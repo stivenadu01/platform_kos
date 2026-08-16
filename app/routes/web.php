@@ -1,0 +1,35 @@
+<?php
+
+get('/', 'UserController@home');
+
+// AUTH
+get('/login', 'AuthController@login');
+get('/register', 'AuthController@register');
+get('/verify', 'AuthController@verify');
+get('/reset-password', 'AuthController@resetPassword');
+
+
+// PEMILIK
+get('/pemilik', 'PemilikController@dashboard', ['auth', 'role:pemilik']);
+get('/pemilik/profil', 'PemilikController@profil', ['auth', 'role:pemilik']);
+get('/pemilik/kos', 'PemilikController@kos', ['auth', 'role:pemilik']);
+get('/pemilik/kos/tambah', 'PemilikController@tambahKos', ['auth', 'role:pemilik']);
+get('/pemilik/kos/edit', 'PemilikController@editKos', ['auth', 'role:pemilik']);
+
+get('/pemilik/kos/foto', 'PemilikController@fotoKos', ['auth', 'role:pemilik']);
+
+
+get('/pemilik/pembayaran', 'PemilikController@pembayaran', ['auth', 'role:pemilik']);
+get('/pemilik/laporan', 'PemilikController@laporan', ['auth', 'role:pemilik']);
+
+
+// Kelola kamar
+get('/pemilik/kamar', 'PemilikController@kamar', ['auth', 'role:pemilik']);
+get('/pemilik/kamar/tambah', 'PemilikController@tambahKamar', ['auth', 'role:pemilik']);
+get('/pemilik/kamar/edit', 'PemilikController@editKamar', ['auth', 'role:pemilik']);
+
+
+// PEMILIK - PENGHUNI
+get('/pemilik/penghuni', 'PemilikController@penghuni', ['auth', 'role:pemilik']);
+get('/pemilik/penghuni/tambah', 'PemilikController@tambahPenghuni', ['auth', 'role:pemilik']);
+get('/pemilik/penghuni/edit', 'PemilikController@editPenghuni', ['auth', 'role:pemilik']);

@@ -1,0 +1,773 @@
+@import "tailwindcss";
+
+#kos-map {
+  width: 100%;
+  height: 400px;
+  min-height: 400px;
+}
+
+#kos-map .leaflet-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================================================
+   PLATFORM KOS KUPANG
+   Global Design System
+   ========================================================= */
+
+/* =========================================================
+   🎨 THEME
+   ========================================================= */
+
+@theme {
+  /* Primary */
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #60a5fa;
+  --color-primary-soft: #eff6ff;
+
+  /* Semantic */
+  --color-success: #16a34a;
+  --color-success-soft: #f0fdf4;
+
+  --color-warning: #d97706;
+  --color-warning-soft: #fffbeb;
+
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
+
+  --color-info: #0891b2;
+  --color-info-soft: #ecfeff;
+
+  /* Surface */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+
+  /* Text */
+  --color-heading: #0f172a;
+  --color-body: #334155;
+  --color-muted: #64748b;
+
+  /* Typography */
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* Radius */
+  --radius-base: 0.5rem;
+}
+
+/* =========================================================
+   🔧 BASE
+   ========================================================= */
+
+@layer base {
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-background text-body font-inter antialiased;
+  }
+
+  h1 {
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-heading;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl font-semibold tracking-tight text-heading;
+  }
+
+  h3 {
+    @apply text-base md:text-lg font-semibold text-heading;
+  }
+
+  h4 {
+    @apply text-sm md:text-base font-semibold text-heading;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+
+  button,
+  a {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  a[aria-disabled="true"] {
+    @apply opacity-40 cursor-not-allowed;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply outline-none;
+  }
+
+  img {
+    @apply max-w-full;
+  }
+}
+
+/* =========================================================
+   🧩 COMMON COMPONENTS
+   ========================================================= */
+
+/* ---------- Buttons ---------- */
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2
+         px-4 py-2
+         rounded-lg
+         font-medium
+         text-sm
+         transition-all duration-200
+         focus:outline-none
+         focus:ring-2
+         focus:ring-primary-light/50
+         disabled:opacity-40
+         disabled:cursor-not-allowed;
+}
+
+@utility btn-primary {
+  @apply inline-flex items-center justify-center gap-2
+         px-4 py-2
+         rounded-lg
+         font-medium
+         text-sm
+         bg-primary
+         text-white
+         hover:bg-primary-dark
+         transition-all duration-200
+         focus:outline-none
+         focus:ring-2
+         focus:ring-primary-light/50;
+}
+
+@utility btn-secondary {
+  @apply inline-flex items-center justify-center gap-2
+         px-4 py-2
+         rounded-lg
+         font-medium
+         text-sm
+         bg-slate-100
+         text-slate-700
+         hover:bg-slate-200
+         transition-all duration-200;
+}
+
+@utility btn-outline {
+  @apply inline-flex items-center justify-center gap-2
+         px-4 py-2
+         rounded-lg
+         font-medium
+         text-sm
+         border border-slate-300
+         text-slate-700
+         bg-white
+         hover:bg-slate-50
+         transition-all duration-200;
+}
+
+@utility btn-danger {
+  @apply inline-flex items-center justify-center gap-2
+         px-4 py-2
+         rounded-lg
+         font-medium
+         text-sm
+         bg-danger
+         text-white
+         hover:bg-red-700
+         transition-all duration-200;
+}
+
+@utility btn-success {
+  @apply inline-flex items-center justify-center gap-2
+         px-4 py-2
+         rounded-lg
+         font-medium
+         text-sm
+         bg-success
+         text-white
+         hover:bg-green-700
+         transition-all duration-200;
+}
+
+@utility btn-rounded {
+  @apply rounded-full;
+}
+
+@utility btn-link {
+  @apply text-slate-600
+         hover:text-primary
+         transition-colors;
+}
+
+@utility btn-link-primary {
+  @apply text-primary
+         hover:text-primary-dark
+         transition-colors;
+}
+
+/* =========================================================
+   📝 FORM
+   ========================================================= */
+
+@utility form-group {
+  @apply space-y-1.5;
+}
+
+@utility label {
+  @apply block
+         text-sm
+         font-medium
+         text-slate-700;
+}
+
+@utility input {
+  @apply w-full
+         px-3 py-2.5
+         rounded-lg
+         border border-slate-300
+         bg-white
+         text-sm text-slate-800
+         placeholder:text-slate-400
+         transition-all duration-200
+         focus:border-primary
+         focus:ring-2
+         focus:ring-primary-light/30
+         disabled:bg-slate-100
+         disabled:text-slate-500
+         disabled:cursor-not-allowed;
+}
+
+@utility input-error {
+  @apply border-danger
+         focus:border-danger
+         focus:ring-red-300/40;
+}
+
+@utility textarea {
+  @apply input min-h-28 resize-y;
+}
+
+@utility select {
+  @apply input appearance-none;
+}
+
+/* =========================================================
+   🗂️ CARD & SURFACE
+   ========================================================= */
+
+@utility card {
+  @apply bg-white
+         border border-slate-200
+         rounded-xl
+         shadow-sm;
+}
+
+@utility card-hover {
+  @apply transition-all duration-200
+         hover:-translate-y-0.5
+         hover:shadow-md
+         hover:border-slate-300;
+}
+
+@utility surface {
+  @apply bg-white
+         border border-slate-200
+         rounded-xl;
+}
+
+/* =========================================================
+   🏷️ STATUS / BADGE
+   Dipakai untuk:
+   - Verifikasi kos
+   - Status kamar
+   - Status penghuni
+   - Status pembayaran
+   ========================================================= */
+
+@utility badge {
+  @apply inline-flex items-center gap-1
+         px-2.5 py-1
+         rounded-full
+         text-xs
+         font-medium
+         whitespace-nowrap;
+}
+
+@utility badge-success {
+  @apply badge
+         bg-success-soft
+         text-success;
+}
+
+@utility badge-warning {
+  @apply badge
+         bg-warning-soft
+         text-warning;
+}
+
+@utility badge-danger {
+  @apply badge
+         bg-danger-soft
+         text-danger;
+}
+
+@utility badge-info {
+  @apply badge
+         bg-info-soft
+         text-info;
+}
+
+@utility badge-primary {
+  @apply badge
+         bg-primary-soft
+         text-primary;
+}
+
+@utility badge-neutral {
+  @apply badge
+         bg-slate-100
+         text-slate-600;
+}
+
+/* =========================================================
+   🏠 STATUS KAMAR
+   Sesuai PRD:
+   TERSEDIA
+   TERISI
+   DIPESAN
+   PERBAIKAN
+   ========================================================= */
+
+@utility status-tersedia {
+  @apply badge-success;
+}
+
+@utility status-terisi {
+  @apply badge-danger;
+}
+
+@utility status-dipesan {
+  @apply badge-warning;
+}
+
+@utility status-perbaikan {
+  @apply badge-neutral;
+}
+
+/* =========================================================
+   🛡️ VERIFIKASI
+   ========================================================= */
+
+@utility verified-badge {
+  @apply inline-flex items-center gap-1
+         px-2.5 py-1
+         rounded-full
+         text-xs font-medium
+         bg-primary-soft
+         text-primary;
+}
+
+/* =========================================================
+   🔍 SEARCH & FILTER
+   ========================================================= */
+
+@utility search-input {
+  @apply w-full
+         px-4 py-2.5
+         rounded-xl
+         border border-slate-300
+         bg-white
+         text-sm
+         placeholder:text-slate-400
+         focus:border-primary
+         focus:ring-2
+         focus:ring-primary-light/30;
+}
+
+@utility btn-filter {
+  @apply inline-flex items-center justify-center gap-2
+         px-3 py-2
+         rounded-lg
+         border border-slate-300
+         bg-white
+         text-sm font-medium
+         text-slate-700
+         whitespace-nowrap
+         transition-all duration-200
+         hover:bg-slate-50;
+}
+
+@utility btn-filter-active {
+  @apply border-primary
+         bg-primary-soft
+         text-primary;
+}
+
+/* =========================================================
+   📊 TABLE
+   ========================================================= */
+
+@utility table {
+  @apply w-full text-sm;
+}
+
+.table {
+  @apply w-full text-sm
+         bg-white
+         rounded-xl
+         overflow-hidden;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  th {
+    @apply px-4 py-3
+           text-left
+           text-xs
+           font-semibold
+           uppercase
+           tracking-wide
+           text-slate-500
+           bg-slate-50;
+
+    border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  }
+
+  td {
+    @apply px-4 py-3
+           text-slate-700
+           bg-white;
+
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  }
+
+  tbody tr {
+    @apply transition-colors;
+  }
+
+  tbody tr:hover td {
+    @apply bg-slate-50;
+  }
+
+  tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+/* =========================================================
+   🪟 MODAL
+   ========================================================= */
+
+@utility modal-backdrop {
+  @apply fixed inset-0
+         z-50
+         flex items-center justify-center
+         p-4
+         bg-slate-900/50
+         backdrop-blur-sm;
+}
+
+@utility modal-box {
+  @apply w-full
+         max-w-lg
+         max-h-[90dvh]
+         overflow-y-auto
+         bg-white
+         rounded-2xl
+         p-5 md:p-6
+         shadow-2xl;
+}
+
+/* =========================================================
+   📐 LAYOUT
+   ========================================================= */
+
+@utility flex-center {
+  @apply flex items-center justify-center;
+}
+
+@utility flex-between {
+  @apply flex items-center justify-between;
+}
+
+@utility flex-end {
+  @apply flex items-center justify-end;
+}
+
+@utility px-d {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+@utility container-app {
+  @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+@utility section {
+  @apply py-10 md:py-16;
+}
+
+@utility section-center {
+  @apply min-h-[80dvh]
+         flex items-center justify-center;
+}
+
+/* =========================================================
+   🧭 NAVIGATION
+   ========================================================= */
+
+@utility nav-link {
+  @apply inline-flex items-center gap-2
+         text-sm font-medium
+         text-slate-600
+         hover:text-primary
+         transition-colors;
+}
+
+@utility nav-link-active {
+  @apply text-primary;
+}
+
+@utility icon-btn {
+  @apply inline-flex
+         w-9 h-9
+         items-center justify-center
+         rounded-lg
+         text-slate-600
+         hover:bg-slate-100
+         hover:text-primary
+         transition-all;
+}
+
+/* =========================================================
+   📱 MOBILE NAVIGATION
+   ========================================================= */
+
+@utility mobile-nav-item {
+  @apply flex flex-col
+         items-center justify-center
+         gap-1
+         text-xs
+         text-slate-500
+         transition-colors;
+}
+
+@utility mobile-nav-item-active {
+  @apply text-primary;
+}
+
+/* =========================================================
+   🗺️ LOCATION
+   ========================================================= */
+
+@utility location-text {
+  @apply inline-flex items-center gap-1
+         text-sm text-slate-500;
+}
+
+@utility distance-text {
+  @apply inline-flex items-center gap-1
+         text-sm font-medium
+         text-primary;
+}
+
+/* =========================================================
+   🏘️ KOS CARD
+   ========================================================= */
+
+@utility kos-card {
+  @apply bg-white
+         border border-slate-200
+         rounded-xl
+         overflow-hidden
+         shadow-sm
+         transition-all duration-200
+         hover:-translate-y-0.5
+         hover:shadow-md;
+}
+
+@utility kos-card-image {
+  @apply w-full
+         aspect-[4/3]
+         object-cover
+         bg-slate-100;
+}
+
+@utility kos-price {
+  @apply text-lg
+         font-bold
+         text-primary;
+}
+
+/* =========================================================
+   🏢 DASHBOARD
+   ========================================================= */
+
+@utility stat-card {
+  @apply bg-white
+         border border-slate-200
+         rounded-xl
+         p-4 md:p-5
+         shadow-sm;
+}
+
+@utility stat-value {
+  @apply text-2xl
+         md:text-3xl
+         font-bold
+         tracking-tight
+         text-heading;
+}
+
+@utility stat-label {
+  @apply text-sm
+         text-muted;
+}
+
+/* =========================================================
+   🔽 DROPDOWN
+   ========================================================= */
+
+@utility dropdown {
+  @apply relative inline-block;
+}
+
+@utility dropdown-menu {
+  @apply absolute
+         left-0
+         mt-2
+         min-w-48
+         max-h-[70dvh]
+         overflow-y-auto
+         bg-white
+         border border-slate-200
+         rounded-xl
+         shadow-xl
+         z-40
+         py-1;
+}
+
+@utility dropdown-item {
+  @apply block
+         w-full
+         px-3 py-2
+         text-left
+         text-sm
+         text-slate-700
+         whitespace-nowrap
+         hover:bg-slate-50
+         hover:text-primary
+         transition-colors;
+}
+
+@utility dropdown-item-active {
+  @apply bg-primary-soft
+         text-primary;
+}
+
+/* =========================================================
+   🔗 LINKS
+   ========================================================= */
+
+@utility link {
+  @apply text-slate-600
+         hover:text-primary
+         transition-colors;
+}
+
+@utility link-primary {
+  @apply text-primary
+         hover:text-primary-dark
+         transition-colors;
+}
+
+/* =========================================================
+   🧊 GLASS
+   ========================================================= */
+
+@utility glass {
+  @apply bg-white/80
+         backdrop-blur-md;
+}
+
+/* =========================================================
+   👁️ ALPINE.JS
+   ========================================================= */
+
+[x-cloak] {
+  display: none !important;
+}
+
+/* =========================================================
+   📜 SCROLLBAR
+   ========================================================= */
+
+/* Hide scrollbar by default */
+.overflow-x-auto,
+.overflow-y-auto {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.overflow-x-auto::-webkit-scrollbar,
+.overflow-y-auto::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Show on interaction */
+.overflow-x-auto:hover,
+.overflow-y-auto:hover {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+
+.overflow-x-auto:hover::-webkit-scrollbar,
+.overflow-y-auto:hover::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.overflow-x-auto:hover::-webkit-scrollbar-track,
+.overflow-y-auto:hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.overflow-x-auto:hover::-webkit-scrollbar-thumb,
+.overflow-y-auto:hover::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 9999px;
+}
+
+.overflow-x-auto:hover::-webkit-scrollbar-thumb:hover,
+.overflow-y-auto:hover::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.55);
+}
+
+/* =========================================================
+   🖼️ IMAGE PLACEHOLDER
+   ========================================================= */
+
+@utility image-placeholder {
+  @apply flex items-center justify-center
+         bg-slate-100
+         text-slate-400;
+}
+
+/* =========================================================
+   📱 MOBILE FIRST HELPERS
+   ========================================================= */
+
+@utility mobile-stack {
+  @apply flex flex-col md:flex-row;
+}
+
+@utility mobile-full {
+  @apply w-full md:w-auto;
+}
