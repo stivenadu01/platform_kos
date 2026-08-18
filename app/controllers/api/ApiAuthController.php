@@ -232,6 +232,105 @@ class ApiAuthController
   }
 
 
+  public function updateProfile()
+  {
+    try {
+      $userId = $_SESSION['user']['id_user'] ?? null;
+      if (!$userId) {
+        return response(['success' => false, 'message' => 'Unauthorized'], 401);
+      }
+
+      $data = input();
+      updateUserProfile((int)$userId, $data);
+
+      $user = findUser((int)$userId);
+      unset($user['password']);
+      $_SESSION['user'] = $user;
+
+      return response([
+        'success' => true,
+        'message' => 'Profil berhasil diperbarui',
+        'data' => $user
+      ]);
+    } catch (Exception $e) {
+      return response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], $e->getCode() ?: 500);
+    }
+  }
+
+
+  public function uploadFotoProfil()
+  {
+    try {
+      $userId = $_SESSION['user']['id_user'] ?? null;
+      if (!$userId) {
+        return response(['success' => false, 'message' => 'Unauthorized'], 401);
+      }
+
+      if (!isset($_FILES['foto'])) {
+        throw new Exception('Foto profil wajib dipilih', 422);
+      }
+
+      require_once ROOT_PATH . '/app/helpers/upload.php';
+      $path = uploadImageGeneral($_FILES['foto'], 'profil', null, 5);
+      updateUserFoto((int)$userId, $path);
+
+      $user = findUser((int)$userId);
+      unset($user['password']);
+      $_SESSION['user'] = $user;
+
+      return response([
+        'success' => true,
+        'message' => 'Foto profil berhasil diperbarui',
+        'data' => $user
+      ]);
+    } catch (Exception $e) {
+      return response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], $e->getCode() ?: 500);
+    }
+  }
+
+
+  public function changePassword()
+  {
+    try {
+      $userId = $_SESSION['user']['id_user'] ?? null;
+      if (!$userId) {
+        return response(['success' => false, 'message' => 'Unauthorized'], 401);
+      }
+
+      $data = input();
+      $lama = $data['password_lama'] ?? '';
+      $baru = $data['password_baru'] ?? '';
+      $konfirmasi = $data['password_konfirmasi'] ?? '';
+
+      if ($lama === '' || $baru === '' || $konfirmasi === '') {
+        throw new Exception('Semua kolom kata sandi wajib diisi', 422);
+      }
+
+      if ($baru !== $konfirmasi) {
+        throw new Exception('Konfirmasi kata sandi tidak cocok', 422);
+      }
+
+      changeUserPassword((int)$userId, $lama, $baru);
+
+      return response([
+        'success' => true,
+        'message' => 'Kata sandi berhasil diubah'
+      ]);
+    } catch (Exception $e) {
+      return response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], $e->getCode() ?: 500);
+    }
+  }
+
+
   public function logout()
   {
     $_SESSION = [];

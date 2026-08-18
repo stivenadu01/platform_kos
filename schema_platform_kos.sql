@@ -54,17 +54,6 @@ CREATE TABLE IF NOT EXISTS user_verification_tokens (
     INDEX idx_verification_token_expires (expires_at)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS kampus (
-    id_kampus BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    nama_kampus VARCHAR(200) NOT NULL,
-    alamat TEXT,
-    latitude DECIMAL(10,8) NOT NULL,
-    longitude DECIMAL(11,8) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB;
-
 CREATE TABLE IF NOT EXISTS kos (
     id_kos BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
@@ -258,70 +247,34 @@ CREATE TABLE IF NOT EXISTS penghuni (
     INDEX idx_penghuni_user (id_user)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS periode_sewa (
-    id_periode BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+/* =========================================================
+   TAGIHAN
+   Tidak menggunakan tabel periode_sewa.
+   Satu tagihan mewakili satu periode penagihan untuk satu kamar.
+   ========================================================= */
 
-    id_kamar BIGINT UNSIGNED NOT NULL,
-
-    tanggal_mulai DATE NOT NULL,
-    tanggal_selesai DATE NOT NULL,
-
-    tanggal_jatuh_tempo DATE NOT NULL,
-
-    jumlah_orang TINYINT UNSIGNED NOT NULL,
-
-    harga_total DECIMAL(12,2) NOT NULL,
-
-    status ENUM(
-        'aktif',
-        'selesai',
-        'dibatalkan'
-    ) NOT NULL DEFAULT 'aktif',
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_periode_kamar
-        FOREIGN KEY (id_kamar)
-        REFERENCES kamar(id_kamar)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
-    CONSTRAINT chk_periode_tanggal
-        CHECK (tanggal_selesai >= tanggal_mulai),
-
-    CONSTRAINT chk_periode_jumlah
-        CHECK (jumlah_orang > 0),
-
-    CONSTRAINT chk_periode_harga
-        CHECK (harga_total >= 0),
-
-    INDEX idx_periode_kamar (id_kamar),
-    INDEX idx_periode_status (status),
-    INDEX idx_periode_jatuh_tempo (tanggal_jatuh_tempo)
-) ENGINE=InnoDB;
-
-ALTER TABLE periode_sewa
-ADD COLUMN kamar_aktif BIGINT UNSIGNED
-GENERATED ALWAYS AS (
-    CASE
-        WHEN status = 'aktif' THEN id_kamar
-        ELSE NULL
-    END
-) STORED;
-ALTER TABLE periode_sewa
-ADD UNIQUE KEY uq_satu_periode_aktif (kamar_aktif);
-
-CREATE TABLE tagihan (
+CREATE TABLE IF NOT EXISTS tagihan (
     id_tagihan BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    id_periode BIGINT UNSIGNED NOT NULL,
+    id_kamar BIGINT UNSIGNED NOT NULL,
 
     nomor_tagihan VARCHAR(50) NOT NULL UNIQUE,
 
     tanggal_terbit DATE NOT NULL,
+    tanggal_mulai DATE NOT NULL,
+    tanggal_selesai DATE NOT NULL,
     tanggal_jatuh_tempo DATE NOT NULL,
+
+    jumlah_orang TINYINT UNSIGNED NOT NULL,
+
+    /* Harga dasar kamar pada saat tagihan dibuat.
+       Nilai ini TIDAK diubah ketika ada penghuni tambahan
+       di tengah periode. */
+    harga_dasar DECIMAL(12,2) NOT NULL DEFAULT 0,
+
+    /* Total seluruh penyesuaian pada tagihan.
+       Positif = tambahan, negatif = pengurangan. */
+    total_penyesuaian DECIMAL(12,2) NOT NULL DEFAULT 0,
 
     total_tagihan DECIMAL(12,2) NOT NULL DEFAULT 0,
     total_dibayar DECIMAL(12,2) NOT NULL DEFAULT 0,
@@ -337,62 +290,53 @@ CREATE TABLE tagihan (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_tagihan_periode
-        FOREIGN KEY (id_periode)
-        REFERENCES periode_sewa(id_periode)
+    CONSTRAINT fk_tagihan_kamar
+        FOREIGN KEY (id_kamar)
+        REFERENCES kamar(id_kamar)
         ON DELETE RESTRICT
         ON UPDATE CASCADE,
 
-    CONSTRAINT chk_total_tagihan
+    CONSTRAINT chk_tagihan_tanggal
+        CHECK (tanggal_selesai >= tanggal_mulai),
+
+    CONSTRAINT chk_tagihan_jatuh_tempo
+        CHECK (tanggal_jatuh_tempo >= tanggal_mulai),
+
+    CONSTRAINT chk_tagihan_jumlah_orang
+        CHECK (jumlah_orang > 0),
+
+    CONSTRAINT chk_tagihan_harga_dasar
+        CHECK (harga_dasar >= 0),
+
+    CONSTRAINT chk_tagihan_total_penyesuaian
+        CHECK (total_penyesuaian >= -harga_dasar),
+
+    CONSTRAINT chk_tagihan_total
         CHECK (total_tagihan >= 0),
 
-    CONSTRAINT chk_total_dibayar
+    CONSTRAINT chk_tagihan_dibayar
         CHECK (total_dibayar >= 0),
 
-    INDEX idx_tagihan_periode (id_periode),
+    /* Mencegah Cron Job membuat tagihan periode yang sama dua kali. */
+    CONSTRAINT uq_tagihan_periode_kamar
+        UNIQUE (id_kamar, tanggal_mulai, tanggal_selesai),
+
+    INDEX idx_tagihan_kamar (id_kamar),
     INDEX idx_tagihan_jatuh_tempo (tanggal_jatuh_tempo),
-    INDEX idx_tagihan_status (status)
+    INDEX idx_tagihan_status (status),
+    INDEX idx_tagihan_periode (tanggal_mulai, tanggal_selesai)
 ) ENGINE=InnoDB;
 
-CREATE TABLE IF NOT EXISTS tagihan_penghuni (
-    id_tagihan_penghuni BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    id_tagihan BIGINT UNSIGNED NOT NULL,
-    id_penghuni BIGINT UNSIGNED NOT NULL,
-
-    jumlah DECIMAL(12,2) NOT NULL,
-
-    status ENUM(
-        'belum_lunas',
-        'sebagian',
-        'lunas'
-    ) NOT NULL DEFAULT 'belum_lunas',
-
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_tp_tagihan
-        FOREIGN KEY (id_tagihan)
-        REFERENCES tagihan(id_tagihan)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_tp_penghuni
-        FOREIGN KEY (id_penghuni)
-        REFERENCES penghuni(id_penghuni)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
-    CONSTRAINT uq_tagihan_penghuni
-        UNIQUE (id_tagihan, id_penghuni),
-
-    CONSTRAINT chk_jumlah_tagihan_penghuni
-        CHECK (jumlah >= 0),
-
-    INDEX idx_tp_tagihan (id_tagihan),
-    INDEX idx_tp_penghuni (id_penghuni)
-) ENGINE=InnoDB;
+/* =========================================================
+   PENYESUAIAN TAGIHAN
+   Menyimpan perubahan biaya di tengah periode.
+   Contoh:
+   harga dasar Rp600.000
+   penghuni kedua masuk
+   penyesuaian +Rp322.000
+   total tagihan menjadi Rp922.000.
+   ========================================================= */
 
 CREATE TABLE IF NOT EXISTS penyesuaian_tagihan (
     id_penyesuaian BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -429,8 +373,15 @@ CREATE TABLE IF NOT EXISTS penyesuaian_tagihan (
         CHECK (jumlah > 0),
 
     INDEX idx_penyesuaian_tagihan (id_tagihan),
-    INDEX idx_penyesuaian_penghuni (id_penghuni)
+    INDEX idx_penyesuaian_penghuni (id_penghuni),
+    INDEX idx_penyesuaian_tanggal (tanggal_efektif)
 ) ENGINE=InnoDB;
+
+
+/* =========================================================
+   PEMBAYARAN
+   Pembayaran selalu mengacu ke satu tagihan.
+   ========================================================= */
 
 CREATE TABLE IF NOT EXISTS pembayaran (
     id_pembayaran BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -602,7 +553,17 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
       - password baru disimpan dengan password_hash().
       - jangan menyimpan token asli di database.
 
-   4. Verifikasi kos:
+   4. Tagihan otomatis:
+      - saat penghuni pertama masuk, sistem membuat tagihan pertama.
+      - tanggal_mulai dan tanggal_selesai disimpan langsung pada tagihan.
+      - saat penghuni tambahan masuk di tengah periode, harga_dasar
+        tagihan lama tidak diubah; sistem hanya membuat penyesuaian.
+      - Cron Job mencari tagihan yang sudah selesai dan membuat tagihan
+        periode berikutnya berdasarkan jumlah penghuni aktif dan harga kamar.
+      - unique (id_kamar, tanggal_mulai, tanggal_selesai) mencegah
+        duplikasi tagihan oleh Cron Job.
+
+   5. Verifikasi kos:
       - pemilik mengajukan kos -> verifikasi_kos.status = 'menunggu'
         dan kos.status = 'menunggu_verifikasi'.
       - admin menyetujui -> verifikasi_kos.status = 'disetujui'

@@ -1,0 +1,309 @@
+<div
+  x-data="penghuniFormPage()"
+  x-init="init()"
+  class="space-y-6">
+
+  <div>
+    <a
+      href="<?= BASE_URL ?>/pemilik/penghuni"
+      class="text-sm text-slate-500 hover:text-slate-700">
+      ← Kembali ke Penghuni
+    </a>
+
+    <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900"
+        x-text="mode === 'edit' ? 'Edit Penghuni' : 'Tambah Penghuni'"></h2>
+
+    <p class="mt-1 text-sm text-slate-500">
+      <span x-show="mode === 'tambah'">
+        Tambahkan penghuni baru. Sistem akan otomatis membuat atau menyesuaikan tagihan kamar.
+      </span>
+      <span x-show="mode === 'edit'">
+        Perubahan pada halaman ini hanya untuk data identitas penghuni.
+      </span>
+    </p>
+  </div>
+
+  <form @submit.prevent="submit" class="card border border-slate-200 shadow-sm space-y-6">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+      <div class="form-group md:col-span-2" x-show="mode === 'tambah'">
+        <label class="label">Kamar <span class="text-red-500">*</span></label>
+
+        <select
+          x-model="form.id_kamar"
+          @change="updateSelectedKamar()"
+          class="input"
+          :required="mode === 'tambah'"
+          :disabled="mode === 'edit'">
+
+          <option value="">Pilih kamar</option>
+
+          <template x-for="item in kamarList" :key="item.id_kamar">
+            <option
+              :value="item.id_kamar"
+              x-text="`${item.nama_kos} — ${item.nomor_kamar} (${item.jumlah_penghuni}/${item.kapasitas} orang)`">
+            </option>
+          </template>
+
+        </select>
+
+        <div
+          x-show="selectedKamar"
+          x-cloak
+          class="mt-2 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">
+
+          <div>
+            Kapasitas:
+            <strong x-text="selectedKamar?.kapasitas || 0"></strong> orang
+          </div>
+
+          <div>
+            Penghuni aktif:
+            <strong x-text="selectedKamar?.jumlah_penghuni || 0"></strong> orang
+          </div>
+
+          <div class="mt-1">
+            Setelah penghuni ditambahkan:
+            <strong x-text="(Number(selectedKamar?.jumlah_penghuni || 0) + 1)"></strong> orang
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="label">
+          Nama Lengkap <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="text"
+          x-model="form.nama"
+          class="input"
+          maxlength="150"
+          required
+          placeholder="Nama penghuni">
+      </div>
+
+      <div class="form-group">
+        <label class="label">No. HP</label>
+
+        <input
+          type="text"
+          x-model="form.no_hp"
+          class="input"
+          maxlength="30"
+          placeholder="08xxxxxxxxxx">
+      </div>
+
+      <div class="form-group">
+        <label class="label">NIK</label>
+
+        <input
+          type="text"
+          x-model="form.nik"
+          class="input"
+          maxlength="16"
+          inputmode="numeric"
+          placeholder="16 digit NIK">
+      </div>
+
+      <div class="form-group" x-show="mode === 'tambah'">
+        <label class="label">
+          Tanggal Masuk <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="date"
+          x-model="form.tanggal_masuk"
+          class="input"
+          :required="mode === 'tambah'">
+      </div>
+
+      <div
+        x-show="mode === 'edit'"
+        class="md:col-span-2 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-800">
+
+        Kamar dan tanggal masuk tidak diubah dari halaman edit karena keduanya
+        sudah menjadi dasar perhitungan tagihan. Jika terjadi pindah kamar atau
+        perubahan tanggal masuk, kita akan buat alur khusus agar histori tagihan
+        tetap aman.
+
+      </div>
+
+    </div>
+
+    <div class="flex justify-end gap-3 border-t border-slate-200 pt-5">
+
+      <a
+        href="<?= BASE_URL ?>/pemilik/penghuni"
+        class="btn-secondary">
+        Batal
+      </a>
+
+      <button
+        type="submit"
+        class="btn-primary"
+        :disabled="saving">
+
+        <span x-show="!saving"
+              x-text="mode === 'edit' ? 'Simpan Perubahan' : 'Tambah Penghuni'"></span>
+
+        <span x-show="saving">
+          Menyimpan...
+        </span>
+
+      </button>
+
+    </div>
+
+  </form>
+</div>
+
+<script>
+function penghuniFormPage() {
+  return {
+    mode: <?= json_encode($mode ?? 'tambah') ?>,
+    idPenghuni: utils.getQuery('id_penghuni') || '',
+
+    kamarList: [],
+    selectedKamar: null,
+
+    saving: false,
+
+    form: {
+      id_kamar: '',
+      nama: '',
+      no_hp: '',
+      nik: '',
+      tanggal_masuk: ''
+    },
+
+    async init() {
+      this.setToday();
+
+      if (this.mode === 'tambah') {
+        await this.loadKamar();
+      } else {
+        await this.loadEdit();
+      }
+    },
+
+    setToday() {
+      const today = new Date();
+
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+
+      this.form.tanggal_masuk = `${year}-${month}-${day}`;
+    },
+
+    async loadKamar() {
+      try {
+        const res = await API.get('/pemilik/penghuni/kamar');
+        this.kamarList = res.data || [];
+      } catch (error) {
+        this.kamarList = [];
+      }
+    },
+
+    updateSelectedKamar() {
+      this.selectedKamar =
+        this.kamarList.find(
+          item => String(item.id_kamar) === String(this.form.id_kamar)
+        ) || null;
+    },
+
+    async loadEdit() {
+      if (!this.idPenghuni) {
+        Alpine.store('ui').toast(
+          'ID penghuni tidak valid.',
+          'error'
+        );
+
+        window.location.href =
+          BASE_URL + '/pemilik/penghuni';
+
+        return;
+      }
+
+      try {
+        const res = await API.get(
+          '/pemilik/penghuni/show?id_penghuni=' +
+          encodeURIComponent(this.idPenghuni)
+        );
+
+        const item = res.data;
+
+        this.form.nama = item.nama || '';
+        this.form.no_hp = item.no_hp || '';
+        this.form.nik = item.nik || '';
+      } catch (error) {
+        window.location.href =
+          BASE_URL + '/pemilik/penghuni';
+      }
+    },
+
+    async submit() {
+      if (this.saving) return;
+
+      if (!this.form.nama.trim()) {
+        Alpine.store('ui').toast(
+          'Nama penghuni wajib diisi.',
+          'error'
+        );
+        return;
+      }
+
+      if (this.mode === 'tambah') {
+        if (!this.form.id_kamar) {
+          Alpine.store('ui').toast(
+            'Kamar wajib dipilih.',
+            'error'
+          );
+          return;
+        }
+
+        if (!this.form.tanggal_masuk) {
+          Alpine.store('ui').toast(
+            'Tanggal masuk wajib diisi.',
+            'error'
+          );
+          return;
+        }
+      }
+
+      this.saving = true;
+
+      try {
+        if (this.mode === 'tambah') {
+          await API.post(
+            '/pemilik/penghuni',
+            this.form
+          );
+        } else {
+          // Gunakan endpoint POST khusus update agar kompatibel
+          // dengan server yang tidak meneruskan request PUT JSON.
+          await API.post(
+            '/pemilik/penghuni/update',
+            {
+              id_penghuni: this.idPenghuni,
+              nama: this.form.nama,
+              no_hp: this.form.no_hp,
+              nik: this.form.nik
+            }
+          );
+        }
+
+        window.location.href =
+          BASE_URL + '/pemilik/penghuni';
+
+      } catch (error) {
+        // API sudah menampilkan toast.
+      } finally {
+        this.saving = false;
+      }
+    }
+  };
+}
+</script>

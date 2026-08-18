@@ -3,7 +3,7 @@
 
     <!-- BRAND -->
     <div class="hidden lg:flex flex-center flex-col gap-5 p-12 bg-primary-soft">
-      <img :src="window.BASE_URL + '/assets/icon/logo.png'" alt="Platform Kos Kupang"
+      <img :src="window.BASE_URL + '/assets/icon/logo.png'" alt="BetaKos"
         class="w-24 h-24 object-contain">
 
       <div class="text-center">
@@ -26,7 +26,7 @@
           </h1>
 
           <p class="mt-2 text-sm text-muted">
-            Masuk untuk melanjutkan ke Platform Kos Kupang.
+            Masuk untuk melanjutkan ke BetaKos.
           </p>
         </div>
 

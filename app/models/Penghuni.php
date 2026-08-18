@@ -1,5 +1,14 @@
 <?php
 
+/*
+|--------------------------------------------------------------------------
+| PENGHUNI
+|--------------------------------------------------------------------------
+| Semua proses tambah penghuni dan penyesuaian tagihan berada di sini.
+| Tidak menggunakan periode_sewa maupun tagihan_penghuni.
+|--------------------------------------------------------------------------
+*/
+
 function getPenghuniListByPemilik(
   $id_pemilik,
   $search = '',
@@ -9,48 +18,31 @@ function getPenghuniListByPemilik(
 ) {
   $conn = db();
 
-  $where = [
-    'k.id_pemilik = ?'
-  ];
-
+  $where = ['k.id_pemilik = ?'];
   $params = [$id_pemilik];
   $types = 'i';
 
   if ($search !== '') {
-    $where[] = '(
-      p.nama LIKE ?
-      OR p.no_hp LIKE ?
-      OR p.nik LIKE ?
-      OR km.nomor_kamar LIKE ?
-    )';
-
+    $where[] = '(p.nama LIKE ? OR p.no_hp LIKE ? OR p.nik LIKE ?)';
     $keyword = "%{$search}%";
-
-    $params[] = $keyword;
-    $params[] = $keyword;
-    $params[] = $keyword;
-    $params[] = $keyword;
-
-    $types .= 'ssss';
+    array_push($params, $keyword, $keyword, $keyword);
+    $types .= 'sss';
   }
 
   if ($id_kos !== '') {
-    $where[] = 'km.id_kos = ?';
-
+    $where[] = 'k.id_kos = ?';
     $params[] = (int) $id_kos;
     $types .= 'i';
   }
 
   if ($id_kamar !== '') {
-    $where[] = 'p.id_kamar = ?';
-
+    $where[] = 'km.id_kamar = ?';
     $params[] = (int) $id_kamar;
     $types .= 'i';
   }
 
   if ($status !== '') {
     $where[] = 'p.status = ?';
-
     $params[] = $status;
     $types .= 's';
   }
@@ -68,44 +60,26 @@ function getPenghuniListByPemilik(
       p.tanggal_masuk,
       p.tanggal_keluar,
       p.status,
-      p.created_at,
-      p.updated_at,
-
+      km.id_kos,
       km.nomor_kamar,
       km.tipe_kamar,
-
-      k.id_kos,
+      km.kapasitas,
       k.nama_kos
-
     FROM penghuni p
-
-    INNER JOIN kamar km
-      ON km.id_kamar = p.id_kamar
-
-    INNER JOIN kos k
-      ON k.id_kos = km.id_kos
-
+    INNER JOIN kamar km ON km.id_kamar = p.id_kamar
+    INNER JOIN kos k ON k.id_kos = km.id_kos
     {$whereSql}
-
     ORDER BY
-      CASE
-        WHEN p.status = 'aktif' THEN 0
-        ELSE 1
-      END,
+      p.status ASC,
+      p.tanggal_masuk DESC,
       p.nama ASC
   ";
 
   $stmt = $conn->prepare($sql);
-
-  $stmt->bind_param(
-    $types,
-    ...$params
-  );
-
+  $stmt->bind_param($types, ...$params);
   $stmt->execute();
 
   $result = $stmt->get_result();
-
   $data = [];
 
   while ($row = $result->fetch_assoc()) {
@@ -116,56 +90,6 @@ function getPenghuniListByPemilik(
 
   return $data;
 }
-
-
-function findPenghuniByIdPemilik(
-  $id_penghuni,
-  $id_pemilik
-) {
-  $conn = db();
-
-  $stmt = $conn->prepare("
-    SELECT
-      p.*,
-
-      km.nomor_kamar,
-      km.tipe_kamar,
-      km.kapasitas,
-
-      k.id_kos,
-      k.nama_kos
-
-    FROM penghuni p
-
-    INNER JOIN kamar km
-      ON km.id_kamar = p.id_kamar
-
-    INNER JOIN kos k
-      ON k.id_kos = km.id_kos
-
-    WHERE p.id_penghuni = ?
-      AND k.id_pemilik = ?
-
-    LIMIT 1
-  ");
-
-  $stmt->bind_param(
-    'ii',
-    $id_penghuni,
-    $id_pemilik
-  );
-
-  $stmt->execute();
-
-  $data = $stmt
-    ->get_result()
-    ->fetch_assoc();
-
-  $stmt->close();
-
-  return $data;
-}
-
 
 function getKamarListForPenghuni($id_pemilik)
 {
@@ -180,37 +104,23 @@ function getKamarListForPenghuni($id_pemilik)
       km.kapasitas,
       km.status,
       k.nama_kos,
-
       (
         SELECT COUNT(*)
         FROM penghuni p
         WHERE p.id_kamar = km.id_kamar
           AND p.status = 'aktif'
       ) AS jumlah_penghuni
-
     FROM kamar km
-
-    INNER JOIN kos k
-      ON k.id_kos = km.id_kos
-
+    INNER JOIN kos k ON k.id_kos = km.id_kos
     WHERE k.id_pemilik = ?
-      AND km.status != 'nonaktif'
-      AND km.status != 'perbaikan'
-
-    ORDER BY
-      k.nama_kos ASC,
-      km.nomor_kamar ASC
+      AND km.status <> 'nonaktif'
+    ORDER BY k.nama_kos ASC, km.nomor_kamar ASC
   ");
 
-  $stmt->bind_param(
-    'i',
-    $id_pemilik
-  );
-
+  $stmt->bind_param('i', $id_pemilik);
   $stmt->execute();
 
   $result = $stmt->get_result();
-
   $data = [];
 
   while ($row = $result->fetch_assoc()) {
@@ -222,77 +132,470 @@ function getKamarListForPenghuni($id_pemilik)
   return $data;
 }
 
-
-function createPenghuni(
-  $data,
-  $id_pemilik
-) {
+function findPenghuniByIdPemilik($id_penghuni, $id_pemilik)
+{
   $conn = db();
 
+  $stmt = $conn->prepare("
+    SELECT
+      p.*,
+      km.id_kos,
+      km.nomor_kamar,
+      km.tipe_kamar,
+      km.kapasitas,
+      k.nama_kos
+    FROM penghuni p
+    INNER JOIN kamar km ON km.id_kamar = p.id_kamar
+    INNER JOIN kos k ON k.id_kos = km.id_kos
+    WHERE p.id_penghuni = ?
+      AND k.id_pemilik = ?
+    LIMIT 1
+  ");
+
+  $stmt->bind_param('ii', $id_penghuni, $id_pemilik);
+  $stmt->execute();
+
+  $data = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  return $data;
+}
+
+function validatePenghuniInput($data)
+{
   $id_kamar = (int) ($data['id_kamar'] ?? 0);
-  $id_user = !empty($data['id_user'])
-    ? (int) $data['id_user']
-    : null;
-
   $nama = trim($data['nama'] ?? '');
-  $no_hp = trim($data['no_hp'] ?? '');
-  $nik = trim($data['nik'] ?? '');
-
-  $tanggal_masuk =
-    trim($data['tanggal_masuk'] ?? '');
+  $tanggal_masuk = trim($data['tanggal_masuk'] ?? '');
 
   if (!$id_kamar) {
-    throw new Exception(
-      'Kamar wajib dipilih.'
-    );
+    throw new Exception('Kamar wajib dipilih.');
   }
 
   if ($nama === '') {
-    throw new Exception(
-      'Nama penghuni wajib diisi.'
-    );
+    throw new Exception('Nama penghuni wajib diisi.');
+  }
+
+  if (mb_strlen($nama) > 150) {
+    throw new Exception('Nama penghuni terlalu panjang.');
   }
 
   if ($tanggal_masuk === '') {
+    throw new Exception('Tanggal masuk wajib diisi.');
+  }
+
+  $date = DateTime::createFromFormat('Y-m-d', $tanggal_masuk);
+
+  if (!$date || $date->format('Y-m-d') !== $tanggal_masuk) {
+    throw new Exception('Format tanggal masuk tidak valid.');
+  }
+
+  $nik = trim($data['nik'] ?? '');
+
+  if ($nik !== '' && !preg_match('/^\d{16}$/', $nik)) {
+    throw new Exception('NIK harus terdiri dari 16 digit.');
+  }
+
+  $no_hp = trim($data['no_hp'] ?? '');
+
+  if (mb_strlen($no_hp) > 30) {
+    throw new Exception('Nomor HP terlalu panjang.');
+  }
+
+  return [
+    'id_kamar' => $id_kamar,
+    'nama' => $nama,
+    'no_hp' => $no_hp !== '' ? $no_hp : null,
+    'nik' => $nik !== '' ? $nik : null,
+    'tanggal_masuk' => $tanggal_masuk
+  ];
+}
+
+/*
+|--------------------------------------------------------------------------
+| HITUNG TANGGAL TAGIHAN
+|--------------------------------------------------------------------------
+| Periode pertama:
+| mulai = tanggal masuk
+| selesai = satu bulan setelah tanggal masuk - 1 hari
+| jatuh tempo = tanggal yang sama pada bulan berikutnya.
+|--------------------------------------------------------------------------
+*/
+function getRentDates($tanggal_mulai)
+{
+  $start = new DateTime($tanggal_mulai);
+
+  /*
+   * Untuk menghindari masalah tanggal 29/30/31,
+   * tentukan tanggal jatuh tempo dengan aturan kalender.
+   */
+  $due = clone $start;
+  $originalDay = (int) $start->format('d');
+
+  $due->modify('first day of next month');
+
+  $lastDay = (int) $due->format('t');
+  $due->setDate(
+    (int) $due->format('Y'),
+    (int) $due->format('m'),
+    min($originalDay, $lastDay)
+  );
+
+  $end = clone $due;
+  $end->modify('-1 day');
+
+  return [
+    'mulai' => $start->format('Y-m-d'),
+    'selesai' => $end->format('Y-m-d'),
+    'jatuh_tempo' => $due->format('Y-m-d')
+  ];
+}
+
+function getHargaKamarUntukJumlah($id_kamar, $jumlah_orang, $conn = null)
+{
+  $conn = $conn ?: db();
+
+  $stmt = $conn->prepare("
+    SELECT harga_total
+    FROM harga_kamar
+    WHERE id_kamar = ?
+      AND jumlah_orang = ?
+    LIMIT 1
+  ");
+
+  $stmt->bind_param('ii', $id_kamar, $jumlah_orang);
+  $stmt->execute();
+
+  $row = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if (!$row) {
     throw new Exception(
-      'Tanggal masuk wajib diisi.'
+      "Harga kamar untuk {$jumlah_orang} orang belum dikonfigurasi."
     );
   }
 
+  return (float) $row['harga_total'];
+}
+
+/*
+|--------------------------------------------------------------------------
+| CARI TAGIHAN BERJALAN
+|--------------------------------------------------------------------------
+*/
+function findTagihanBerjalan($id_kamar, $tanggal, $conn = null)
+{
+  $conn = $conn ?: db();
+
+  $stmt = $conn->prepare("
+    SELECT *
+    FROM tagihan
+    WHERE id_kamar = ?
+      AND tanggal_mulai <= ?
+      AND tanggal_selesai >= ?
+      AND status <> 'dibatalkan'
+    ORDER BY tanggal_mulai DESC
+    LIMIT 1
+  ");
+
+  $stmt->bind_param('iss', $id_kamar, $tanggal, $tanggal);
+  $stmt->execute();
+
+  $row = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  return $row;
+}
+
+function generateNomorTagihan($conn)
+{
+  do {
+    $nomor = 'TAG-' . date('YmdHis') . '-' . random_int(1000, 9999);
+
+    $stmt = $conn->prepare("
+      SELECT id_tagihan
+      FROM tagihan
+      WHERE nomor_tagihan = ?
+      LIMIT 1
+    ");
+
+    $stmt->bind_param('s', $nomor);
+    $stmt->execute();
+
+    $exists = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+  } while ($exists);
+
+  return $nomor;
+}
+
+/*
+|--------------------------------------------------------------------------
+| BUAT TAGIHAN PERTAMA
+|--------------------------------------------------------------------------
+*/
+function createTagihanPertama(
+  $id_kamar,
+  $tanggal_masuk,
+  $jumlah_orang,
+  $conn
+) {
+  $harga = getHargaKamarUntukJumlah(
+    $id_kamar,
+    $jumlah_orang,
+    $conn
+  );
+
+  $dates = getRentDates($tanggal_masuk);
+  $nomor = generateNomorTagihan($conn);
+
+  $stmt = $conn->prepare("
+    INSERT INTO tagihan (
+      id_kamar,
+      nomor_tagihan,
+      tanggal_terbit,
+      tanggal_mulai,
+      tanggal_selesai,
+      tanggal_jatuh_tempo,
+      jumlah_orang,
+      harga_dasar,
+      total_penyesuaian,
+      total_tagihan,
+      total_dibayar,
+      status
+    )
+    VALUES (
+      ?, ?, CURDATE(), ?, ?, ?,
+      ?, ?, 0, ?, 0, 'belum_lunas'
+    )
+  ");
+
+  $stmt->bind_param(
+    'issssidd',
+    $id_kamar,
+    $nomor,
+    $dates['mulai'],
+    $dates['selesai'],
+    $dates['jatuh_tempo'],
+    $jumlah_orang,
+    $harga,
+    $harga
+  );
+
+  if (!$stmt->execute()) {
+    $error = $stmt->error;
+    $stmt->close();
+    throw new Exception('Gagal membuat tagihan: ' . $error);
+  }
+
+  $id_tagihan = $conn->insert_id;
+  $stmt->close();
+
+  return $id_tagihan;
+}
+
+/*
+|--------------------------------------------------------------------------
+| HITUNG PENYESUAIAN PENGHUNI TAMBAHAN
+|--------------------------------------------------------------------------
+| Dasar:
+| selisih harga × sisa hari / jumlah hari kalender bulan mulai.
+|
+| Pembulatan dilakukan ke bawah ke ribuan rupiah.
+| Contoh 400.000 × 25 / 31 = 322.580 -> 322.000.
+|--------------------------------------------------------------------------
+*/
+function calculateProratedAdjustment(
+  $harga_lama,
+  $harga_baru,
+  $tanggal_masuk,
+  $tanggal_jatuh_tempo
+) {
+  $selisih = $harga_baru - $harga_lama;
+
+  if ($selisih == 0) {
+    return 0;
+  }
+
+  $masuk = new DateTime($tanggal_masuk);
+  $jatuhTempo = new DateTime($tanggal_jatuh_tempo);
+
   /*
-   * Pastikan kamar milik pemilik.
+   * Sisa hari dihitung inklusif dari tanggal masuk
+   * sampai tanggal jatuh tempo.
+   */
+  $sisaHari =
+    $masuk->diff($jatuhTempo)->days + 1;
+
+  /*
+   * Jumlah hari menggunakan bulan saat penghuni masuk.
+   * Ini membuat kasus:
+   * 10 Agustus -> 3 September = 25/31.
+   */
+  $jumlahHariBulan =
+    (int) $masuk->format('t');
+
+  $nilai =
+    $selisih *
+    ($sisaHari / $jumlahHariBulan);
+
+  /*
+   * Untuk tagihan rupiah, bulatkan ke bawah
+   * ke kelipatan Rp1.000.
+   */
+  if ($nilai >= 0) {
+    return floor($nilai / 1000) * 1000;
+  }
+
+  return ceil($nilai / 1000) * 1000;
+}
+
+/*
+|--------------------------------------------------------------------------
+| TAMBAH PENGHUNI
+|--------------------------------------------------------------------------
+| Seluruh operasi berada dalam satu transaction.
+|--------------------------------------------------------------------------
+*/
+function siapkanTagihanBerikutnyaUntukPenghuni($tagihan, $jumlah_orang, $tanggalTerbit, $conn)
+{
+  $dates = getRentDates($tagihan['tanggal_jatuh_tempo']);
+  $idKamar = (int) $tagihan['id_kamar'];
+
+  $stmt = $conn->prepare("
+    SELECT *
+    FROM tagihan
+    WHERE id_kamar = ?
+      AND tanggal_mulai = ?
+      AND tanggal_selesai = ?
+    LIMIT 1
+    FOR UPDATE
+  ");
+  $stmt->bind_param('iss', $idKamar, $dates['mulai'], $dates['selesai']);
+  $stmt->execute();
+  $existing = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  $harga = getHargaKamarUntukJumlah($idKamar, $jumlah_orang, $conn);
+
+  if ($existing) {
+    if ($existing['status'] === 'dibatalkan') {
+      return (int) $existing['id_tagihan'];
+    }
+
+    /*
+     * Periode berikutnya sudah dibuat sebelumnya, misalnya ketika
+     * tagihan periode sekarang dilunasi. Jumlah penghuni berubah
+     * sebelum periode berikutnya dimulai, sehingga harga dasar periode
+     * berikutnya harus ikut berubah. Pembayaran yang sudah ada tetap
+     * dipertahankan; status dihitung ulang berdasarkan total kewajiban.
+     */
+    $totalPenyesuaian = (float) $existing['total_penyesuaian'];
+    $totalDibayar = (float) $existing['total_dibayar'];
+    $totalTagihan = $harga + $totalPenyesuaian;
+
+    if ($totalDibayar >= $totalTagihan) {
+      $status = 'lunas';
+    } elseif ($totalDibayar > 0) {
+      $status = 'sebagian';
+    } else {
+      $status = 'belum_lunas';
+    }
+
+    $stmt = $conn->prepare("
+      UPDATE tagihan
+      SET
+        jumlah_orang = ?,
+        harga_dasar = ?,
+        total_tagihan = ?,
+        status = ?
+      WHERE id_tagihan = ?
+        AND status <> 'dibatalkan'
+    ");
+    $stmt->bind_param(
+      'iddsi',
+      $jumlah_orang,
+      $harga,
+      $totalTagihan,
+      $status,
+      $existing['id_tagihan']
+    );
+
+    if (!$stmt->execute()) {
+      $error = $stmt->error;
+      $stmt->close();
+      throw new Exception('Gagal menyinkronkan tagihan periode berikutnya: ' . $error);
+    }
+    $stmt->close();
+
+    return (int) $existing['id_tagihan'];
+  }
+
+  $nomor = generateNomorTagihan($conn);
+  $tanggalTerbit = substr($tanggalTerbit, 0, 10);
+
+  $stmt = $conn->prepare("
+    INSERT INTO tagihan (
+      id_kamar, nomor_tagihan, tanggal_terbit, tanggal_mulai,
+      tanggal_selesai, tanggal_jatuh_tempo, jumlah_orang, harga_dasar,
+      total_penyesuaian, total_tagihan, total_dibayar, status
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0, ?, 0, 'belum_lunas')
+  ");
+  $stmt->bind_param(
+    'isssssidd',
+    $idKamar,
+    $nomor,
+    $tanggalTerbit,
+    $dates['mulai'],
+    $dates['selesai'],
+    $dates['jatuh_tempo'],
+    $jumlah_orang,
+    $harga,
+    $harga
+  );
+
+  if (!$stmt->execute()) {
+    $error = $stmt->error;
+    $stmt->close();
+    throw new Exception('Gagal membuat tagihan periode berikutnya: ' . $error);
+  }
+
+  $id = $stmt->insert_id;
+  $stmt->close();
+  return $id;
+}
+
+function createPenghuni($data, $id_pemilik)
+{
+  $data = validatePenghuniInput($data);
+  $conn = db();
+
+  /*
+   * Ownership + data kamar.
    */
   $stmt = $conn->prepare("
     SELECT
       km.id_kamar,
+      km.id_kos,
       km.kapasitas,
       km.status,
-      k.nama_kos,
-      km.nomor_kamar
-
+      k.nama_kos
     FROM kamar km
-
-    INNER JOIN kos k
-      ON k.id_kos = km.id_kos
-
+    INNER JOIN kos k ON k.id_kos = km.id_kos
     WHERE km.id_kamar = ?
       AND k.id_pemilik = ?
-
     LIMIT 1
   ");
 
   $stmt->bind_param(
     'ii',
-    $id_kamar,
+    $data['id_kamar'],
     $id_pemilik
   );
 
   $stmt->execute();
 
-  $kamar = $stmt
-    ->get_result()
-    ->fetch_assoc();
-
+  $kamar = $stmt->get_result()->fetch_assoc();
   $stmt->close();
 
   if (!$kamar) {
@@ -301,17 +604,14 @@ function createPenghuni(
     );
   }
 
-  if (
-    $kamar['status'] === 'nonaktif' ||
-    $kamar['status'] === 'perbaikan'
-  ) {
+  if (in_array($kamar['status'], ['perbaikan', 'nonaktif'], true)) {
     throw new Exception(
-      'Kamar tidak dapat digunakan untuk penghuni.'
+      'Kamar sedang tidak dapat menerima penghuni.'
     );
   }
 
   /*
-   * Cek kapasitas.
+   * Hitung penghuni aktif.
    */
   $stmt = $conn->prepare("
     SELECT COUNT(*) AS total
@@ -320,34 +620,27 @@ function createPenghuni(
       AND status = 'aktif'
   ");
 
-  $stmt->bind_param(
-    'i',
-    $id_kamar
-  );
-
+  $stmt->bind_param('i', $data['id_kamar']);
   $stmt->execute();
 
-  $jumlahAktif = (int) (
-    $stmt
-      ->get_result()
-      ->fetch_assoc()['total'] ?? 0
+  $jumlahLama = (int) (
+    $stmt->get_result()->fetch_assoc()['total'] ?? 0
   );
 
   $stmt->close();
 
-  if (
-    $jumlahAktif >= (int) $kamar['kapasitas']
-  ) {
+  $jumlahBaru = $jumlahLama + 1;
+
+  if ($jumlahBaru > (int) $kamar['kapasitas']) {
     throw new Exception(
-      'Kapasitas kamar sudah penuh.'
+      "Kamar sudah mencapai kapasitas maksimal {$kamar['kapasitas']} orang."
     );
   }
 
   /*
-   * NIK harus unik jika diisi.
+   * Cek NIK unik jika diberikan.
    */
-  if ($nik !== '') {
-
+  if ($data['nik'] !== null) {
     $stmt = $conn->prepare("
       SELECT id_penghuni
       FROM penghuni
@@ -355,175 +648,425 @@ function createPenghuni(
       LIMIT 1
     ");
 
-    $stmt->bind_param(
-      's',
-      $nik
-    );
-
+    $stmt->bind_param('s', $data['nik']);
     $stmt->execute();
 
-    $exists = $stmt
-      ->get_result()
-      ->fetch_assoc();
-
+    $exists = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
     if ($exists) {
-      throw new Exception(
-        'NIK tersebut sudah digunakan oleh penghuni lain.'
-      );
+      throw new Exception('NIK tersebut sudah terdaftar.');
     }
   }
 
-  $stmt = $conn->prepare("
-    INSERT INTO penghuni (
-      id_kamar,
-      id_user,
-      nama,
-      no_hp,
-      nik,
-      tanggal_masuk,
-      status
-    )
-    VALUES (?, ?, ?, ?, NULLIF(?, ''), ?, 'aktif')
-  ");
-
-  $stmt->bind_param(
-    'iissss',
-    $id_kamar,
-    $id_user,
-    $nama,
-    $no_hp,
-    $nik,
-    $tanggal_masuk
-  );
-
-  $result = $stmt->execute();
-
-  $id_penghuni = $stmt->insert_id;
-
-  $stmt->close();
-
-  if (!$result) {
-    return false;
+  /*
+   * Untuk penghuni tambahan, pastikan harga jumlah baru ada
+   * sebelum INSERT agar transaction dapat dibatalkan dengan aman.
+   */
+  if ($jumlahBaru > 1) {
+    getHargaKamarUntukJumlah(
+      $data['id_kamar'],
+      $jumlahBaru,
+      $conn
+    );
+  } else {
+    getHargaKamarUntukJumlah(
+      $data['id_kamar'],
+      1,
+      $conn
+    );
   }
-  /*
-  * Kelola periode dan tagihan.
-  *
-  * Jika ini penghuni pertama:
-  *   buat periode + tagihan awal.
-  *
-  * Jika periode sudah ada:
-  *   sesuaikan harga berdasarkan
-  *   jumlah penghuni baru.
-  */
-  prosesPeriodeDanTagihanPenghuniMasuk(
-    $id_kamar,
-    $id_penghuni,
-    $tanggal_masuk
-  );
 
-  /*
-  * Otomatis ubah status kamar.
-  */
-  sinkronkanStatusKamar($id_kamar);
+  $conn->begin_transaction();
 
-  return $id_penghuni;
+  try {
+    /*
+     * INSERT penghuni.
+     */
+    $stmt = $conn->prepare("
+      INSERT INTO penghuni (
+        id_kamar,
+        nama,
+        no_hp,
+        nik,
+        tanggal_masuk,
+        status
+      )
+      VALUES (?, ?, ?, ?, ?, 'aktif')
+    ");
+
+    $stmt->bind_param(
+      'issss',
+      $data['id_kamar'],
+      $data['nama'],
+      $data['no_hp'],
+      $data['nik'],
+      $data['tanggal_masuk']
+    );
+
+    if (!$stmt->execute()) {
+      $error = $stmt->error;
+      $stmt->close();
+      throw new Exception('Gagal menyimpan penghuni: ' . $error);
+    }
+
+    $id_penghuni = $conn->insert_id;
+    $stmt->close();
+
+    /*
+     * Jika sebelumnya TIDAK ADA penghuni aktif, penghuni baru
+     * memulai siklus tagihan baru.
+     *
+     * Penting:
+     * Tagihan lama yang masih belum lunas tetap menjadi utang
+     * penghuni lama dan TIDAK boleh dipakai untuk penghuni baru.
+     */
+    if ($jumlahLama === 0) {
+      createTagihanPertama(
+        $data['id_kamar'],
+        $data['tanggal_masuk'],
+        1,
+        $conn
+      );
+    } else {
+      /*
+       * Masih ada penghuni aktif. Penghuni baru adalah penghuni
+       * tambahan sehingga harus menggunakan tagihan berjalan
+       * dan menghasilkan penyesuaian otomatis.
+       */
+      $tagihan = findTagihanBerjalan(
+        $data['id_kamar'],
+        $data['tanggal_masuk'],
+        $conn
+      );
+
+      if (!$tagihan) {
+        throw new Exception(
+          'Tagihan berjalan untuk kamar ini tidak ditemukan. ' .
+          'Periksa data tagihan sebelum menambahkan penghuni.'
+        );
+      }
+
+      /*
+       * Penghuni tambahan di tengah periode selalu menghasilkan
+       * penyesuaian pada tagihan berjalan, termasuk jika sebelumnya
+       * sudah lunas. Pembayaran lama tidak dihapus; status dihitung
+       * ulang sehingga kembali menjadi 'sebagian' jika masih ada sisa.
+       */
+      $hargaLama = (float) $tagihan['harga_dasar'];
+
+      $hargaBaru = getHargaKamarUntukJumlah(
+        $data['id_kamar'],
+        $jumlahBaru,
+        $conn
+      );
+
+      $penyesuaian = calculateProratedAdjustment(
+        $hargaLama,
+        $hargaBaru,
+        $data['tanggal_masuk'],
+        $tagihan['tanggal_jatuh_tempo']
+      );
+
+      $totalPenyesuaian =
+        (float) $tagihan['total_penyesuaian']
+        + $penyesuaian;
+
+      $totalTagihan =
+        $hargaLama
+        + $totalPenyesuaian;
+
+      /*
+       * Simpan histori penyesuaian jika memang ada perubahan.
+       */
+      if ($penyesuaian != 0) {
+        $jenis =
+          $penyesuaian > 0
+            ? 'tambah'
+            : 'kurang';
+
+        $jumlah =
+          abs($penyesuaian);
+
+        $alasan =
+          "Penyesuaian harga karena penghuni ke-{$jumlahBaru} masuk.";
+
+        $stmt = $conn->prepare("
+          INSERT INTO penyesuaian_tagihan (
+            id_tagihan,
+            id_penghuni,
+            jenis,
+            jumlah,
+            tanggal_efektif,
+            alasan
+          )
+          VALUES (?, ?, ?, ?, ?, ?)
+        ");
+
+        $stmt->bind_param(
+          'iisiss',
+          $tagihan['id_tagihan'],
+          $id_penghuni,
+          $jenis,
+          $jumlah,
+          $data['tanggal_masuk'],
+          $alasan
+        );
+
+        if (!$stmt->execute()) {
+          $error = $stmt->error;
+          $stmt->close();
+          throw new Exception(
+            'Gagal menyimpan penyesuaian: ' . $error
+          );
+        }
+
+        $stmt->close();
+      }
+
+      /*
+       * Harga dasar TIDAK disentuh.
+       */
+      $totalDibayar = (float) $tagihan['total_dibayar'];
+      if ($totalDibayar >= $totalTagihan) {
+        $statusBaru = 'lunas';
+      } elseif ($totalDibayar > 0) {
+        $statusBaru = 'sebagian';
+      } else {
+        $statusBaru = 'belum_lunas';
+      }
+
+      $stmt = $conn->prepare("
+        UPDATE tagihan
+        SET
+          jumlah_orang = ?,
+          total_penyesuaian = ?,
+          total_tagihan = ?,
+          status = ?
+        WHERE id_tagihan = ?
+      ");
+
+      $stmt->bind_param(
+        'iddsi',
+        $jumlahBaru,
+        $totalPenyesuaian,
+        $totalTagihan,
+        $statusBaru,
+        $tagihan['id_tagihan']
+      );
+
+      if (!$stmt->execute()) {
+        $error = $stmt->error;
+        $stmt->close();
+        throw new Exception(
+          'Gagal memperbarui tagihan: ' . $error
+        );
+      }
+
+      $stmt->close();
+
+      /*
+       * Jika periode berikutnya sudah terlanjur dibuat (misalnya saat
+       * tagihan berjalan dilunasi), sinkronkan harga dan jumlah orang
+       * agar mencerminkan penghuni baru yang sudah masuk pada periode
+       * sebelumnya. Jika belum ada, fungsi ini membuatnya.
+       */
+      siapkanTagihanBerikutnyaUntukPenghuni(
+        $tagihan,
+        $jumlahBaru,
+        date('Y-m-d'),
+        $conn
+      );
+    }
+
+    /*
+     * Kamar otomatis TERISI jika ada penghuni.
+     */
+    $stmt = $conn->prepare("
+      UPDATE kamar
+      SET status = 'terisi'
+      WHERE id_kamar = ?
+    ");
+
+    $stmt->bind_param('i', $data['id_kamar']);
+
+    if (!$stmt->execute()) {
+      $stmt->close();
+      throw new Exception(
+        'Gagal memperbarui status kamar.'
+      );
+    }
+
+    $stmt->close();
+
+    $conn->commit();
+
+    return $id_penghuni;
+
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+  }
 }
 
-
-function updatePenghuni(
-  $id_penghuni,
-  $data,
-  $id_pemilik
-) {
-  $conn = db();
-
-  $penghuni = findPenghuniByIdPemilik(
+/*
+|--------------------------------------------------------------------------
+| EDIT DATA PENGHUNI
+|--------------------------------------------------------------------------
+| Edit hanya data identitas. Perubahan kamar/tanggal masuk tidak
+| dilakukan lewat edit biasa karena dapat mengubah histori tagihan.
+|--------------------------------------------------------------------------
+*/
+function updatePenghuni($id_penghuni, $data, $id_pemilik)
+{
+  $existing = findPenghuniByIdPemilik(
     $id_penghuni,
     $id_pemilik
   );
 
-  if (!$penghuni) {
-    throw new Exception(
-      'Penghuni tidak ditemukan atau bukan milik Anda.'
-    );
+  if (!$existing) {
+    throw new Exception('Penghuni tidak ditemukan.');
   }
 
-  $id_kamar = (int) ($data['id_kamar'] ?? 0);
   $nama = trim($data['nama'] ?? '');
   $no_hp = trim($data['no_hp'] ?? '');
   $nik = trim($data['nik'] ?? '');
 
-  $tanggal_masuk =
-    trim($data['tanggal_masuk'] ?? '');
-
-  if (!$id_kamar || $nama === '') {
-    throw new Exception(
-      'Kamar dan nama penghuni wajib diisi.'
-    );
+  if ($nama === '') {
+    throw new Exception('Nama penghuni wajib diisi.');
   }
 
-  /*
-   * Validasi kamar baru.
-   */
+  if ($nik !== '' && !preg_match('/^\d{16}$/', $nik)) {
+    throw new Exception('NIK harus terdiri dari 16 digit.');
+  }
+
+  $conn = db();
+
+  if ($nik !== '') {
+    $stmt = $conn->prepare("
+      SELECT id_penghuni
+      FROM penghuni
+      WHERE nik = ?
+        AND id_penghuni <> ?
+      LIMIT 1
+    ");
+
+    $stmt->bind_param('si', $nik, $id_penghuni);
+    $stmt->execute();
+
+    if ($stmt->get_result()->fetch_assoc()) {
+      $stmt->close();
+      throw new Exception('NIK tersebut sudah digunakan.');
+    }
+
+    $stmt->close();
+  }
+
   $stmt = $conn->prepare("
-    SELECT
-      km.id_kamar,
-      km.kapasitas,
-      km.status
-
-    FROM kamar km
-
-    INNER JOIN kos k
-      ON k.id_kos = km.id_kos
-
-    WHERE km.id_kamar = ?
-      AND k.id_pemilik = ?
-
-    LIMIT 1
+    UPDATE penghuni p
+    INNER JOIN kamar k ON k.id_kamar = p.id_kamar
+    INNER JOIN kos ko ON ko.id_kos = k.id_kos
+    SET
+      p.nama = ?,
+      p.no_hp = ?,
+      p.nik = ?
+    WHERE p.id_penghuni = ?
+      AND ko.id_pemilik = ?
   ");
 
+  $nikValue = $nik !== '' ? $nik : null;
+  $noHpValue = $no_hp !== '' ? $no_hp : null;
+
   $stmt->bind_param(
-    'ii',
-    $id_kamar,
+    'sssii',
+    $nama,
+    $noHpValue,
+    $nikValue,
+    $id_penghuni,
     $id_pemilik
   );
 
-  $stmt->execute();
-
-  $kamar = $stmt
-    ->get_result()
-    ->fetch_assoc();
-
+  $result = $stmt->execute();
   $stmt->close();
 
-  if (!$kamar) {
+  if (!$result) {
+    throw new Exception('Gagal memperbarui data penghuni.');
+  }
+
+  return true;
+}
+
+/*
+|--------------------------------------------------------------------------
+| KELUAR
+|--------------------------------------------------------------------------
+*/
+function keluarPenghuni(
+  $id_penghuni,
+  $tanggal_keluar,
+  $id_pemilik
+) {
+  $existing = findPenghuniByIdPemilik(
+    $id_penghuni,
+    $id_pemilik
+  );
+
+  if (!$existing) {
+    throw new Exception('Penghuni tidak ditemukan.');
+  }
+
+  if ($existing['status'] !== 'aktif') {
+    throw new Exception('Penghuni sudah berstatus keluar.');
+  }
+
+  $date = DateTime::createFromFormat(
+    'Y-m-d',
+    $tanggal_keluar
+  );
+
+  if (
+    !$date ||
+    $date->format('Y-m-d') !== $tanggal_keluar
+  ) {
+    throw new Exception('Tanggal keluar tidak valid.');
+  }
+
+  if ($tanggal_keluar < $existing['tanggal_masuk']) {
     throw new Exception(
-      'Kamar tidak ditemukan atau bukan milik Anda.'
+      'Tanggal keluar tidak boleh sebelum tanggal masuk.'
     );
   }
 
-  if (
-    $penghuni['status'] === 'aktif' &&
-    (
-      $kamar['status'] === 'perbaikan' ||
-      $kamar['status'] === 'nonaktif'
-    )
-  ) {
-    throw new Exception(
-      'Kamar tidak dapat digunakan untuk penghuni.'
+  $conn = db();
+  $conn->begin_transaction();
+
+  try {
+    $stmt = $conn->prepare("
+      UPDATE penghuni
+      SET
+        tanggal_keluar = ?,
+        status = 'keluar'
+      WHERE id_penghuni = ?
+    ");
+
+    $stmt->bind_param(
+      'si',
+      $tanggal_keluar,
+      $id_penghuni
     );
-  }
 
-  /*
-   * Jika pindah kamar, cek kapasitas kamar baru.
-   */
-  if (
-    $id_kamar !== (int) $penghuni['id_kamar'] &&
-    $penghuni['status'] === 'aktif'
-  ) {
+    if (!$stmt->execute()) {
+      $stmt->close();
+      throw new Exception(
+        'Gagal mencatat penghuni keluar.'
+      );
+    }
 
+    $stmt->close();
+
+    /*
+     * Hitung penghuni aktif yang tersisa.
+     */
     $stmt = $conn->prepare("
       SELECT COUNT(*) AS total
       FROM penghuni
@@ -533,215 +1076,57 @@ function updatePenghuni(
 
     $stmt->bind_param(
       'i',
-      $id_kamar
+      $existing['id_kamar']
     );
 
     $stmt->execute();
 
     $jumlahAktif = (int) (
-      $stmt
-        ->get_result()
-        ->fetch_assoc()['total'] ?? 0
+      $stmt->get_result()->fetch_assoc()['total'] ?? 0
     );
 
     $stmt->close();
 
-    if (
-      $jumlahAktif >= (int) $kamar['kapasitas']
-    ) {
-      throw new Exception(
-        'Kapasitas kamar tujuan sudah penuh.'
+    if ($jumlahAktif === 0) {
+      /*
+       * Jika tidak ada penghuni, kamar kembali tersedia
+       * hanya jika sebelumnya TERISI.
+       */
+      $stmt = $conn->prepare("
+        UPDATE kamar
+        SET status = 'tersedia'
+        WHERE id_kamar = ?
+          AND status = 'terisi'
+      ");
+
+      $stmt->bind_param(
+        'i',
+        $existing['id_kamar']
       );
+
+      $stmt->execute();
+      $stmt->close();
     }
+
+    $conn->commit();
+
+    return true;
+
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
   }
-
-  /*
-   * Validasi NIK.
-   */
-  if ($nik !== '') {
-
-    $stmt = $conn->prepare("
-      SELECT id_penghuni
-      FROM penghuni
-      WHERE nik = ?
-        AND id_penghuni != ?
-      LIMIT 1
-    ");
-
-    $stmt->bind_param(
-      'si',
-      $nik,
-      $id_penghuni
-    );
-
-    $stmt->execute();
-
-    $exists = $stmt
-      ->get_result()
-      ->fetch_assoc();
-
-    $stmt->close();
-
-    if ($exists) {
-      throw new Exception(
-        'NIK tersebut sudah digunakan oleh penghuni lain.'
-      );
-    }
-  }
-
-  $oldKamar = (int) $penghuni['id_kamar'];
-
-  $stmt = $conn->prepare("
-    UPDATE penghuni
-    SET
-      id_kamar = ?,
-      nama = ?,
-      no_hp = ?,
-      nik = NULLIF(?, ''),
-      tanggal_masuk = ?
-    WHERE id_penghuni = ?
-  ");
-
-  $stmt->bind_param(
-    'issssi',
-    $id_kamar,
-    $nama,
-    $no_hp,
-    $nik,
-    $tanggal_masuk,
-    $id_penghuni
-  );
-
-  $result = $stmt->execute();
-
-  $stmt->close();
-
-  if (!$result) {
-    return false;
-  }
-
-  /*
-   * Sinkronkan kamar lama dan baru.
-   */
-  if ($oldKamar !== $id_kamar) {
-    sinkronkanStatusKamar($oldKamar);
-    sinkronkanStatusKamar($id_kamar);
-  } else {
-    sinkronkanStatusKamar($id_kamar);
-  }
-
-  return true;
 }
 
-
-function keluarkanPenghuni(
-  $id_penghuni,
-  $tanggal_keluar,
-  $id_pemilik
-) {
-  $conn = db();
-
-  $penghuni = findPenghuniByIdPemilik(
-    $id_penghuni,
-    $id_pemilik
-  );
-
-  if (!$penghuni) {
-    throw new Exception(
-      'Penghuni tidak ditemukan atau bukan milik Anda.'
-    );
-  }
-
-  if ($penghuni['status'] !== 'aktif') {
-    throw new Exception(
-      'Penghuni sudah berstatus keluar.'
-    );
-  }
-
-  if (!$tanggal_keluar) {
-    throw new Exception(
-      'Tanggal keluar wajib diisi.'
-    );
-  }
-
-  if (
-    $tanggal_keluar < $penghuni['tanggal_masuk']
-  ) {
-    throw new Exception(
-      'Tanggal keluar tidak boleh sebelum tanggal masuk.'
-    );
-  }
-
-  $stmt = $conn->prepare("
-    UPDATE penghuni
-    SET
-      tanggal_keluar = ?,
-      status = 'keluar'
-    WHERE id_penghuni = ?
-  ");
-
-  $stmt->bind_param(
-    'si',
-    $tanggal_keluar,
-    $id_penghuni
-  );
-
-  $result = $stmt->execute();
-
-  $stmt->close();
-
-  if (!$result) {
-    return false;
-  }
-
-  sinkronkanStatusKamar(
-    (int) $penghuni['id_kamar']
-  );
-
-  return true;
-}
-
-
-function deletePenghuni(
-  $id_penghuni,
-  $id_pemilik
-) {
-  $conn = db();
-
-  $penghuni = findPenghuniByIdPemilik(
-    $id_penghuni,
-    $id_pemilik
-  );
-
-  if (!$penghuni) {
-    throw new Exception(
-      'Penghuni tidak ditemukan atau bukan milik Anda.'
-    );
-  }
-
-  /*
-   * Penghuni aktif tidak boleh dihapus.
-   * Gunakan proses keluar.
-   */
-  if ($penghuni['status'] === 'aktif') {
-    throw new Exception(
-      'Penghuni aktif tidak dapat dihapus. Proses penghuni keluar terlebih dahulu.'
-    );
-  }
-
-  $stmt = $conn->prepare("
-    DELETE FROM penghuni
-    WHERE id_penghuni = ?
-  ");
-
-  $stmt->bind_param(
-    'i',
-    $id_penghuni
-  );
-
-  $result = $stmt->execute();
-
-  $stmt->close();
-
-  return $result;
+function deletePenghuni($id_penghuni, $id_pemilik)
+{
+  $existing=findPenghuniByIdPemilik($id_penghuni,$id_pemilik);
+  if(!$existing) throw new Exception('Penghuni tidak ditemukan.');
+  if($existing['status']==='aktif') throw new Exception('Penghuni aktif tidak dapat dihapus. Catat sebagai keluar terlebih dahulu.');
+  $conn=db();
+  $stmt=$conn->prepare("SELECT (SELECT COUNT(*) FROM pembayaran WHERE id_penghuni=?) AS total_pembayaran,(SELECT COUNT(*) FROM penyesuaian_tagihan WHERE id_penghuni=?) AS total_penyesuaian");
+  $stmt->bind_param('ii',$id_penghuni,$id_penghuni); $stmt->execute(); $histori=$stmt->get_result()->fetch_assoc(); $stmt->close();
+  if((int)($histori['total_pembayaran']??0)>0 || (int)($histori['total_penyesuaian']??0)>0) throw new Exception('Penghuni yang sudah memiliki histori pembayaran atau penyesuaian tidak dapat dihapus. Data tetap disimpan sebagai histori.');
+  $stmt=$conn->prepare('DELETE FROM penghuni WHERE id_penghuni=?'); $stmt->bind_param('i',$id_penghuni);
+  if(!$stmt->execute()){ $stmt->close(); throw new Exception('Gagal menghapus data penghuni.'); } $stmt->close(); return true;
 }

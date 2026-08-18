@@ -8,7 +8,7 @@
 
         <img
           :src="BASE_URL + '/assets/icon/logo.png'"
-          alt="Platform Kos Kupang"
+          alt="BetaKos"
           class="w-16 h-16 object-contain mx-auto mb-4">
 
         <h1 class="text-2xl font-bold text-heading">

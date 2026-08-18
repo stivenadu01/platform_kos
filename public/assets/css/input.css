@@ -266,6 +266,7 @@
   @apply bg-white
          border border-slate-200
          rounded-xl
+         p-1.5 md:p-3
          shadow-sm;
 }
 
@@ -477,7 +478,7 @@
 @utility modal-box {
   @apply w-full
          max-w-lg
-         max-h-[90dvh]
+         max-h-dvh
          overflow-y-auto
          bg-white
          rounded-2xl

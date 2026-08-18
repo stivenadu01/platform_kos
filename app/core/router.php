@@ -44,9 +44,28 @@ function run()
   $method = $_SERVER['REQUEST_METHOD'];
   $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-  // hapus prefix jika ada
-  if (str_starts_with($uri, '/platform_kos')) {
-    $uri = substr($uri, 13);
+  // Normalisasi prefix deployment.
+  // Mendukung akses langsung melalui:
+  //   /pemilik
+  //   /public/pemilik
+  //   /platform_kos/pemilik
+  //   /platform_kos/public/pemilik
+  $prefixes = [
+    '/platform_kos/public',
+    '/platform_kos',
+    '/public'
+  ];
+
+  foreach ($prefixes as $prefix) {
+    if ($uri === $prefix) {
+      $uri = '/';
+      break;
+    }
+
+    if (str_starts_with($uri, $prefix . '/')) {
+      $uri = substr($uri, strlen($prefix));
+      break;
+    }
   }
 
   $uri = rtrim($uri, '/');

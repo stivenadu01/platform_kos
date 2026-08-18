@@ -5,24 +5,16 @@ class ApiPenghuniController
   public function __construct()
   {
     model('Penghuni');
-    model('Kamar');
-    model('PeriodeSewa');
-    model('Tagihan');
   }
-
 
   private function pemilikId()
   {
-    return (int) (
-      $_SESSION['user']['id_user'] ?? 0
-    );
+    return (int) ($_SESSION['user']['id_user'] ?? 0);
   }
-
 
   public function index()
   {
     try {
-
       $data = getPenghuniListByPemilik(
         $this->pemilikId(),
         query('search') ?? '',
@@ -36,7 +28,6 @@ class ApiPenghuniController
         'data' => $data
       ]);
     } catch (Throwable $e) {
-
       response([
         'success' => false,
         'message' => $e->getMessage()
@@ -44,20 +35,33 @@ class ApiPenghuniController
     }
   }
 
+  public function kamar()
+  {
+    try {
+      response([
+        'success' => true,
+        'data' => getKamarListForPenghuni(
+          $this->pemilikId()
+        )
+      ]);
+    } catch (Throwable $e) {
+      response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], 500);
+    }
+  }
 
   public function show()
   {
     try {
-
-      $id_penghuni =
-        (int) (query('id_penghuni') ?? 0);
+      $id_penghuni = (int) query('id_penghuni');
 
       if (!$id_penghuni) {
         response([
           'success' => false,
           'message' => 'ID penghuni tidak valid.'
         ], 400);
-
         return;
       }
 
@@ -71,7 +75,6 @@ class ApiPenghuniController
           'success' => false,
           'message' => 'Penghuni tidak ditemukan.'
         ], 404);
-
         return;
       }
 
@@ -80,74 +83,29 @@ class ApiPenghuniController
         'data' => $data
       ]);
     } catch (Throwable $e) {
-
       response([
         'success' => false,
         'message' => $e->getMessage()
       ], 500);
     }
   }
-
-
-  public function kamar()
-  {
-    try {
-
-      $data = getKamarListForPenghuni(
-        $this->pemilikId()
-      );
-
-      response([
-        'success' => true,
-        'data' => $data
-      ]);
-    } catch (Throwable $e) {
-
-      response([
-        'success' => false,
-        'message' => $e->getMessage()
-      ], 500);
-    }
-  }
-
 
   public function store()
   {
-    $conn = db();
-    $conn->begin_transaction();
     try {
-
-      $data = input();
-
-      if (!is_array($data)) {
-        throw new Exception("Error Processing Request", 1);
-      }
-
-      if (
-        empty($data['id_kamar']) ||
-        empty(trim($data['nama'] ?? '')) ||
-        empty($data['tanggal_masuk'])
-      ) {
-        throw new Exception(
-          'Kamar, nama, dan tanggal masuk wajib diisi.'
-        );
-      }
-
       $id_penghuni = createPenghuni(
-        $data,
+        input(),
         $this->pemilikId()
       );
-      $conn->commit();
+
       response([
         'success' => true,
-        'message' => 'Penghuni berhasil ditambahkan.',
+        'message' => 'Penghuni berhasil ditambahkan dan tagihan otomatis dibuat/diperbarui.',
         'data' => [
           'id_penghuni' => $id_penghuni
         ]
       ], 201);
     } catch (Throwable $e) {
-      $conn->rollback();
-
       response([
         'success' => false,
         'message' => $e->getMessage()
@@ -155,28 +113,22 @@ class ApiPenghuniController
     }
   }
 
-
   public function update()
   {
     try {
-
-      $data = input();
-
-      $id_penghuni =
-        (int) (input('id_penghuni') ?? 0);
+      $id_penghuni = (int) input('id_penghuni');
 
       if (!$id_penghuni) {
         response([
           'success' => false,
           'message' => 'ID penghuni tidak valid.'
         ], 400);
-
         return;
       }
 
       updatePenghuni(
         $id_penghuni,
-        $data,
+        input(),
         $this->pemilikId()
       );
 
@@ -185,7 +137,6 @@ class ApiPenghuniController
         'message' => 'Data penghuni berhasil diperbarui.'
       ]);
     } catch (Throwable $e) {
-
       response([
         'success' => false,
         'message' => $e->getMessage()
@@ -193,30 +144,21 @@ class ApiPenghuniController
     }
   }
 
-
   public function keluar()
   {
     try {
-
-      $data = input();
-
-      $id_penghuni =
-        (int) ($data['id_penghuni'] ?? 0);
-
-      $tanggal_keluar =
-        trim($data['tanggal_keluar'] ?? '');
+      $id_penghuni = (int) input('id_penghuni');
+      $tanggal_keluar = trim(input('tanggal_keluar') ?? '');
 
       if (!$id_penghuni || !$tanggal_keluar) {
         response([
           'success' => false,
-          'message' =>
-          'ID penghuni dan tanggal keluar wajib diisi.'
+          'message' => 'ID penghuni dan tanggal keluar wajib diisi.'
         ], 422);
-
         return;
       }
 
-      keluarkanPenghuni(
+      keluarPenghuni(
         $id_penghuni,
         $tanggal_keluar,
         $this->pemilikId()
@@ -227,7 +169,6 @@ class ApiPenghuniController
         'message' => 'Penghuni berhasil dicatat keluar.'
       ]);
     } catch (Throwable $e) {
-
       response([
         'success' => false,
         'message' => $e->getMessage()
@@ -235,22 +176,16 @@ class ApiPenghuniController
     }
   }
 
-
   public function destroy()
   {
     try {
-
-      $data = input();
-
-      $id_penghuni =
-        (int) ($data['id_penghuni'] ?? 0);
+      $id_penghuni = (int) input('id_penghuni');
 
       if (!$id_penghuni) {
         response([
           'success' => false,
           'message' => 'ID penghuni tidak valid.'
         ], 400);
-
         return;
       }
 
@@ -264,7 +199,6 @@ class ApiPenghuniController
         'message' => 'Data penghuni berhasil dihapus.'
       ]);
     } catch (Throwable $e) {
-
       response([
         'success' => false,
         'message' => $e->getMessage()

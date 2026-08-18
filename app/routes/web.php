@@ -23,13 +23,18 @@ get('/pemilik/pembayaran', 'PemilikController@pembayaran', ['auth', 'role:pemili
 get('/pemilik/laporan', 'PemilikController@laporan', ['auth', 'role:pemilik']);
 
 
+// Kelola penghuni
+get('/pemilik/penghuni', 'PemilikController@penghuni', ['auth', 'role:pemilik']);
+get('/pemilik/penghuni/tambah', 'PemilikController@tambahPenghuni', ['auth', 'role:pemilik']);
+get('/pemilik/penghuni/edit', 'PemilikController@editPenghuni', ['auth', 'role:pemilik']);
+
 // Kelola kamar
 get('/pemilik/kamar', 'PemilikController@kamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/tambah', 'PemilikController@tambahKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/edit', 'PemilikController@editKamar', ['auth', 'role:pemilik']);
 
-
-// PEMILIK - PENGHUNI
-get('/pemilik/penghuni', 'PemilikController@penghuni', ['auth', 'role:pemilik']);
-get('/pemilik/penghuni/tambah', 'PemilikController@tambahPenghuni', ['auth', 'role:pemilik']);
-get('/pemilik/penghuni/edit', 'PemilikController@editPenghuni', ['auth', 'role:pemilik']);
+// USER FLOW (placeholder routes — implementation dilanjutkan pada fase berikutnya)
+get('/cari-kos', 'UserController@search');
+get('/kos/{id}', 'UserController@detailKos');
+get('/user/favorit', 'UserController@favorit', ['auth', 'role:pelanggan']);
+get('/user/profil', 'UserController@profil', ['auth', 'role:pelanggan']);

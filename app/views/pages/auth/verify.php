@@ -4,7 +4,7 @@
 
     <img
       :src="BASE_URL + '/assets/icon/logo.png'"
-      alt="Platform Kos Kupang"
+      alt="BetaKos"
       class="w-16 h-16 object-contain mx-auto mb-5">
 
     <?php if ($status === 'success'): ?>

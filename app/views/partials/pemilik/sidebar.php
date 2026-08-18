@@ -18,12 +18,12 @@
 
       <img
         :src="window.BASE_URL + '/assets/icon/logo.png'"
-        alt="Platform Kos Kupang"
+        alt="BetaKos"
         class="w-9 h-9 object-contain">
 
       <div>
         <div class="font-bold text-slate-900">
-          Platform Kos
+          BetaKos
         </div>
 
         <div class="text-xs text-slate-500">
@@ -188,7 +188,7 @@
       </span>
 
       <span>
-        Pembayaran
+        Tagihan & Pembayaran
       </span>
 
     </a>

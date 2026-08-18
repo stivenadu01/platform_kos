@@ -31,7 +31,7 @@
     <div class="lg:hidden">
 
       <div class="font-bold text-slate-900">
-        Platform Kos
+        BetaKos
       </div>
 
     </div>
@@ -58,21 +58,30 @@
 
 
     <!-- AVATAR -->
-    <div
-      class="
-        w-10 h-10
-        rounded-full
-        bg-primary-soft
-        text-primary
-        flex items-center justify-center
-        font-semibold
-      "
-      x-text="
-        ($store.auth.user?.nama || 'P')
-          .charAt(0)
-          .toUpperCase()
-      ">
-    </div>
+    <template x-if="$store.auth.user?.foto">
+      <img
+        :src="window.BASE_URL + $store.auth.user.foto"
+        :alt="$store.auth.user?.nama || 'Pemilik'"
+        class="w-10 h-10 rounded-full object-cover ring-1 ring-slate-200">
+    </template>
+
+    <template x-if="!$store.auth.user?.foto">
+      <div
+        class="
+          w-10 h-10
+          rounded-full
+          bg-primary-soft
+          text-primary
+          flex items-center justify-center
+          font-semibold
+        "
+        x-text="
+          ($store.auth.user?.nama || 'P')
+            .charAt(0)
+            .toUpperCase()
+        ">
+      </div>
+    </template>
 
   </div>
 

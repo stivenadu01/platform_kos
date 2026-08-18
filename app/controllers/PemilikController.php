@@ -17,6 +17,30 @@ class PemilikController
   }
 
 
+  public function profil()
+  {
+    $user = $this->owner();
+
+    model('User');
+    $profile = findUser((int)$user['id_user']);
+
+    if (!$profile) {
+      response([
+        'success' => false,
+        'message' => 'Data profil tidak ditemukan'
+      ], 404);
+    }
+
+    unset($profile['password']);
+
+    view('pemilik/profil/index', [
+      'title' => 'Profil Saya',
+      'layout' => 'pemilik',
+      'profile' => $profile
+    ]);
+  }
+
+
   public function kos()
   {
     model('Kos');
@@ -102,6 +126,14 @@ class PemilikController
     ]);
   }
 
+  public function pembayaran()
+  {
+    view('pemilik/pembayaran/index', [
+      'title' => 'Tagihan & Pembayaran',
+      'layout' => 'pemilik'
+    ]);
+  }
+
   public function kamar()
   {
     view('pemilik/kamar/index', [
@@ -125,7 +157,6 @@ class PemilikController
       'layout' => 'pemilik'
     ]);
   }
-
   public function penghuni()
   {
     view('pemilik/penghuni/index', [
@@ -134,21 +165,22 @@ class PemilikController
     ]);
   }
 
-
   public function tambahPenghuni()
   {
-    view('pemilik/penghuni/tambah', [
+    view('pemilik/penghuni/form', [
       'title' => 'Tambah Penghuni',
-      'layout' => 'pemilik'
+      'layout' => 'pemilik',
+      'mode' => 'tambah'
     ]);
   }
-
 
   public function editPenghuni()
   {
-    view('pemilik/penghuni/edit', [
+    view('pemilik/penghuni/form', [
       'title' => 'Edit Penghuni',
-      'layout' => 'pemilik'
+      'layout' => 'pemilik',
+      'mode' => 'edit'
     ]);
   }
+
 }

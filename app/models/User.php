@@ -814,3 +814,96 @@ function updateUserPassword($id_user, $newPassword)
 
   return true;
 }
+
+
+/* =========================================================
+   PEMILIK PROFILE
+   ========================================================= */
+
+function updateUserProfile($id_user, $data)
+{
+  $conn = db();
+
+  $nama = trim($data['nama'] ?? '');
+  $email = strtolower(trim($data['email'] ?? ''));
+  $no_hp = trim($data['no_hp'] ?? '') ?: null;
+
+  if ($nama === '' || $email === '') {
+    throw new Exception('Nama dan email wajib diisi', 422);
+  }
+
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    throw new Exception('Format email tidak valid', 422);
+  }
+
+  $stmt = $conn->prepare("SELECT id_user FROM users WHERE email = ? AND id_user <> ? LIMIT 1");
+  $stmt->bind_param('si', $email, $id_user);
+  $stmt->execute();
+  $exists = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if ($exists) {
+    throw new Exception('Email sudah digunakan oleh akun lain', 409);
+  }
+
+  $stmt = $conn->prepare("UPDATE users SET nama = ?, email = ?, no_hp = ? WHERE id_user = ?");
+  $stmt->bind_param('sssi', $nama, $email, $no_hp, $id_user);
+
+  if (!$stmt->execute()) {
+    $stmt->close();
+    throw new Exception('Gagal memperbarui profil', 500);
+  }
+
+  $stmt->close();
+  return true;
+}
+
+
+function updateUserFoto($id_user, $foto)
+{
+  $conn = db();
+
+  $stmt = $conn->prepare("UPDATE users SET foto = ? WHERE id_user = ?");
+  $stmt->bind_param('si', $foto, $id_user);
+
+  if (!$stmt->execute()) {
+    $stmt->close();
+    throw new Exception('Gagal memperbarui foto profil', 500);
+  }
+
+  $stmt->close();
+  return true;
+}
+
+
+function changeUserPassword($id_user, $password_lama, $password_baru)
+{
+  $conn = db();
+
+  if (strlen($password_baru) < 8) {
+    throw new Exception('Kata sandi baru minimal 8 karakter', 422);
+  }
+
+  $stmt = $conn->prepare("SELECT password FROM users WHERE id_user = ? LIMIT 1");
+  $stmt->bind_param('i', $id_user);
+  $stmt->execute();
+  $user = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if (!$user || !password_verify($password_lama, $user['password'])) {
+    throw new Exception('Kata sandi lama tidak benar', 400);
+  }
+
+  $hash = password_hash($password_baru, PASSWORD_DEFAULT);
+
+  $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id_user = ?");
+  $stmt->bind_param('si', $hash, $id_user);
+
+  if (!$stmt->execute()) {
+    $stmt->close();
+    throw new Exception('Gagal mengubah kata sandi', 500);
+  }
+
+  $stmt->close();
+  return true;
+}
