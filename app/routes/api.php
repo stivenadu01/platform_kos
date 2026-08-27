@@ -100,6 +100,15 @@ post('/api/pemilik/kos/ajukan-verifikasi', 'ApiAdminController@submitVerificatio
 // =========================================================
 // PELANGGAN - LAPORAN KOS
 // =========================================================
+get('/api/pelanggan/riwayat-kos', 'ApiClaimController@history', ['auth', 'role:pelanggan']);
+get('/api/pelanggan/tagihan', 'ApiClaimController@bills', ['auth', 'role:pelanggan']);
+get('/api/pelanggan/tagihan/show', 'ApiClaimController@billShow', ['auth', 'role:pelanggan']);
+get('/api/pelanggan/claim/candidates', 'ApiClaimController@candidates', ['auth', 'role:pelanggan']);
+get('/api/pelanggan/claim', 'ApiClaimController@mine', ['auth', 'role:pelanggan']);
+post('/api/pelanggan/claim', 'ApiClaimController@store', ['auth', 'role:pelanggan']);
+get('/api/pemilik/claim', 'ApiClaimController@ownerIndex', ['auth', 'role:pemilik']);
+post('/api/pemilik/claim/keputusan', 'ApiClaimController@decision', ['auth', 'role:pemilik']);
+
 post('/api/laporan/kos', 'ApiLaporanController@store', ['auth', 'role:pelanggan']);
 get('/api/laporan/kos/saya', 'ApiLaporanController@mine', ['auth', 'role:pelanggan']);
 

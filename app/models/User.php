@@ -180,6 +180,10 @@ function tambahUser($data, $isRegister = false)
     throw new Exception("Data pengguna tidak lengkap", 422);
   }
 
+  if (!preg_match('/^\d{16}$/', $nik)) {
+    throw new Exception('NIK harus terdiri dari 16 digit', 422);
+  }
+
   $password = password_hash($passwordRaw, PASSWORD_DEFAULT);
 
   $role = $data['role'] ?? 'pelanggan';

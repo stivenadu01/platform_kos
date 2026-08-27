@@ -170,6 +170,30 @@
     </a>
 
 
+    <!-- CLAIM RIWAYAT -->
+    <a
+      :href="window.BASE_URL + '/pemilik/claim'"
+      class="
+        flex items-center gap-3
+        px-4 py-3
+        rounded-xl
+        text-sm font-medium
+        text-slate-700
+        hover:bg-slate-100
+        hover:text-primary
+      ">
+
+      <span class="text-lg">
+        ✓
+      </span>
+
+      <span>
+        Claim Riwayat
+      </span>
+
+    </a>
+
+
     <!-- PEMBAYARAN -->
     <a
       :href="window.BASE_URL + '/pemilik/pembayaran'"

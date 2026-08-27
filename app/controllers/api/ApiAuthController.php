@@ -70,8 +70,21 @@ class ApiAuthController
     try {
       $input = input();
 
+      $input['nama'] = trim($input['nama'] ?? '');
+      $input['email'] = strtolower(trim($input['email'] ?? ''));
+      $input['no_hp'] = trim($input['no_hp'] ?? '');
+      $input['nik'] = trim($input['nik'] ?? '');
+      $input['password'] = $input['password'] ?? '';
+      $input['konfirmasi_password'] = $input['konfirmasi_password'] ?? '';
 
-      if (!$input['nama'] || !$input['email'] || !$input['password'] || !$input['no_hp'] || !$input['nik'] || !$input['konfirmasi_password']) {
+      if (
+        $input['nama'] === '' ||
+        $input['email'] === '' ||
+        $input['password'] === '' ||
+        $input['no_hp'] === '' ||
+        $input['nik'] === '' ||
+        $input['konfirmasi_password'] === ''
+      ) {
         throw new Exception("Semua field wajib diisi", 422);
       }
 
@@ -79,8 +92,16 @@ class ApiAuthController
         throw new Exception("Email tidak valid", 422);
       }
 
+      if (!preg_match('/^\d{16}$/', $input['nik'])) {
+        throw new Exception("NIK harus terdiri dari 16 digit", 422);
+      }
+
       if (strlen($input['password']) < 8) {
         throw new Exception("Kata sandi minimal 8 karakter", 422);
+      }
+
+      if ($input['password'] !== $input['konfirmasi_password']) {
+        throw new Exception("Kata sandi tidak cocok", 422);
       }
 
       if (findUserByEmail($input['email'])) {

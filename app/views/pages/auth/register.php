@@ -72,6 +72,9 @@
               type="text"
               x-model="nik"
               autocomplete="off"
+              inputmode="numeric"
+              maxlength="16"
+              pattern="[0-9]{16}"
               placeholder="Masukkan NIK"
               class="input py-3 px-4"
               required>
@@ -157,6 +160,14 @@
         if (this.password.length < 8) {
           Alpine.store('ui').toast(
             'Kata sandi minimal 8 karakter',
+            'error'
+          );
+          return;
+        }
+
+        if (!/^\d{16}$/.test(this.nik)) {
+          Alpine.store('ui').toast(
+            'NIK harus terdiri dari 16 digit',
             'error'
           );
           return;

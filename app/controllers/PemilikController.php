@@ -173,6 +173,14 @@ class PemilikController
     ]);
   }
 
+  public function claim()
+  {
+    view('pemilik/claim/index', [
+      'title' => 'Claim Riwayat Kos',
+      'layout' => 'pemilik'
+    ]);
+  }
+
   public function tambahPenghuni()
   {
     view('pemilik/penghuni/form', [
