@@ -8,7 +8,9 @@ const API = (() => {
 
       let options = {
         method: method,
-        headers: {}
+        headers: {
+          'Accept': 'application/json'
+        }
       };
 
       // SMART BODY HANDLING
@@ -29,6 +31,12 @@ const API = (() => {
           options.body.append('_method', method);
           options.method = 'POST';
         }
+      }
+
+      const csrfToken = window.__CSRF_TOKEN__ || document.querySelector('meta[name=csrf-token]')?.content || '';
+
+      if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && csrfToken) {
+        options.headers['X-CSRF-Token'] = csrfToken;
       }
 
       const res = await fetch(BASE_URL + '/api' + url, options);

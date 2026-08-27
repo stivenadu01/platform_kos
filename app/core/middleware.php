@@ -3,8 +3,17 @@
 function run_middleware($middlewares = [])
 {
   foreach ($middlewares as $mw) {
+    // CSRF protection for all state-changing HTTP methods.
+    // Login/register/reset are also protected because the token is rendered
+    // into the public auth layout and sent automatically by API.js.
+    if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+      csrf_validate_request();
+    }
+
     // AUTH MIDDLEWARE
     if ($mw === 'auth') {
+      header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+      header('Pragma: no-cache');
       if (!isset($_SESSION['user'])) {
         response([
           'success' => false,

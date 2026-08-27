@@ -2,8 +2,14 @@
 
 class ApiKosSearchController
 {
+  public function __construct()
+  {
+    require_once ROOT_PATH . '/app/helpers/rate_limit_helper.php';
+  }
   public function index()
   {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    rateLimit('kos_search_' . $ip, 120, 60);
     model('Kos');
 
     response([

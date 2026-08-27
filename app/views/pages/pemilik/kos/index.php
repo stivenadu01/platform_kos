@@ -110,6 +110,28 @@
             </div>
 
 
+            <?php if ($item['status'] === 'ditolak' && !empty($item['catatan_verifikasi'])): ?>
+              <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3.5">
+                <div class="flex items-center gap-2 text-sm font-semibold text-red-700">
+                  <span>⚠</span> Alasan penolakan Admin
+                </div>
+                <p class="mt-1.5 text-sm leading-6 text-red-700 whitespace-pre-line"><?= htmlspecialchars($item['catatan_verifikasi']) ?></p>
+                <p class="mt-2 text-xs text-red-500">Silakan perbaiki data kos kemudian ajukan kembali untuk verifikasi.</p>
+              </div>
+            <?php endif; ?>
+
+            <div class="mt-4">
+              <?php if ($item['status'] === 'draft' || $item['status'] === 'ditolak'): ?>
+                <button type="button" @click="ajukan(<?= $item['id_kos'] ?>)" class="w-full rounded-xl bg-primary-soft text-primary px-4 py-2.5 text-sm font-semibold hover:bg-blue-100">
+                  Ajukan Verifikasi Admin
+                </button>
+              <?php elseif ($item['status'] === 'menunggu_verifikasi'): ?>
+                <div class="w-full rounded-xl bg-amber-50 text-amber-700 px-4 py-2.5 text-sm font-semibold text-center">Menunggu Verifikasi Admin</div>
+              <?php elseif ($item['status'] === 'aktif'): ?>
+                <div class="w-full rounded-xl bg-emerald-50 text-emerald-700 px-4 py-2.5 text-sm font-semibold text-center">Kos Terverifikasi & Aktif</div>
+              <?php endif; ?>
+            </div>
+
             <div class="flex gap-2 mt-5">
 
               <a
@@ -149,6 +171,15 @@
 <script>
   function kosPage() {
     return {
+      async ajukan(id) {
+        const ok = await Alpine.store('ui').confirm('Ajukan kos ini untuk diperiksa Admin?');
+        if (!ok) return;
+        try {
+          await API.post('/pemilik/kos/ajukan-verifikasi', { id_kos: id });
+          window.location.reload();
+        } catch (error) { console.error(error); }
+      },
+
       async hapus(id) {
 
         const ok = await Alpine.store('ui').confirm(

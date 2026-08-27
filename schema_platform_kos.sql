@@ -54,6 +54,17 @@ CREATE TABLE IF NOT EXISTS user_verification_tokens (
     INDEX idx_verification_token_expires (expires_at)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS kampus (
+    id_kampus BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nama_kampus VARCHAR(200) NOT NULL,
+    alamat TEXT,
+    latitude DECIMAL(10,8) NOT NULL,
+    longitude DECIMAL(11,8) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS kos (
     id_kos BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
@@ -572,3 +583,63 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
         dan kos.status = 'ditolak'.
       - verifikasi_kos menyimpan riwayat pengajuan/verifikasi.
 */
+
+/* =========================================================
+   LAPORAN KOS - PELANGGAN & MODERASI ADMIN
+   Pelanggan dapat melaporkan informasi kos yang bermasalah.
+   Admin memeriksa dan menyelesaikan laporan.
+   ========================================================= */
+CREATE TABLE IF NOT EXISTS laporan_kos (
+    id_laporan BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    id_user BIGINT UNSIGNED NOT NULL,
+    id_kos BIGINT UNSIGNED NOT NULL,
+    id_admin BIGINT UNSIGNED NULL,
+
+    alasan ENUM(
+        'informasi_tidak_sesuai',
+        'foto_tidak_sesuai',
+        'kos_sudah_tidak_tersedia',
+        'informasi_menyesatkan',
+        'lainnya'
+    ) NOT NULL,
+
+    deskripsi TEXT NOT NULL,
+
+    status ENUM(
+        'menunggu',
+        'diproses',
+        'selesai',
+        'ditolak'
+    ) NOT NULL DEFAULT 'menunggu',
+
+    catatan_admin TEXT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_laporan_kos_user
+        FOREIGN KEY (id_user)
+        REFERENCES users(id_user)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_laporan_kos_kos
+        FOREIGN KEY (id_kos)
+        REFERENCES kos(id_kos)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    CONSTRAINT fk_laporan_kos_admin
+        FOREIGN KEY (id_admin)
+        REFERENCES users(id_user)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+
+    INDEX idx_laporan_kos_user (id_user),
+    INDEX idx_laporan_kos_kos (id_kos),
+    INDEX idx_laporan_kos_admin (id_admin),
+    INDEX idx_laporan_kos_status (status),
+    INDEX idx_laporan_kos_created (created_at)
+) ENGINE=InnoDB;

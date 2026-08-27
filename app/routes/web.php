@@ -20,7 +20,6 @@ get('/pemilik/kos/foto', 'PemilikController@fotoKos', ['auth', 'role:pemilik']);
 
 
 get('/pemilik/pembayaran', 'PemilikController@pembayaran', ['auth', 'role:pemilik']);
-get('/pemilik/laporan', 'PemilikController@laporan', ['auth', 'role:pemilik']);
 
 
 // Kelola penghuni
@@ -38,3 +37,10 @@ get('/cari-kos', 'UserController@search');
 get('/kos/{id}', 'UserController@detailKos');
 get('/user/favorit', 'UserController@favorit', ['auth', 'role:pelanggan']);
 get('/user/profil', 'UserController@profil', ['auth', 'role:pelanggan']);
+get('/user/laporan', 'UserController@laporan', ['auth', 'role:pelanggan']);
+
+// ADMIN
+get('/admin', 'AdminController@dashboard', ['auth', 'role:admin']);
+get('/admin/pengguna', 'AdminController@pengguna', ['auth', 'role:admin']);
+get('/admin/verifikasi', 'AdminController@verifikasi', ['auth', 'role:admin']);
+get('/admin/laporan', 'AdminController@laporan', ['auth', 'role:admin']);

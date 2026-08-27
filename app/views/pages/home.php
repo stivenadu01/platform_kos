@@ -20,7 +20,7 @@
             <input
               type="text"
               name="q"
-              placeholder="Contoh: STIKOM Uyelindo..."
+              placeholder="Contoh: Politeknik Negeri Kupang..."
               class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             >
           </div>
@@ -29,11 +29,69 @@
           </button>
         </form>
 
-        <div class="mt-5 flex flex-wrap gap-2 text-xs text-slate-500">
-          <span class="font-semibold text-slate-600">Cari berdasarkan:</span>
-          <a href="<?= BASE_URL ?>/cari-kos?jenis=putra" class="rounded-full border border-slate-200 px-3 py-1 hover:border-primary hover:text-primary">Putra</a>
-          <a href="<?= BASE_URL ?>/cari-kos?jenis=putri" class="rounded-full border border-slate-200 px-3 py-1 hover:border-primary hover:text-primary">Putri</a>
-          <a href="<?= BASE_URL ?>/cari-kos?kapasitas=2" class="rounded-full border border-slate-200 px-3 py-1 hover:border-primary hover:text-primary">2 orang</a>
+        <div class="mt-6">
+          <div class="flex items-center gap-2">
+            <span class="h-px flex-1 bg-slate-200"></span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Cari berdasarkan</span>
+            <span class="h-px flex-1 bg-slate-200"></span>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <?php
+            $kampusCari = [
+              [
+                'nama' => 'Politeknik Negeri Kupang',
+                'label' => 'Politeknik Negeri Kupang',
+                'lat' => -10.1513944,
+                'lng' => 123.6676240,
+              ],
+              [
+                'nama' => 'Universitas Nusa Cendana',
+                'label' => 'Undana',
+                'lat' => -10.1544480,
+                'lng' => 123.6588310,
+              ],
+              [
+                'nama' => 'Universitas Muhammadiyah Kupang',
+                'label' => 'Muhammadiyah',
+                'lat' => -10.1585622,
+                'lng' => 123.6197763,
+              ],
+              [
+                'nama' => 'Sekolah Tinggi Manajemen Informatika Komputer Uyelindo Kupang',
+                'label' => 'STIKOM',
+                'lat' => -10.1629100,
+                'lng' => 123.6238010,
+              ],
+              [
+                'nama' => 'Universitas Citra Bangsa',
+                'label' => 'UCB',
+                'lat' => -10.1626807,
+                'lng' => 123.6236238,
+              ],
+              [
+                'nama' => 'Poltekkes Kemenkes Kupang',
+                'label' => 'Poltekkes',
+                'lat' => -10.1581806,
+                'lng' => 123.6397611,
+              ],
+            ];
+            ?>
+            <?php foreach ($kampusCari as $kampus): ?>
+              <a
+                href="<?= BASE_URL ?>/cari-kos?lokasi=<?= urlencode($kampus['nama']) ?>&lat=<?= urlencode((string) $kampus['lat']) ?>&lng=<?= urlencode((string) $kampus['lng']) ?>"
+                class="group rounded-xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-primary hover:bg-primary-soft hover:shadow-sm"
+              >
+                <span class="flex items-start gap-2">
+                  <span class="mt-0.5 text-primary">⌖</span>
+                  <span class="min-w-0">
+                    <span class="block truncate text-xs font-semibold text-slate-800 group-hover:text-primary"><?= htmlspecialchars($kampus['label']) ?></span>
+                    <span class="mt-0.5 block text-[10px] text-slate-400">Cari kos di sekitarnya →</span>
+                  </span>
+                </span>
+              </a>
+            <?php endforeach; ?>
+          </div>
         </div>
 
         <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
@@ -55,8 +113,8 @@
             </div>
 
             <div class="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p class="text-xs text-slate-400">Lokasi tujuan</p>
-              <p class="mt-1 text-sm font-semibold text-slate-800">STIKOM Uyelindo</p>
+              <p class="text-xs text-slate-400">Contoh lokasi tujuan</p>
+              <p class="mt-1 text-sm font-semibold text-slate-800">Politeknik Negeri Kupang</p>
               <p class="mt-1 text-xs text-slate-500">Cari kos berdasarkan jarak dari lokasi pilihanmu.</p>
             </div>
 

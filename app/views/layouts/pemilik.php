@@ -23,7 +23,8 @@
   <script>
     window.BASE_URL = <?= json_encode(BASE_URL) ?>;
     window.NOMOR_WA = <?= json_encode($_ENV['NOMOR_WA'] ?? '') ?>;
-    window.__USER__ = <?= json_encode($_SESSION['user'] ?? null) ?>;
+    window.__USER__ = <?= json_encode($_SESSION['user'] ?? null, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    window.__CSRF_TOKEN__ = <?= json_encode(csrf_token()) ?>;
   </script>
 
   <!-- ALPINE -->

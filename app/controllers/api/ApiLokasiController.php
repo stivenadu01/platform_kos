@@ -2,14 +2,28 @@
 
 class ApiLokasiController
 {
+  public function __construct()
+  {
+    require_once ROOT_PATH . '/app/helpers/rate_limit_helper.php';
+  }
   public function search()
   {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    rateLimit('lokasi_' . $ip, 30, 60);
+
     $q = trim($_GET['q'] ?? '');
 
     if ($q === '' || mb_strlen($q) < 3) {
       response([
         'success' => false,
         'message' => 'Masukkan minimal 3 karakter untuk mencari lokasi.'
+      ], 422);
+    }
+
+    if (mb_strlen($q) > 100) {
+      response([
+        'success' => false,
+        'message' => 'Pencarian lokasi terlalu panjang.'
       ], 422);
     }
 

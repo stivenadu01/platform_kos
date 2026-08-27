@@ -131,7 +131,7 @@ function getUserList($page = 1, $limit = 10, $search = '', $role = '')
       role,
       email_verified_at,
       status,
-      tanggal_dibuat
+      created_at
     FROM users
     $whereSql
     ORDER BY id_user DESC
@@ -183,6 +183,10 @@ function tambahUser($data, $isRegister = false)
   $password = password_hash($passwordRaw, PASSWORD_DEFAULT);
 
   $role = $data['role'] ?? 'pelanggan';
+
+  if (!in_array($role, ['pelanggan', 'pemilik', 'admin'], true)) {
+    throw new Exception('Role pengguna tidak valid', 422);
+  }
 
 
   /*
@@ -306,7 +310,7 @@ function tambahUser($data, $isRegister = false)
   ");
 
   $stmt->bind_param(
-    "ssssss",
+    "sssssss",
     $nama,
     $email,
     $no_hp,

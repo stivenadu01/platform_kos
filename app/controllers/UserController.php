@@ -49,10 +49,36 @@ class UserController
 
   public function favorit()
   {
-    view('user/placeholder', [
-      'title' => 'Favorit',
-      'heading' => 'Kos Favorit',
-      'message' => 'Fitur favorit akan dibuat pada fase user flow berikutnya.'
+    $user = $_SESSION['user'] ?? null;
+    if (!$user || ($user['role'] ?? '') !== 'pelanggan') {
+      response([
+        'success' => false,
+        'message' => 'Akses hanya untuk pelanggan.'
+      ], 403);
+    }
+
+    view('user/favorit', [
+      'title' => 'Favorit - BetaKos'
+    ]);
+  }
+
+  public function laporan()
+  {
+    model('Kos');
+
+    $user = $_SESSION['user'] ?? null;
+    if (!$user || ($user['role'] ?? '') !== 'pelanggan') {
+      response([
+        'success' => false,
+        'message' => 'Akses hanya untuk pelanggan.'
+      ], 403);
+    }
+
+    $laporan = getLaporanKosByUser((int)$user['id_user']);
+
+    view('user/laporan', [
+      'title' => 'Laporan Saya - BetaKos',
+      'laporan' => $laporan
     ]);
   }
 

@@ -1,0 +1,4 @@
+"Pak/Bu, kami sedang membuat database kos di sekitar kampus Kupang. Kami bantu masukkan kos Bapak/Ibu ke platform secara gratis, termasuk foto, harga, fasilitas dan jumlah kamar. Jadi kalau mahasiswa mencari kos di sekitar sini, kos Bapak/Ibu bisa ditemukan."
+
+"Pak/Bu, saya sedang membuat platform untuk membantu pemilik kos mendapatkan calon penghuni sekaligus mengelola kamar dan penghuni. Saya bantu daftarkan kos Bapak/Ibu secara gratis."
+

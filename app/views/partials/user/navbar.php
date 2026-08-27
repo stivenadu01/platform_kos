@@ -27,6 +27,11 @@
           Favorit
         </a>
       </template>
+      <template x-if="$store.auth.user?.role === 'pelanggan'">
+        <a href="<?= BASE_URL ?>/user/laporan" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+          Laporan Saya
+        </a>
+      </template>
     </nav>
 
     <div class="hidden items-center gap-2 md:flex">
@@ -83,6 +88,11 @@
       <template x-if="$store.auth.isLoggedIn">
         <a @click="open = false" href="<?= BASE_URL ?>/user/favorit" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
           Favorit
+        </a>
+      </template>
+      <template x-if="$store.auth.user?.role === 'pelanggan'">
+        <a @click="open = false" href="<?= BASE_URL ?>/user/laporan" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Laporan Saya
         </a>
       </template>
 

@@ -79,3 +79,30 @@ post('/api/pemilik/tagihan/pembayaran', 'ApiTagihanController@payment', ['auth',
 get('/api/lokasi/search', 'ApiLokasiController@search');
 get('/api/kos/search', 'ApiKosSearchController@index');
 get('/api/kos/{id}', 'ApiKosSearchController@show');
+
+// =========================================================
+// ADMIN - MANAJEMEN PENGGUNA
+get('/api/admin/pengguna', 'ApiAdminController@userList', ['auth', 'role:admin']);
+post('/api/admin/pengguna', 'ApiAdminController@userCreate', ['auth', 'role:admin']);
+post('/api/admin/pengguna/verifikasi', 'ApiAdminController@userVerify', ['auth', 'role:admin']);
+post('/api/admin/pengguna/status', 'ApiAdminController@userStatus', ['auth', 'role:admin']);
+
+// ADMIN - VERIFIKASI KOS
+// =========================================================
+get('/api/admin/verifikasi', 'ApiAdminController@verificationList', ['auth', 'role:admin']);
+get('/api/admin/verifikasi/{id}', 'ApiAdminController@verificationShow', ['auth', 'role:admin']);
+post('/api/admin/verifikasi/keputusan', 'ApiAdminController@verificationDecision', ['auth', 'role:admin']);
+post('/api/pemilik/kos/ajukan-verifikasi', 'ApiAdminController@submitVerification', ['auth', 'role:pemilik']);
+
+// =========================================================
+// PELANGGAN - LAPORAN KOS
+// =========================================================
+post('/api/laporan/kos', 'ApiLaporanController@store', ['auth', 'role:pelanggan']);
+get('/api/laporan/kos/saya', 'ApiLaporanController@mine', ['auth', 'role:pelanggan']);
+
+// =========================================================
+// ADMIN - LAPORAN KOS
+// =========================================================
+get('/api/admin/laporan', 'ApiAdminLaporanController@index', ['auth', 'role:admin']);
+get('/api/admin/laporan/{id}', 'ApiAdminLaporanController@show', ['auth', 'role:admin']);
+post('/api/admin/laporan/keputusan', 'ApiAdminLaporanController@decision', ['auth', 'role:admin']);

@@ -206,7 +206,14 @@
             Alpine.store('ui').toast('Login berhasil', 'success');
 
             setTimeout(() => {
-              window.location.href = BASE_URL;
+              const role = res.data?.role || '';
+              if (role === 'admin') {
+                window.location.href = BASE_URL + '/admin';
+              } else if (role === 'pemilik') {
+                window.location.href = BASE_URL + '/pemilik';
+              } else {
+                window.location.href = BASE_URL;
+              }
             }, 700);
           }
         } catch (error) {

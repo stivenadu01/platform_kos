@@ -12,7 +12,8 @@ function db()
     $conn = new mysqli($host, $user, $pass, $name);
 
     if ($conn->connect_error) {
-      die("Koneksi gagal: " . $conn->connect_error);
+      error_log('Database connection failed: ' . $conn->connect_error);
+      throw new RuntimeException('Koneksi database gagal.');
     }
 
 

@@ -16,13 +16,25 @@ function getKosByPemilik($id_pemilik)
       k.status,
       k.created_at,
       k.updated_at,
+      vk.status AS status_verifikasi,
+      vk.catatan AS catatan_verifikasi,
+      vk.tanggal_verifikasi,
       COUNT(DISTINCT km.id_kamar) AS jumlah_kamar,
       COUNT(DISTINCT CASE WHEN km.status = 'tersedia' THEN km.id_kamar END) AS kamar_tersedia,
       COUNT(DISTINCT CASE WHEN km.status = 'terisi' THEN km.id_kamar END) AS kamar_terisi
     FROM kos k
     LEFT JOIN kamar km ON km.id_kos = k.id_kos
+    LEFT JOIN (
+      SELECT v.id_kos, v.status, v.catatan, v.tanggal_verifikasi
+      FROM verifikasi_kos v
+      INNER JOIN (
+        SELECT id_kos, MAX(id_verifikasi) AS id_verifikasi
+        FROM verifikasi_kos
+        GROUP BY id_kos
+      ) latest ON latest.id_verifikasi = v.id_verifikasi
+    ) vk ON vk.id_kos = k.id_kos
     WHERE k.id_pemilik = ?
-    GROUP BY k.id_kos
+    GROUP BY k.id_kos, vk.status, vk.catatan, vk.tanggal_verifikasi
     ORDER BY k.id_kos DESC
   ");
 
@@ -534,4 +546,71 @@ function getDetailKosPublik($id_kos)
   $stmt->close();
 
   return $kos;
+}
+
+/* =========================================================
+   LAPORAN KOS - PELANGGAN
+   ========================================================= */
+
+function buatLaporanKos($id_user, $id_kos, $alasan, $deskripsi)
+{
+  $conn = db();
+  $id_user = (int)$id_user;
+  $id_kos = (int)$id_kos;
+  $deskripsi = trim($deskripsi);
+
+  $allowed = [
+    'informasi_tidak_sesuai',
+    'foto_tidak_sesuai',
+    'kos_sudah_tidak_tersedia',
+    'informasi_menyesatkan',
+    'lainnya'
+  ];
+
+  if ($id_user <= 0 || $id_kos <= 0) throw new Exception('Data laporan tidak valid.', 422);
+  if (!in_array($alasan, $allowed, true)) throw new Exception('Alasan laporan tidak valid.', 422);
+  if (mb_strlen($deskripsi) < 10) throw new Exception('Jelaskan laporan minimal 10 karakter.', 422);
+  if (mb_strlen($deskripsi) > 2000) throw new Exception('Laporan maksimal 2000 karakter.', 422);
+
+  $stmt = $conn->prepare("SELECT id_kos FROM kos WHERE id_kos = ? LIMIT 1");
+  $stmt->bind_param('i', $id_kos);
+  $stmt->execute();
+  $kos = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+  if (!$kos) throw new Exception('Kos tidak ditemukan.', 404);
+
+  // Hindari spam laporan identik yang masih menunggu/diproses.
+  $stmt = $conn->prepare("SELECT id_laporan FROM laporan_kos WHERE id_user = ? AND id_kos = ? AND status IN ('menunggu', 'diproses') LIMIT 1");
+  $stmt->bind_param('ii', $id_user, $id_kos);
+  $stmt->execute();
+  $existing = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+  if ($existing) throw new Exception('Anda sudah memiliki laporan yang sedang diproses untuk kos ini.', 409);
+
+  $stmt = $conn->prepare("INSERT INTO laporan_kos (id_user, id_kos, alasan, deskripsi) VALUES (?, ?, ?, ?)");
+  $stmt->bind_param('iiss', $id_user, $id_kos, $alasan, $deskripsi);
+  if (!$stmt->execute()) {
+    $stmt->close();
+    throw new Exception('Gagal mengirim laporan.', 500);
+  }
+  $id = (int)$stmt->insert_id;
+  $stmt->close();
+  return $id;
+}
+
+function getLaporanKosByUser($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("
+    SELECT id_laporan, id_kos, alasan, deskripsi, status, catatan_admin, created_at, updated_at,
+           (SELECT nama_kos FROM kos WHERE kos.id_kos = laporan_kos.id_kos LIMIT 1) AS nama_kos
+    FROM laporan_kos
+    WHERE id_user = ?
+    ORDER BY id_laporan DESC
+  ");
+  $stmt->bind_param('i', $id_user);
+  $stmt->execute();
+  $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+  return $data;
 }
