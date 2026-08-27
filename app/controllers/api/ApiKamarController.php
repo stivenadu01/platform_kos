@@ -80,6 +80,66 @@ class ApiKamarController
     }
   }
 
+  public function harga()
+  {
+    try {
+      $id_kamar = (int) (query('id_kamar') ?? 0);
+
+      if (!$id_kamar || !findKamarByIdPemilik($id_kamar, $this->pemilikId())) {
+        response([
+          'success' => false,
+          'message' => 'Kamar tidak ditemukan.'
+        ], 404);
+        return;
+      }
+
+      response([
+        'success' => true,
+        'data' => getHargaKamarByKamar($id_kamar)
+      ]);
+    } catch (Throwable $e) {
+      response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], 500);
+    }
+  }
+
+  public function simpanHarga()
+  {
+    try {
+      $data = input();
+      $id_kamar = (int) ($data['id_kamar'] ?? 0);
+      $kamar = $id_kamar
+        ? findKamarByIdPemilik($id_kamar, $this->pemilikId())
+        : null;
+
+      if (!$kamar) {
+        response([
+          'success' => false,
+          'message' => 'Kamar tidak ditemukan.'
+        ], 404);
+        return;
+      }
+
+      saveHargaKamar(
+        $id_kamar,
+        $data['harga'] ?? [],
+        (int) $kamar['kapasitas']
+      );
+
+      response([
+        'success' => true,
+        'message' => 'Harga kamar berhasil disimpan.'
+      ]);
+    } catch (Throwable $e) {
+      response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], 422);
+    }
+  }
+
 
   public function kos()
   {
@@ -199,7 +259,7 @@ class ApiKamarController
       response([
         'success' => true,
         'message' =>
-        'Kamar dan harga berhasil diperbarui.'
+        'Data kamar berhasil diperbarui.'
       ]);
     } catch (Throwable $e) {
 

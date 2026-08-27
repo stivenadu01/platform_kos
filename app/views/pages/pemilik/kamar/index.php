@@ -302,6 +302,12 @@
                     Edit
                   </a>
 
+                  <a
+                    :href="BASE_URL + '/pemilik/kamar/harga?id_kamar=' + item.id_kamar"
+                    class="btn-secondary">
+                    Atur Harga
+                  </a>
+
                   <button
                     type="button"
                     @click="remove(item)"

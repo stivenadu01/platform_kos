@@ -150,6 +150,21 @@
         <div>
           <h3 class="text-lg font-bold text-slate-900" x-text="detail?.nomor_tagihan || 'Detail Tagihan'"></h3>
           <p class="text-sm text-slate-500" x-text="detail ? detail.nama_kos + ' • Kamar ' + detail.nomor_kamar : ''"></p>
+          <div
+            x-show="detail"
+            class="mt-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
+            <p class="text-xs font-medium uppercase tracking-wide text-blue-600">
+              Periode tagihan
+            </p>
+            <p
+              class="mt-1 text-base font-semibold text-blue-950"
+              x-text="detail ? formatDate(detail.tanggal_mulai) + ' - ' + formatDate(detail.tanggal_selesai) : ''">
+            </p>
+            <p
+              class="mt-1 text-xs text-blue-700"
+              x-text="detail ? 'Jatuh tempo ' + formatDate(detail.tanggal_jatuh_tempo) : ''">
+            </p>
+          </div>
         </div>
         <button type="button" @click="closeDetail()" class="text-slate-400 hover:text-slate-700 text-xl">×</button>
       </div>
@@ -215,7 +230,7 @@
                 <div class="p-4 flex items-center justify-between gap-4">
                   <div>
                     <p class="font-medium" x-text="item.nomor_pembayaran"></p>
-                    <p class="text-xs text-slate-500 mt-1" x-text="formatDateTime(item.tanggal_bayar) + ' • ' + item.metode"></p>
+                    <p class="text-xs text-slate-500 mt-1" x-text="(item.nama_penghuni || 'Penghuni') + ' • ' + formatDateTime(item.tanggal_bayar) + ' • ' + item.metode"></p>
                   </div>
                   <span class="font-semibold text-emerald-600" x-text="format(item.jumlah)"></span>
                 </div>
@@ -273,6 +288,10 @@
       <div>
         <h3 class="text-lg font-bold text-slate-900">Catat Pembayaran</h3>
         <p class="text-sm text-slate-500 mt-1" x-text="paymentTarget?.nomor_tagihan || ''"></p>
+        <p
+          class="text-xs text-slate-500 mt-1"
+          x-text="paymentTarget ? 'Periode ' + formatDate(paymentTarget.tanggal_mulai) + ' - ' + formatDate(paymentTarget.tanggal_selesai) : ''">
+        </p>
       </div>
       <div class="rounded-xl bg-slate-50 p-4">
         <div class="flex justify-between text-sm"><span>Total tagihan</span><strong x-text="format(paymentTarget?.total_tagihan || 0)"></strong></div>
@@ -283,9 +302,9 @@
         <input type="number" min="1" step="1" :max="paymentTarget?.sisa_tagihan" x-model.number="payment.jumlah" class="input" required>
       </div>
       <div class="form-group">
-        <label class="label">Penghuni</label>
-        <select x-model="payment.id_penghuni" class="input">
-          <option value="">Tidak ditentukan</option>
+        <label class="label">Penghuni <span class="text-red-500">*</span></label>
+        <select x-model="payment.id_penghuni" class="input" required>
+          <option value="">Pilih penghuni</option>
           <template x-for="item in (detail?.penghuni || [])" :key="item.id_penghuni">
             <option :value="item.id_penghuni" x-text="item.nama"></option>
           </template>
@@ -511,6 +530,11 @@
       },
 
       async submitPayment() {
+        if (!this.payment.id_penghuni) {
+          Alpine.store('ui').toast('Penghuni wajib dipilih agar pembayaran tercatat sebagai histori.', 'error');
+          return;
+        }
+
         this.saving = true;
         try {
           const date = this.payment.tanggal_bayar.replace('T', ' ') + ':00';

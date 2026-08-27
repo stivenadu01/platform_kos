@@ -360,20 +360,6 @@ function updateKamar($id_kamar, $data, $id_pemilik)
   }
 
 
-  /*
-   * Jika data harga dikirim dari form,
-   * sinkronkan konfigurasi harga.
-   */
-  if (array_key_exists('harga', $data)) {
-
-    saveHargaKamar(
-      $id_kamar,
-      $data['harga'],
-      $kapasitas,
-      $conn
-    );
-  }
-
   return true;
 }
 
