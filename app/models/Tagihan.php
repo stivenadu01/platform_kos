@@ -96,6 +96,39 @@ function getTagihanListByPemilik(
   return $data;
 }
 
+function getTagihanListByUser($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("SELECT DISTINCT t.id_tagihan, t.id_kamar, t.nomor_tagihan, t.tanggal_terbit, t.tanggal_mulai, t.tanggal_selesai, t.tanggal_jatuh_tempo, t.jumlah_orang, t.total_tagihan, t.total_dibayar, GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan, t.status, km.nomor_kamar, k.id_kos, k.nama_kos, u.nama AS nama_pemilik FROM tagihan t INNER JOIN tagihan_penghuni tp ON tp.id_tagihan = t.id_tagihan INNER JOIN penghuni p ON p.id_penghuni = tp.id_penghuni AND p.id_user = ? INNER JOIN kamar km ON km.id_kamar = t.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik ORDER BY t.tanggal_mulai DESC, t.tanggal_selesai DESC, t.id_tagihan DESC");
+  $stmt->bind_param('i', $id_user);
+  $stmt->execute();
+  $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+  return $data;
+}
+
+function findTagihanByIdUser($id_tagihan, $id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("SELECT DISTINCT t.id_tagihan, t.id_kamar, t.nomor_tagihan, t.tanggal_terbit, t.tanggal_mulai, t.tanggal_selesai, t.tanggal_jatuh_tempo, t.jumlah_orang, t.harga_dasar, t.total_penyesuaian, t.total_tagihan, t.total_dibayar, GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan, t.status, km.nomor_kamar, k.id_kos, k.nama_kos, u.nama AS nama_pemilik FROM tagihan t INNER JOIN tagihan_penghuni tp ON tp.id_tagihan = t.id_tagihan INNER JOIN penghuni p ON p.id_penghuni = tp.id_penghuni AND p.id_user = ? INNER JOIN kamar km ON km.id_kamar = t.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE t.id_tagihan = ? LIMIT 1");
+  $stmt->bind_param('ii', $id_user, $id_tagihan);
+  $stmt->execute();
+  $tagihan = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if (!$tagihan) {
+    return null;
+  }
+
+  $stmt = $conn->prepare("SELECT pb.id_pembayaran, pb.id_tagihan, pb.id_penghuni, pb.nomor_pembayaran, pb.jumlah, pb.tanggal_bayar, pb.metode, pb.status, pb.catatan, p.nama AS nama_penghuni FROM pembayaran pb INNER JOIN penghuni p ON p.id_penghuni = pb.id_penghuni WHERE pb.id_tagihan = ? AND p.id_user = ? ORDER BY pb.tanggal_bayar DESC, pb.id_pembayaran DESC");
+  $stmt->bind_param('ii', $id_tagihan, $id_user);
+  $stmt->execute();
+  $tagihan['pembayaran'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+
+  return $tagihan;
+}
+
 
 function findTagihanByIdPemilik($id_tagihan, $id_pemilik)
 {

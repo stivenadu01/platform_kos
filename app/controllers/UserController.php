@@ -90,4 +90,11 @@ class UserController
       'message' => 'Halaman profil mahasiswa akan dibuat pada fase berikutnya.'
     ]);
   }
+
+  public function riwayatKos()
+  {
+    view('user/riwayat-kos', [
+      'title' => 'Riwayat Kos Saya - BetaKos'
+    ]);
+  }
 }

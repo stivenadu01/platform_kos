@@ -192,6 +192,27 @@
 
           <div>
             <div class="flex items-center justify-between mb-3">
+              <h4 class="font-semibold text-slate-900">Penghuni pada Periode Ini</h4>
+              <span class="text-xs text-slate-500" x-text="detail.penghuni.length + ' penghuni'"></span>
+            </div>
+            <div class="divide-y border border-slate-200 rounded-xl">
+              <template x-if="detail.penghuni.length === 0">
+                <p class="p-4 text-sm text-slate-500">Belum ada penghuni yang terhubung ke periode ini.</p>
+              </template>
+              <template x-for="item in detail.penghuni" :key="item.id_penghuni">
+                <div class="p-4 flex items-center justify-between gap-4">
+                  <div>
+                    <p class="font-medium text-slate-900" x-text="item.nama"></p>
+                    <p class="text-xs text-slate-500 mt-1" x-text="item.tanggal_masuk + (item.tanggal_keluar ? ' - ' + item.tanggal_keluar : ' - masih tinggal')"></p>
+                  </div>
+                  <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : 'Keluar'"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-3">
               <h4 class="font-semibold text-slate-900">Penyesuaian Tagihan <span class="text-xs text-slate-500">(Tambahkan biaya atau potongan pada tagihan)</span></h4>
               <button
                 type="button"

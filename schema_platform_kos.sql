@@ -201,6 +201,33 @@ CREATE TABLE IF NOT EXISTS penghuni (
     INDEX idx_penghuni_user (id_user)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS claim_riwayat (
+    id_claim BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    id_penghuni BIGINT UNSIGNED NOT NULL,
+    id_user BIGINT UNSIGNED NOT NULL,
+    nik_diajukan VARCHAR(16) NOT NULL,
+
+    status ENUM(
+        'menunggu',
+        'disetujui',
+        'ditolak'
+    ) NOT NULL DEFAULT 'menunggu',
+
+    catatan_mahasiswa TEXT NULL,
+    catatan_pemilik TEXT NULL,
+    tanggal_pengajuan DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    tanggal_keputusan DATETIME NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT uq_claim_penghuni UNIQUE (id_penghuni),
+    INDEX idx_claim_user (id_user),
+    INDEX idx_claim_status (status)
+) ENGINE=InnoDB;
+
 /* =========================================================
    TAGIHAN
    Tidak menggunakan tabel periode_sewa.
@@ -556,6 +583,14 @@ ALTER TABLE penghuni
     ADD CONSTRAINT fk_penghuni_user
         FOREIGN KEY (id_user) REFERENCES users(id_user)
         ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE claim_riwayat
+    ADD CONSTRAINT fk_claim_penghuni
+        FOREIGN KEY (id_penghuni) REFERENCES penghuni(id_penghuni)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_claim_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE tagihan
     ADD CONSTRAINT fk_tagihan_kamar
