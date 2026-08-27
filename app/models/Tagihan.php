@@ -9,8 +9,7 @@ function getTagihanListByPemilik(
   $status = '',
   $id_kos = '',
   $id_kamar = ''
-)
-{
+) {
   $conn = db();
 
   $where = ['k.id_pemilik = ?'];
@@ -68,8 +67,9 @@ function getTagihanListByPemilik(
       k.nama_kos,
       (
         SELECT COUNT(*)
-        FROM penghuni p
-        WHERE p.id_kamar = t.id_kamar
+        FROM tagihan_penghuni tp
+        INNER JOIN penghuni p ON p.id_penghuni = tp.id_penghuni
+        WHERE tp.id_tagihan = t.id_tagihan
           AND p.status = 'aktif'
       ) AS penghuni_aktif
     FROM tagihan t
@@ -77,15 +77,9 @@ function getTagihanListByPemilik(
     INNER JOIN kos k ON k.id_kos = km.id_kos
     {$whereSql}
     ORDER BY
-      CASE t.status
-        WHEN 'belum_lunas' THEN 1
-        WHEN 'sebagian' THEN 2
-        WHEN 'lunas' THEN 3
-        WHEN 'dibatalkan' THEN 4
-        ELSE 5
-      END,
-      t.tanggal_jatuh_tempo ASC,
-      t.created_at DESC
+      t.tanggal_mulai DESC,
+      t.tanggal_selesai DESC,
+      t.id_tagihan DESC
   ";
 
   $stmt = $conn->prepare($sql);
@@ -229,13 +223,11 @@ function getPenghuniByTagihan($id_tagihan)
       p.tanggal_keluar,
       p.status
     FROM tagihan t
+    INNER JOIN tagihan_penghuni tp
+      ON tp.id_tagihan = t.id_tagihan
     INNER JOIN penghuni p
-      ON p.id_kamar = t.id_kamar
+      ON p.id_penghuni = tp.id_penghuni
     WHERE t.id_tagihan = ?
-      AND (
-        p.tanggal_masuk <= t.tanggal_selesai
-        AND (p.tanggal_keluar IS NULL OR p.tanggal_keluar >= t.tanggal_mulai)
-      )
     ORDER BY p.status ASC, p.nama ASC
   ");
 
@@ -419,6 +411,10 @@ function catatPembayaranTagihan($id_tagihan, $data, $id_pemilik)
   $tanggalBayar = trim($data['tanggal_bayar'] ?? date('Y-m-d H:i:s'));
   $catatan = trim($data['catatan'] ?? '');
 
+  if ($idPenghuni === null) {
+    throw new Exception('Penghuni wajib dipilih agar pembayaran tercatat sebagai histori.', 422);
+  }
+
   if ($jumlah <= 0) {
     throw new Exception('Jumlah pembayaran harus lebih besar dari 0.', 422);
   }
@@ -446,15 +442,17 @@ function catatPembayaranTagihan($id_tagihan, $data, $id_pemilik)
     $stmt = $conn->prepare("
       SELECT p.id_penghuni
       FROM penghuni p
+      INNER JOIN tagihan_penghuni tp
+        ON tp.id_penghuni = p.id_penghuni
       INNER JOIN kamar km ON km.id_kamar = p.id_kamar
       INNER JOIN kos k ON k.id_kos = km.id_kos
       WHERE p.id_penghuni = ?
-        AND p.id_kamar = ?
+        AND tp.id_tagihan = ?
         AND k.id_pemilik = ?
       LIMIT 1
     ");
 
-    $stmt->bind_param('iii', $idPenghuni, $tagihan['id_kamar'], $id_pemilik);
+    $stmt->bind_param('iii', $idPenghuni, $id_tagihan, $id_pemilik);
     $stmt->execute();
     $validPenghuni = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -475,16 +473,19 @@ function catatPembayaranTagihan($id_tagihan, $data, $id_pemilik)
   $conn->begin_transaction();
 
   try {
-    $stmt=$conn->prepare("SELECT * FROM tagihan WHERE id_tagihan=? LIMIT 1 FOR UPDATE");
-    $stmt->bind_param('i',$id_tagihan); $stmt->execute(); $tagihanTerkunci=$stmt->get_result()->fetch_assoc(); $stmt->close();
-    if(!$tagihanTerkunci) throw new Exception('Tagihan tidak ditemukan.',404);
-    if($tagihanTerkunci['status']==='dibatalkan') throw new Exception('Tagihan yang dibatalkan tidak dapat menerima pembayaran.',422);
-    $sisa=max((float)$tagihanTerkunci['total_tagihan']-(float)$tagihanTerkunci['total_dibayar'],0);
-    if($sisa<=0) throw new Exception('Tagihan sudah lunas.',422);
-    if($jumlah>$sisa) throw new Exception('Jumlah pembayaran melebihi sisa tagihan.',422);
-    $tagihan=$tagihanTerkunci;
-    $totalDibayarBaru=(float)$tagihan['total_dibayar']+$jumlah;
-    $statusBaru=$totalDibayarBaru >= (float)$tagihan['total_tagihan'] ? 'lunas' : 'sebagian';
+    $stmt = $conn->prepare("SELECT * FROM tagihan WHERE id_tagihan=? LIMIT 1 FOR UPDATE");
+    $stmt->bind_param('i', $id_tagihan);
+    $stmt->execute();
+    $tagihanTerkunci = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$tagihanTerkunci) throw new Exception('Tagihan tidak ditemukan.', 404);
+    if ($tagihanTerkunci['status'] === 'dibatalkan') throw new Exception('Tagihan yang dibatalkan tidak dapat menerima pembayaran.', 422);
+    $sisa = max((float)$tagihanTerkunci['total_tagihan'] - (float)$tagihanTerkunci['total_dibayar'], 0);
+    if ($sisa <= 0) throw new Exception('Tagihan sudah lunas.', 422);
+    if ($jumlah > $sisa) throw new Exception('Jumlah pembayaran melebihi sisa tagihan.', 422);
+    $tagihan = $tagihanTerkunci;
+    $totalDibayarBaru = (float)$tagihan['total_dibayar'] + $jumlah;
+    $statusBaru = $totalDibayarBaru >= (float)$tagihan['total_tagihan'] ? 'lunas' : 'sebagian';
 
     $stmt = $conn->prepare("
       INSERT INTO pembayaran (
@@ -775,6 +776,46 @@ function createTagihanCron(
   $harga,
   $conn
 ) {
+  $stmt = $conn->prepare("SELECT id_kamar FROM kamar WHERE id_kamar = ? FOR UPDATE");
+  $stmt->bind_param('i', $id_kamar);
+  $stmt->execute();
+  $kamarTerkunci = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if (!$kamarTerkunci) {
+    throw new Exception('Kamar tidak ditemukan saat membuat tagihan.');
+  }
+
+  $stmt = $conn->prepare("
+    SELECT id_tagihan
+    FROM tagihan
+    WHERE id_kamar = ?
+      AND tanggal_mulai = ?
+      AND tanggal_selesai = ?
+    LIMIT 1
+  ");
+  $stmt->bind_param(
+    'iss',
+    $id_kamar,
+    $tanggalMulai,
+    $tanggalSelesai
+  );
+  $stmt->execute();
+  $existing = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if ($existing) {
+    linkPenghuniTagihanUntukPeriode(
+      $existing['id_tagihan'],
+      $id_kamar,
+      $tanggalMulai,
+      $tanggalSelesai,
+      $conn
+    );
+
+    return (int) $existing['id_tagihan'];
+  }
+
   $nomor = generateNomorTagihan($conn);
 
   $stmt = $conn->prepare("
@@ -818,7 +859,17 @@ function createTagihanCron(
       );
     }
 
-    return $stmt->insert_id;
+    $idTagihan = $stmt->insert_id;
+
+    linkPenghuniTagihanUntukPeriode(
+      $idTagihan,
+      $id_kamar,
+      $tanggalMulai,
+      $tanggalSelesai,
+      $conn
+    );
+
+    return $idTagihan;
   } finally {
     $stmt->close();
   }
@@ -890,7 +941,7 @@ function generateTagihanBerikutnyaCron($tanggalHariIni = null)
       if ($jumlahOrang > (int) $kamar['kapasitas']) {
         throw new Exception(
           "Jumlah penghuni aktif ({$jumlahOrang}) " .
-          "melebihi kapasitas kamar ({$kamar['kapasitas']})."
+            "melebihi kapasitas kamar ({$kamar['kapasitas']})."
         );
       }
 
@@ -923,6 +974,17 @@ function generateTagihanBerikutnyaCron($tanggalHariIni = null)
           'id_kamar' => $idKamar,
           'aksi' => 'skip',
           'alasan' => 'Tagihan terakhir masih berjalan.',
+          'id_tagihan' => (int) $tagihanTerakhir['id_tagihan']
+        ];
+        continue;
+      }
+
+      if ($tagihanTerakhir['status'] !== 'lunas') {
+        $hasil['dilewati']++;
+        $hasil['detail'][] = [
+          'id_kamar' => $idKamar,
+          'aksi' => 'skip',
+          'alasan' => 'Tagihan terakhir belum lunas.',
           'id_tagihan' => (int) $tagihanTerakhir['id_tagihan']
         ];
         continue;
@@ -1034,4 +1096,3 @@ function generateTagihanBerikutnyaCron($tanggalHariIni = null)
 
   return $hasil;
 }
-

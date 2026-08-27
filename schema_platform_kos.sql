@@ -13,13 +13,9 @@ CREATE TABLE IF NOT EXISTS users (
     role ENUM('pelanggan', 'pemilik', 'admin') NOT NULL DEFAULT 'pelanggan',
     no_hp VARCHAR(30),
     foto VARCHAR(255),
-
-    /* Verifikasi akun pemilik/mahasiswa */
     email_verified_at DATETIME NULL,
-
     status ENUM('aktif', 'nonaktif', 'ditangguhkan')
         NOT NULL DEFAULT 'aktif',
-
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP
@@ -43,12 +39,6 @@ CREATE TABLE IF NOT EXISTS user_verification_tokens (
     used_at DATETIME NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_verification_token_user
-        FOREIGN KEY (id_user)
-        REFERENCES users(id_user)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
 
     INDEX idx_verification_token_user (id_user),
     INDEX idx_verification_token_expires (expires_at)
@@ -92,12 +82,6 @@ CREATE TABLE IF NOT EXISTS kos (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_kos_pemilik
-        FOREIGN KEY (id_pemilik)
-        REFERENCES users(id_user)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
     INDEX idx_kos_pemilik (id_pemilik),
     INDEX idx_kos_status (status),
     INDEX idx_kos_jenis (jenis)
@@ -126,12 +110,6 @@ CREATE TABLE IF NOT EXISTS kamar (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_kamar_kos
-        FOREIGN KEY (id_kos)
-        REFERENCES kos(id_kos)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
     CONSTRAINT uq_kamar_nomor
         UNIQUE (id_kos, nomor_kamar),
 
@@ -152,12 +130,6 @@ CREATE TABLE IF NOT EXISTS harga_kamar (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_harga_kamar
-        FOREIGN KEY (id_kamar)
-        REFERENCES kamar(id_kamar)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
 
     CONSTRAINT uq_harga_jumlah_orang
         UNIQUE (id_kamar, jumlah_orang),
@@ -183,19 +155,8 @@ CREATE TABLE IF NOT EXISTS kos_fasilitas (
     id_kos BIGINT UNSIGNED NOT NULL,
     id_fasilitas BIGINT UNSIGNED NOT NULL,
 
-    PRIMARY KEY (id_kos, id_fasilitas),
+    PRIMARY KEY (id_kos, id_fasilitas)
 
-    CONSTRAINT fk_kos_fasilitas_kos
-        FOREIGN KEY (id_kos)
-        REFERENCES kos(id_kos)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_kos_fasilitas_fasilitas
-        FOREIGN KEY (id_fasilitas)
-        REFERENCES fasilitas(id_fasilitas)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS kos_foto (
@@ -209,12 +170,6 @@ CREATE TABLE IF NOT EXISTS kos_foto (
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_kos_foto_kos
-        FOREIGN KEY (id_kos)
-        REFERENCES kos(id_kos)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
     INDEX idx_kos_foto_kos (id_kos)
 ) ENGINE=InnoDB;
 
@@ -227,7 +182,7 @@ CREATE TABLE IF NOT EXISTS penghuni (
 
     nama VARCHAR(150) NOT NULL,
     no_hp VARCHAR(30),
-    nik VARCHAR(16) UNIQUE,
+    nik VARCHAR(16),
 
     tanggal_masuk DATE NOT NULL,
     tanggal_keluar DATE NULL,
@@ -240,18 +195,6 @@ CREATE TABLE IF NOT EXISTS penghuni (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_penghuni_kamar
-        FOREIGN KEY (id_kamar)
-        REFERENCES kamar(id_kamar)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_penghuni_user
-        FOREIGN KEY (id_user)
-        REFERENCES users(id_user)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
 
     INDEX idx_penghuni_kamar (id_kamar),
     INDEX idx_penghuni_status (status),
@@ -301,12 +244,6 @@ CREATE TABLE IF NOT EXISTS tagihan (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_tagihan_kamar
-        FOREIGN KEY (id_kamar)
-        REFERENCES kamar(id_kamar)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
     CONSTRAINT chk_tagihan_tanggal
         CHECK (tanggal_selesai >= tanggal_mulai),
 
@@ -349,6 +286,16 @@ CREATE TABLE IF NOT EXISTS tagihan (
    total tagihan menjadi Rp922.000.
    ========================================================= */
 
+CREATE TABLE IF NOT EXISTS tagihan_penghuni (
+    id_tagihan_penghuni BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_tagihan BIGINT UNSIGNED NOT NULL,
+    id_penghuni BIGINT UNSIGNED NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tagihan_penghuni UNIQUE (id_tagihan, id_penghuni),
+    INDEX idx_tagihan_penghuni_tagihan (id_tagihan),
+    INDEX idx_tagihan_penghuni_penghuni (id_penghuni)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS penyesuaian_tagihan (
     id_penyesuaian BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
@@ -368,18 +315,6 @@ CREATE TABLE IF NOT EXISTS penyesuaian_tagihan (
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_penyesuaian_tagihan
-        FOREIGN KEY (id_tagihan)
-        REFERENCES tagihan(id_tagihan)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_penyesuaian_penghuni
-        FOREIGN KEY (id_penghuni)
-        REFERENCES penghuni(id_penghuni)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
     CONSTRAINT chk_penyesuaian_jumlah
         CHECK (jumlah > 0),
 
@@ -398,7 +333,7 @@ CREATE TABLE IF NOT EXISTS pembayaran (
     id_pembayaran BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     id_tagihan BIGINT UNSIGNED NOT NULL,
-    id_penghuni BIGINT UNSIGNED NULL,
+    id_penghuni BIGINT UNSIGNED NOT NULL,
     id_user BIGINT UNSIGNED NULL,
 
     nomor_pembayaran VARCHAR(50) NOT NULL UNIQUE,
@@ -425,24 +360,6 @@ CREATE TABLE IF NOT EXISTS pembayaran (
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_pembayaran_tagihan
-        FOREIGN KEY (id_tagihan)
-        REFERENCES tagihan(id_tagihan)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_pembayaran_penghuni
-        FOREIGN KEY (id_penghuni)
-        REFERENCES penghuni(id_penghuni)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_pembayaran_user
-        FOREIGN KEY (id_user)
-        REFERENCES users(id_user)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
     CONSTRAINT chk_pembayaran_jumlah
         CHECK (jumlah > 0),
 
@@ -458,18 +375,6 @@ CREATE TABLE IF NOT EXISTS favorit (
     id_kos BIGINT UNSIGNED NOT NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_favorit_user
-        FOREIGN KEY (id_user)
-        REFERENCES users(id_user)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_favorit_kos
-        FOREIGN KEY (id_kos)
-        REFERENCES kos(id_kos)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
 
     CONSTRAINT uq_favorit
         UNIQUE (id_user, id_kos)
@@ -494,18 +399,6 @@ CREATE TABLE IF NOT EXISTS verifikasi_kos (
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_verifikasi_kos
-        FOREIGN KEY (id_kos)
-        REFERENCES kos(id_kos)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_verifikasi_admin
-        FOREIGN KEY (id_admin)
-        REFERENCES users(id_user)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
     INDEX idx_verifikasi_kos (id_kos),
     INDEX idx_verifikasi_admin (id_admin),
     INDEX idx_verifikasi_status (status),
@@ -529,12 +422,6 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
     used_at DATETIME NULL,
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_password_reset_user
-        FOREIGN KEY (id_user)
-        REFERENCES users(id_user)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
 
     INDEX idx_password_reset_user (id_user),
     INDEX idx_password_reset_expires (expires_at)
@@ -566,6 +453,9 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 
    4. Tagihan otomatis:
       - saat penghuni pertama masuk, sistem membuat tagihan pertama.
+        - tagihan terhubung ke penghuni melalui tagihan_penghuni.
+        - tagihan bersama tetap dipertahankan jika salah satu penghuni dihapus.
+        - tagihan eksklusif yang belum dibayar dapat dihapus bersama penghuni.
       - tanggal_mulai dan tanggal_selesai disimpan langsung pada tagihan.
       - saat penghuni tambahan masuk di tengah periode, harga_dasar
         tagihan lama tidak diubah; sistem hanya membuat penyesuaian.
@@ -619,27 +509,114 @@ CREATE TABLE IF NOT EXISTS laporan_kos (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_laporan_kos_user
-        FOREIGN KEY (id_user)
-        REFERENCES users(id_user)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_laporan_kos_kos
-        FOREIGN KEY (id_kos)
-        REFERENCES kos(id_kos)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-
-    CONSTRAINT fk_laporan_kos_admin
-        FOREIGN KEY (id_admin)
-        REFERENCES users(id_user)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE,
-
     INDEX idx_laporan_kos_user (id_user),
     INDEX idx_laporan_kos_kos (id_kos),
     INDEX idx_laporan_kos_admin (id_admin),
     INDEX idx_laporan_kos_status (status),
     INDEX idx_laporan_kos_created (created_at)
 ) ENGINE=InnoDB;
+
+ALTER TABLE user_verification_tokens
+    ADD CONSTRAINT fk_verification_token_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE kos
+    ADD CONSTRAINT fk_kos_pemilik
+        FOREIGN KEY (id_pemilik) REFERENCES users(id_user)
+        ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE kamar
+    ADD CONSTRAINT fk_kamar_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE harga_kamar
+    ADD CONSTRAINT fk_harga_kamar
+        FOREIGN KEY (id_kamar) REFERENCES kamar(id_kamar)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE kos_fasilitas
+    ADD CONSTRAINT fk_kos_fasilitas_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_kos_fasilitas_fasilitas
+        FOREIGN KEY (id_fasilitas) REFERENCES fasilitas(id_fasilitas)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE kos_foto
+    ADD CONSTRAINT fk_kos_foto_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE penghuni
+    ADD CONSTRAINT fk_penghuni_kamar
+        FOREIGN KEY (id_kamar) REFERENCES kamar(id_kamar)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_penghuni_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE tagihan
+    ADD CONSTRAINT fk_tagihan_kamar
+        FOREIGN KEY (id_kamar) REFERENCES kamar(id_kamar)
+        ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE tagihan_penghuni
+    ADD CONSTRAINT fk_tagihan_penghuni_tagihan
+        FOREIGN KEY (id_tagihan) REFERENCES tagihan(id_tagihan)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_tagihan_penghuni_penghuni
+        FOREIGN KEY (id_penghuni) REFERENCES penghuni(id_penghuni)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE penyesuaian_tagihan
+    ADD CONSTRAINT fk_penyesuaian_tagihan
+        FOREIGN KEY (id_tagihan) REFERENCES tagihan(id_tagihan)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_penyesuaian_penghuni
+        FOREIGN KEY (id_penghuni) REFERENCES penghuni(id_penghuni)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE pembayaran
+    ADD CONSTRAINT fk_pembayaran_tagihan
+        FOREIGN KEY (id_tagihan) REFERENCES tagihan(id_tagihan)
+        ON DELETE RESTRICT ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_pembayaran_penghuni
+        FOREIGN KEY (id_penghuni) REFERENCES penghuni(id_penghuni)
+        ON DELETE SET NULL ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_pembayaran_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE favorit
+    ADD CONSTRAINT fk_favorit_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_favorit_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE verifikasi_kos
+    ADD CONSTRAINT fk_verifikasi_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_verifikasi_admin
+        FOREIGN KEY (id_admin) REFERENCES users(id_user)
+        ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE password_reset_tokens
+    ADD CONSTRAINT fk_password_reset_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE laporan_kos
+    ADD CONSTRAINT fk_laporan_kos_user
+        FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_laporan_kos_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_laporan_kos_admin
+        FOREIGN KEY (id_admin) REFERENCES users(id_user)
+        ON DELETE SET NULL ON UPDATE CASCADE;

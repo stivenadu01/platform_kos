@@ -52,6 +52,37 @@ class ApiPenghuniController
     }
   }
 
+  public function userByNik()
+  {
+    try {
+      $nik = trim(query('nik') ?? '');
+
+      if (!preg_match('/^\d{16}$/', $nik)) {
+        response([
+          'success' => false,
+          'message' => 'NIK harus terdiri dari 16 digit.'
+        ], 422);
+        return;
+      }
+
+      $user = findUserByNikForPenghuni($nik);
+
+      response([
+        'success' => true,
+        'found' => (bool) $user,
+        'data' => $user ? [
+          'nama' => $user['nama'],
+          'no_hp' => $user['no_hp']
+        ] : null
+      ]);
+    } catch (Throwable $e) {
+      response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], 500);
+    }
+  }
+
   public function show()
   {
     try {

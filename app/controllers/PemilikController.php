@@ -157,6 +157,14 @@ class PemilikController
       'layout' => 'pemilik'
     ]);
   }
+
+  public function hargaKamar()
+  {
+    view('pemilik/kamar/harga', [
+      'title' => 'Atur Harga Kamar',
+      'layout' => 'pemilik'
+    ]);
+  }
   public function penghuni()
   {
     view('pemilik/penghuni/index', [
@@ -182,5 +190,4 @@ class PemilikController
       'mode' => 'edit'
     ]);
   }
-
 }

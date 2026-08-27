@@ -45,6 +45,7 @@ delete('/api/pemilik/kos/foto/{id_kos}/{id_foto}', 'ApiFotoController@destroy', 
 // =========================================================
 get('/api/pemilik/penghuni', 'ApiPenghuniController@index', ['auth', 'role:pemilik']);
 get('/api/pemilik/penghuni/kamar', 'ApiPenghuniController@kamar', ['auth', 'role:pemilik']);
+get('/api/pemilik/penghuni/user-by-nik', 'ApiPenghuniController@userByNik', ['auth', 'role:pemilik']);
 get('/api/pemilik/penghuni/show', 'ApiPenghuniController@show', ['auth', 'role:pemilik']);
 post('/api/pemilik/penghuni', 'ApiPenghuniController@store', ['auth', 'role:pemilik']);
 put('/api/pemilik/penghuni', 'ApiPenghuniController@update', ['auth', 'role:pemilik']);
@@ -57,9 +58,11 @@ delete('/api/pemilik/penghuni', 'ApiPenghuniController@destroy', ['auth', 'role:
 // =========================================================
 get('/api/pemilik/kamar', 'ApiKamarController@index', ['auth', 'role:pemilik']);
 get('/api/pemilik/kamar/show', 'ApiKamarController@show', ['auth', 'role:pemilik']);
+get('/api/pemilik/kamar/harga', 'ApiKamarController@harga', ['auth', 'role:pemilik']);
 get('/api/pemilik/kamar/kos', 'ApiKamarController@kos', ['auth', 'role:pemilik']);
 post('/api/pemilik/kamar', 'ApiKamarController@store', ['auth', 'role:pemilik']);
 put('/api/pemilik/kamar', 'ApiKamarController@update', ['auth', 'role:pemilik']);
+put('/api/pemilik/kamar/harga', 'ApiKamarController@simpanHarga', ['auth', 'role:pemilik']);
 delete('/api/pemilik/kamar', 'ApiKamarController@destroy', ['auth', 'role:pemilik']);
 put('/api/pemilik/kamar/status', 'ApiKamarController@status', ['auth', 'role:pemilik']);
 

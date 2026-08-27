@@ -215,6 +215,10 @@
             </th>
 
             <th class="text-left px-5 py-3 font-semibold">
+              Tanggal Keluar
+            </th>
+
+            <th class="text-left px-5 py-3 font-semibold">
               Status
             </th>
 
@@ -279,6 +283,24 @@
               <td
                 class="px-5 py-4 text-slate-600"
                 x-text="formatDate(item.tanggal_masuk)">
+              </td>
+
+              <!-- TANGGAL KELUAR -->
+              <td class="px-5 py-4">
+
+                <template x-if="item.tanggal_keluar">
+                  <span
+                    class="text-slate-600"
+                    x-text="formatDate(item.tanggal_keluar)">
+                  </span>
+                </template>
+
+                <template x-if="!item.tanggal_keluar">
+                  <span class="text-slate-400">
+                    -
+                  </span>
+                </template>
+
               </td>
 
 

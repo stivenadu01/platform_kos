@@ -146,7 +146,11 @@
     </div>
 
     <!-- HARGA KAMAR -->
-    <div class="border-t border-slate-200 pt-6">
+    <div
+      x-show="false"
+      x-ignore
+      style="display: none"
+      class="border-t border-slate-200 pt-6">
 
       <div class="flex items-start justify-between gap-4 mb-4">
 
@@ -430,16 +434,7 @@
 
               kapasitas: Number(data.kapasitas) || 1,
 
-              deskripsi: data.deskripsi || '',
-
-              harga: Array.isArray(data.harga) ?
-                data.harga.map(item => ({
-                  id_harga: Number(item.id_harga),
-
-                  jumlah_orang: Number(item.jumlah_orang),
-
-                  harga_total: Number(item.harga_total)
-                })) : []
+              deskripsi: data.deskripsi || ''
 
             };
 
@@ -460,133 +455,6 @@
           this.loadingData = false;
 
         }
-
-      },
-
-
-      /*
-       * Daftar jumlah orang yang belum
-       * digunakan oleh baris harga lain.
-       */
-      availableJumlahOrang(index) {
-
-        const used =
-          this.form.harga
-          .filter((_, i) => i !== index)
-          .map(item =>
-            Number(item.jumlah_orang)
-          );
-
-
-        const result = [];
-
-
-        for (
-          let i = 1; i <= Number(this.form.kapasitas); i++
-        ) {
-
-          if (!used.includes(i)) {
-            result.push(i);
-          }
-
-        }
-
-
-        /*
-         * Pastikan nilai yang sedang dipilih
-         * tetap tersedia.
-         */
-        const current =
-          Number(
-            this.form.harga[index]?.jumlah_orang
-          );
-
-
-        if (
-          current >= 1 &&
-          current <= Number(this.form.kapasitas) &&
-          !result.includes(current)
-        ) {
-
-          result.push(current);
-
-          result.sort((a, b) => a - b);
-
-        }
-
-
-        return result;
-
-      },
-
-
-      addHarga() {
-
-        if (
-          this.form.harga.length >=
-          Number(this.form.kapasitas)
-        ) {
-
-          Alpine.store('ui').toast(
-            'Jumlah harga sudah mencapai kapasitas kamar.',
-            'warning'
-          );
-
-          return;
-        }
-
-
-        const used =
-          this.form.harga.map(item =>
-            Number(item.jumlah_orang)
-          );
-
-
-        let jumlah = 1;
-
-
-        while (
-          used.includes(jumlah) &&
-          jumlah <= Number(this.form.kapasitas)
-        ) {
-
-          jumlah++;
-
-        }
-
-
-        if (
-          jumlah >
-          Number(this.form.kapasitas)
-        ) {
-
-          Alpine.store('ui').toast(
-            'Tidak ada jumlah orang yang tersedia.',
-            'warning'
-          );
-
-          return;
-
-        }
-
-
-        this.form.harga.push({
-
-          jumlah_orang: jumlah,
-
-          harga_total: ''
-
-        });
-
-      },
-
-
-      removeHarga(index) {
-
-        this.form.harga.splice(
-          index,
-          1
-        );
 
       },
 
@@ -612,53 +480,6 @@
         }
 
 
-        /*
-         * Validasi harga.
-         */
-        for (
-          const item of this.form.harga
-        ) {
-
-          const jumlah =
-            Number(item.jumlah_orang);
-
-          const harga =
-            Number(item.harga_total);
-
-
-          if (
-            jumlah < 1 ||
-            jumlah > Number(this.form.kapasitas)
-          ) {
-
-            Alpine.store('ui').toast(
-              'Jumlah orang pada harga tidak valid.',
-              'warning'
-            );
-
-            return;
-
-          }
-
-
-          if (
-            item.harga_total === '' ||
-            !Number.isFinite(harga) ||
-            harga < 0
-          ) {
-
-            Alpine.store('ui').toast(
-              'Harga kamar harus berupa angka yang valid.',
-              'warning'
-            );
-
-            return;
-
-          }
-
-        }
-
-
         this.saving = true;
 
 
@@ -677,22 +498,14 @@
 
               kapasitas: this.form.kapasitas,
 
-              deskripsi: this.form.deskripsi,
-
-              harga: this.form.harga.map(item => ({
-
-                jumlah_orang: Number(item.jumlah_orang),
-
-                harga_total: Number(item.harga_total)
-
-              }))
+              deskripsi: this.form.deskripsi
 
             }
           );
 
 
           Alpine.store('ui').toast(
-            'Kamar dan harga berhasil diperbarui.',
+            'Data kamar berhasil diperbarui.',
             'success'
           );
 

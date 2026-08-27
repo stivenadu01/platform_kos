@@ -31,6 +31,7 @@ get('/pemilik/penghuni/edit', 'PemilikController@editPenghuni', ['auth', 'role:p
 get('/pemilik/kamar', 'PemilikController@kamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/tambah', 'PemilikController@tambahKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/edit', 'PemilikController@editKamar', ['auth', 'role:pemilik']);
+get('/pemilik/kamar/harga', 'PemilikController@hargaKamar', ['auth', 'role:pemilik']);
 
 // USER FLOW (placeholder routes — implementation dilanjutkan pada fase berikutnya)
 get('/cari-kos', 'UserController@search');
