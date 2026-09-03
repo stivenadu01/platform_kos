@@ -144,9 +144,12 @@ class PemilikController
 
   public function tambahKamar()
   {
+    $mode = query('mode') === 'bulk' ? 'bulk' : 'single';
+
     view('pemilik/kamar/tambah', [
-      'title' => 'Tambah Kamar',
-      'layout' => 'pemilik'
+      'title' => $mode === 'bulk' ? 'Tambah Banyak Kamar' : 'Tambah Satu Kamar',
+      'layout' => 'pemilik',
+      'mode' => $mode
     ]);
   }
 
@@ -162,6 +165,30 @@ class PemilikController
   {
     view('pemilik/kamar/harga', [
       'title' => 'Atur Harga Kamar',
+      'layout' => 'pemilik'
+    ]);
+  }
+
+  public function tipeKamar()
+  {
+    view('pemilik/tipe-kamar/index', [
+      'title' => 'Tipe Kamar',
+      'layout' => 'pemilik'
+    ]);
+  }
+
+  public function tambahTipeKamar()
+  {
+    view('pemilik/tipe-kamar/form', [
+      'title' => 'Tambah Tipe Kamar',
+      'layout' => 'pemilik'
+    ]);
+  }
+
+  public function editTipeKamar()
+  {
+    view('pemilik/tipe-kamar/form', [
+      'title' => 'Edit Tipe Kamar',
       'layout' => 'pemilik'
     ]);
   }

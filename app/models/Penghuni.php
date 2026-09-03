@@ -62,11 +62,12 @@ function getPenghuniListByPemilik(
       p.status,
       km.id_kos,
       km.nomor_kamar,
-      km.tipe_kamar,
-      km.kapasitas,
+      tk.nama_tipe AS tipe_kamar,
+      tk.kapasitas,
       k.nama_kos
     FROM penghuni p
     INNER JOIN kamar km ON km.id_kamar = p.id_kamar
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
     {$whereSql}
     ORDER BY
@@ -100,8 +101,8 @@ function getKamarListForPenghuni($id_pemilik)
       km.id_kamar,
       km.id_kos,
       km.nomor_kamar,
-      km.tipe_kamar,
-      km.kapasitas,
+      tk.nama_tipe AS tipe_kamar,
+      tk.kapasitas,
       km.status,
       k.nama_kos,
       (
@@ -111,6 +112,7 @@ function getKamarListForPenghuni($id_pemilik)
           AND p.status = 'aktif'
       ) AS jumlah_penghuni
     FROM kamar km
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
     WHERE k.id_pemilik = ?
       AND km.status <> 'nonaktif'
@@ -141,11 +143,12 @@ function findPenghuniByIdPemilik($id_penghuni, $id_pemilik)
       p.*,
       km.id_kos,
       km.nomor_kamar,
-      km.tipe_kamar,
-      km.kapasitas,
+      tk.nama_tipe AS tipe_kamar,
+      tk.kapasitas,
       k.nama_kos
     FROM penghuni p
     INNER JOIN kamar km ON km.id_kamar = p.id_kamar
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
     WHERE p.id_penghuni = ?
       AND k.id_pemilik = ?
@@ -279,8 +282,9 @@ function getHargaKamarUntukJumlah($id_kamar, $jumlah_orang, $conn = null)
 
   $stmt = $conn->prepare("
     SELECT harga_total
-    FROM harga_kamar
-    WHERE id_kamar = ?
+    FROM harga_kamar hk
+    INNER JOIN kamar km ON km.id_tipe_kamar = hk.id_tipe_kamar
+    WHERE km.id_kamar = ?
       AND jumlah_orang = ?
     LIMIT 1
   ");
@@ -733,10 +737,11 @@ function createPenghuni($data, $id_pemilik)
     SELECT
       km.id_kamar,
       km.id_kos,
-      km.kapasitas,
+      tk.kapasitas,
       km.status,
       k.nama_kos
     FROM kamar km
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
     WHERE km.id_kamar = ?
       AND k.id_pemilik = ?
@@ -795,6 +800,20 @@ function createPenghuni($data, $id_pemilik)
 
   $user = findUserByNikForPenghuni($data['nik'], $conn);
   $id_user = $user ? (int) $user['id_user'] : null;
+
+  /*
+   * Jika NIK cocok dengan akun pelanggan aktif, identitas penghuni
+   * harus berasal dari akun tersebut. Pemilik kos hanya memilih NIK;
+   * nama dan nomor HP bukan data yang boleh diubah oleh pemilik.
+   *
+   * Jika NIK tidak ditemukan, penghuni dianggap belum memiliki akun
+   * sehingga data identitas yang diinput pemilik tetap digunakan.
+   */
+  if ($user) {
+    $data['nama'] = $user['nama'];
+    $data['no_hp'] = $user['no_hp'];
+    $data['nik'] = $data['nik'];
+  }
 
   /*
    * Untuk penghuni tambahan, pastikan harga jumlah baru ada
@@ -1072,6 +1091,15 @@ function updatePenghuni($id_penghuni, $data, $id_pemilik)
 
   if (!$existing) {
     throw new Exception('Penghuni tidak ditemukan.');
+  }
+
+  /*
+   * Penghuni yang sudah terhubung ke akun pelanggan bukan milik
+   * pemilik kos untuk diedit identitasnya. UI akan mengunci field,
+   * tetapi aturan ini juga wajib ditegakkan di backend.
+   */
+  if (!empty($existing['id_user'])) {
+    return true;
   }
 
   $nama = trim($data['nama'] ?? '');

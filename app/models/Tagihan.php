@@ -62,7 +62,7 @@ function getTagihanListByPemilik(
       GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan,
       t.status,
       km.nomor_kamar,
-      km.tipe_kamar,
+      tk.nama_tipe AS tipe_kamar,
       k.id_kos,
       k.nama_kos,
       (
@@ -74,6 +74,7 @@ function getTagihanListByPemilik(
       ) AS penghuni_aktif
     FROM tagihan t
     INNER JOIN kamar km ON km.id_kamar = t.id_kamar
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
     {$whereSql}
     ORDER BY
@@ -139,12 +140,13 @@ function findTagihanByIdPemilik($id_tagihan, $id_pemilik)
       t.*,
       GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan,
       km.nomor_kamar,
-      km.tipe_kamar,
+      tk.nama_tipe AS tipe_kamar,
       k.id_kos,
       k.nama_kos,
       k.id_pemilik
     FROM tagihan t
     INNER JOIN kamar km ON km.id_kamar = t.id_kamar
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
     WHERE t.id_tagihan = ?
       AND k.id_pemilik = ?
@@ -714,8 +716,9 @@ function getKamarUntukCronTagihan($conn)
   $stmt = $conn->prepare("
     SELECT
       km.id_kamar,
-      km.kapasitas
+      tk.kapasitas
     FROM kamar km
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     WHERE km.status <> 'nonaktif'
     ORDER BY km.id_kamar ASC
   ");

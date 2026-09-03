@@ -128,9 +128,11 @@ function getAdminVerifikasiDetail($id_verifikasi)
   if (!$kos) return null;
 
   $stmt = $conn->prepare("
-    SELECT id_kamar, nomor_kamar, tipe_kamar, kapasitas, status, deskripsi
-    FROM kamar
-    WHERE id_kos = ?
+    SELECT km.id_kamar, km.nomor_kamar, km.id_tipe_kamar,
+      tk.nama_tipe AS tipe_kamar, tk.kapasitas, km.status, km.deskripsi
+    FROM kamar km
+    INNER JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
+    WHERE km.id_kos = ?
     ORDER BY nomor_kamar ASC, id_kamar ASC
   ");
   $stmt->bind_param('i', $kos['id_kos']);
@@ -139,8 +141,8 @@ function getAdminVerifikasiDetail($id_verifikasi)
   $stmt->close();
 
   foreach ($kamar as &$item) {
-    $stmt = $conn->prepare("SELECT jumlah_orang, harga_total FROM harga_kamar WHERE id_kamar = ? ORDER BY jumlah_orang ASC");
-    $stmt->bind_param('i', $item['id_kamar']);
+    $stmt = $conn->prepare("SELECT jumlah_orang, harga_total FROM harga_kamar WHERE id_tipe_kamar = ? ORDER BY jumlah_orang ASC");
+    $stmt->bind_param('i', $item['id_tipe_kamar']);
     $stmt->execute();
     $item['harga'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     $stmt->close();

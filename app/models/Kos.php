@@ -1,5 +1,7 @@
 <?php
 
+require_once ROOT_PATH . '/app/models/TipeKamar.php';
+
 function getKosByPemilik($id_pemilik)
 {
   $conn = db();
@@ -217,7 +219,8 @@ function getKosUnggulanUntukHome($limit = 6)
       MIN(hk.harga_total) AS harga_mulai
     FROM kos k
     LEFT JOIN kamar km ON km.id_kos = k.id_kos
-    LEFT JOIN harga_kamar hk ON hk.id_kamar = km.id_kamar
+    LEFT JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
+    LEFT JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     WHERE k.status = 'aktif'
     GROUP BY k.id_kos
     HAVING kamar_tersedia > 0
@@ -328,7 +331,7 @@ function searchKosPublik($filters = [])
     // Kapasitas yang dipilih menentukan harga yang relevan.
     // Contoh: filter 2 orang harus mengambil harga jumlah_orang = 2,
     // bukan harga termurah untuk 1 orang.
-    $where[] = 'km.kapasitas >= ?';
+    $where[] = 'tk.kapasitas >= ?';
     $params[] = $kapasitas;
     $types .= 'i';
 
@@ -373,7 +376,8 @@ function searchKosPublik($filters = [])
     SELECT COUNT(DISTINCT k.id_kos) AS total
     FROM kos k
     JOIN kamar km ON km.id_kos = k.id_kos
-    JOIN harga_kamar hk ON hk.id_kamar = km.id_kamar
+    JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
+    JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     $locationJoin
     WHERE $whereSql $distanceWhere
   ";
@@ -409,8 +413,9 @@ function searchKosPublik($filters = [])
       k.jenis,
       k.deskripsi,
       MIN(hk.harga_total) AS harga_mulai,
-      MIN(km.kapasitas) AS kapasitas_min,
+      MIN(tk.kapasitas) AS kapasitas_min,
       COUNT(DISTINCT km.id_kamar) AS kamar_tersedia,
+      GROUP_CONCAT(DISTINCT tk.nama_tipe ORDER BY tk.nama_tipe SEPARATOR ', ') AS tipe_kamar,
       $distanceSelect,
       (
         SELECT f.nama_file
@@ -421,7 +426,8 @@ function searchKosPublik($filters = [])
       ) AS foto
     FROM kos k
     JOIN kamar km ON km.id_kos = k.id_kos
-    JOIN harga_kamar hk ON hk.id_kamar = km.id_kamar
+    JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
+    JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     $locationJoin
     WHERE $whereSql $distanceWhere
     GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, loc.user_lat, loc.user_lng
@@ -479,14 +485,16 @@ function getDetailKosPublik($id_kos)
       k.deskripsi,
       u.nama AS nama_pemilik,
       u.no_hp AS no_hp_pemilik,
+      u.last_login_at AS last_login_at,
       COUNT(DISTINCT CASE WHEN km.status = 'tersedia' THEN km.id_kamar END) AS kamar_tersedia,
       MIN(CASE WHEN km.status = 'tersedia' THEN hk.harga_total END) AS harga_mulai
     FROM kos k
     INNER JOIN users u ON u.id_user = k.id_pemilik
     LEFT JOIN kamar km ON km.id_kos = k.id_kos
-    LEFT JOIN harga_kamar hk ON hk.id_kamar = km.id_kamar
+    LEFT JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
+    LEFT JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     WHERE k.id_kos = ? AND k.status = 'aktif'
-    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, u.nama, u.no_hp
+    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, u.nama, u.no_hp, u.last_login_at
     LIMIT 1
   ");
   $stmt->bind_param('i', $id_kos);
@@ -499,28 +507,31 @@ function getDetailKosPublik($id_kos)
   }
 
   $stmt = $conn->prepare("
-    SELECT id_kamar, nomor_kamar, tipe_kamar, kapasitas, status, deskripsi
-    FROM kamar
-    WHERE id_kos = ?
-    ORDER BY nomor_kamar ASC
+    SELECT
+      tk.id_tipe_kamar,
+      tk.nama_tipe,
+      tk.kapasitas,
+      tk.deskripsi,
+      COUNT(km.id_kamar) AS jumlah_kamar,
+      SUM(CASE WHEN km.status = 'tersedia' THEN 1 ELSE 0 END) AS kamar_tersedia
+    FROM tipe_kamar tk
+    LEFT JOIN kamar km ON km.id_tipe_kamar = tk.id_tipe_kamar
+    WHERE tk.id_kos = ?
+    GROUP BY tk.id_tipe_kamar
+    ORDER BY tk.nama_tipe ASC
   ");
   $stmt->bind_param('i', $id_kos);
   $stmt->execute();
-  $kamar = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $tipeKamar = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   $stmt->close();
 
-  foreach ($kamar as &$item) {
-    $id_kamar = (int)$item['id_kamar'];
-    $stmt = $conn->prepare("SELECT jumlah_orang, harga_total FROM harga_kamar WHERE id_kamar = ? ORDER BY jumlah_orang ASC");
-    $stmt->bind_param('i', $id_kamar);
-    $stmt->execute();
-    $item['harga'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+  foreach ($tipeKamar as &$tipe) {
+    $tipe['harga'] = getHargaTipeKamar((int) $tipe['id_tipe_kamar']);
+    $tipe['fasilitas'] = getFasilitasTipeKamar((int) $tipe['id_tipe_kamar']);
+    $tipe['foto'] = getFotoTipeKamar((int) $tipe['id_tipe_kamar']);
   }
-  unset($item);
-
-  // Kirim daftar kamar beserta konfigurasi harga ke view detail.
-  $kos['kamar'] = $kamar;
+  unset($tipe);
+  $kos['tipe_kamar'] = $tipeKamar;
 
   $stmt = $conn->prepare("
     SELECT f.id_fasilitas, f.nama_fasilitas

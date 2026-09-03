@@ -61,6 +61,21 @@ function findUserByEmail($email)
 }
 
 
+/**
+ * Menyimpan waktu login terakhir pengguna.
+ * Dipanggil hanya setelah autentikasi berhasil.
+ */
+function updateLastLoginAt($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("UPDATE users SET last_login_at = NOW() WHERE id_user = ? LIMIT 1");
+  $stmt->bind_param('i', $id_user);
+  $success = $stmt->execute();
+  $stmt->close();
+  return $success;
+}
+
+
 /* =========================================================
    USER LIST
    ========================================================= */

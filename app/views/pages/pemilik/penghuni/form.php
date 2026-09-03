@@ -121,6 +121,8 @@
           class="input"
           maxlength="150"
           required
+          :disabled="matchedUser"
+          :class="matchedUser ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''"
           placeholder="Nama penghuni">
       </div>
 
@@ -132,6 +134,8 @@
           x-model="form.no_hp"
           class="input"
           maxlength="30"
+          :disabled="matchedUser"
+          :class="matchedUser ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''"
           placeholder="08xxxxxxxxxx">
       </div>
 
@@ -144,7 +148,16 @@
           class="input"
           maxlength="16"
           inputmode="numeric"
+          :disabled="matchedUser"
+          :class="matchedUser ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : ''"
           placeholder="16 digit NIK">
+
+        <p
+          x-show="matchedUser"
+          x-cloak
+          class="mt-2 text-xs text-slate-500">
+          Data nama, NIK, dan nomor HP berasal dari akun penghuni dan tidak dapat diubah oleh pemilik kos.
+        </p>
       </div>
 
       <div class="form-group" x-show="mode === 'tambah'">
@@ -284,6 +297,7 @@
           this.form.nama = item.nama || '';
           this.form.no_hp = item.no_hp || '';
           this.form.nik = item.nik || '';
+          this.matchedUser = Boolean(item.id_user);
         } catch (error) {
           window.location.href =
             BASE_URL + '/pemilik/penghuni';
@@ -314,6 +328,7 @@
           if (this.matchedUser) {
             this.form.nama = res.data.nama || '';
             this.form.no_hp = res.data.no_hp || '';
+            this.form.nik = nik;
             Alpine.store('ui').toast(
               'Data mahasiswa ditemukan dan diisi otomatis.',
               'success'

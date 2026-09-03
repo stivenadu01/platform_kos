@@ -42,6 +42,10 @@ class ApiAuthController
         throw new Exception("Akun tidak dapat digunakan. Silakan hubungi administrator.", 403);
       }
 
+      // Catat login terakhir hanya setelah seluruh validasi login berhasil.
+      updateLastLoginAt((int) $user['id_user']);
+      $user['last_login_at'] = date('Y-m-d H:i:s');
+
       // Regenerasi session untuk mencegah session fixation.
       session_regenerate_id(true);
 
@@ -76,6 +80,7 @@ class ApiAuthController
       $input['nik'] = trim($input['nik'] ?? '');
       $input['password'] = $input['password'] ?? '';
       $input['konfirmasi_password'] = $input['konfirmasi_password'] ?? '';
+      $input['role'] = trim($input['role'] ?? '');
 
       if (
         $input['nama'] === '' ||
@@ -83,7 +88,8 @@ class ApiAuthController
         $input['password'] === '' ||
         $input['no_hp'] === '' ||
         $input['nik'] === '' ||
-        $input['konfirmasi_password'] === ''
+        $input['konfirmasi_password'] === '' ||
+        $input['role'] === ''
       ) {
         throw new Exception("Semua field wajib diisi", 422);
       }
@@ -107,7 +113,9 @@ class ApiAuthController
       if (findUserByEmail($input['email'])) {
         throw new Exception("Email sudah digunakan", 409);
       }
-      $input['role'] = 'pelanggan';
+      if (!in_array($input['role'], ['pelanggan', 'pemilik'], true)) {
+        throw new Exception("Jenis akun tidak valid", 422);
+      }
 
       /*
        * Model wajib:

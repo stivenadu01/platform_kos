@@ -56,11 +56,25 @@ delete('/api/pemilik/penghuni', 'ApiPenghuniController@destroy', ['auth', 'role:
 // =========================================================
 // KAMAR - PEMILIK
 // =========================================================
+get('/api/pemilik/tipe-kamar', 'ApiTipeKamarController@index', ['auth', 'role:pemilik']);
+get('/api/pemilik/tipe-kamar/show', 'ApiTipeKamarController@show', ['auth', 'role:pemilik']);
+post('/api/pemilik/tipe-kamar', 'ApiTipeKamarController@store', ['auth', 'role:pemilik']);
+put('/api/pemilik/tipe-kamar', 'ApiTipeKamarController@update', ['auth', 'role:pemilik']);
+delete('/api/pemilik/tipe-kamar', 'ApiTipeKamarController@destroy', ['auth', 'role:pemilik']);
+get('/api/pemilik/tipe-kamar/harga', 'ApiTipeKamarController@harga', ['auth', 'role:pemilik']);
+put('/api/pemilik/tipe-kamar/harga', 'ApiTipeKamarController@simpanHarga', ['auth', 'role:pemilik']);
+get('/api/pemilik/tipe-kamar/fasilitas', 'ApiTipeKamarController@fasilitas', ['auth', 'role:pemilik']);
+put('/api/pemilik/tipe-kamar/fasilitas', 'ApiTipeKamarController@simpanFasilitas', ['auth', 'role:pemilik']);
+get('/api/pemilik/tipe-kamar/foto', 'ApiTipeKamarController@foto', ['auth', 'role:pemilik']);
+post('/api/pemilik/tipe-kamar/{id_tipe_kamar}/foto', 'ApiTipeKamarController@tambahFoto', ['auth', 'role:pemilik']);
+put('/api/pemilik/tipe-kamar/foto/{id_foto}/thumbnail', 'ApiTipeKamarController@thumbnail', ['auth', 'role:pemilik']);
+delete('/api/pemilik/tipe-kamar/foto/{id_foto}', 'ApiTipeKamarController@hapusFoto', ['auth', 'role:pemilik']);
 get('/api/pemilik/kamar', 'ApiKamarController@index', ['auth', 'role:pemilik']);
 get('/api/pemilik/kamar/show', 'ApiKamarController@show', ['auth', 'role:pemilik']);
 get('/api/pemilik/kamar/harga', 'ApiKamarController@harga', ['auth', 'role:pemilik']);
 get('/api/pemilik/kamar/kos', 'ApiKamarController@kos', ['auth', 'role:pemilik']);
 post('/api/pemilik/kamar', 'ApiKamarController@store', ['auth', 'role:pemilik']);
+post('/api/pemilik/kamar/bulk', 'ApiKamarController@bulk', ['auth', 'role:pemilik']);
 put('/api/pemilik/kamar', 'ApiKamarController@update', ['auth', 'role:pemilik']);
 put('/api/pemilik/kamar/harga', 'ApiKamarController@simpanHarga', ['auth', 'role:pemilik']);
 delete('/api/pemilik/kamar', 'ApiKamarController@destroy', ['auth', 'role:pemilik']);

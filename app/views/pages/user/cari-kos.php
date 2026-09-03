@@ -3,33 +3,42 @@ $title = 'Cari Kos';
 
 // State pencarian dari URL agar hasil lokasi dapat dibagikan/reload tanpa kehilangan konteks.
 $initialState = [
-    'q' => trim($_GET['q'] ?? ''),
-    'lokasi' => trim($_GET['lokasi'] ?? ''),
-    'latitude' => isset($_GET['lat']) && is_numeric($_GET['lat']) ? (float) $_GET['lat'] : null,
-    'longitude' => isset($_GET['lng']) && is_numeric($_GET['lng']) ? (float) $_GET['lng'] : null,
-    'jarak_max' => trim($_GET['radius'] ?? ''),
-    'jenis' => trim($_GET['jenis'] ?? ''),
-    'kapasitas' => trim($_GET['kapasitas'] ?? ''),
-    'harga_min' => trim($_GET['harga_min'] ?? ''),
-    'harga_max' => trim($_GET['harga_max'] ?? ''),
-    'fasilitas' => isset($_GET['fasilitas']) && is_array($_GET['fasilitas'])
-        ? array_values(array_filter(array_map('intval', $_GET['fasilitas']), fn($id) => $id > 0))
-        : [],
+  'q' => trim($_GET['q'] ?? ''),
+  'lokasi' => trim($_GET['lokasi'] ?? ''),
+  'latitude' => isset($_GET['lat']) && is_numeric($_GET['lat']) ? (float) $_GET['lat'] : null,
+  'longitude' => isset($_GET['lng']) && is_numeric($_GET['lng']) ? (float) $_GET['lng'] : null,
+  'jarak_max' => trim($_GET['radius'] ?? ''),
+  'jenis' => trim($_GET['jenis'] ?? ''),
+  'kapasitas' => trim($_GET['kapasitas'] ?? ''),
+  'harga_min' => trim($_GET['harga_min'] ?? ''),
+  'harga_max' => trim($_GET['harga_max'] ?? ''),
+  'fasilitas' => isset($_GET['fasilitas']) && is_array($_GET['fasilitas'])
+    ? array_values(array_filter(array_map('intval', $_GET['fasilitas']), fn($id) => $id > 0))
+    : [],
 ];
 ?>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  #search-map { z-index: 1; }
-  .leaflet-pane, .leaflet-control { z-index: 2; }
-  .leaflet-top, .leaflet-bottom { z-index: 10; }
+  #search-map {
+    z-index: 1;
+  }
+
+  .leaflet-pane,
+  .leaflet-control {
+    z-index: 2;
+  }
+
+  .leaflet-top,
+  .leaflet-bottom {
+    z-index: 10;
+  }
 </style>
 
 <div
   x-data="kosSearchPage(<?= htmlspecialchars(json_encode($initialState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
   x-init="init()"
-  class="min-h-[calc(100vh-4rem)] bg-slate-50"
->
+  class="min-h-[calc(100vh-4rem)] bg-slate-50">
   <section class="border-b border-slate-200 bg-white">
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
@@ -53,28 +62,24 @@ $initialState = [
               type="search"
               autocomplete="off"
               class="w-full bg-transparent py-2 text-sm outline-none"
-              placeholder="Cari kampus, jalan, atau lokasi di Kupang..."
-            >
+              placeholder="Cari kampus, jalan, atau lokasi di Kupang...">
             <button
               x-show="locationQuery"
               x-cloak
               @click="clearLocation()"
               type="button"
-              class="rounded-lg px-2 py-1 text-xs text-slate-400 hover:bg-slate-100"
-            >Hapus</button>
+              class="rounded-lg px-2 py-1 text-xs text-slate-400 hover:bg-slate-100">Hapus</button>
           </div>
 
           <div
             x-show="locationResults.length && !selectedLocation"
             x-cloak
-            class="absolute left-3 right-3 top-[58px] z-[1000] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:left-4 sm:right-4"
-          >
+            class="absolute left-3 right-3 top-[58px] z-[1000] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:left-4 sm:right-4">
             <template x-for="item in locationResults" :key="item.latitude + ',' + item.longitude + item.nama">
               <button
                 @click="selectLocation(item)"
                 type="button"
-                class="flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50"
-              >
+                class="flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50">
                 <span class="mt-0.5 text-primary">⌖</span>
                 <span class="min-w-0">
                   <span class="block text-sm font-semibold text-slate-800" x-text="shortLocationName(item.nama)"></span>
@@ -91,16 +96,14 @@ $initialState = [
               <p class="text-xs font-semibold text-primary">Lokasi pencarian</p>
               <p
                 class="mt-0.5 truncate text-sm font-medium text-slate-700"
-                x-text="selectedLocation ? selectedLocation.nama : 'Pilih lokasi dari pencarian atau peta'"
-              ></p>
+                x-text="selectedLocation ? selectedLocation.nama : 'Pilih lokasi dari pencarian atau peta'"></p>
             </div>
             <button
               x-show="selectedLocation"
               x-cloak
               @click="clearLocation()"
               type="button"
-              class="text-xs font-semibold text-primary hover:underline"
-            >Ganti lokasi</button>
+              class="text-xs font-semibold text-primary hover:underline">Ganti lokasi</button>
           </div>
 
           <div id="search-map" class="h-64 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:h-80"></div>
@@ -114,16 +117,14 @@ $initialState = [
               @click="useMyLocation()"
               type="button"
               :disabled="locating"
-              class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60"
-            >
+              class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60">
               <span x-text="locating ? 'Mencari lokasi...' : '📍 Gunakan lokasi saya'"></span>
             </button>
             <button
               @click="search(1)"
               type="button"
               :disabled="!selectedLocation || loading"
-              class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
-            >
+              class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50">
               Cari kos di sekitar
             </button>
           </div>
@@ -132,10 +133,10 @@ $initialState = [
             x-show="locationError"
             x-cloak
             class="mt-2 text-xs font-medium text-red-600"
-            x-text="locationError"
-          ></p>
+            x-text="locationError"></p>
         </div>
-      </div>    </div>
+      </div>
+    </div>
   </section>
 
   <div class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
@@ -197,8 +198,7 @@ $initialState = [
               x-cloak
               @click="filters.fasilitas = []; search(1)"
               type="button"
-              class="text-[11px] font-semibold text-primary hover:underline"
-            >Reset</button>
+              class="text-[11px] font-semibold text-primary hover:underline">Reset</button>
           </div>
 
           <div class="mt-1.5 max-h-44 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3">
@@ -213,8 +213,7 @@ $initialState = [
                   :value="String(item.id_fasilitas)"
                   x-model="filters.fasilitas"
                   @change="search(1)"
-                  class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                >
+                  class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
                 <span x-text="item.nama_fasilitas"></span>
               </label>
             </template>
@@ -253,8 +252,7 @@ $initialState = [
                 :src="kos.foto ? '<?= BASE_URL ?>/uploads' + kos.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'"
                 :alt="kos.nama_kos"
                 class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                @error="$event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'"
-              >
+                @error="$event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'">
               <span x-show="kos.jarak_km !== null" class="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm" x-text="formatDistance(kos.jarak_km)"></span>
             </div>
             <div class="p-4">
@@ -263,6 +261,7 @@ $initialState = [
                 <span class="shrink-0 rounded-full bg-primary-soft px-2 py-1 text-[11px] font-medium capitalize text-primary" x-text="kos.jenis"></span>
               </div>
               <p class="mt-1 line-clamp-2 text-xs text-slate-500" x-text="kos.alamat"></p>
+              <p class="mt-2 text-xs font-medium text-slate-600" x-text="kos.tipe_kamar || 'Tipe kamar belum tersedia'"></p>
               <div class="mt-4 flex items-end justify-between gap-3">
                 <div>
                   <span class="text-[11px] text-slate-500">Mulai dari</span>
@@ -292,60 +291,306 @@ $initialState = [
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-function kosSearchPage(initialState = {}) {
-  const validCoord = (value) => Number.isFinite(Number(value));
-  const validLocationCoords = (lat, lng) => {
-    const a = Number(lat), b = Number(lng);
-    return validCoord(a) && validCoord(b) && !(a === 0 && b === 0);
-  };
+  function kosSearchPage(initialState = {}) {
+    const validCoord = (value) => Number.isFinite(Number(value));
+    const validLocationCoords = (lat, lng) => {
+      const a = Number(lat),
+        b = Number(lng);
+      return validCoord(a) && validCoord(b) && !(a === 0 && b === 0);
+    };
 
-  return {
-    locationQuery: initialState.q || initialState.lokasi || '',
-    locationResults: [],
-    selectedLocation: null,
-    map: null,
-    marker: null,
-    locating: false,
-    locationError: '',
-    loading: false,
-    shareMessage: '',
-    kosList: [],
-    filters: {
-      q: '',
-      latitude: '',
-      longitude: '',
-      jarak_max: initialState.jarak_max || '',
-      jenis: initialState.jenis || '',
-      kapasitas: initialState.kapasitas || '',
-      harga_min: initialState.harga_min || '',
-      harga_max: initialState.harga_max || '',
-      fasilitas: Array.isArray(initialState.fasilitas) ? initialState.fasilitas.map(String) : []
-    },
-    fasilitasList: [],
-    pagination: { page: 1, per_page: 12, total: 0, total_pages: 0 },
+    return {
+      locationQuery: initialState.q || initialState.lokasi || '',
+      locationResults: [],
+      selectedLocation: null,
+      map: null,
+      marker: null,
+      locating: false,
+      locationError: '',
+      loading: false,
+      shareMessage: '',
+      kosList: [],
+      filters: {
+        q: '',
+        latitude: '',
+        longitude: '',
+        jarak_max: initialState.jarak_max || '',
+        jenis: initialState.jenis || '',
+        kapasitas: initialState.kapasitas || '',
+        harga_min: initialState.harga_min || '',
+        harga_max: initialState.harga_max || '',
+        fasilitas: Array.isArray(initialState.fasilitas) ? initialState.fasilitas.map(String) : []
+      },
+      fasilitasList: [],
+      pagination: {
+        page: 1,
+        per_page: 12,
+        total: 0,
+        total_pages: 0
+      },
 
-    get resultText() {
-      if (!this.pagination.total) {
-        return this.selectedLocation ? 'Belum ada kos yang sesuai filter' : 'Belum ada hasil pencarian';
-      }
-      return this.selectedLocation
-        ? `${this.pagination.total} kos ditemukan di sekitar ${this.shortLocationName(this.selectedLocation.nama)}`
-        : `${this.pagination.total} kos ditemukan`;
-    },
+      get resultText() {
+        if (!this.pagination.total) {
+          return this.selectedLocation ? 'Belum ada kos yang sesuai filter' : 'Belum ada hasil pencarian';
+        }
+        return this.selectedLocation ?
+          `${this.pagination.total} kos ditemukan di sekitar ${this.shortLocationName(this.selectedLocation.nama)}` :
+          `${this.pagination.total} kos ditemukan`;
+      },
 
-    async init() {
-      this.$nextTick(() => this.initMap());
+      async init() {
+        this.$nextTick(() => this.initMap());
 
-      await this.loadFasilitas();
+        await this.loadFasilitas();
 
-      // Restore a shared search directly from URL.
-      if (validLocationCoords(initialState.latitude, initialState.longitude)) {
-        const lat = Number(initialState.latitude);
-        const lng = Number(initialState.longitude);
-        const name = initialState.lokasi || initialState.q || `Titik peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+        // Restore a shared search directly from URL.
+        if (validLocationCoords(initialState.latitude, initialState.longitude)) {
+          const lat = Number(initialState.latitude);
+          const lng = Number(initialState.longitude);
+          const name = initialState.lokasi || initialState.q || `Titik peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
 
-        this.selectedLocation = { nama: name, latitude: lat, longitude: lng };
-        this.locationQuery = name;
+          this.selectedLocation = {
+            nama: name,
+            latitude: lat,
+            longitude: lng
+          };
+          this.locationQuery = name;
+          this.filters.latitude = lat;
+          this.filters.longitude = lng;
+
+          this.$nextTick(() => {
+            this.setMapMarker(lat, lng);
+            setTimeout(() => this.map?.invalidateSize(), 100);
+          });
+
+          await this.search(1, false);
+          return;
+        }
+
+        // If only text was supplied, search suggestions and let the user choose.
+        if (this.locationQuery) {
+          await this.searchLocations();
+        }
+
+        // First visit: try to initialize from the user's current location.
+        // We keep radius empty, so location is used for the marker/distance,
+        // while all kos remain eligible until the user chooses a radius.
+        if (!this.locationQuery && !this.selectedLocation) {
+          const located = await this.requestInitialLocation();
+          if (!located) {
+            await this.search(1, false);
+          }
+        }
+      },
+
+      async loadFasilitas() {
+        try {
+          const res = await fetch('<?= BASE_URL ?>/api/fasilitas', {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          const json = await res.json();
+
+          if (!res.ok || json.success === false) {
+            throw new Error(json.message || 'Gagal memuat fasilitas');
+          }
+
+          const data = json.data || [];
+          this.fasilitasList = Array.isArray(data) ? data : [];
+        } catch (e) {
+          console.error('Gagal memuat fasilitas:', e);
+          this.fasilitasList = [];
+        }
+      },
+
+      requestInitialLocation() {
+        return new Promise((resolve) => {
+          if (!navigator.geolocation) {
+            resolve(false);
+            return;
+          }
+
+          this.locating = true;
+
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                this.locating = false;
+
+                const lat = Number(position.coords.latitude);
+                const lng = Number(position.coords.longitude);
+
+                if (!Number.isFinite(lat) || !Number.isFinite(lng) ||
+                  (lat === 0 && lng === 0)) {
+                  resolve(false);
+                  return;
+                }
+
+                this.selectLocation({
+                  nama: 'Lokasi saya',
+                  latitude: lat,
+                  longitude: lng
+                }, false);
+
+                // No radius is imposed automatically.
+                this.filters.jarak_max = '';
+                await this.search(1, false);
+                resolve(true);
+              },
+              (error) => {
+                this.locating = false;
+                // Initial location is optional: if permission is denied,
+                // silently fall back to the normal all-kos view.
+                console.info('Lokasi awal tidak tersedia:', error.code);
+                resolve(false);
+              }, {
+                enableHighAccuracy: true,
+                timeout: 12000,
+                maximumAge: 300000
+              }
+          );
+        });
+      },
+
+      initMap() {
+        if (this.map || typeof L === 'undefined') return;
+
+        const defaultLat = -10.1772;
+        const defaultLng = 123.6070;
+
+        this.map = L.map('search-map', {
+          zoomControl: true,
+          attributionControl: true
+        }).setView([defaultLat, defaultLng], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(this.map);
+
+        this.map.on('click', (event) => this.setMapLocation(event.latlng.lat, event.latlng.lng));
+        setTimeout(() => this.map.invalidateSize(), 150);
+      },
+
+      onLocationInput() {
+        // Saat user mulai mengetik pencarian baru, lokasi sebelumnya tidak lagi
+        // menjadi pilihan aktif sehingga dropdown hasil pencarian dapat muncul.
+        if (this.selectedLocation) {
+          this.selectedLocation = null;
+          this.filters.latitude = '';
+          this.filters.longitude = '';
+          if (this.marker) {
+            this.marker.remove();
+            this.marker = null;
+          }
+        }
+        this.shareMessage = '';
+        this.searchLocations();
+      },
+
+      async searchLocations() {
+        const query = this.locationQuery.trim();
+        this.locationError = '';
+
+        if (query.length < 3) {
+          this.locationResults = [];
+          return;
+        }
+
+        try {
+          const res = await fetch('<?= BASE_URL ?>/api/lokasi/search?q=' + encodeURIComponent(query), {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (res.ok) {
+            const json = await res.json();
+            if (json.success && Array.isArray(json.data) && json.data.length) {
+              this.locationResults = json.data;
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Proxy lokasi gagal, mencoba Nominatim langsung.', e);
+        }
+
+        try {
+          const queryVariants = [
+            `${query}, Kupang, Nusa Tenggara Timur, Indonesia`,
+            `${query}, Kota Kupang, Indonesia`,
+            `${query}, Indonesia`
+          ];
+          let items = [];
+          for (const qv of queryVariants) {
+            const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({
+              q: qv,
+              format: 'jsonv2',
+              addressdetails: '1',
+              limit: '8',
+              countrycodes: 'id',
+              'accept-language': 'id'
+            });
+            const res = await fetch(url, {
+              headers: {
+                'Accept': 'application/json'
+              }
+            });
+            if (res.ok) {
+              const part = await res.json();
+              if (Array.isArray(part)) items.push(...part);
+            }
+            if (items.length >= 6) break;
+          }
+          const seen = new Set();
+          this.locationResults = items.filter(item => item.lat && item.lon).map(item => ({
+            nama: item.display_name || query,
+            latitude: Number(item.lat),
+            longitude: Number(item.lon),
+            type: item.type || null
+          })).filter(item => {
+            const key = `${item.latitude},${item.longitude}`;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          }).sort((a, b) => {
+            const n = query.toLowerCase();
+            const ap = a.nama.toLowerCase().indexOf(n);
+            const bp = b.nama.toLowerCase().indexOf(n);
+            return (ap < 0 ? 999999 : ap) - (bp < 0 ? 999999 : bp);
+          }).slice(0, 6);
+
+          if (!this.locationResults.length) {
+            this.locationError = 'Lokasi tidak ditemukan. Coba nama tempat yang lebih spesifik.';
+          }
+        } catch (e) {
+          console.error(e);
+          this.locationResults = [];
+          this.locationError = 'Pencarian lokasi gagal. Pastikan koneksi internet tersedia.';
+        }
+      },
+
+      selectFirstLocation() {
+        if (this.locationResults.length) this.selectLocation(this.locationResults[0]);
+      },
+
+      selectLocation(item, updateUrl = true) {
+        const lat = Number(item.latitude);
+        const lng = Number(item.longitude);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+          this.locationError = 'Koordinat lokasi tidak valid.';
+          return;
+        }
+
+        this.locationError = '';
+        this.selectedLocation = {
+          nama: item.nama,
+          latitude: lat,
+          longitude: lng
+        };
+        this.locationQuery = item.nama;
+        this.locationResults = [];
         this.filters.latitude = lat;
         this.filters.longitude = lng;
 
@@ -354,439 +599,236 @@ function kosSearchPage(initialState = {}) {
           setTimeout(() => this.map?.invalidateSize(), 100);
         });
 
-        await this.search(1, false);
-        return;
-      }
+        if (updateUrl) this.syncUrl(true, 1);
+        this.search(1, false);
+      },
 
-      // If only text was supplied, search suggestions and let the user choose.
-      if (this.locationQuery) {
-        await this.searchLocations();
-      }
+      setMapLocation(lat, lng) {
+        this.locationError = '';
+        this.selectedLocation = {
+          nama: `Titik peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
+          latitude: lat,
+          longitude: lng
+        };
+        this.locationQuery = '';
+        this.locationResults = [];
+        this.filters.latitude = lat;
+        this.filters.longitude = lng;
+        this.setMapMarker(lat, lng);
+        this.syncUrl(true, 1);
+        this.search(1, false);
+      },
 
-      // First visit: try to initialize from the user's current location.
-      // We keep radius empty, so location is used for the marker/distance,
-      // while all kos remain eligible until the user chooses a radius.
-      if (!this.locationQuery && !this.selectedLocation) {
-        const located = await this.requestInitialLocation();
-        if (!located) {
-          await this.search(1, false);
-        }
-      }
-    },
+      setMapMarker(lat, lng) {
+        this.initMap();
+        if (!this.map) return;
 
-    async loadFasilitas() {
-      try {
-        const res = await fetch('<?= BASE_URL ?>/api/fasilitas', {
-          headers: { 'Accept': 'application/json' }
-        });
-        const json = await res.json();
+        this.map.setView([lat, lng], Math.max(this.map.getZoom(), 14));
 
-        if (!res.ok || json.success === false) {
-          throw new Error(json.message || 'Gagal memuat fasilitas');
-        }
-
-        const data = json.data || [];
-        this.fasilitasList = Array.isArray(data) ? data : [];
-      } catch (e) {
-        console.error('Gagal memuat fasilitas:', e);
-        this.fasilitasList = [];
-      }
-    },
-
-    requestInitialLocation() {
-      return new Promise((resolve) => {
-        if (!navigator.geolocation) {
-          resolve(false);
-          return;
+        if (this.marker) {
+          this.marker.setLatLng([lat, lng]);
+        } else {
+          this.marker = L.marker([lat, lng]).addTo(this.map);
         }
 
-        this.locating = true;
+        this.marker.bindPopup('Lokasi pencarian').openPopup();
+      },
 
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            this.locating = false;
-
-            const lat = Number(position.coords.latitude);
-            const lng = Number(position.coords.longitude);
-
-            if (!Number.isFinite(lat) || !Number.isFinite(lng) ||
-                (lat === 0 && lng === 0)) {
-              resolve(false);
-              return;
-            }
-
-            this.selectLocation({
-              nama: 'Lokasi saya',
-              latitude: lat,
-              longitude: lng
-            }, false);
-
-            // No radius is imposed automatically.
-            this.filters.jarak_max = '';
-            await this.search(1, false);
-            resolve(true);
-          },
-          (error) => {
-            this.locating = false;
-            // Initial location is optional: if permission is denied,
-            // silently fall back to the normal all-kos view.
-            console.info('Lokasi awal tidak tersedia:', error.code);
-            resolve(false);
-          },
-          {
-            enableHighAccuracy: true,
-            timeout: 12000,
-            maximumAge: 300000
-          }
-        );
-      });
-    },
-
-    initMap() {
-      if (this.map || typeof L === 'undefined') return;
-
-      const defaultLat = -10.1772;
-      const defaultLng = 123.6070;
-
-      this.map = L.map('search-map', {
-        zoomControl: true,
-        attributionControl: true
-      }).setView([defaultLat, defaultLng], 12);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(this.map);
-
-      this.map.on('click', (event) => this.setMapLocation(event.latlng.lat, event.latlng.lng));
-      setTimeout(() => this.map.invalidateSize(), 150);
-    },
-
-    onLocationInput() {
-      // Saat user mulai mengetik pencarian baru, lokasi sebelumnya tidak lagi
-      // menjadi pilihan aktif sehingga dropdown hasil pencarian dapat muncul.
-      if (this.selectedLocation) {
+      clearLocation() {
         this.selectedLocation = null;
+        this.locationQuery = '';
+        this.locationResults = [];
+        this.locationError = '';
         this.filters.latitude = '';
         this.filters.longitude = '';
+        this.kosList = [];
+        this.pagination = {
+          page: 1,
+          per_page: 12,
+          total: 0,
+          total_pages: 0
+        };
+
         if (this.marker) {
           this.marker.remove();
           this.marker = null;
         }
-      }
-      this.shareMessage = '';
-      this.searchLocations();
-    },
-
-    async searchLocations() {
-      const query = this.locationQuery.trim();
-      this.locationError = '';
-
-      if (query.length < 3) {
-        this.locationResults = [];
-        return;
-      }
-
-      try {
-        const res = await fetch('<?= BASE_URL ?>/api/lokasi/search?q=' + encodeURIComponent(query), {
-          headers: { 'Accept': 'application/json' }
-        });
-
-        if (res.ok) {
-          const json = await res.json();
-          if (json.success && Array.isArray(json.data) && json.data.length) {
-            this.locationResults = json.data;
-            return;
-          }
+        if (this.map) {
+          this.map.setView([-10.1772, 123.6070], 12);
+          setTimeout(() => this.map.invalidateSize(), 100);
         }
-      } catch (e) {
-        console.warn('Proxy lokasi gagal, mencoba Nominatim langsung.', e);
-      }
 
-      try {
-        const queryVariants = [
-          `${query}, Kupang, Nusa Tenggara Timur, Indonesia`,
-          `${query}, Kota Kupang, Indonesia`,
-          `${query}, Indonesia`
-        ];
-        let items = [];
-        for (const qv of queryVariants) {
-          const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({
-            q: qv, format: 'jsonv2', addressdetails: '1', limit: '8',
-            countrycodes: 'id', 'accept-language': 'id'
-          });
-          const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-          if (res.ok) {
-            const part = await res.json();
-            if (Array.isArray(part)) items.push(...part);
-          }
-          if (items.length >= 6) break;
-        }
-        const seen = new Set();
-        this.locationResults = items.filter(item => item.lat && item.lon).map(item => ({
-          nama: item.display_name || query, latitude: Number(item.lat),
-          longitude: Number(item.lon), type: item.type || null
-        })).filter(item => {
-          const key = `${item.latitude},${item.longitude}`;
-          if (seen.has(key)) return false; seen.add(key); return true;
-        }).sort((a,b) => {
-          const n = query.toLowerCase();
-          const ap = a.nama.toLowerCase().indexOf(n);
-          const bp = b.nama.toLowerCase().indexOf(n);
-          return (ap < 0 ? 999999 : ap) - (bp < 0 ? 999999 : bp);
-        }).slice(0, 6);
+        this.syncUrl(false, 1);
+      },
 
-        if (!this.locationResults.length) {
-          this.locationError = 'Lokasi tidak ditemukan. Coba nama tempat yang lebih spesifik.';
-        }
-      } catch (e) {
-        console.error(e);
-        this.locationResults = [];
-        this.locationError = 'Pencarian lokasi gagal. Pastikan koneksi internet tersedia.';
-      }
-    },
+      async useMyLocation() {
+        this.locationError = '';
 
-    selectFirstLocation() {
-      if (this.locationResults.length) this.selectLocation(this.locationResults[0]);
-    },
-
-    selectLocation(item, updateUrl = true) {
-      const lat = Number(item.latitude);
-      const lng = Number(item.longitude);
-
-      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-        this.locationError = 'Koordinat lokasi tidak valid.';
-        return;
-      }
-
-      this.locationError = '';
-      this.selectedLocation = {
-        nama: item.nama,
-        latitude: lat,
-        longitude: lng
-      };
-      this.locationQuery = item.nama;
-      this.locationResults = [];
-      this.filters.latitude = lat;
-      this.filters.longitude = lng;
-
-      this.$nextTick(() => {
-        this.setMapMarker(lat, lng);
-        setTimeout(() => this.map?.invalidateSize(), 100);
-      });
-
-      if (updateUrl) this.syncUrl(true, 1);
-      this.search(1, false);
-    },
-
-    setMapLocation(lat, lng) {
-      this.locationError = '';
-      this.selectedLocation = {
-        nama: `Titik peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
-        latitude: lat,
-        longitude: lng
-      };
-      this.locationQuery = '';
-      this.locationResults = [];
-      this.filters.latitude = lat;
-      this.filters.longitude = lng;
-      this.setMapMarker(lat, lng);
-      this.syncUrl(true, 1);
-      this.search(1, false);
-    },
-
-    setMapMarker(lat, lng) {
-      this.initMap();
-      if (!this.map) return;
-
-      this.map.setView([lat, lng], Math.max(this.map.getZoom(), 14));
-
-      if (this.marker) {
-        this.marker.setLatLng([lat, lng]);
-      } else {
-        this.marker = L.marker([lat, lng]).addTo(this.map);
-      }
-
-      this.marker.bindPopup('Lokasi pencarian').openPopup();
-    },
-
-    clearLocation() {
-      this.selectedLocation = null;
-      this.locationQuery = '';
-      this.locationResults = [];
-      this.locationError = '';
-      this.filters.latitude = '';
-      this.filters.longitude = '';
-      this.kosList = [];
-      this.pagination = { page: 1, per_page: 12, total: 0, total_pages: 0 };
-
-      if (this.marker) {
-        this.marker.remove();
-        this.marker = null;
-      }
-      if (this.map) {
-        this.map.setView([-10.1772, 123.6070], 12);
-        setTimeout(() => this.map.invalidateSize(), 100);
-      }
-
-      this.syncUrl(false, 1);
-    },
-
-    async useMyLocation() {
-      this.locationError = '';
-
-      if (!navigator.geolocation) {
-        this.locationError = 'Browser kamu tidak mendukung fitur lokasi.';
-        return;
-      }
-
-      this.locating = true;
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          this.locating = false;
-          this.selectLocation({
-            nama: 'Lokasi saya',
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        (error) => {
-          this.locating = false;
-          const messages = {
-            1: 'Izin lokasi ditolak. Izinkan akses lokasi pada pengaturan browser.',
-            2: 'Lokasi perangkat tidak dapat ditemukan.',
-            3: 'Permintaan lokasi terlalu lama. Silakan coba lagi.'
-          };
-          this.locationError = messages[error.code] || 'Lokasi tidak dapat diakses.';
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
-      );
-    },
-
-    syncUrl(push = false, page = 1) {
-      const params = new URLSearchParams();
-
-      if (this.selectedLocation) {
-        params.set('lokasi', this.shortLocationName(this.selectedLocation.nama));
-        params.set('lat', Number(this.selectedLocation.latitude).toFixed(7));
-        params.set('lng', Number(this.selectedLocation.longitude).toFixed(7));
-      }
-
-      if (this.filters.jarak_max) params.set('radius', this.filters.jarak_max);
-      if (this.filters.jenis) params.set('jenis', this.filters.jenis);
-      if (this.filters.kapasitas) params.set('kapasitas', this.filters.kapasitas);
-      if (this.filters.harga_min) params.set('harga_min', this.filters.harga_min);
-      if (this.filters.harga_max) params.set('harga_max', this.filters.harga_max);
-      this.filters.fasilitas.forEach(id => params.append('fasilitas[]', String(id)));
-      if (page > 1) params.set('page', page);
-
-      const query = params.toString();
-      const url = window.location.pathname + (query ? '?' + query : '');
-      if (push) window.history.pushState({ search: query }, '', url);
-      else window.history.replaceState({ search: query }, '', url);
-    },
-
-    async search(page = 1, updateUrl = true) {
-      if (page < 1 || (this.pagination.total_pages && page > this.pagination.total_pages)) return;
-
-      // Tanpa lokasi, lakukan pencarian umum. Radius hanya digunakan
-      // setelah user memilih lokasi.
-      if (!this.selectedLocation) {
-        this.filters.latitude = '';
-        this.filters.longitude = '';
-        this.filters.jarak_max = '';
-      }
-
-      if (updateUrl) this.syncUrl(false, page);
-      this.loading = true;
-      this.locationError = '';
-
-      try {
-        const params = new URLSearchParams();
-
-        Object.entries(this.filters).forEach(([key, value]) => {
-          if (key === 'fasilitas') return;
-          if (value !== null && value !== undefined && value !== '') {
-            params.set(key, value);
-          }
-        });
-
-        this.filters.fasilitas.forEach(id => {
-          params.append('fasilitas[]', String(id));
-        });
-
-        params.set('page', page);
-        params.set('per_page', this.pagination.per_page);
-
-        const res = await fetch('<?= BASE_URL ?>/api/kos/search?' + params.toString(), {
-          headers: { 'Accept': 'application/json' }
-        });
-        const json = await res.json();
-
-        if (!res.ok || json.success === false) throw new Error(json.message || 'Gagal memuat data kos');
-
-        const payload = json.data || {};
-        this.kosList = payload.items || json.items || [];
-        this.pagination = payload.pagination || json.pagination || this.pagination;
-      } catch (e) {
-        console.error(e);
-        this.kosList = [];
-        this.locationError = 'Pencarian kos gagal. Periksa koneksi atau coba lagi.';
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    resetFilters() {
-      this.filters.jarak_max = this.selectedLocation ? '3' : '';
-      this.filters.jenis = '';
-      this.filters.kapasitas = '';
-      this.filters.harga_min = '';
-      this.filters.harga_max = '';
-      this.filters.fasilitas = [];
-      this.syncUrl(false, 1);
-      this.search(1, false);
-    },
-
-    async shareSearch() {
-      this.syncUrl(false, this.pagination.page || 1);
-      const url = window.location.href;
-      this.shareMessage = '';
-
-      try {
-        if (navigator.share) {
-          await navigator.share({
-            title: 'Pencarian Kos - BetaKos',
-            text: this.selectedLocation ? `Cari kos dekat ${this.shortLocationName(this.selectedLocation.nama)}` : 'Pencarian kos',
-            url
-          });
+        if (!navigator.geolocation) {
+          this.locationError = 'Browser kamu tidak mendukung fitur lokasi.';
           return;
         }
 
-        await navigator.clipboard.writeText(url);
-        this.shareMessage = '✓ Link pencarian disalin';
-      } catch (e) {
-        if (e && e.name === 'AbortError') return;
-        this.shareMessage = 'Link siap dibagikan dari alamat browser';
+        this.locating = true;
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            this.locating = false;
+            this.selectLocation({
+              nama: 'Lokasi saya',
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            });
+          },
+          (error) => {
+            this.locating = false;
+            const messages = {
+              1: 'Izin lokasi ditolak. Izinkan akses lokasi pada pengaturan browser.',
+              2: 'Lokasi perangkat tidak dapat ditemukan.',
+              3: 'Permintaan lokasi terlalu lama. Silakan coba lagi.'
+            };
+            this.locationError = messages[error.code] || 'Lokasi tidak dapat diakses.';
+          }, {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 300000
+          }
+        );
+      },
+
+      syncUrl(push = false, page = 1) {
+        const params = new URLSearchParams();
+
+        if (this.selectedLocation) {
+          params.set('lokasi', this.shortLocationName(this.selectedLocation.nama));
+          params.set('lat', Number(this.selectedLocation.latitude).toFixed(7));
+          params.set('lng', Number(this.selectedLocation.longitude).toFixed(7));
+        }
+
+        if (this.filters.jarak_max) params.set('radius', this.filters.jarak_max);
+        if (this.filters.jenis) params.set('jenis', this.filters.jenis);
+        if (this.filters.kapasitas) params.set('kapasitas', this.filters.kapasitas);
+        if (this.filters.harga_min) params.set('harga_min', this.filters.harga_min);
+        if (this.filters.harga_max) params.set('harga_max', this.filters.harga_max);
+        this.filters.fasilitas.forEach(id => params.append('fasilitas[]', String(id)));
+        if (page > 1) params.set('page', page);
+
+        const query = params.toString();
+        const url = window.location.pathname + (query ? '?' + query : '');
+        if (push) window.history.pushState({
+          search: query
+        }, '', url);
+        else window.history.replaceState({
+          search: query
+        }, '', url);
+      },
+
+      async search(page = 1, updateUrl = true) {
+        if (page < 1 || (this.pagination.total_pages && page > this.pagination.total_pages)) return;
+
+        // Tanpa lokasi, lakukan pencarian umum. Radius hanya digunakan
+        // setelah user memilih lokasi.
+        if (!this.selectedLocation) {
+          this.filters.latitude = '';
+          this.filters.longitude = '';
+          this.filters.jarak_max = '';
+        }
+
+        if (updateUrl) this.syncUrl(false, page);
+        this.loading = true;
+        this.locationError = '';
+
+        try {
+          const params = new URLSearchParams();
+
+          Object.entries(this.filters).forEach(([key, value]) => {
+            if (key === 'fasilitas') return;
+            if (value !== null && value !== undefined && value !== '') {
+              params.set(key, value);
+            }
+          });
+
+          this.filters.fasilitas.forEach(id => {
+            params.append('fasilitas[]', String(id));
+          });
+
+          params.set('page', page);
+          params.set('per_page', this.pagination.per_page);
+
+          const res = await fetch('<?= BASE_URL ?>/api/kos/search?' + params.toString(), {
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+          const json = await res.json();
+
+          if (!res.ok || json.success === false) throw new Error(json.message || 'Gagal memuat data kos');
+
+          const payload = json.data || {};
+          this.kosList = payload.items || json.items || [];
+          this.pagination = payload.pagination || json.pagination || this.pagination;
+        } catch (e) {
+          console.error(e);
+          this.kosList = [];
+          this.locationError = 'Pencarian kos gagal. Periksa koneksi atau coba lagi.';
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      resetFilters() {
+        this.filters.jarak_max = this.selectedLocation ? '3' : '';
+        this.filters.jenis = '';
+        this.filters.kapasitas = '';
+        this.filters.harga_min = '';
+        this.filters.harga_max = '';
+        this.filters.fasilitas = [];
+        this.syncUrl(false, 1);
+        this.search(1, false);
+      },
+
+      async shareSearch() {
+        this.syncUrl(false, this.pagination.page || 1);
+        const url = window.location.href;
+        this.shareMessage = '';
+
+        try {
+          if (navigator.share) {
+            await navigator.share({
+              title: 'Pencarian Kos - BetaKos',
+              text: this.selectedLocation ? `Cari kos dekat ${this.shortLocationName(this.selectedLocation.nama)}` : 'Pencarian kos',
+              url
+            });
+            return;
+          }
+
+          await navigator.clipboard.writeText(url);
+          this.shareMessage = '✓ Link pencarian disalin';
+        } catch (e) {
+          if (e && e.name === 'AbortError') return;
+          this.shareMessage = 'Link siap dibagikan dari alamat browser';
+        }
+
+        setTimeout(() => this.shareMessage = '', 2500);
+      },
+
+      formatRupiah(value) {
+        return new Intl.NumberFormat('id-ID', {
+          style: 'currency',
+          currency: 'IDR',
+          maximumFractionDigits: 0
+        }).format(Number(value || 0));
+      },
+
+      formatDistance(value) {
+        const km = Number(value);
+        return Number.isFinite(km) ? (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`) : '';
+      },
+
+      shortLocationName(value) {
+        const text = String(value || '').trim();
+        if (!text) return 'Lokasi pilihan';
+        return text.split(',')[0].trim();
       }
-
-      setTimeout(() => this.shareMessage = '', 2500);
-    },
-
-    formatRupiah(value) {
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(value || 0));
-    },
-
-    formatDistance(value) {
-      const km = Number(value);
-      return Number.isFinite(km) ? (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`) : '';
-    },
-
-    shortLocationName(value) {
-      const text = String(value || '').trim();
-      if (!text) return 'Lokasi pilihan';
-      return text.split(',')[0].trim();
-    }
-  };
-}
+    };
+  }
 </script>

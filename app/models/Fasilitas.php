@@ -1,16 +1,31 @@
 <?php
 
-function getAllFasilitas()
+function getAllFasilitas($kategori = 'kos')
 {
   $conn = db();
 
-  $stmt = $conn->prepare("
+  $sql = "
     SELECT
       id_fasilitas,
-      nama_fasilitas
+      nama_fasilitas,
+      kategori
     FROM fasilitas
-    ORDER BY nama_fasilitas ASC
-  ");
+  ";
+  $params = [];
+  $types = '';
+
+  if (in_array($kategori, ['kos', 'kamar'], true)) {
+    $sql .= ' WHERE kategori = ?';
+    $params[] = $kategori;
+    $types = 's';
+  }
+
+  $sql .= ' ORDER BY nama_fasilitas ASC';
+  $stmt = $conn->prepare($sql);
+
+  if ($types !== '') {
+    $stmt->bind_param($types, ...$params);
+  }
 
   $stmt->execute();
 
@@ -48,6 +63,7 @@ function getFasilitasByKos(
 
     WHERE k.id_kos = ?
       AND k.id_pemilik = ?
+      AND f.kategori = 'kos'
 
     ORDER BY f.nama_fasilitas ASC
   ");
@@ -188,7 +204,8 @@ function syncFasilitasKos(
       $stmt = $conn->prepare("
         SELECT id_fasilitas
         FROM fasilitas
-        WHERE id_fasilitas IN ($placeholders)
+        WHERE kategori = 'kos'
+          AND id_fasilitas IN ($placeholders)
       ");
 
       $stmt->bind_param(
