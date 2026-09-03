@@ -42,6 +42,22 @@
   <!-- RIGHT -->
   <div class="flex items-center gap-3">
 
+    <!-- CONTEXTUAL HELP -->
+    <button
+      type="button"
+      @click="
+        if (localStorage.getItem('betakos_owner_onboarding_complete_v3') !== '1') {
+          window.dispatchEvent(new CustomEvent('betakos:onboarding-help'));
+        } else {
+          window.dispatchEvent(new CustomEvent('betakos:operational-help'));
+        }
+      "
+      class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+      title="Buka bantuan sesuai halaman yang sedang dibuka">
+      <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400 text-xs font-bold">?</span>
+      Bantuan
+    </button>
+
     <!-- USER -->
     <div class="hidden sm:block text-right">
 
@@ -60,7 +76,7 @@
     <!-- AVATAR -->
     <template x-if="$store.auth.user?.foto">
       <img
-        :src="window.BASE_URL + $store.auth.user.foto"
+        :src="window.BASE_URL + '/uploads' + $store.auth.user.foto"
         :alt="$store.auth.user?.nama || 'Pemilik'"
         class="w-10 h-10 rounded-full object-cover ring-1 ring-slate-200">
     </template>

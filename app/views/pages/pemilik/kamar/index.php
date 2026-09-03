@@ -10,25 +10,28 @@
       <p class="mt-1 text-sm text-slate-500">Kelola unit kamar dari seluruh kos yang Anda miliki.</p>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-      <a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary justify-center">
+    <div class="flex flex-wrap gap-3 items-center">
+      <a data-onboarding="fast-kelola-tipe-kamar" data-help="help-kamar-type" href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary justify-center">
         Kelola Tipe Kamar
       </a>
-      <a href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-secondary justify-center">
+      <a data-onboarding="fast-tambah-tipe-kamar" href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-secondary justify-center">
         + Tambah Tipe Kamar
       </a>
-      <a href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary justify-center">
-        + Tambah Banyak Kamar
-      </a>
-      <a href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary justify-center">
-        + Tambah Satu Kamar
-      </a>
+
+      <div data-help="help-kamar-add" data-onboarding="kamar-add-choice" class="flex flex-wrap gap-3">
+        <a data-onboarding="fast-tambah-kamar-bulk" href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary justify-center">
+          + Tambah Banyak Kamar
+        </a>
+        <a data-onboarding="fast-tambah-kamar" href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary justify-center">
+          + Tambah Satu Kamar
+        </a>
+      </div>
     </div>
   </div>
 
 
   <!-- FILTER -->
-  <div class="card border border-slate-200 shadow-sm">
+  <div data-help="help-kamar-filter" class="card border border-slate-200 shadow-sm">
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -126,7 +129,7 @@
 
 
   <!-- DATA -->
-  <div class="card border border-slate-200 shadow-sm overflow-hidden">
+  <div data-help="help-kamar-summary" class="card border border-slate-200 shadow-sm overflow-hidden">
 
     <div
       x-show="loading"
@@ -153,8 +156,8 @@
       </p>
 
       <div class="mt-5 flex flex-wrap justify-center gap-3">
-        <a href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary">+ Tambah Satu Kamar</a>
-        <a href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary">+ Tambah Banyak Kamar</a>
+        <a data-onboarding="fast-tambah-kamar-single" href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary">+ Tambah Satu Kamar</a>
+        <a data-onboarding="fast-tambah-kamar-bulk-empty" href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary">+ Tambah Banyak Kamar</a>
       </div>
 
     </div>

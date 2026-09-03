@@ -82,6 +82,7 @@
         class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary transition">
 
         <input
+          data-help="help-kos-photo-picker"
           type="file"
           x-ref="file"
           accept="image/jpeg,image/png,image/webp"
@@ -90,6 +91,7 @@
 
 
         <button
+          data-onboarding="kos-foto-pilih"
           type="button"
           @click="$refs.file.click()"
           class="btn-secondary">
@@ -141,6 +143,7 @@
       <div class="flex justify-end mt-5">
 
         <button
+          data-help="help-kos-photo-upload" data-onboarding="kos-foto-upload"
           type="submit"
           class="btn-primary"
           :disabled="loading || !selectedFile">
@@ -517,6 +520,10 @@
              * Refresh daftar foto
              */
             await this.loadFoto();
+
+            if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
+              window.location.href = BASE_URL + '/pemilik/kos?onboarding=1';
+            }
 
           }
 

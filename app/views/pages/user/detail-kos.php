@@ -12,6 +12,15 @@ $waUrl = $phone !== '' ? 'https://wa.me/' . $phone . '?text=' . rawurlencode($wa
 $shareUrl = BASE_URL . '/kos/' . (int)$kos['id_kos'];
 $isPelanggan = isset($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pelanggan';
 
+$pemilikNama = trim((string)($kos['nama_pemilik'] ?? 'Pemilik kos'));
+$pemilikInisial = '';
+foreach (preg_split('/\s+/', $pemilikNama) as $kata) {
+  if ($kata !== '') $pemilikInisial .= mb_strtoupper(mb_substr($kata, 0, 1));
+  if (mb_strlen($pemilikInisial) >= 2) break;
+}
+$pemilikInisial = $pemilikInisial ?: 'PK';
+$pemilikFoto = $kos['foto_pemilik'] ?? null;
+
 $lastLoginAt = $kos['last_login_at'] ?? null;
 $lastLoginLabel = 'Belum pernah login';
 if (!empty($lastLoginAt)) {
@@ -143,7 +152,17 @@ if (!empty($lastLoginAt)) {
                   ?>
                   <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <?php if (!empty($typePhotos)): ?>
-                      <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($typePhotos[0]['nama_file']) ?>" alt="<?= htmlspecialchars($type['nama_tipe']) ?>" loading="lazy" class="h-48 w-full object-cover sm:h-44">
+                      <button
+                        type="button"
+                        @click='openTypeGallery(<?= json_encode($type['nama_tipe'], JSON_UNESCAPED_UNICODE) ?>, <?= json_encode(array_map(fn($photo) => BASE_URL . '/uploads' . $photo['nama_file'], $typePhotos), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>)'
+                        class="group relative block h-48 w-full overflow-hidden bg-slate-100 text-left sm:h-44"
+                        aria-label="Lihat foto <?= htmlspecialchars($type['nama_tipe']) ?>">
+                        <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($typePhotos[0]['nama_file']) ?>" alt="<?= htmlspecialchars($type['nama_tipe']) ?>" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
+                        <span class="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/65 to-transparent px-4 pb-3 pt-10 text-xs font-semibold text-white">
+                          <span>Lihat <?= count($typePhotos) ?> foto</span>
+                          <span class="rounded-full bg-black/45 px-2.5 py-1 backdrop-blur-sm">⌕</span>
+                        </span>
+                      </button>
                     <?php else: ?>
                       <div class="flex h-40 items-center justify-center bg-slate-100 text-sm text-slate-400">Foto tipe belum tersedia</div>
                     <?php endif; ?>
@@ -224,10 +243,21 @@ if (!empty($lastLoginAt)) {
 
             <div class="mt-3 rounded-xl bg-slate-50 p-3">
               <p class="text-xs text-slate-400">Pemilik</p>
-              <p class="mt-1 text-sm font-semibold text-slate-800"><?= htmlspecialchars($kos['nama_pemilik'] ?? 'Pemilik kos') ?></p>
-              <div class="mt-2 flex items-center gap-2 text-xs text-slate-500">
-                <span class="h-2 w-2 shrink-0 rounded-full <?= !empty($lastLoginAt) ? 'bg-emerald-500' : 'bg-slate-300' ?>"></span>
-                <span><?= htmlspecialchars($lastLoginLabel) ?></span>
+              <div class="mt-2 flex items-center gap-3">
+                <?php if ($pemilikFoto): ?>
+                  <img src="<?= htmlspecialchars(BASE_URL . '/uploads' . $pemilikFoto) ?>" alt="Foto <?= htmlspecialchars($pemilikNama) ?>" class="h-11 w-11 shrink-0 rounded-full object-cover ring-1 ring-slate-200" loading="lazy">
+                <?php else: ?>
+                  <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary ring-1 ring-blue-100">
+                    <?= htmlspecialchars($pemilikInisial) ?>
+                  </div>
+                <?php endif; ?>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-slate-800"><?= htmlspecialchars($pemilikNama) ?></p>
+                  <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
+                    <span class="h-2 w-2 shrink-0 rounded-full <?= !empty($lastLoginAt) ? 'bg-emerald-500' : 'bg-slate-300' ?>"></span>
+                    <span><?= htmlspecialchars($lastLoginLabel) ?></span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -278,7 +308,18 @@ if (!empty($lastLoginAt)) {
     </div>
   <?php endif; ?>
 
-  <div x-show="galleryOpen" x-cloak @keydown.escape.window="galleryOpen = false" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4">
+  <div x-show="typeGalleryOpen" x-cloak @click.self="typeGalleryOpen = false" @keydown.escape.window="typeGalleryOpen = false" class="fixed inset-0 z-[2050] flex items-center justify-center bg-black/90 p-4">
+    <button @click="typeGalleryOpen = false" type="button" class="absolute right-4 top-4 rounded-full bg-white/10 px-4 py-2 text-white hover:bg-white/20">✕</button>
+    <button @click="previousTypePhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
+    <div class="flex max-h-[90vh] max-w-6xl flex-col items-center">
+      <div class="mb-3 rounded-full bg-black/45 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm" x-text="typeGalleryName"></div>
+      <img :src="typeGalleryPhotos[typeGalleryIndex]" :alt="typeGalleryName" class="max-h-[78vh] max-w-full rounded-xl object-contain">
+      <p class="mt-3 text-center text-xs text-white/70" x-text="(typeGalleryIndex + 1) + ' / ' + typeGalleryPhotos.length"></p>
+    </div>
+    <button @click="nextTypePhoto()" type="button" class="absolute right-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:right-8">›</button>
+  </div>
+
+  <div x-show="galleryOpen" x-cloak @click.self="galleryOpen = false" @keydown.escape.window="galleryOpen = false" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4">
     <button @click="galleryOpen = false" type="button" class="absolute right-4 top-4 rounded-full bg-white/10 px-4 py-2 text-white hover:bg-white/20">✕</button>
     <button @click="previousPhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="max-h-[90vh] max-w-6xl">
@@ -299,6 +340,10 @@ if (!empty($lastLoginAt)) {
       galleryPhotos: photos,
       galleryIndex: 0,
       galleryOpen: false,
+      typeGalleryPhotos: [],
+      typeGalleryIndex: 0,
+      typeGalleryName: '',
+      typeGalleryOpen: false,
       reportOpen: false,
       reportSaving: false,
       reportSuccess: false,
@@ -318,6 +363,21 @@ if (!empty($lastLoginAt)) {
       previousPhoto() {
         if (!this.galleryPhotos.length) return;
         this.galleryIndex = (this.galleryIndex - 1 + this.galleryPhotos.length) % this.galleryPhotos.length;
+      },
+      openTypeGallery(name, photos) {
+        if (!Array.isArray(photos) || !photos.length) return;
+        this.typeGalleryName = name || 'Foto tipe kamar';
+        this.typeGalleryPhotos = photos;
+        this.typeGalleryIndex = 0;
+        this.typeGalleryOpen = true;
+      },
+      nextTypePhoto() {
+        if (!this.typeGalleryPhotos.length) return;
+        this.typeGalleryIndex = (this.typeGalleryIndex + 1) % this.typeGalleryPhotos.length;
+      },
+      previousTypePhoto() {
+        if (!this.typeGalleryPhotos.length) return;
+        this.typeGalleryIndex = (this.typeGalleryIndex - 1 + this.typeGalleryPhotos.length) % this.typeGalleryPhotos.length;
       },
       async submitReport() {
         if (!this.reportForm.alasan || this.reportForm.deskripsi.trim().length < 10) return;

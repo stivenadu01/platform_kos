@@ -66,6 +66,7 @@
     <!-- PROFIL -->
     <a
       :href="window.BASE_URL + '/pemilik/profil'"
+      data-onboarding="sidebar-profil"
       class="
         flex items-center gap-3
         px-4 py-3
@@ -101,6 +102,7 @@
     <!-- KOS -->
     <a
       :href="window.BASE_URL + '/pemilik/kos'"
+      data-onboarding="sidebar-kos"
       class="
         flex items-center gap-3
         px-4 py-3
@@ -125,6 +127,7 @@
     <!-- KELOLA KAMAR -->
     <a
       :href="window.BASE_URL + '/pemilik/kamar'"
+      data-onboarding="sidebar-kamar"
       class="
         flex items-center gap-3
         px-4 py-3

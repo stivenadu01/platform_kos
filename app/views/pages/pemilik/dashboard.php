@@ -23,7 +23,7 @@
     </template>
   </div>
 
-  <div x-show="!loading" x-cloak class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+  <div x-show="!loading" x-cloak data-help="dashboard-ringkasan" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
     <div class="card border border-slate-200 shadow-sm">
       <p class="text-sm text-slate-500">Total Kos</p>
       <div class="mt-3 flex items-end justify-between">
@@ -62,7 +62,7 @@
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 card border border-slate-200 shadow-sm">
+    <div data-help="dashboard-keuangan" class="lg:col-span-2 card border border-slate-200 shadow-sm">
       <div class="flex items-start justify-between gap-4">
         <div>
           <h3 class="font-semibold text-slate-900">Ringkasan Keuangan</h3>
@@ -87,7 +87,7 @@
       </div>
     </div>
 
-    <div class="card border border-slate-200 shadow-sm">
+    <div data-help="dashboard-aksi" class="card border border-slate-200 shadow-sm">
       <h3 class="font-semibold text-slate-900">Aksi Cepat</h3>
       <div class="mt-4 space-y-2">
         <a href="<?= BASE_URL ?>/pemilik/kos/tambah" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
@@ -106,7 +106,7 @@
     </div>
   </div>
 
-  <div class="card border border-slate-200 shadow-sm">
+  <div data-help="dashboard-tagihan" class="card border border-slate-200 shadow-sm">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h3 class="font-semibold text-slate-900">Tagihan Terdekat</h3>

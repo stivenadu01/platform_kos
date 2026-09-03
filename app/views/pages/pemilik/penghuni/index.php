@@ -17,7 +17,7 @@
     </div>
 
     <a
-      href="<?= BASE_URL ?>/pemilik/penghuni/tambah"
+      data-help="help-penghuni-add" href="<?= BASE_URL ?>/pemilik/penghuni/tambah"
       class="btn-primary">
       + Tambah Penghuni
     </a>
@@ -26,7 +26,7 @@
 
 
   <!-- FILTER -->
-  <div class="card border border-slate-200 shadow-sm">
+  <div data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
@@ -145,7 +145,7 @@
 
 
   <!-- DATA -->
-  <div class="card border border-slate-200 shadow-sm overflow-hidden">
+  <div data-help="help-penghuni-table" class="card border border-slate-200 shadow-sm overflow-hidden">
 
     <!-- LOADING -->
     <div
@@ -349,7 +349,7 @@
               <!-- AKSI -->
               <td class="px-5 py-4">
 
-                <div class="flex justify-end gap-2">
+                <div data-help="help-penghuni-actions" class="flex justify-end gap-2">
 
                   <a
                     :href="

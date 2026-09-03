@@ -16,7 +16,8 @@
 
     <a
       href="<?= BASE_URL ?>/pemilik/kos/tambah"
-      class="btn-primary sm:w-auto">
+      data-onboarding="fast-tambah-kos"
+      data-help="help-kos-add" class="btn-primary sm:w-auto">
       + Tambah Kos
     </a>
 
@@ -42,6 +43,7 @@
 
         <a
           href="<?= BASE_URL ?>/pemilik/kos/tambah"
+          data-onboarding="fast-tambah-kos"
           class="btn-primary inline-flex mt-5">
           + Tambah Kos
         </a>
@@ -51,7 +53,7 @@
 
   <?php else: ?>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    <div data-help="help-kos-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
       <?php foreach ($kos as $item): ?>
 
@@ -122,7 +124,7 @@
 
             <div class="mt-4">
               <?php if ($item['status'] === 'draft' || $item['status'] === 'ditolak'): ?>
-                <button type="button" @click="ajukan(<?= $item['id_kos'] ?>)" class="w-full rounded-xl bg-primary-soft text-primary px-4 py-2.5 text-sm font-semibold hover:bg-blue-100">
+                <button type="button" data-onboarding="fast-ajukan-verifikasi" @click="ajukan(<?= $item['id_kos'] ?>)" class="w-full rounded-xl bg-primary-soft text-primary px-4 py-2.5 text-sm font-semibold hover:bg-blue-100">
                   Ajukan Verifikasi Admin
                 </button>
               <?php elseif ($item['status'] === 'menunggu_verifikasi'): ?>
@@ -132,9 +134,10 @@
               <?php endif; ?>
             </div>
 
-            <div class="flex gap-2 mt-5">
+            <div data-help="help-kos-action" class="flex gap-2 mt-5">
 
               <a
+                data-onboarding="kos-photo"
                 href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>"
                 class="btn-secondary flex-1 text-center">
                 Foto
@@ -176,6 +179,14 @@
         if (!ok) return;
         try {
           await API.post('/pemilik/kos/ajukan-verifikasi', { id_kos: id });
+          if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
+            localStorage.setItem('betakos_owner_onboarding_complete_v3', '1');
+            localStorage.removeItem('betakos_owner_onboarding_active_v3');
+            localStorage.removeItem('betakos_owner_onboarding_skipped_v3');
+            localStorage.setItem('betakos_owner_onboarding_welcome_v3', '1');
+            window.dispatchEvent(new CustomEvent('betakos:onboarding-completed'));
+          }
+          window.dispatchEvent(new CustomEvent('betakos:onboarding-refresh'));
           window.location.reload();
         } catch (error) { console.error(error); }
       },

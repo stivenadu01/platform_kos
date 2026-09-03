@@ -40,7 +40,7 @@
     </div>
 
 
-    <div class="form-group">
+    <div data-help="help-kos-form-main" class="form-group">
 
       <label class="label">
         Nama Kos
@@ -48,7 +48,7 @@
 
       <input
         type="text"
-        x-model="form.nama_kos"
+        data-onboarding="kos-field-nama" x-model="form.nama_kos"
         class="input"
         placeholder="Contoh: Kos Melati"
         required>
@@ -63,7 +63,7 @@
       </label>
 
       <textarea
-        x-model="form.alamat"
+        data-onboarding="kos-field-alamat" x-model="form.alamat"
         class="input min-h-28"
         placeholder="Alamat lengkap kos"
         required></textarea>
@@ -80,7 +80,7 @@
         </label>
 
         <select
-          x-model="form.jenis"
+          data-onboarding="kos-field-jenis" x-model="form.jenis"
           class="input"
           required>
 
@@ -114,14 +114,14 @@
       </label>
 
       <textarea
-        x-model="form.deskripsi"
+        data-onboarding="kos-field-deskripsi" x-model="form.deskripsi"
         class="input min-h-32"
         placeholder="Jelaskan kondisi dan keunggulan kos..."></textarea>
 
     </div>
 
     <!-- FASILITAS -->
-    <div class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-facility" data-onboarding="kos-field-fasilitas" class="pt-4 border-t border-slate-200">
 
       <div>
         <h3 class="font-semibold text-slate-900">
@@ -183,7 +183,7 @@
     </div>
 
     <!-- LOKASI -->
-    <div class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-location" data-onboarding="kos-field-lokasi" class="pt-4 border-t border-slate-200">
 
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
 
@@ -285,6 +285,7 @@
 
       <button
         type="submit"
+        data-help="help-kos-form-save" data-onboarding="kos-save"
         class="btn-primary"
         :disabled="loading || !form.latitude || !form.longitude">
 

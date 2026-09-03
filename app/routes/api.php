@@ -31,6 +31,7 @@ delete('/api/pemilik/kos/{id}', 'ApiKosController@destroy', ['auth', 'role:pemil
 
 // dashboard
 get('/api/pemilik/dashboard', 'ApiDashboardController@index', ['auth', 'role:pemilik']);
+get('/api/pemilik/onboarding', 'ApiOnboardingController@status', ['auth', 'role:pemilik']);
 
 // =========================================================
 // FOTO KOS - PEMILIK

@@ -30,7 +30,7 @@
       x-cloak
       class="space-y-5">
 
-      <div class="form-group">
+      <div data-help="help-penghuni-nik" class="form-group">
         <label class="label">
           NIK Penghuni <span class="text-red-500">*</span>
         </label>
@@ -65,9 +65,10 @@
     <div
       x-show="mode === 'edit' || step === 2"
       x-cloak
+      data-help="help-penghuni-edit-data"
       class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-      <div class="form-group md:col-span-2" x-show="mode === 'tambah'">
+      <div data-help="help-penghuni-room" class="form-group md:col-span-2" x-show="mode === 'tambah'">
         <label class="label">Kamar <span class="text-red-500">*</span></label>
 
         <select
@@ -160,7 +161,7 @@
         </p>
       </div>
 
-      <div class="form-group" x-show="mode === 'tambah'">
+      <div data-help="help-penghuni-date" class="form-group" x-show="mode === 'tambah'">
         <label class="label">
           Tanggal Masuk <span class="text-red-500">*</span>
         </label>
@@ -197,6 +198,7 @@
       </a>
 
       <button
+        data-help="help-penghuni-save"
         type="submit"
         class="btn-primary"
         :disabled="saving">

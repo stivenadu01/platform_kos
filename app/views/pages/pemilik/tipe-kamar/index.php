@@ -1,16 +1,16 @@
 <div x-data="tipeKamarPage()" x-init="init()" class="space-y-6">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <a href="<?= BASE_URL ?>/pemilik/kamar" class="text-sm text-slate-500 hover:text-primary">← Kembali ke kamar</a>
+      <a data-onboarding="tipe-back-kamar" href="<?= BASE_URL ?>/pemilik/kamar" class="text-sm text-slate-500 hover:text-primary">← Kembali ke kamar</a>
       <h2 class="mt-3 text-xl font-bold text-slate-900 sm:text-2xl">Tipe Kamar</h2>
       <p class="mt-1 text-sm text-slate-500">Kelola tipe, harga, fasilitas, foto, dan unit kamar.</p>
     </div>
-    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary">+ Tambah Tipe Kamar</a>
+    <a data-onboarding="fast-tambah-tipe-kamar-list" data-help="help-tipe-add" href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary">+ Tambah Tipe Kamar</a>
   </div>
 
   <div x-show="loading" class="card p-10 text-center text-sm text-slate-500">Memuat tipe kamar...</div>
   <div x-show="!loading && !items.length" x-cloak class="card p-10 text-center text-sm text-slate-500">Belum ada tipe kamar.</div>
-  <div x-show="!loading && items.length" x-cloak class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+  <div data-help="help-tipe-list" x-show="!loading && items.length" x-cloak class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
     <template x-for="item in items" :key="item.id_tipe_kamar">
       <article class="card border border-slate-200 shadow-sm">
         <div class="flex items-start justify-between gap-3">
@@ -30,8 +30,9 @@
             <div class="mt-1 font-semibold text-emerald-800" x-text="item.kamar_tersedia"></div>
           </div>
         </div>
-        <div class="mt-5 flex flex-wrap gap-2">
+        <div data-help="help-tipe-action" class="mt-5 flex flex-wrap gap-2">
           <a :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar" class="btn-secondary">Kelola</a>
+          <a :href="BASE_URL + '/pemilik/tipe-kamar/foto?id_tipe_kamar=' + item.id_tipe_kamar" class="btn-secondary">Foto</a>
           <button type="button" @click="remove(item)" class="btn-danger">Hapus</button>
         </div>
       </article>

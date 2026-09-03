@@ -29,7 +29,7 @@ function createClaimRiwayat($id_user, $id_penghuni, $nik, $catatan)
   $stmt = $conn->prepare("
     SELECT p.id_penghuni, p.id_user, p.nik, p.nama, p.tanggal_masuk,
            p.tanggal_keluar, p.status, km.nomor_kamar, k.id_kos,
-           k.nama_kos, k.id_pemilik, u.nama AS nama_pemilik
+           k.nama_kos, k.id_pemilik, u.nama AS nama_pemilik, u.foto AS foto_pemilik
     FROM penghuni p
     INNER JOIN kamar km ON km.id_kamar = p.id_kamar
     INNER JOIN kos k ON k.id_kos = km.id_kos
@@ -90,7 +90,7 @@ function createClaimRiwayat($id_user, $id_penghuni, $nik, $catatan)
 function getClaimRiwayatByUser($id_user)
 {
   $conn = db();
-  $stmt = $conn->prepare("SELECT c.id_claim, c.id_penghuni, c.status, c.catatan_mahasiswa, c.catatan_pemilik, c.tanggal_pengajuan, c.tanggal_keputusan, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, km.nomor_kamar, k.id_kos, k.nama_kos, u.nama AS nama_pemilik FROM claim_riwayat c INNER JOIN penghuni p ON p.id_penghuni = c.id_penghuni INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE c.id_user = ? ORDER BY c.id_claim DESC");
+  $stmt = $conn->prepare("SELECT c.id_claim, c.id_penghuni, c.status, c.catatan_mahasiswa, c.catatan_pemilik, c.tanggal_pengajuan, c.tanggal_keputusan, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, km.nomor_kamar, k.id_kos, k.nama_kos, u.nama AS nama_pemilik, u.foto AS foto_pemilik FROM claim_riwayat c INNER JOIN penghuni p ON p.id_penghuni = c.id_penghuni INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE c.id_user = ? ORDER BY c.id_claim DESC");
   $stmt->bind_param('i', $id_user);
   $stmt->execute();
   $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -101,7 +101,7 @@ function getClaimRiwayatByUser($id_user)
 function getRiwayatKosByUser($id_user)
 {
   $conn = db();
-  $stmt = $conn->prepare("SELECT p.id_penghuni, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, p.status, km.id_kamar, km.nomor_kamar, k.id_kos, k.nama_kos, k.alamat, u.nama AS nama_pemilik FROM penghuni p INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE p.id_user = ? ORDER BY p.tanggal_masuk DESC, p.id_penghuni DESC");
+  $stmt = $conn->prepare("SELECT p.id_penghuni, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, p.status, km.id_kamar, km.nomor_kamar, k.id_kos, k.nama_kos, k.alamat, u.nama AS nama_pemilik, u.foto AS foto_pemilik FROM penghuni p INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE p.id_user = ? ORDER BY p.tanggal_masuk DESC, p.id_penghuni DESC");
   $stmt->bind_param('i', $id_user);
   $stmt->execute();
   $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -112,7 +112,7 @@ function getRiwayatKosByUser($id_user)
 function getClaimCandidatesByUser($id_user)
 {
   $conn = db();
-  $stmt = $conn->prepare("SELECT p.id_penghuni, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, p.status, km.nomor_kamar, k.id_kos, k.nama_kos, k.alamat, u.nama AS nama_pemilik, c.id_claim, c.status AS claim_status FROM penghuni p INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users me ON me.id_user = ? INNER JOIN users u ON u.id_user = k.id_pemilik LEFT JOIN claim_riwayat c ON c.id_penghuni = p.id_penghuni WHERE p.id_user IS NULL AND p.nik = me.nik AND (c.id_claim IS NULL OR c.status = 'ditolak') ORDER BY p.tanggal_masuk DESC, p.id_penghuni DESC");
+  $stmt = $conn->prepare("SELECT p.id_penghuni, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, p.status, km.nomor_kamar, k.id_kos, k.nama_kos, k.alamat, u.nama AS nama_pemilik, c.id_claim, c.status AS claim_status, u.foto AS foto_pemilik FROM penghuni p INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users me ON me.id_user = ? INNER JOIN users u ON u.id_user = k.id_pemilik LEFT JOIN claim_riwayat c ON c.id_penghuni = p.id_penghuni WHERE p.id_user IS NULL AND p.nik = me.nik AND (c.id_claim IS NULL OR c.status = 'ditolak') ORDER BY p.tanggal_masuk DESC, p.id_penghuni DESC");
   $stmt->bind_param('i', $id_user);
   $stmt->execute();
   $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);

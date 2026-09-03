@@ -14,7 +14,7 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+  <div data-help="help-tagihan-summary" class="grid grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="card border border-slate-200 shadow-sm">
       <p class="text-xs text-slate-500">Belum lunas</p>
       <p class="mt-2 text-xl font-bold text-slate-900" x-text="summary.belum_lunas"></p>
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <div class="card border border-slate-200 shadow-sm">
+  <div data-help="help-tagihan-filter" class="card border border-slate-200 shadow-sm">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="form-group">
         <label class="label">Cari tagihan</label>
@@ -78,7 +78,7 @@
     </div>
   </div>
 
-  <div class="card border border-slate-200 shadow-sm overflow-hidden">
+  <div data-help="help-tagihan-list" class="card border border-slate-200 shadow-sm overflow-hidden">
     <div x-show="loading" class="py-12 text-center text-sm text-slate-500">
       Memuat tagihan...
     </div>
@@ -127,7 +127,7 @@
               </td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
-                  <button type="button" @click="openDetail(item.id_tagihan)" class="btn-secondary">Detail</button>
+                  <button data-help="help-tagihan-detail" type="button" @click="openDetail(item.id_tagihan)" class="btn-secondary">Detail</button>
                   <button
                     type="button"
                     x-show="item.status !== 'lunas' && item.status !== 'dibatalkan'"
@@ -215,6 +215,7 @@
             <div class="flex items-center justify-between mb-3">
               <h4 class="font-semibold text-slate-900">Penyesuaian Tagihan <span class="text-xs text-slate-500">(Tambahkan biaya atau potongan pada tagihan)</span></h4>
               <button
+                data-help="help-tagihan-adjustment"
                 type="button"
                 x-show="detail.status !== 'lunas' && detail.status !== 'dibatalkan'"
                 @click="adjustmentOpen = true"
@@ -261,7 +262,7 @@
 
           <div class="flex justify-end gap-3">
             <button type="button" @click="closeDetail()" class="btn-secondary">Tutup</button>
-            <button type="button" x-show="detail.status !== 'lunas' && detail.status !== 'dibatalkan'" @click="openPayment(detail)" class="btn-primary">Catat Pembayaran</button>
+            <button data-help="help-tagihan-payment" type="button" x-show="detail.status !== 'lunas' && detail.status !== 'dibatalkan'" @click="openPayment(detail)" class="btn-primary">Catat Pembayaran</button>
           </div>
         </div>
       </template>
@@ -494,6 +495,7 @@
           const res = await API.get('/pemilik/tagihan/show?id_tagihan=' + id, false);
           this.detail = res.data;
           this.detailOpen = true;
+          window.dispatchEvent(new CustomEvent('betakos:tagihan-detail-opened', { detail: { id_tagihan: id } }));
         } catch (error) {
           console.error(error);
         }

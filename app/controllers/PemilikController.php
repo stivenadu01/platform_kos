@@ -192,6 +192,28 @@ class PemilikController
       'layout' => 'pemilik'
     ]);
   }
+
+  public function fotoTipeKamar()
+  {
+    model('TipeKamar');
+    $id_tipe_kamar = (int) query('id_tipe_kamar');
+    $user = $this->owner();
+
+    if (!$id_tipe_kamar) {
+      response(['success' => false, 'message' => 'ID tipe kamar tidak valid'], 400);
+    }
+
+    $tipe = findTipeKamarByIdPemilik($id_tipe_kamar, $user['id_user']);
+    if (!$tipe) {
+      response(['success' => false, 'message' => 'Tipe kamar tidak ditemukan'], 404);
+    }
+
+    view('pemilik/tipe-kamar/foto', [
+      'title' => 'Kelola Foto Tipe Kamar',
+      'layout' => 'pemilik',
+      'tipe' => $tipe
+    ]);
+  }
   public function penghuni()
   {
     view('pemilik/penghuni/index', [
