@@ -14,7 +14,7 @@
       <div class="flex flex-col items-center text-center">
         <div class="relative">
           <template x-if="user.foto">
-            <img :src="window.BASE_URL + user.foto" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow ring-1 ring-slate-200" alt="Foto profil">
+            <img :src="window.BASE_URL + '/uploads' + user.foto" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow ring-1 ring-slate-200" alt="Foto profil">
           </template>
           <template x-if="!user.foto">
             <div class="w-28 h-28 rounded-full bg-primary-soft text-primary flex items-center justify-center text-4xl font-bold ring-1 ring-blue-100" x-text="initial"></div>
@@ -27,7 +27,7 @@
 
         <form class="mt-6 w-full" @submit.prevent="uploadFoto">
           <label class="block text-left text-sm font-medium text-slate-700">Foto profil</label>
-          <input type="file" x-ref="foto" accept="image/jpeg,image/png,image/webp" class="mt-2 input" required>
+          <input type="file" x-ref="foto" accept="image/jpeg,image/png,image/webp" class="mt-2 input">
           <button class="mt-3 btn-secondary w-full" :disabled="savingFoto">
             <span x-text="savingFoto ? 'Mengunggah...' : 'Ubah Foto'"></span>
           </button>
@@ -47,11 +47,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label class="label">Nama lengkap</label>
-              <input class="input" type="text" x-model.trim="form.nama" required maxlength="150">
+              <input class="input" type="text" data-onboarding="profil-field-nama" x-model.trim="form.nama" required maxlength="150">
             </div>
             <div>
               <label class="label">Nomor HP</label>
-              <input class="input" type="tel" x-model.trim="form.no_hp" maxlength="30" placeholder="08xxxxxxxxxx">
+              <input class="input" type="tel" data-onboarding="profil-field-hp" x-model.trim="form.no_hp" maxlength="30" placeholder="08xxxxxxxxxx">
             </div>
             <div>
               <label class="label">Email</label>
@@ -65,7 +65,7 @@
           </div>
 
           <div class="flex justify-end">
-            <button class="btn-primary w-auto" :disabled="savingProfile" x-text="savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'"></button>
+            <button data-onboarding="profil-save" class="btn-primary w-auto" :disabled="savingProfile" x-text="savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'"></button>
           </div>
         </form>
       </div>
@@ -128,6 +128,7 @@ function profilPemilikPage() {
         const res = await API.post('/auth/profile', this.form);
         this.user = res.data;
         Alpine.store('auth').user = res.data;
+        window.dispatchEvent(new CustomEvent('betakos:onboarding-refresh'));
       } finally {
         this.savingProfile = false;
       }

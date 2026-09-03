@@ -7,16 +7,16 @@
   <div x-show="loading" class="card p-10 text-center text-sm text-slate-500">Memuat data tipe kamar...</div>
   <form x-show="!loading" x-cloak @submit.prevent="saveType" class="card space-y-6 border border-slate-200 shadow-sm">
     <div class="grid gap-5 md:grid-cols-2">
-      <div class="form-group"><label class="label">Kos <span class="text-red-500">*</span></label><select x-model="form.id_kos" class="input" required>
+      <div class="form-group"><label class="label">Kos <span class="text-red-500">*</span></label><select data-onboarding="tipe-field-kos" x-model="form.id_kos" class="input" required>
           <option value="">Pilih kos</option><template x-for="kos in kosList" :key="kos.id_kos">
             <option :value="kos.id_kos" x-text="kos.nama_kos"></option>
           </template>
         </select></div>
-      <div class="form-group"><label class="label">Nama Tipe <span class="text-red-500">*</span></label><input x-model="form.nama_tipe" class="input" maxlength="100" placeholder="Standard" required></div>
-      <div class="form-group"><label class="label">Kapasitas <span class="text-red-500">*</span></label><input type="number" x-model.number="form.kapasitas" min="1" max="255" class="input" required></div>
+      <div class="form-group"><label class="label">Nama Tipe <span class="text-red-500">*</span></label><input data-onboarding="tipe-field-nama" x-model="form.nama_tipe" class="input" maxlength="100" placeholder="Standard" required></div>
+      <div class="form-group"><label class="label">Kapasitas <span class="text-red-500">*</span></label><input data-onboarding="tipe-field-kapasitas" type="number" x-model.number="form.kapasitas" min="1" max="255" class="input" required></div>
       <div class="form-group md:col-span-2"><label class="label">Deskripsi</label><textarea x-model="form.deskripsi" class="input resize-none" rows="3"></textarea></div>
     </div>
-    <div class="border-t border-slate-200 pt-5">
+    <div data-onboarding="tipe-field-harga" class="border-t border-slate-200 pt-5">
       <div class="flex items-center justify-between gap-3">
         <div>
           <h3 class="font-semibold">Harga</h3>
@@ -29,7 +29,7 @@
               </template></select><input type="number" x-model.number="item.harga_total" min="0" step="1000" class="input" placeholder="700000" required><button type="button" @click="harga.splice(index, 1)" class="btn-danger">Hapus</button></div>
         </template></div>
     </div>
-    <div class="border-t border-slate-200 pt-5">
+    <div data-onboarding="tipe-field-fasilitas" class="border-t border-slate-200 pt-5">
       <div class="flex items-center justify-between gap-3">
         <div>
           <h3 class="font-semibold">Fasilitas Kamar</h3>
@@ -38,17 +38,8 @@
       </div>
       <div class="mt-4 grid gap-2 sm:grid-cols-2"><template x-for="item in fasilitas" :key="item.id_fasilitas"><label class="flex items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm"><input type="checkbox" :value="Number(item.id_fasilitas)" x-model="fasilitasTerpilih"><span x-text="item.nama_fasilitas"></span></label></template></div>
     </div>
-    <div class="flex justify-end gap-3 border-t border-slate-200 pt-5"><a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary">Batal</a><button type="submit" class="btn-primary" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Tipe'"></button></div>
+    <div class="flex justify-end gap-3 border-t border-slate-200 pt-5"><a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary">Batal</a><button type="submit" data-onboarding="tipe-save" class="btn-primary" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Tipe'"></button></div>
   </form>
-
-  <section x-show="id && foto.length" x-cloak class="card border border-slate-200 shadow-sm">
-    <div class="flex items-center justify-between">
-      <h3 class="font-semibold">Foto Tipe Kamar</h3><label class="btn-secondary cursor-pointer">Tambah Foto<input type="file" class="hidden" accept="image/*" @change="uploadPhoto($event)"></label>
-    </div>
-    <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4"><template x-for="item in foto" :key="item.id_foto">
-        <div class="relative overflow-hidden rounded-lg border border-slate-200"><img :src="BASE_URL + '/uploads' + item.nama_file" class="aspect-square w-full object-cover"><button type="button" @click="setThumbnail(item)" class="absolute bottom-2 left-2 rounded bg-white/90 px-2 py-1 text-xs" x-text="item.is_thumbnail ? 'Thumbnail' : 'Jadikan thumbnail'"></button></div>
-      </template></div>
-  </section>
 
 
 </div>
@@ -62,7 +53,6 @@
       fasilitas: [],
       fasilitasTerpilih: [],
       harga: [],
-      foto: [],
       kamar: [],
       form: {
         id_kos: '',
@@ -90,7 +80,6 @@
             };
             this.harga = data.harga || [];
             this.fasilitasTerpilih = (data.fasilitas || []).map(item => Number(item.id_fasilitas));
-            this.foto = data.foto || [];
             this.kamar = data.kamar || [];
           }
         } catch (error) {
@@ -133,27 +122,17 @@
             id_tipe_kamar: this.id,
             id_fasilitas: this.fasilitasTerpilih
           });
-          window.location.href = BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + this.id;
+          if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
+            window.location.href = BASE_URL + '/pemilik/tipe-kamar?onboarding=1';
+          } else {
+            window.location.href = BASE_URL + '/pemilik/tipe-kamar';
+          }
         } catch (error) {
           console.error(error);
         } finally {
           this.saving = false;
         }
       },
-      async uploadPhoto(event) {
-        const data = new FormData();
-        data.append('foto', event.target.files[0]);
-        await API.post('/pemilik/tipe-kamar/' + this.id + '/foto', data);
-        const res = await API.get('/pemilik/tipe-kamar/foto?id_tipe_kamar=' + this.id, false);
-        this.foto = res.data || [];
-      },
-      async setThumbnail(item) {
-        await API.put('/pemilik/tipe-kamar/foto/' + item.id_foto + '/thumbnail');
-        this.foto = this.foto.map(photo => ({
-          ...photo,
-          is_thumbnail: Number(photo.id_foto) === Number(item.id_foto) ? 1 : 0
-        }));
-      }
     };
   }
 </script>

@@ -485,6 +485,7 @@ function getDetailKosPublik($id_kos)
       k.deskripsi,
       u.nama AS nama_pemilik,
       u.no_hp AS no_hp_pemilik,
+      u.foto AS foto_pemilik,
       u.last_login_at AS last_login_at,
       COUNT(DISTINCT CASE WHEN km.status = 'tersedia' THEN km.id_kamar END) AS kamar_tersedia,
       MIN(CASE WHEN km.status = 'tersedia' THEN hk.harga_total END) AS harga_mulai
@@ -494,7 +495,7 @@ function getDetailKosPublik($id_kos)
     LEFT JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     LEFT JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     WHERE k.id_kos = ? AND k.status = 'aktif'
-    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, u.nama, u.no_hp, u.last_login_at
+    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, u.nama, u.no_hp, u.foto, u.last_login_at
     LIMIT 1
   ");
   $stmt->bind_param('i', $id_kos);

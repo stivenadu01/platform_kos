@@ -36,6 +36,7 @@
       </label>
 
       <select
+        data-onboarding="kamar-field-kos"
         x-model="form.id_kos"
         @change="loadTipe()"
         class="input"
@@ -64,6 +65,7 @@
       </label>
 
       <select
+        data-onboarding="kamar-field-tipe"
         x-model="form.id_tipe_kamar"
         @change="loadTypeFacilities()"
         class="input"
@@ -88,6 +90,7 @@
 
     <!-- NOMOR SINGLE -->
     <div
+      data-onboarding="kamar-field-nomor-single"
       x-show="mode === 'single'"
       x-cloak
       class="form-group">
@@ -106,6 +109,7 @@
 
     <!-- NOMOR BULK -->
     <div
+      data-onboarding="kamar-field-nomor-bulk"
       x-show="mode === 'bulk'"
       x-cloak
       class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -217,6 +221,7 @@
 
       <button
         type="submit"
+        data-onboarding="kamar-save"
         class="btn-primary"
         :disabled="loading">
         <span
@@ -339,7 +344,11 @@
             });
           }
 
-          window.location.href = BASE_URL + '/pemilik/kamar';
+          if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
+            window.location.href = BASE_URL + '/pemilik/kamar';
+          } else {
+            window.location.href = BASE_URL + '/pemilik/kamar';
+          }
         } catch (error) {
           console.error('Gagal menyimpan kamar:', error);
         } finally {

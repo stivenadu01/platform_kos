@@ -19,9 +19,17 @@
         <template x-for="item in history" :key="item.id_penghuni">
           <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-slate-900" x-text="item.nama_kos"></h3>
-                <p class="mt-1 text-sm text-slate-500" x-text="`Kamar ${item.nomor_kamar} · ${item.nama_pemilik}`"></p>
+              <div class="flex min-w-0 items-center gap-3">
+                <template x-if="item.foto_pemilik">
+                  <img :src="BASE_URL + '/uploads' + item.foto_pemilik" :alt="item.nama_pemilik || 'Pemilik kos'" class="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200" loading="lazy">
+                </template>
+                <template x-if="!item.foto_pemilik">
+                  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary" x-text="initials(item.nama_pemilik)"></div>
+                </template>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-slate-900" x-text="item.nama_kos"></h3>
+                  <p class="mt-1 text-sm text-slate-500" x-text="`Kamar ${item.nomor_kamar} · ${item.nama_pemilik}`"></p>
+                </div>
               </div>
               <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700" x-text="item.status === 'aktif' ? 'Sedang tinggal' : 'Selesai'"></span>
             </div>
@@ -82,9 +90,13 @@
         <template x-for="item in claims" :key="item.id_claim">
           <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex items-start justify-between gap-3">
-              <div>
-                <h3 class="font-semibold text-slate-900" x-text="item.nama_kos"></h3>
-                <p class="mt-1 text-sm text-slate-500" x-text="item.nama_pemilik"></p>
+              <div class="flex min-w-0 items-center gap-3">
+                <template x-if="item.foto_pemilik"><img :src="BASE_URL + '/uploads' + item.foto_pemilik" :alt="item.nama_pemilik || 'Pemilik kos'" class="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200" loading="lazy"></template>
+                <template x-if="!item.foto_pemilik"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary" x-text="initials(item.nama_pemilik)"></div></template>
+                <div class="min-w-0">
+                  <h3 class="font-semibold text-slate-900" x-text="item.nama_kos"></h3>
+                  <p class="mt-1 text-sm text-slate-500" x-text="item.nama_pemilik"></p>
+                </div>
               </div>
               <span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="claimStatusClass(item.status)" x-text="claimStatusLabel(item.status)"></span>
             </div>
@@ -104,8 +116,11 @@
       <div class="grid gap-4 md:grid-cols-2">
         <template x-for="item in candidates" :key="item.id_penghuni">
           <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h3 class="font-semibold text-slate-900" x-text="item.nama_kos"></h3>
-            <p class="mt-1 text-sm text-slate-500" x-text="`Kamar ${item.nomor_kamar} · ${item.nama_pemilik}`"></p>
+            <div class="flex items-center gap-3">
+              <template x-if="item.foto_pemilik"><img :src="BASE_URL + '/uploads' + item.foto_pemilik" :alt="item.nama_pemilik || 'Pemilik kos'" class="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200" loading="lazy"></template>
+              <template x-if="!item.foto_pemilik"><div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary" x-text="initials(item.nama_pemilik)"></div></template>
+              <div class="min-w-0"><h3 class="font-semibold text-slate-900" x-text="item.nama_kos"></h3><p class="mt-1 text-sm text-slate-500" x-text="`Kamar ${item.nomor_kamar} · ${item.nama_pemilik}`"></p></div>
+            </div>
             <p class="mt-3 text-sm text-slate-600" x-text="`${item.tanggal_masuk} - ${item.tanggal_keluar || 'masih tinggal'}`"></p>
             <p x-show="item.claim_status === 'ditolak'" class="mt-2 text-xs text-red-600">Claim sebelumnya ditolak. Anda dapat mengajukan ulang.</p>
             <button type="button" @click="openClaim(item)" class="btn-primary mt-4 w-full">Ajukan Claim</button>
@@ -190,6 +205,9 @@
 <script>
   function riwayatKosPage() {
     return {
+    initials(nama) {
+      return String(nama || 'Pemilik kos').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(k => k.charAt(0).toUpperCase()).join('') || 'PK';
+    },
       history: [],
       bills: [],
       claims: [],
