@@ -40,7 +40,7 @@
     </div>
 
 
-    <div class="form-group">
+    <div data-help="help-kos-form-main" class="form-group">
 
       <label class="label">
         Nama Kos
@@ -121,7 +121,7 @@
     </div>
 
     <!-- FASILITAS -->
-    <div data-onboarding="kos-field-fasilitas" class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-facility" data-onboarding="kos-field-fasilitas" class="pt-4 border-t border-slate-200">
 
       <div>
         <h3 class="font-semibold text-slate-900">
@@ -183,7 +183,7 @@
     </div>
 
     <!-- LOKASI -->
-    <div data-onboarding="kos-field-lokasi" class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-location" data-onboarding="kos-field-lokasi" class="pt-4 border-t border-slate-200">
 
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
 
@@ -285,7 +285,7 @@
 
       <button
         type="submit"
-        data-onboarding="kos-save"
+        data-help="help-kos-form-save" data-onboarding="kos-save"
         class="btn-primary"
         :disabled="loading || !form.latitude || !form.longitude">
 

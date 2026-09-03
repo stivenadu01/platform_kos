@@ -11,14 +11,14 @@
     </div>
 
     <div class="flex flex-wrap gap-3 items-center">
-      <a data-onboarding="fast-kelola-tipe-kamar" href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary justify-center">
+      <a data-onboarding="fast-kelola-tipe-kamar" data-help="help-kamar-type" href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary justify-center">
         Kelola Tipe Kamar
       </a>
       <a data-onboarding="fast-tambah-tipe-kamar" href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-secondary justify-center">
         + Tambah Tipe Kamar
       </a>
 
-      <div data-onboarding="kamar-add-choice" class="flex flex-wrap gap-3">
+      <div data-help="help-kamar-add" data-onboarding="kamar-add-choice" class="flex flex-wrap gap-3">
         <a data-onboarding="fast-tambah-kamar-bulk" href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary justify-center">
           + Tambah Banyak Kamar
         </a>
@@ -31,7 +31,7 @@
 
 
   <!-- FILTER -->
-  <div class="card border border-slate-200 shadow-sm">
+  <div data-help="help-kamar-filter" class="card border border-slate-200 shadow-sm">
 
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -129,7 +129,7 @@
 
 
   <!-- DATA -->
-  <div class="card border border-slate-200 shadow-sm overflow-hidden">
+  <div data-help="help-kamar-summary" class="card border border-slate-200 shadow-sm overflow-hidden">
 
     <div
       x-show="loading"

@@ -17,7 +17,7 @@
     <a
       href="<?= BASE_URL ?>/pemilik/kos/tambah"
       data-onboarding="fast-tambah-kos"
-      class="btn-primary sm:w-auto">
+      data-help="help-kos-add" class="btn-primary sm:w-auto">
       + Tambah Kos
     </a>
 
@@ -53,7 +53,7 @@
 
   <?php else: ?>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+    <div data-help="help-kos-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
       <?php foreach ($kos as $item): ?>
 
@@ -134,7 +134,7 @@
               <?php endif; ?>
             </div>
 
-            <div class="flex gap-2 mt-5">
+            <div data-help="help-kos-action" class="flex gap-2 mt-5">
 
               <a
                 data-onboarding="kos-photo"

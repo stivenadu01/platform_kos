@@ -42,15 +42,18 @@
   <!-- RIGHT -->
   <div class="flex items-center gap-3">
 
-    <!-- ONBOARDING HELP -->
+    <!-- CONTEXTUAL HELP -->
     <button
       type="button"
-      x-data="{ onboardingAvailable: localStorage.getItem('betakos_owner_onboarding_welcome_v3') === '1' && localStorage.getItem('betakos_owner_onboarding_complete_v3') !== '1' }"
-      x-init="const syncOnboardingHelp = () => onboardingAvailable = localStorage.getItem('betakos_owner_onboarding_welcome_v3') === '1' && localStorage.getItem('betakos_owner_onboarding_complete_v3') !== '1'; window.addEventListener('storage', syncOnboardingHelp); window.addEventListener('betakos:onboarding-skipped', syncOnboardingHelp); window.addEventListener('betakos:onboarding-help-closed', syncOnboardingHelp); window.addEventListener('betakos:onboarding-completed', syncOnboardingHelp)"
-      x-show="onboardingAvailable"
-      @click="window.dispatchEvent(new CustomEvent('betakos:onboarding-help'))"
+      @click="
+        if (localStorage.getItem('betakos_owner_onboarding_complete_v3') !== '1') {
+          window.dispatchEvent(new CustomEvent('betakos:onboarding-help'));
+        } else {
+          window.dispatchEvent(new CustomEvent('betakos:operational-help'));
+        }
+      "
       class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-      title="Buka kembali panduan pengaturan awal">
+      title="Buka bantuan sesuai halaman yang sedang dibuka">
       <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400 text-xs font-bold">?</span>
       Bantuan
     </button>

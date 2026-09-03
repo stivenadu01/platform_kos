@@ -36,7 +36,7 @@
       </label>
 
       <select
-        data-onboarding="kamar-field-kos"
+        data-help="help-kamar-form-kos" data-onboarding="kamar-field-kos"
         x-model="form.id_kos"
         @change="loadTipe()"
         class="input"
@@ -65,7 +65,7 @@
       </label>
 
       <select
-        data-onboarding="kamar-field-tipe"
+        data-help="help-kamar-form-type" data-onboarding="kamar-field-tipe"
         x-model="form.id_tipe_kamar"
         @change="loadTypeFacilities()"
         class="input"
@@ -90,7 +90,7 @@
 
     <!-- NOMOR SINGLE -->
     <div
-      data-onboarding="kamar-field-nomor-single"
+      data-help="help-kamar-form-number" data-onboarding="kamar-field-nomor-single"
       x-show="mode === 'single'"
       x-cloak
       class="form-group">
@@ -109,7 +109,7 @@
 
     <!-- NOMOR BULK -->
     <div
-      data-onboarding="kamar-field-nomor-bulk"
+      data-help="help-kamar-form-number" data-onboarding="kamar-field-nomor-bulk"
       x-show="mode === 'bulk'"
       x-cloak
       class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -219,7 +219,7 @@
         Batal
       </a>
 
-      <button
+      <button data-help="help-kamar-form-save"
         type="submit"
         data-onboarding="kamar-save"
         class="btn-primary"

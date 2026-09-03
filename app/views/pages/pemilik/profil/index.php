@@ -25,7 +25,7 @@
         <p class="text-sm text-slate-500" x-text="user.email || '-' "></p>
         <span class="mt-3 inline-flex rounded-full bg-blue-50 text-blue-700 px-3 py-1 text-xs font-semibold">Pemilik Kos</span>
 
-        <form class="mt-6 w-full" @submit.prevent="uploadFoto">
+        <form data-help="help-profil-foto" class="mt-6 w-full" @submit.prevent="uploadFoto">
           <label class="block text-left text-sm font-medium text-slate-700">Foto profil</label>
           <input type="file" x-ref="foto" accept="image/jpeg,image/png,image/webp" class="mt-2 input">
           <button class="mt-3 btn-secondary w-full" :disabled="savingFoto">
@@ -37,7 +37,7 @@
     </div>
 
     <div class="xl:col-span-2 space-y-6">
-      <div class="card border border-slate-200 shadow-sm">
+      <div data-help="help-profil-data" class="card border border-slate-200 shadow-sm">
         <div>
           <h3 class="font-semibold text-slate-900">Informasi Pribadi</h3>
           <p class="mt-1 text-sm text-slate-500">Informasi ini digunakan untuk identitas pemilik pada aplikasi.</p>
@@ -70,7 +70,7 @@
         </form>
       </div>
 
-      <div class="card border border-slate-200 shadow-sm">
+      <div data-help="help-profil-password" class="card border border-slate-200 shadow-sm">
         <div>
           <h3 class="font-semibold text-slate-900">Keamanan Akun</h3>
           <p class="mt-1 text-sm text-slate-500">Gunakan kata sandi yang kuat dan jangan membagikannya kepada orang lain.</p>

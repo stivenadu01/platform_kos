@@ -28,7 +28,7 @@
 
     <form @submit.prevent="upload" class="mt-5">
       <div class="rounded-xl border-2 border-dashed border-slate-300 p-6 text-center transition hover:border-primary">
-        <input type="file" x-ref="file" accept="image/jpeg,image/png,image/webp" @change="previewFile" class="hidden">
+        <input data-help="help-tipe-photo-list" type="file" x-ref="file" accept="image/jpeg,image/png,image/webp" @change="previewFile" class="hidden">
         <button type="button" data-onboarding="tipe-foto-pilih" @click="$refs.file.click()" class="btn-secondary">Pilih Foto</button>
         <p class="mt-3 text-sm text-slate-500">JPG, PNG, atau WEBP</p>
         <p class="mt-1 text-xs text-slate-400">Maksimal 10 MB</p>
@@ -42,7 +42,7 @@
       </div>
 
       <div class="mt-5 flex justify-end">
-        <button type="submit" data-onboarding="tipe-foto-upload" class="btn-primary" :disabled="loading || !selectedFile">
+        <button type="submit" data-help="help-tipe-photo-upload" data-onboarding="tipe-foto-upload" class="btn-primary" :disabled="loading || !selectedFile">
           <span x-show="!loading">Upload Foto</span>
           <span x-show="loading" x-cloak>Mengupload...</span>
         </button>

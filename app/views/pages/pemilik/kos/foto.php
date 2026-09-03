@@ -82,6 +82,7 @@
         class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary transition">
 
         <input
+          data-help="help-kos-photo-picker"
           type="file"
           x-ref="file"
           accept="image/jpeg,image/png,image/webp"
@@ -142,7 +143,7 @@
       <div class="flex justify-end mt-5">
 
         <button
-          data-onboarding="kos-foto-upload"
+          data-help="help-kos-photo-upload" data-onboarding="kos-foto-upload"
           type="submit"
           class="btn-primary"
           :disabled="loading || !selectedFile">
