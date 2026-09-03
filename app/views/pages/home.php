@@ -7,11 +7,11 @@
         </span>
 
         <h1 class="mt-5 max-w-3xl font-[Poppins] text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-          Cari kos dekat kampus, sesuai budgetmu.
+          Cari kos sesuai lokasi, kebutuhan, dan budgetmu.
         </h1>
 
         <p class="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-          Bingung mulai cari kos? Masukkan nama kampus atau lokasi tujuanmu, lalu BetaKos membantu menemukan pilihan kos di sekitarnya.
+          Masukkan nama tempat, jalan, kawasan, atau lokasi tujuan untuk menemukan kos di area yang kamu inginkan.
         </p>
 
         <form action="<?= BASE_URL ?>/cari-kos" method="GET" class="mt-8 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/60 sm:flex sm:items-center">
@@ -20,7 +20,7 @@
             <input
               type="text"
               name="q"
-              placeholder="Contoh: Politeknik Negeri Kupang..."
+              placeholder="Contoh: Oesapa, Kelapa Lima, atau Politeknik Negeri Kupang..."
               class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             >
           </div>
@@ -32,7 +32,7 @@
         <div class="mt-6">
           <div class="flex items-center gap-2">
             <span class="h-px flex-1 bg-slate-200"></span>
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Cari berdasarkan</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Cari berdasarkan lokasi</span>
             <span class="h-px flex-1 bg-slate-200"></span>
           </div>
 
@@ -86,7 +86,7 @@
                   <span class="mt-0.5 text-primary">⌖</span>
                   <span class="min-w-0">
                     <span class="block truncate text-xs font-semibold text-slate-800 group-hover:text-primary"><?= htmlspecialchars($kampus['label']) ?></span>
-                    <span class="mt-0.5 block text-[10px] text-slate-400">Cari kos di sekitarnya →</span>
+                    <span class="mt-0.5 block text-[10px] text-slate-400">Lihat kos di sekitarnya →</span>
                   </span>
                 </span>
               </a>
@@ -95,7 +95,7 @@
         </div>
 
         <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
-          <span class="flex items-center gap-2"><span class="text-success">✓</span> Cari dekat kampus</span>
+          <span class="flex items-center gap-2"><span class="text-success">✓</span> Cari berdasarkan lokasi</span>
           <span class="flex items-center gap-2"><span class="text-success">✓</span> Sesuaikan budget</span>
           <span class="flex items-center gap-2"><span class="text-success">✓</span> Lihat kamar tersedia</span>
         </div>
@@ -107,13 +107,13 @@
             <div class="flex items-center gap-3">
               <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-2xl">⌖</div>
               <div>
-                <p class="text-xs font-semibold uppercase tracking-wider text-primary">Contoh pencarian</p>
-                <p class="mt-1 font-[Poppins] text-xl font-bold text-slate-900">Kos dekat kampus</p>
+                <p class="text-xs font-semibold uppercase tracking-wider text-primary">Contoh pencarian lokasi</p>
+                <p class="mt-1 font-[Poppins] text-xl font-bold text-slate-900">Kos di sekitar lokasi pilihan</p>
               </div>
             </div>
 
             <div class="mt-6 rounded-xl border border-slate-100 bg-slate-50 p-4">
-              <p class="text-xs text-slate-400">Contoh lokasi tujuan</p>
+              <p class="text-xs text-slate-400">Contoh lokasi</p>
               <p class="mt-1 text-sm font-semibold text-slate-800">Politeknik Negeri Kupang</p>
               <p class="mt-1 text-xs text-slate-500">Cari kos berdasarkan jarak dari lokasi pilihanmu.</p>
             </div>
@@ -144,9 +144,9 @@
   <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="text-center">
       <p class="text-sm font-semibold text-primary">Mulai dari sini</p>
-      <h2 class="mt-1 font-[Poppins] text-2xl font-bold text-slate-900 sm:text-3xl">Cari kos tanpa harus bingung mulai dari mana</h2>
+      <h2 class="mt-1 font-[Poppins] text-2xl font-bold text-slate-900 sm:text-3xl">Temukan kos yang sesuai tanpa ribet</h2>
       <p class="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-        Kamu cukup tentukan lokasi, kebutuhan, dan budget. Selebihnya, pilih kos yang paling cocok untukmu.
+        Tentukan lokasi, kebutuhan, dan budget. BetaKos membantu kamu menemukan pilihan yang paling sesuai.
       </p>
     </div>
 
@@ -155,7 +155,7 @@
         <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">⌕</div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 1</p>
         <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Cari lokasi tujuan</h3>
-        <p class="mt-2 text-sm leading-6 text-slate-500">Ketik nama kampus, jalan, atau tempat yang ingin kamu jadikan patokan.</p>
+        <p class="mt-2 text-sm leading-6 text-slate-500">Ketik nama tempat, jalan, kawasan, atau lokasi yang ingin kamu jadikan patokan.</p>
       </a>
 
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -179,9 +179,9 @@
   <div class="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
     <div class="flex items-end justify-between gap-4">
       <div>
-        <p class="text-sm font-semibold text-primary">Pilihan untukmu</p>
-        <h2 class="mt-1 font-[Poppins] text-2xl font-bold text-slate-900 sm:text-3xl">Kos yang tersedia di Kupang</h2>
-        <p class="mt-2 text-sm text-slate-500">Lihat beberapa kos yang sedang tersedia, lalu buka pencarian untuk menemukan lebih banyak pilihan.</p>
+        <p class="text-sm font-semibold text-primary">Kos pilihan</p>
+        <h2 class="mt-1 font-[Poppins] text-2xl font-bold text-slate-900 sm:text-3xl">Kos tersedia di Kupang</h2>
+        <p class="mt-2 text-sm text-slate-500">Lihat kos yang sedang tersedia atau mulai pencarian untuk menemukan lebih banyak pilihan.</p>
       </div>
       <a href="<?= BASE_URL ?>/cari-kos" class="hidden text-sm font-semibold text-primary hover:text-primary-dark sm:block">Lihat semua →</a>
     </div>
@@ -237,9 +237,9 @@
       <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
         <div>
           <p class="text-sm font-semibold text-blue-100">Belum tahu harus pilih yang mana?</p>
-          <h2 class="mt-2 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">Mulai dari kampus atau lokasi tujuanmu.</h2>
+          <h2 class="mt-2 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">Cari kos dari lokasi yang kamu inginkan.</h2>
           <p class="mt-3 max-w-2xl text-sm leading-6 text-blue-100">
-            Gunakan peta BetaKos untuk melihat kos di sekitar lokasi yang kamu pilih dan sesuaikan dengan kebutuhanmu.
+            Cari kos di sekitar lokasi yang kamu pilih, lalu sesuaikan dengan kebutuhan dan budgetmu.
           </p>
         </div>
         <a href="<?= BASE_URL ?>/cari-kos" class="rounded-xl bg-white px-6 py-3 text-center text-sm font-bold text-primary hover:bg-blue-50">

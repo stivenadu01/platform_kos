@@ -190,7 +190,7 @@
     <div
       x-show="!loading && penghuni.length > 0"
       x-cloak
-      class="overflow-x-auto">
+      class="!hidden md:!block overflow-x-auto">
 
       <table class="w-full text-sm">
 
@@ -399,6 +399,30 @@
 
       </table>
 
+    </div>
+
+    <div x-show="!loading && penghuni.length > 0" class="!block md:!hidden divide-y divide-slate-200">
+      <template x-for="item in penghuni" :key="'m-' + item.id_penghuni">
+        <article class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama"></div><div class="mt-1 text-xs text-slate-500" x-show="item.no_hp" x-text="item.no_hp"></div></div>
+            <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : item.status === 'keluar' ? 'Sudah Keluar' : item.status || '-' "></span>
+          </div>
+          <div class="mt-3 space-y-2 text-sm">
+            <div><span class="text-xs text-slate-400">Kos</span><div class="mt-0.5 text-slate-700" x-text="item.nama_kos"></div></div>
+            <div><span class="text-xs text-slate-400">Kamar</span><div class="mt-0.5 font-medium text-slate-700" x-text="item.nomor_kamar + (item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+            <div><div class="text-slate-400">Tanggal masuk</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_masuk)"></div></div>
+            <div><div class="text-slate-400">Tanggal keluar</div><div class="mt-1 text-slate-700" x-text="item.tanggal_keluar ? formatDate(item.tanggal_keluar) : '-' "></div></div>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <a :href="BASE_URL + '/pemilik/penghuni/edit?id_penghuni=' + item.id_penghuni" class="btn-secondary text-xs">Edit</a>
+            <button x-show="item.status === 'aktif'" type="button" @click="keluar(item)" class="btn-secondary text-xs">Catat Keluar</button>
+            <button type="button" @click="remove(item)" class="btn-danger text-xs">Hapus</button>
+          </div>
+        </article>
+      </template>
     </div>
 
   </div>

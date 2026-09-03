@@ -1,3 +1,14 @@
+<?php
+$__topbarIsPro = false;
+$__topbarSubscriptionLabel = 'Gratis';
+if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik') {
+  model('Langganan');
+  $__topbarStatusLangganan = getStatusLanggananPemilik((int)$_SESSION['user']['id_user']);
+  $__topbarIsPro = !empty($__topbarStatusLangganan['is_pro']);
+  $__topbarSubscriptionLabel = $__topbarIsPro ? 'BetaKos Pro' : 'Akun Gratis';
+}
+?>
+
 <header
   class="
     h-16
@@ -66,8 +77,13 @@
         x-text="$store.auth.user?.nama || 'Pemilik'">
       </div>
 
-      <div class="text-xs text-slate-500">
-        Pemilik Kos
+      <div class="mt-0.5 flex items-center justify-end gap-2 text-xs">
+        <span class="text-slate-500">Pemilik Kos</span>
+        <?php if ($__topbarIsPro): ?>
+          <span class="rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary">PRO</span>
+        <?php else: ?>
+          <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">Gratis</span>
+        <?php endif; ?>
       </div>
 
     </div>

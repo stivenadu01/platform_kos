@@ -342,7 +342,7 @@
    Sesuai PRD:
    TERSEDIA
    TERISI
-   DIPESAN
+   TIDAK TERSEDIA
    PERBAIKAN
    ========================================================= */
 
@@ -354,8 +354,8 @@
   @apply badge-danger;
 }
 
-@utility status-dipesan {
-  @apply badge-warning;
+@utility status-tidak-tersedia {
+  @apply badge-neutral;
 }
 
 @utility status-perbaikan {

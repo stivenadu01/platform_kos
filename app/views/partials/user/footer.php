@@ -6,11 +6,11 @@
           <img src="<?= BASE_URL ?>/assets/icon/logo.png" alt="BetaKos" class="h-9 w-9 object-contain">
           <div>
             <div class="font-bold text-slate-900">BetaKos</div>
-            <div class="text-xs text-slate-500">Temukan kos yang sesuai kebutuhanmu.</div>
+            <div class="text-xs text-slate-500">Cari kos yang sesuai dengan kebutuhanmu.</div>
           </div>
         </div>
         <p class="mt-4 text-sm leading-6 text-slate-500">
-          Cari kos berdasarkan kampus, budget, jarak, fasilitas, dan ketersediaan.
+          Temukan kos berdasarkan lokasi, budget, jarak, fasilitas, kapasitas, dan ketersediaan kamar.
         </p>
       </div>
 

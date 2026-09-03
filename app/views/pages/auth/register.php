@@ -9,8 +9,8 @@
         class="w-24 h-24 object-contain">
 
       <div class="text-center">
-        <h2 class="text-2xl font-bold text-heading" x-text="role === 'pemilik' ? 'Kelola Kos Lebih Mudah' : 'Temukan Kos Lebih Mudah'"></h2>
-        <p class="mt-2 text-sm text-muted max-w-sm" x-text="role === 'pemilik' ? 'Daftarkan diri sebagai pemilik kos dan kelola properti Anda melalui BetaKos.' : 'Bergabung untuk mencari kos berdasarkan kebutuhan dan lokasi kampus Anda.'"></p>
+        <h2 class="text-2xl font-bold text-heading" x-text="role === 'pemilik' ? 'Kelola Kos Lebih Mudah & Promosikan Kos Anda' : 'Temukan Kos Lebih Mudah'"></h2>
+        <p class="mt-2 text-sm text-muted max-w-sm" x-text="role === 'pemilik' ? 'Daftarkan diri sebagai pemilik kos untuk mengelola properti dan mempromosikan kos Anda melalui BetaKos.' : 'Bergabung untuk mencari kos berdasarkan kebutuhan dan lokasi yang Anda inginkan.'"></p>
       </div>
     </div>
 
@@ -23,8 +23,8 @@
           <div>
             <div class="text-center sm:text-left">
               <p class="text-xs font-semibold uppercase tracking-wide text-primary">Langkah 1 dari 2</p>
-              <h1 class="mt-2 text-2xl font-bold text-heading">Anda ingin menggunakan BetaKos sebagai?</h1>
-              <p class="mt-2 text-sm text-muted">Pilih jenis akun yang sesuai dengan kebutuhan Anda.</p>
+              <h1 class="mt-2 text-2xl font-bold text-heading">Bagaimana Anda ingin menggunakan BetaKos?</h1>
+              <p class="mt-2 text-sm text-muted">Pilih akun sesuai kebutuhan Anda.</p>
             </div>
 
             <div class="mt-7 space-y-4">
@@ -38,7 +38,7 @@
                   </div>
                   <div>
                     <h2 class="font-bold text-heading">Pemilik Kos</h2>
-                    <p class="mt-1 text-sm text-muted">Saya memiliki atau mengelola kos dan ingin mendaftarkan kos di BetaKos.</p>
+                    <p class="mt-1 text-sm text-muted">Saya memiliki atau mengelola kos dan ingin mengelolanya melalui BetaKos.</p>
                   </div>
                 </div>
               </button>
@@ -53,7 +53,7 @@
                   </div>
                   <div>
                     <h2 class="font-bold text-heading">Pencari Kos</h2>
-                    <p class="mt-1 text-sm text-muted">Saya sedang mencari kos dan ingin menemukan tempat tinggal yang sesuai.</p>
+                    <p class="mt-1 text-sm text-muted">Saya sedang mencari kos dan ingin menemukan tempat tinggal yang sesuai dengan kebutuhan saya.</p>
                   </div>
                 </div>
               </button>

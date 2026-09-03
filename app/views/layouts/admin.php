@@ -22,9 +22,9 @@
   <div x-data="{ sidebarOpen: false }" class="min-h-screen">
     <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 bg-black/40 z-40 lg:hidden"></div>
     <?php include ROOT_PATH . '/app/views/partials/admin/sidebar.php'; ?>
-    <div class="lg:ml-64 min-h-screen">
+    <div class="lg:ml-64 min-h-screen min-w-0 overflow-x-hidden">
       <?php include ROOT_PATH . '/app/views/partials/admin/topbar.php'; ?>
-      <main class="p-4 sm:p-6 lg:p-8">
+      <main class="p-4 sm:p-6 lg:p-8 min-w-0 overflow-x-hidden">
         <?= $content ?>
       </main>
     </div>

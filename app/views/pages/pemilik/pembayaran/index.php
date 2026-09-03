@@ -89,7 +89,7 @@
       <p class="mt-1 text-sm text-slate-500">Tagihan akan muncul otomatis setelah penghuni ditambahkan.</p>
     </div>
 
-    <div x-show="!loading && tagihan.length > 0" x-cloak class="overflow-x-auto">
+    <div x-show="!loading && tagihan.length > 0" x-cloak class="!hidden md:!block overflow-x-auto">
       <table class="w-full text-sm">
         <thead class="bg-slate-50 border-b border-slate-200">
           <tr>
@@ -139,6 +139,27 @@
           </template>
         </tbody>
       </table>
+    </div>
+
+    <div x-show="!loading && tagihan.length > 0" class="!block md:!hidden divide-y divide-slate-200">
+      <template x-for="item in tagihan" :key="'m-' + item.id_tagihan">
+        <article class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nomor_tagihan"></div><div class="mt-1 text-xs text-slate-500" x-text="item.nama_kos + ' · Kamar ' + item.nomor_kamar"></div></div>
+            <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+            <div><div class="text-slate-400">Periode</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_mulai) + ' - ' + formatDate(item.tanggal_selesai)"></div></div>
+            <div><div class="text-slate-400">Jatuh tempo</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_jatuh_tempo)"></div></div>
+            <div><div class="text-slate-400">Total</div><div class="mt-1 font-semibold text-slate-800" x-text="format(item.total_tagihan)"></div></div>
+            <div><div class="text-slate-400">Sisa</div><div class="mt-1 font-semibold text-slate-800" x-text="format(item.sisa_tagihan)"></div></div>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button type="button" @click="openDetail(item.id_tagihan)" class="btn-secondary flex-1">Detail</button>
+            <button type="button" x-show="item.status !== 'lunas' && item.status !== 'dibatalkan'" @click="openPayment(item)" class="btn-primary flex-1">Bayar</button>
+          </div>
+        </article>
+      </template>
     </div>
   </div>
 

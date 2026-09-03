@@ -67,15 +67,42 @@
       <p class="mt-1 text-sm text-slate-500">Coba ubah pencarian atau filter.</p>
     </div>
 
-    <div x-show="!loading && result.items.length" class="overflow-x-auto">
-      <table class="w-full min-w-[900px] text-sm">
+    <div x-show="!loading && result.items.length" class="!block md:!hidden divide-y divide-slate-200">
+      <template x-for="user in result.items" :key="'m-' + user.id_user">
+        <article class="p-4 space-y-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 shrink-0 rounded-full bg-primary-soft text-primary flex items-center justify-center font-bold" x-text="initial(user.nama)"></div>
+              <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="user.nama"></div><div class="text-xs text-slate-500 truncate" x-text="user.email"></div><div class="text-xs text-slate-400" x-text="user.no_hp || 'No. HP belum diisi'"></div></div>
+            </div>
+            <span class="shrink-0 px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium" x-text="roleLabel(user.role)"></span>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Verifikasi</div><div class="mt-1 font-semibold" x-text="user.email_verified_at ? 'Terverifikasi' : 'Belum diverifikasi'"></div></div>
+            <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Status</div><div class="mt-1 font-semibold" x-text="statusLabel(user.status)"></div></div>
+            <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Login terakhir</div><div class="mt-1 font-semibold text-slate-700" x-text="user.last_login_at ? formatDateTime(user.last_login_at) : 'Belum pernah login'"></div></div>
+            <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Terdaftar</div><div class="mt-1 font-semibold text-slate-700" x-text="formatDate(user.created_at)"></div></div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button x-show="!user.email_verified_at" @click="verify(user)" class="btn-secondary text-xs text-emerald-700">Verifikasi</button>
+            <button x-show="user.status === 'aktif' && Number(user.id_user) !== currentUserId" @click="changeStatus(user, 'nonaktif')" class="btn-secondary text-xs text-red-600">Nonaktifkan</button>
+            <button x-show="user.status === 'nonaktif' && Number(user.id_user) !== currentUserId" @click="changeStatus(user, 'aktif')" class="btn-secondary text-xs text-emerald-700">Aktifkan</button>
+            <button x-show="user.status !== 'ditangguhkan' && Number(user.id_user) !== currentUserId" @click="changeStatus(user, 'ditangguhkan')" class="btn-secondary text-xs text-amber-700">Tangguhkan</button>
+            <button x-show="user.status === 'ditangguhkan' && Number(user.id_user) !== currentUserId" @click="changeStatus(user, 'aktif')" class="btn-secondary text-xs text-emerald-700">Pulihkan</button>
+          </div>
+        </article>
+      </template>
+    </div>
+
+    <div x-show="!loading && result.items.length" class="!hidden md:!block overflow-x-auto overscroll-x-contain">
+      <table class="w-full min-w-[1050px] text-sm">
         <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
           <tr>
             <th class="text-left px-5 py-3">Pengguna</th>
             <th class="text-left px-5 py-3">Peran</th>
             <th class="text-left px-5 py-3">Verifikasi</th>
             <th class="text-left px-5 py-3">Status</th>
-            <th class="text-left px-5 py-3">Terdaftar</th>
+            <th class="text-left px-5 py-3">Login Terakhir</th><th class="text-left px-5 py-3">Terdaftar</th>
             <th class="text-right px-5 py-3">Aksi</th>
           </tr>
         </thead>
@@ -97,7 +124,7 @@
                 <span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="user.email_verified_at ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" x-text="user.email_verified_at ? 'Terverifikasi' : 'Belum diverifikasi'"></span>
               </td>
               <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="statusClass(user.status)" x-text="statusLabel(user.status)"></span></td>
-              <td class="px-5 py-4 text-slate-500" x-text="formatDate(user.created_at)"></td>
+              <td class="px-5 py-4 whitespace-nowrap"><div class="text-slate-700" x-text="user.last_login_at ? formatDateTime(user.last_login_at) : 'Belum pernah login'"></div><div class="text-[11px] text-slate-400" x-text="user.last_login_at ? 'Aktivitas terakhir' : 'Belum ada aktivitas login'"></div></td><td class="px-5 py-4 text-slate-500 whitespace-nowrap" x-text="formatDate(user.created_at)"></td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
                   <button x-show="!user.email_verified_at" @click="verify(user)" class="btn-secondary text-xs text-emerald-700">Verifikasi</button>
@@ -196,6 +223,7 @@ function adminPenggunaPage() {
     statusLabel(status) { return status === 'aktif' ? 'Aktif' : status === 'ditangguhkan' ? 'Ditangguhkan' : 'Nonaktif'; },
     statusClass(status) { return status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : status === 'ditangguhkan' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'; },
     formatDate(v) { if (!v) return '-'; const d = new Date(String(v).replace(' ', 'T')); return isNaN(d) ? '-' : d.toLocaleDateString('id-ID', { dateStyle: 'medium' }); },
+    formatDateTime(v) { if (!v) return '-'; const d = new Date(String(v).replace(' ', 'T')); return isNaN(d) ? '-' : d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); },
     openCreate() { this.resetForm(); this.createOpen = true; },
     closeCreate() { if (!this.saving) this.createOpen = false; },
     async createUser() {

@@ -18,9 +18,20 @@ class ApiDashboardController
       ], 401);
     }
 
+    model('Langganan');
+    $subscription = getStatusLanggananPemilik((int) $user['id_user']);
+
+    $dashboard = getDashboardPemilik((int) $user['id_user'], $subscription['is_pro']);
+    $dashboard['subscription'] = [
+      'is_pro' => $subscription['is_pro'],
+      'status' => $subscription['status'],
+      'days_remaining' => $subscription['days_remaining'],
+      'reminder' => $subscription['reminder']
+    ];
+
     response([
       'success' => true,
-      'data' => getDashboardPemilik((int)$user['id_user'])
+      'data' => $dashboard
     ]);
   }
 }

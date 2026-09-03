@@ -134,6 +134,32 @@ class PemilikController
     ]);
   }
 
+
+  public function langganan()
+  {
+    view('pemilik/langganan/index', [
+      'title' => 'Langganan BetaKos',
+      'layout' => 'pemilik',
+      'upgrade_requested' => query('upgrade') === '1'
+    ]);
+  }
+
+  public function langgananCheckout()
+  {
+    view('pemilik/langganan/checkout', [
+      'title' => 'Checkout BetaKos Pro',
+      'layout' => 'pemilik'
+    ]);
+  }
+
+  public function langgananPembayaran()
+  {
+    view('pemilik/langganan/pembayaran', [
+      'title' => 'Pembayaran Langganan',
+      'layout' => 'pemilik'
+    ]);
+  }
+
   public function kamar()
   {
     view('pemilik/kamar/index', [

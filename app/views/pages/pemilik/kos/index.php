@@ -80,7 +80,7 @@
             </div>
 
 
-            <div class="grid grid-cols-3 gap-2 mt-5">
+            <div class="grid grid-cols-2 gap-2 mt-5 sm:grid-cols-4">
 
               <div class="bg-slate-50 rounded-lg p-3 text-center">
                 <div class="font-semibold">
@@ -106,6 +106,15 @@
                 </div>
                 <div class="text-xs text-slate-500">
                   Terisi
+                </div>
+              </div>
+
+              <div class="bg-slate-50 rounded-lg p-3 text-center">
+                <div class="font-semibold">
+                  <?= $item['kamar_tidak_tersedia'] ?>
+                </div>
+                <div class="text-xs text-slate-500">
+                  Tidak tersedia
                 </div>
               </div>
 

@@ -3,6 +3,8 @@
 // Admin membutuhkan fungsi user (findUserByEmail, tambahUser).
 // Pastikan model User dimuat meskipun Admin dipanggil secara langsung dari API.
 require_once ROOT_PATH . '/app/models/User.php';
+require_once ROOT_PATH . '/app/models/Langganan.php';
+require_once ROOT_PATH . '/app/models/MetodePembayaranLangganan.php';
 
 function getAdminVerificationSummary()
 {
@@ -349,7 +351,8 @@ function getAdminUserList($page = 1, $limit = 10, $search = '', $role = '', $ver
       u.email_verified_at,
       u.status,
       u.created_at,
-      u.updated_at
+      u.updated_at,
+      u.last_login_at
     FROM users u
     $whereSql
     ORDER BY u.id_user DESC
@@ -627,4 +630,142 @@ function prosesLaporanKos($id_laporan, $id_admin, $status, $catatan_admin = '')
   }
   $stmt->close();
   return true;
+}
+
+/* =========================================================
+   DASHBOARD ADMIN LENGKAP
+   ========================================================= */
+
+function getAdminDashboardData()
+{
+  $conn = db();
+
+  $scalar = function ($sql) use ($conn) {
+    $result = $conn->query($sql);
+    if (!$result) throw new RuntimeException('Gagal mengambil data dashboard.');
+    $row = $result->fetch_assoc() ?: [];
+    return $row;
+  };
+
+  $users = $scalar("SELECT
+    COUNT(*) AS total,
+    SUM(CASE WHEN status = 'aktif' THEN 1 ELSE 0 END) AS aktif,
+    SUM(CASE WHEN status <> 'aktif' THEN 1 ELSE 0 END) AS nonaktif,
+    SUM(CASE WHEN role = 'pemilik' THEN 1 ELSE 0 END) AS pemilik,
+    SUM(CASE WHEN role = 'pelanggan' THEN 1 ELSE 0 END) AS pelanggan,
+    SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) AS admin,
+    SUM(CASE WHEN email_verified_at IS NULL THEN 1 ELSE 0 END) AS belum_verifikasi,
+    SUM(CASE WHEN last_login_at >= CURRENT_DATE THEN 1 ELSE 0 END) AS login_hari_ini,
+    SUM(CASE WHEN last_login_at >= DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 7 DAY) THEN 1 ELSE 0 END) AS login_7_hari
+    FROM users");
+
+  $kos = $scalar("SELECT
+    COUNT(*) AS total,
+    SUM(CASE WHEN status = 'aktif' THEN 1 ELSE 0 END) AS aktif,
+    SUM(CASE WHEN status = 'menunggu_verifikasi' THEN 1 ELSE 0 END) AS menunggu_verifikasi,
+    SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) AS draft,
+    SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak
+    FROM kos");
+
+  $kamar = $scalar("SELECT
+    COUNT(*) AS total,
+    SUM(CASE WHEN status = 'terisi' THEN 1 ELSE 0 END) AS terisi,
+    SUM(CASE WHEN status = 'tersedia' THEN 1 ELSE 0 END) AS tersedia
+    FROM kamar");
+
+  $penghuni = $scalar("SELECT COUNT(*) AS aktif FROM penghuni WHERE status = 'aktif'");
+
+  $verification = getAdminVerificationSummary();
+  $subscriptions = getAdminSubscriptionSummary();
+  $laporan = getAdminLaporanSummary();
+
+  $payment = $scalar("SELECT
+    COUNT(*) AS total,
+    SUM(CASE WHEN status = 'menunggu' THEN 1 ELSE 0 END) AS menunggu,
+    SUM(CASE WHEN status = 'diverifikasi' THEN 1 ELSE 0 END) AS diverifikasi,
+    SUM(CASE WHEN status = 'ditolak' THEN 1 ELSE 0 END) AS ditolak,
+    COALESCE(SUM(CASE WHEN status = 'diverifikasi' THEN nominal ELSE 0 END), 0) AS total_terverifikasi,
+    COALESCE(SUM(CASE WHEN status = 'diverifikasi' AND tanggal_verifikasi >= DATE_FORMAT(CURRENT_DATE, '%Y-%m-01') THEN nominal ELSE 0 END), 0) AS pendapatan_bulan_ini
+    FROM pembayaran_langganan");
+
+  $paymentMethods = $scalar("SELECT
+    COUNT(*) AS total,
+    SUM(CASE WHEN is_aktif = 1 THEN 1 ELSE 0 END) AS aktif,
+    SUM(CASE WHEN is_aktif = 0 THEN 1 ELSE 0 END) AS nonaktif,
+    SUM(CASE WHEN jenis = 'transfer_bank' AND is_aktif = 1 THEN 1 ELSE 0 END) AS bank_aktif,
+    SUM(CASE WHEN jenis = 'e_wallet' AND is_aktif = 1 THEN 1 ELSE 0 END) AS ewallet_aktif
+    FROM metode_pembayaran_langganan");
+
+  $recentUsersResult = $conn->query("SELECT id_user, nama, email, role, status, email_verified_at, last_login_at, created_at FROM users ORDER BY id_user DESC LIMIT 8");
+  if (!$recentUsersResult) throw new RuntimeException('Gagal mengambil pengguna terbaru.');
+  $recentUsers = $recentUsersResult->fetch_all(MYSQLI_ASSOC);
+
+  $recentKosResult = $conn->query("SELECT k.id_kos, k.nama_kos, k.status, k.jenis, k.created_at, u.nama AS nama_pemilik FROM kos k INNER JOIN users u ON u.id_user = k.id_pemilik ORDER BY k.id_kos DESC LIMIT 8");
+  if (!$recentKosResult) throw new RuntimeException('Gagal mengambil kos terbaru.');
+  $recentKos = $recentKosResult->fetch_all(MYSQLI_ASSOC);
+
+  $pendingPaymentResult = $conn->query("SELECT pl.id_pembayaran_langganan, pl.nomor_order, pl.nominal, pl.jenis_pembayaran, pl.metode_pembayaran, pl.created_at, u.nama AS nama_pemilik, p.nama AS nama_paket FROM pembayaran_langganan pl INNER JOIN users u ON u.id_user = pl.id_pemilik INNER JOIN paket_langganan p ON p.id_paket_langganan = pl.id_paket_langganan WHERE pl.status = 'menunggu' ORDER BY pl.id_pembayaran_langganan DESC LIMIT 6");
+  if (!$pendingPaymentResult) throw new RuntimeException('Gagal mengambil pembayaran terbaru.');
+  $pendingPayments = $pendingPaymentResult->fetch_all(MYSQLI_ASSOC);
+  foreach ($pendingPayments as &$item) $item['nominal'] = (float)$item['nominal'];
+  unset($item);
+
+  $pendingReportResult = $conn->query("SELECT l.id_laporan, l.alasan, l.status, l.created_at, k.nama_kos, u.nama AS nama_pelapor FROM laporan_kos l INNER JOIN kos k ON k.id_kos = l.id_kos INNER JOIN users u ON u.id_user = l.id_user WHERE l.status IN ('menunggu','diproses') ORDER BY l.id_laporan DESC LIMIT 6");
+  if (!$pendingReportResult) throw new RuntimeException('Gagal mengambil laporan terbaru.');
+  $pendingReports = $pendingReportResult->fetch_all(MYSQLI_ASSOC);
+
+  $pendingVerification = getAdminVerifikasiList('menunggu');
+  $pendingVerification = array_slice($pendingVerification, 0, 6);
+
+  return [
+    'pengguna' => array_map('intval', [
+      'total' => $users['total'] ?? 0,
+      'aktif' => $users['aktif'] ?? 0,
+      'nonaktif' => $users['nonaktif'] ?? 0,
+      'pemilik' => $users['pemilik'] ?? 0,
+      'pelanggan' => $users['pelanggan'] ?? 0,
+      'admin' => $users['admin'] ?? 0,
+      'belum_verifikasi' => $users['belum_verifikasi'] ?? 0,
+      'login_hari_ini' => $users['login_hari_ini'] ?? 0,
+      'login_7_hari' => $users['login_7_hari'] ?? 0,
+    ]),
+    'kos' => array_map('intval', [
+      'total' => $kos['total'] ?? 0,
+      'aktif' => $kos['aktif'] ?? 0,
+      'menunggu_verifikasi' => $kos['menunggu_verifikasi'] ?? 0,
+      'draft' => $kos['draft'] ?? 0,
+      'ditolak' => $kos['ditolak'] ?? 0,
+    ]),
+    'kamar' => array_map('intval', [
+      'total' => $kamar['total'] ?? 0,
+      'terisi' => $kamar['terisi'] ?? 0,
+      'tersedia' => $kamar['tersedia'] ?? 0,
+    ]),
+    'penghuni_aktif' => (int)($penghuni['aktif'] ?? 0),
+    'verifikasi' => $verification,
+    'langganan' => $subscriptions,
+    'laporan' => $laporan,
+    'pembayaran_langganan' => [
+      'total' => (int)($payment['total'] ?? 0),
+      'menunggu' => (int)($payment['menunggu'] ?? 0),
+      'diverifikasi' => (int)($payment['diverifikasi'] ?? 0),
+      'ditolak' => (int)($payment['ditolak'] ?? 0),
+      'total_terverifikasi' => (float)($payment['total_terverifikasi'] ?? 0),
+      'pendapatan_bulan_ini' => (float)($payment['pendapatan_bulan_ini'] ?? 0),
+    ],
+    'metode_pembayaran' => array_map('intval', [
+      'total' => $paymentMethods['total'] ?? 0,
+      'aktif' => $paymentMethods['aktif'] ?? 0,
+      'nonaktif' => $paymentMethods['nonaktif'] ?? 0,
+      'bank_aktif' => $paymentMethods['bank_aktif'] ?? 0,
+      'ewallet_aktif' => $paymentMethods['ewallet_aktif'] ?? 0,
+    ]),
+    'terbaru' => [
+      'pengguna' => $recentUsers,
+      'kos' => $recentKos,
+      'pembayaran_menunggu' => $pendingPayments,
+      'laporan_menunggu' => $pendingReports,
+      'verifikasi_menunggu' => $pendingVerification,
+    ],
+  ];
 }
