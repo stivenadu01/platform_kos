@@ -4,31 +4,33 @@
   class="space-y-6">
 
   <!-- HEADER -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-
+  <div class="space-y-4">
     <div>
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
-        Kelola Kamar
-      </h2>
-
-      <p class="mt-1 text-sm text-slate-500">
-        Kelola kamar dari seluruh kos yang Anda miliki.
-      </p>
+      <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Kelola Kamar</h2>
+      <p class="mt-1 text-sm text-slate-500">Kelola unit kamar dari seluruh kos yang Anda miliki.</p>
     </div>
 
-    <a
-      href="<?= BASE_URL ?>/pemilik/kamar/tambah"
-      class="btn-primary">
-      + Tambah Kamar
-    </a>
-
+    <div class="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
+      <a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary justify-center">
+        Kelola Tipe Kamar
+      </a>
+      <a href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-secondary justify-center">
+        + Tambah Tipe Kamar
+      </a>
+      <a href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary justify-center">
+        + Tambah Banyak Kamar
+      </a>
+      <a href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary justify-center">
+        + Tambah Satu Kamar
+      </a>
+    </div>
   </div>
 
 
   <!-- FILTER -->
   <div class="card border border-slate-200 shadow-sm">
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
 
       <div class="form-group">
         <label class="label">
@@ -40,7 +42,7 @@
           x-model="search"
           @input.debounce.400ms="load()"
           class="input"
-          placeholder="Nomor atau tipe kamar">
+          placeholder="Cari nomor kamar...">
       </div>
 
 
@@ -51,7 +53,7 @@
 
         <select
           x-model="idKos"
-          @change="load()"
+          @change="loadTipe().then(() => load())"
           class="input">
 
           <option value="">
@@ -68,6 +70,22 @@
         </select>
       </div>
 
+
+      <div class="form-group">
+        <label class="label">
+          Tipe kamar
+        </label>
+
+        <select
+          x-model="idTipeKamar"
+          @change="load()"
+          class="input">
+          <option value="">Semua tipe</option>
+          <template x-for="tipe in tipeList" :key="tipe.id_tipe_kamar">
+            <option :value="tipe.id_tipe_kamar" x-text="tipe.nama_tipe"></option>
+          </template>
+        </select>
+      </div>
 
       <div class="form-group">
         <label class="label">
@@ -134,11 +152,10 @@
         Tambahkan kamar untuk mulai mengelola ketersediaan kos.
       </p>
 
-      <a
-        href="<?= BASE_URL ?>/pemilik/kamar/tambah"
-        class="btn-primary inline-flex mt-5">
-        + Tambah Kamar
-      </a>
+      <div class="mt-5 flex flex-wrap justify-center gap-3">
+        <a href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary">+ Tambah Satu Kamar</a>
+        <a href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary">+ Tambah Banyak Kamar</a>
+      </div>
 
     </div>
 
@@ -303,9 +320,9 @@
                   </a>
 
                   <a
-                    :href="BASE_URL + '/pemilik/kamar/harga?id_kamar=' + item.id_kamar"
+                    :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar"
                     class="btn-secondary">
-                    Atur Harga
+                    Kelola Tipe
                   </a>
 
                   <button
@@ -343,7 +360,9 @@
 
       search: '',
       idKos: '',
+      idTipeKamar: '',
       status: '',
+      tipeList: [],
 
       loading: false,
 
@@ -362,9 +381,24 @@
           );
 
           this.kosList = res.data || [];
+          await this.loadTipe();
 
         } catch (error) {
           console.error(error);
+        }
+      },
+
+      async loadTipe() {
+        try {
+          const query = this.idKos ? '?id_kos=' + encodeURIComponent(this.idKos) : '';
+          const res = await API.get('/pemilik/tipe-kamar' + query, false);
+          this.tipeList = res.data || [];
+          if (this.idTipeKamar && !this.tipeList.some((item) => String(item.id_tipe_kamar) === String(this.idTipeKamar))) {
+            this.idTipeKamar = '';
+          }
+        } catch (error) {
+          console.error('Gagal memuat tipe kamar:', error);
+          this.tipeList = [];
         }
       },
 
@@ -384,6 +418,11 @@
           if (this.idKos) {
             utils.setQuery('id_kos', this.idKos);
             params.set('id_kos', this.idKos);
+          }
+
+          if (this.idTipeKamar) {
+            utils.setQuery('id_tipe_kamar', this.idTipeKamar);
+            params.set('id_tipe_kamar', this.idTipeKamar);
           }
 
           if (this.status) {

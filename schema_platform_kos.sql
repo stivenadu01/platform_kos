@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     no_hp VARCHAR(30),
     foto VARCHAR(255),
     email_verified_at DATETIME NULL,
+    last_login_at DATETIME NULL,
     status ENUM('aktif', 'nonaktif', 'ditangguhkan')
         NOT NULL DEFAULT 'aktif',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -87,15 +88,27 @@ CREATE TABLE IF NOT EXISTS kos (
     INDEX idx_kos_jenis (jenis)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS tipe_kamar (
+    id_tipe_kamar BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_kos BIGINT UNSIGNED NOT NULL,
+    nama_tipe VARCHAR(100) NOT NULL,
+    kapasitas TINYINT UNSIGNED NOT NULL,
+    deskripsi TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT uq_tipe_kamar_nama UNIQUE (id_kos, nama_tipe),
+    CONSTRAINT chk_tipe_kamar_kapasitas CHECK (kapasitas > 0),
+    INDEX idx_tipe_kamar_kos (id_kos)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS kamar (
     id_kamar BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     id_kos BIGINT UNSIGNED NOT NULL,
+    id_tipe_kamar BIGINT UNSIGNED NOT NULL,
 
     nomor_kamar VARCHAR(50) NOT NULL,
-    tipe_kamar VARCHAR(100),
-
-    kapasitas TINYINT UNSIGNED NOT NULL,
 
     status ENUM(
         'tersedia',
@@ -114,14 +127,15 @@ CREATE TABLE IF NOT EXISTS kamar (
         UNIQUE (id_kos, nomor_kamar),
 
     INDEX idx_kamar_kos (id_kos),
+    INDEX idx_kamar_tipe (id_tipe_kamar),
     INDEX idx_kamar_status (status),
-    INDEX idx_kamar_kapasitas (kapasitas)
+    INDEX idx_kamar_nomor (nomor_kamar)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS harga_kamar (
     id_harga BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
-    id_kamar BIGINT UNSIGNED NOT NULL,
+    id_tipe_kamar BIGINT UNSIGNED NOT NULL,
 
     jumlah_orang TINYINT UNSIGNED NOT NULL,
 
@@ -132,7 +146,7 @@ CREATE TABLE IF NOT EXISTS harga_kamar (
         ON UPDATE CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_harga_jumlah_orang
-        UNIQUE (id_kamar, jumlah_orang),
+        UNIQUE (id_tipe_kamar, jumlah_orang),
 
     CONSTRAINT chk_harga_positif
         CHECK (harga_total >= 0),
@@ -140,13 +154,14 @@ CREATE TABLE IF NOT EXISTS harga_kamar (
     CONSTRAINT chk_jumlah_orang_positif
         CHECK (jumlah_orang > 0),
 
-    INDEX idx_harga_kamar (id_kamar)
+    INDEX idx_harga_tipe (id_tipe_kamar)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS fasilitas (
     id_fasilitas BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
 
     nama_fasilitas VARCHAR(100) NOT NULL UNIQUE,
+    kategori ENUM('kos', 'kamar') NOT NULL DEFAULT 'kos',
 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
@@ -171,6 +186,16 @@ CREATE TABLE IF NOT EXISTS kos_foto (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_kos_foto_kos (id_kos)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS tipe_kamar_foto (
+    id_foto BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id_tipe_kamar BIGINT UNSIGNED NOT NULL,
+    nama_file VARCHAR(255) NOT NULL,
+    urutan SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    is_thumbnail BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_tipe_kamar_foto_tipe (id_tipe_kamar)
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS penghuni (
@@ -226,6 +251,13 @@ CREATE TABLE IF NOT EXISTS claim_riwayat (
     CONSTRAINT uq_claim_penghuni UNIQUE (id_penghuni),
     INDEX idx_claim_user (id_user),
     INDEX idx_claim_status (status)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS tipe_kamar_fasilitas (
+    id_tipe_kamar BIGINT UNSIGNED NOT NULL,
+    id_fasilitas BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (id_tipe_kamar, id_fasilitas),
+    INDEX idx_tipe_kamar_fasilitas_fasilitas (id_fasilitas)
 ) ENGINE=InnoDB;
 
 /* =========================================================
@@ -556,11 +588,19 @@ ALTER TABLE kos
 ALTER TABLE kamar
     ADD CONSTRAINT fk_kamar_kos
         FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_kamar_tipe
+        FOREIGN KEY (id_tipe_kamar) REFERENCES tipe_kamar(id_tipe_kamar)
+        ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE tipe_kamar
+    ADD CONSTRAINT fk_tipe_kamar_kos
+        FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
         ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE harga_kamar
     ADD CONSTRAINT fk_harga_kamar
-        FOREIGN KEY (id_kamar) REFERENCES kamar(id_kamar)
+        FOREIGN KEY (id_tipe_kamar) REFERENCES tipe_kamar(id_tipe_kamar)
         ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE kos_fasilitas
@@ -574,6 +614,11 @@ ALTER TABLE kos_fasilitas
 ALTER TABLE kos_foto
     ADD CONSTRAINT fk_kos_foto_kos
         FOREIGN KEY (id_kos) REFERENCES kos(id_kos)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE tipe_kamar_foto
+    ADD CONSTRAINT fk_tipe_kamar_foto_tipe
+        FOREIGN KEY (id_tipe_kamar) REFERENCES tipe_kamar(id_tipe_kamar)
         ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE penghuni
@@ -590,6 +635,14 @@ ALTER TABLE claim_riwayat
         ON DELETE CASCADE ON UPDATE CASCADE,
     ADD CONSTRAINT fk_claim_user
         FOREIGN KEY (id_user) REFERENCES users(id_user)
+        ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE tipe_kamar_fasilitas
+    ADD CONSTRAINT fk_tipe_kamar_fasilitas_tipe
+        FOREIGN KEY (id_tipe_kamar) REFERENCES tipe_kamar(id_tipe_kamar)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    ADD CONSTRAINT fk_tipe_kamar_fasilitas_fasilitas
+        FOREIGN KEY (id_fasilitas) REFERENCES fasilitas(id_fasilitas)
         ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE tagihan
@@ -619,7 +672,7 @@ ALTER TABLE pembayaran
         ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_pembayaran_penghuni
         FOREIGN KEY (id_penghuni) REFERENCES penghuni(id_penghuni)
-        ON DELETE SET NULL ON UPDATE CASCADE,
+        ON DELETE RESTRICT ON UPDATE CASCADE,
     ADD CONSTRAINT fk_pembayaran_user
         FOREIGN KEY (id_user) REFERENCES users(id_user)
         ON DELETE SET NULL ON UPDATE CASCADE;

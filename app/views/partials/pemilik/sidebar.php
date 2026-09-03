@@ -122,7 +122,7 @@
     </a>
 
 
-    <!-- KAMAR -->
+    <!-- KELOLA KAMAR -->
     <a
       :href="window.BASE_URL + '/pemilik/kamar'"
       class="
@@ -140,7 +140,7 @@
       </span>
 
       <span>
-        Kamar
+        Kelola Kamar
       </span>
 
     </a>

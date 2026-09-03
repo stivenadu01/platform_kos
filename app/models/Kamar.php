@@ -1,6 +1,6 @@
 <?php
 
-function getKamarListByPemilik($id_pemilik, $search = '', $id_kos = '', $status = '')
+function getKamarListByPemilik($id_pemilik, $search = '', $id_kos = '', $status = '', $id_tipe_kamar = '')
 {
   $conn = db();
 
@@ -12,12 +12,10 @@ function getKamarListByPemilik($id_pemilik, $search = '', $id_kos = '', $status 
   $types = 'i';
 
   if ($search !== '') {
-    $where[] = '(km.nomor_kamar LIKE ? OR km.tipe_kamar LIKE ?)';
-    $keyword = "%{$search}%";
-
-    $params[] = $keyword;
-    $params[] = $keyword;
-    $types .= 'ss';
+    // Pencarian sengaja dibatasi hanya pada nomor kamar agar cepat dan tidak membingungkan.
+    $where[] = 'km.nomor_kamar LIKE ?';
+    $params[] = "%{$search}%";
+    $types .= 's';
   }
 
   if ($id_kos !== '') {
@@ -32,6 +30,12 @@ function getKamarListByPemilik($id_pemilik, $search = '', $id_kos = '', $status 
     $types .= 's';
   }
 
+  if ($id_tipe_kamar !== '') {
+    $where[] = 'km.id_tipe_kamar = ?';
+    $params[] = (int) $id_tipe_kamar;
+    $types .= 'i';
+  }
+
   $whereSql = 'WHERE ' . implode(' AND ', $where);
 
   $sql = "
@@ -39,8 +43,9 @@ function getKamarListByPemilik($id_pemilik, $search = '', $id_kos = '', $status 
       km.id_kamar,
       km.id_kos,
       km.nomor_kamar,
-      km.tipe_kamar,
-      km.kapasitas,
+      km.id_tipe_kamar,
+      tk.nama_tipe AS tipe_kamar,
+      tk.kapasitas,
       km.status,
       km.deskripsi,
       km.created_at,
@@ -50,19 +55,22 @@ function getKamarListByPemilik($id_pemilik, $search = '', $id_kos = '', $status 
       (
         SELECT MIN(hk.harga_total)
         FROM harga_kamar hk
-        WHERE hk.id_kamar = km.id_kamar
+        WHERE hk.id_tipe_kamar = km.id_tipe_kamar
       ) AS harga_min,
 
       (
         SELECT MAX(hk.harga_total)
         FROM harga_kamar hk
-        WHERE hk.id_kamar = km.id_kamar
+        WHERE hk.id_tipe_kamar = km.id_tipe_kamar
       ) AS harga_max
 
     FROM kamar km
 
     INNER JOIN kos k
       ON k.id_kos = km.id_kos
+
+    INNER JOIN tipe_kamar tk
+      ON tk.id_tipe_kamar = km.id_tipe_kamar
 
     {$whereSql}
 
@@ -98,10 +106,15 @@ function findKamarByIdPemilik(
   $stmt = $conn->prepare("
     SELECT
       km.*,
+      tk.nama_tipe AS tipe_kamar,
+      tk.kapasitas,
       k.nama_kos
     FROM kamar km
     INNER JOIN kos k
       ON k.id_kos = km.id_kos
+
+    INNER JOIN tipe_kamar tk
+      ON tk.id_tipe_kamar = km.id_tipe_kamar
     WHERE km.id_kamar = ?
       AND k.id_pemilik = ?
     LIMIT 1
@@ -168,37 +181,27 @@ function createKamar($data, $id_pemilik)
 {
   $conn = db();
 
-  $id_kos = (int) $data['id_kos'];
-  $nomor_kamar = trim($data['nomor_kamar']);
-  $tipe_kamar = trim($data['tipe_kamar'] ?? '');
-  $kapasitas = (int) $data['kapasitas'];
-  $deskripsi = trim($data['deskripsi'] ?? '');
-
-  /*
-   * Pastikan kos benar-benar milik pemilik
-   */
+  $id_tipe_kamar = (int) ($data['id_tipe_kamar'] ?? 0);
+  $nomor_kamar = trim($data['nomor_kamar'] ?? '');
   $stmt = $conn->prepare("
-    SELECT id_kos
-    FROM kos
-    WHERE id_kos = ?
-      AND id_pemilik = ?
+    SELECT t.id_tipe_kamar, t.id_kos
+    FROM tipe_kamar t
+    INNER JOIN kos k ON k.id_kos = t.id_kos
+    WHERE t.id_tipe_kamar = ?
+      AND k.id_pemilik = ?
     LIMIT 1
   ");
 
-  $stmt->bind_param('ii', $id_kos, $id_pemilik);
+  $stmt->bind_param('ii', $id_tipe_kamar, $id_pemilik);
   $stmt->execute();
-
-  $kos = $stmt->get_result()->fetch_assoc();
-
+  $tipe = $stmt->get_result()->fetch_assoc();
   $stmt->close();
 
-  if (!$kos) {
-    throw new Exception('Kos tidak ditemukan atau bukan milik Anda.');
+  if (!$tipe || $nomor_kamar === '') {
+    throw new Exception('Tipe kamar dan nomor kamar wajib diisi.');
   }
 
-  /*
-   * Cegah nomor kamar duplikat pada kos yang sama
-   */
+  $id_kos = (int) $tipe['id_kos'];
   $stmt = $conn->prepare("
     SELECT id_kamar
     FROM kamar
@@ -218,31 +221,20 @@ function createKamar($data, $id_pemilik)
     throw new Exception('Nomor kamar tersebut sudah digunakan pada kos ini.');
   }
 
-  /*
-   * Validasi kapasitas
-   */
-  if ($kapasitas < 1) {
-    throw new Exception('Kapasitas kamar minimal 1 orang.');
-  }
-
   $stmt = $conn->prepare("
     INSERT INTO kamar (
       id_kos,
-      nomor_kamar,
-      tipe_kamar,
-      kapasitas,
-      deskripsi
+      id_tipe_kamar,
+      nomor_kamar
     )
-    VALUES (?, ?, ?, ?, ?)
+    VALUES (?, ?, ?)
   ");
 
   $stmt->bind_param(
-    'issis',
+    'iis',
     $id_kos,
-    $nomor_kamar,
-    $tipe_kamar,
-    $kapasitas,
-    $deskripsi
+    $id_tipe_kamar,
+    $nomor_kamar
   );
 
   $result = $stmt->execute();
@@ -268,24 +260,21 @@ function updateKamar($id_kamar, $data, $id_pemilik)
     throw new Exception('Kamar tidak ditemukan atau bukan milik Anda.');
   }
 
-  $id_kos = (int) $data['id_kos'];
-  $nomor_kamar = trim($data['nomor_kamar']);
-  $tipe_kamar = trim($data['tipe_kamar'] ?? '');
-  $kapasitas = (int) $data['kapasitas'];
-  $deskripsi = trim($data['deskripsi'] ?? '');
-
+  $id_tipe_kamar = (int) ($data['id_tipe_kamar'] ?? 0);
+  $nomor_kamar = trim($data['nomor_kamar'] ?? '');
   /*
    * Pastikan kos baru juga milik pemilik
    */
   $stmt = $conn->prepare("
-    SELECT id_kos
-    FROM kos
-    WHERE id_kos = ?
-      AND id_pemilik = ?
+    SELECT t.id_kos
+    FROM tipe_kamar t
+    INNER JOIN kos k ON k.id_kos = t.id_kos
+    WHERE t.id_tipe_kamar = ?
+      AND k.id_pemilik = ?
     LIMIT 1
   ");
 
-  $stmt->bind_param('ii', $id_kos, $id_pemilik);
+  $stmt->bind_param('ii', $id_tipe_kamar, $id_pemilik);
   $stmt->execute();
 
   $kos = $stmt->get_result()->fetch_assoc();
@@ -296,9 +285,11 @@ function updateKamar($id_kamar, $data, $id_pemilik)
     throw new Exception('Kos tidak ditemukan atau bukan milik Anda.');
   }
 
-  if ($kapasitas < 1) {
-    throw new Exception('Kapasitas kamar minimal 1 orang.');
+  if (!$kos || !$id_tipe_kamar || $nomor_kamar === '') {
+    throw new Exception('Tipe kamar dan nomor kamar wajib diisi.');
   }
+
+  $id_kos = (int) $kos['id_kos'];
 
   /*
    * Cek nomor kamar duplikat.
@@ -334,20 +325,16 @@ function updateKamar($id_kamar, $data, $id_pemilik)
     UPDATE kamar
     SET
       id_kos = ?,
-      nomor_kamar = ?,
-      tipe_kamar = ?,
-      kapasitas = ?,
-      deskripsi = ?
+      id_tipe_kamar = ?,
+      nomor_kamar = ?
     WHERE id_kamar = ?
   ");
 
   $stmt->bind_param(
-    'issisi',
+    'iisi',
     $id_kos,
+    $id_tipe_kamar,
     $nomor_kamar,
-    $tipe_kamar,
-    $kapasitas,
-    $deskripsi,
     $id_kamar
   );
 
@@ -361,6 +348,70 @@ function updateKamar($id_kamar, $data, $id_pemilik)
 
 
   return true;
+}
+
+function createBulkKamar($data, $id_pemilik)
+{
+  $id_tipe_kamar = (int) ($data['id_tipe_kamar'] ?? 0);
+  $nomor_awal = trim((string) ($data['nomor_awal'] ?? ''));
+  $jumlah = (int) ($data['jumlah'] ?? 0);
+  if (!$id_tipe_kamar || $nomor_awal === '' || $jumlah < 1) {
+    throw new Exception('Tipe kamar, nomor awal, dan jumlah wajib diisi.', 422);
+  }
+  if (!ctype_digit($nomor_awal)) {
+    throw new Exception('Nomor awal harus berupa angka.', 422);
+  }
+
+  $conn = db();
+  $stmt = $conn->prepare("SELECT t.id_kos FROM tipe_kamar t INNER JOIN kos k ON k.id_kos = t.id_kos WHERE t.id_tipe_kamar = ? AND k.id_pemilik = ? LIMIT 1");
+  $stmt->bind_param('ii', $id_tipe_kamar, $id_pemilik);
+  $stmt->execute();
+  $tipe = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+  if (!$tipe) {
+    throw new Exception('Tipe kamar tidak ditemukan atau bukan milik Anda.', 403);
+  }
+
+  $nomorInt = (int) $nomor_awal;
+  if ($nomorInt < 0 || $nomorInt + $jumlah - 1 > 999999999) {
+    throw new Exception('Rentang nomor kamar tidak valid.', 422);
+  }
+
+  $nomorList = [];
+  for ($index = 0; $index < $jumlah; $index++) {
+    $nomorList[] = (string) ($nomorInt + $index);
+  }
+
+  $placeholders = implode(',', array_fill(0, count($nomorList), '?'));
+  $types = 'i' . str_repeat('s', count($nomorList));
+  $params = array_merge([(int) $tipe['id_kos']], $nomorList);
+  $stmt = $conn->prepare("SELECT nomor_kamar FROM kamar WHERE id_kos = ? AND nomor_kamar IN ($placeholders)");
+  $stmt->bind_param($types, ...$params);
+  $stmt->execute();
+  $existing = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+  if ($existing) {
+    throw new Exception('Sebagian nomor kamar sudah digunakan: ' . implode(', ', array_column($existing, 'nomor_kamar')), 422);
+  }
+
+  $conn->begin_transaction();
+  try {
+    $id_kos = (int) $tipe['id_kos'];
+    $stmt = $conn->prepare('INSERT INTO kamar (id_kos, id_tipe_kamar, nomor_kamar) VALUES (?, ?, ?)');
+    foreach ($nomorList as $nomor) {
+      $stmt->bind_param('iis', $id_kos, $id_tipe_kamar, $nomor);
+      if (!$stmt->execute()) {
+        throw new Exception('Gagal membuat kamar secara massal.', 500);
+      }
+    }
+    $stmt->close();
+    $conn->commit();
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+  }
+
+  return ['jumlah' => $jumlah, 'nomor_awal' => $nomorList[0], 'nomor_akhir' => end($nomorList)];
 }
 
 
@@ -604,13 +655,17 @@ function getHargaKamarByKamar($id_kamar)
   $stmt = $conn->prepare("
     SELECT
       id_harga,
-      id_kamar,
+      id_tipe_kamar,
       jumlah_orang,
       harga_total,
       created_at,
       updated_at
     FROM harga_kamar
-    WHERE id_kamar = ?
+    WHERE id_tipe_kamar = (
+      SELECT id_tipe_kamar
+      FROM kamar
+      WHERE id_kamar = ?
+    )
     ORDER BY jumlah_orang ASC
   ");
 
@@ -663,6 +718,19 @@ function saveHargaKamar(
     $conn = db();
     $ownConnection = true;
   }
+
+  $stmt = $conn->prepare('SELECT id_tipe_kamar, kapasitas FROM kamar INNER JOIN tipe_kamar USING (id_tipe_kamar) WHERE id_kamar = ? LIMIT 1');
+  $stmt->bind_param('i', $id_kamar);
+  $stmt->execute();
+  $room = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  if (!$room) {
+    throw new Exception('Kamar tidak ditemukan.', 404);
+  }
+
+  $id_tipe_kamar = (int) $room['id_tipe_kamar'];
+  $kapasitas = (int) $room['kapasitas'];
 
   if (!is_array($harga)) {
     throw new Exception(
@@ -765,12 +833,12 @@ function saveHargaKamar(
    */
   $stmt = $conn->prepare("
     DELETE FROM harga_kamar
-    WHERE id_kamar = ?
+    WHERE id_tipe_kamar = ?
   ");
 
   $stmt->bind_param(
     'i',
-    $id_kamar
+    $id_tipe_kamar
   );
 
   if (!$stmt->execute()) {
@@ -796,7 +864,7 @@ function saveHargaKamar(
    */
   $stmt = $conn->prepare("
     INSERT INTO harga_kamar (
-      id_kamar,
+      id_tipe_kamar,
       jumlah_orang,
       harga_total
     )
@@ -813,7 +881,7 @@ function saveHargaKamar(
 
     $stmt->bind_param(
       'iid',
-      $id_kamar,
+      $id_tipe_kamar,
       $jumlah_orang,
       $harga_total
     );

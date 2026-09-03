@@ -5,6 +5,7 @@ class ApiKamarController
   public function __construct()
   {
     model('Kamar');
+    model('TipeKamar');
   }
 
   private function pemilikId()
@@ -20,12 +21,14 @@ class ApiKamarController
       $search = query('search') ?? '';
       $id_kos = query('id_kos') ?? '';
       $status = query('status') ?? '';
+      $id_tipe_kamar = query('id_tipe_kamar') ?? '';
 
       $data = getKamarListByPemilik(
         $id_pemilik,
         $search,
         $id_kos,
-        $status
+        $status,
+        $id_tipe_kamar
       );
 
       response([
@@ -175,13 +178,12 @@ class ApiKamarController
       }
 
       if (
-        empty($data['id_kos']) ||
-        empty(trim($data['nomor_kamar'] ?? '')) ||
-        empty($data['kapasitas'])
+        empty($data['id_tipe_kamar']) ||
+        empty(trim($data['nomor_kamar'] ?? ''))
       ) {
         response([
           'success' => false,
-          'message' => 'Kos, nomor kamar, dan kapasitas wajib diisi.'
+          'message' => 'Tipe kamar dan nomor kamar wajib diisi.'
         ], 422);
         return;
       }
@@ -203,6 +205,23 @@ class ApiKamarController
         'success' => false,
         'message' => $e->getMessage()
       ], 422);
+    }
+  }
+
+  public function bulk()
+  {
+    try {
+      $result = createBulkKamar(input(), $this->pemilikId());
+      response([
+        'success' => true,
+        'message' => "{$result['jumlah']} kamar berhasil dibuat.",
+        'data' => $result
+      ], 201);
+    } catch (Throwable $e) {
+      response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], $e->getCode() ?: 422);
     }
   }
 
@@ -231,15 +250,14 @@ class ApiKamarController
        * Validasi dasar kamar.
        */
       if (
-        empty($data['id_kos']) ||
-        empty(trim($data['nomor_kamar'] ?? '')) ||
-        empty($data['kapasitas'])
+        empty($data['id_tipe_kamar']) ||
+        empty(trim($data['nomor_kamar'] ?? ''))
       ) {
 
         response([
           'success' => false,
           'message' =>
-          'Kos, nomor kamar, dan kapasitas wajib diisi.'
+          'Tipe kamar dan nomor kamar wajib diisi.'
         ], 422);
 
         return;

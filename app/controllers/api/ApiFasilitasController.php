@@ -8,7 +8,7 @@ class ApiFasilitasController
 
     response([
       'success' => true,
-      'data' => getAllFasilitas()
+      'data' => getAllFasilitas(query('kategori') ?? 'kos')
     ]);
   }
 }
