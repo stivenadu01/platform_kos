@@ -23,7 +23,8 @@ function getKosByPemilik($id_pemilik)
       vk.tanggal_verifikasi,
       COUNT(DISTINCT km.id_kamar) AS jumlah_kamar,
       COUNT(DISTINCT CASE WHEN km.status = 'tersedia' THEN km.id_kamar END) AS kamar_tersedia,
-      COUNT(DISTINCT CASE WHEN km.status = 'terisi' THEN km.id_kamar END) AS kamar_terisi
+      COUNT(DISTINCT CASE WHEN km.status = 'terisi' THEN km.id_kamar END) AS kamar_terisi,
+      COUNT(DISTINCT CASE WHEN km.status = 'tidak_tersedia' THEN km.id_kamar END) AS kamar_tidak_tersedia
     FROM kos k
     LEFT JOIN kamar km ON km.id_kos = k.id_kos
     LEFT JOIN (
@@ -487,13 +488,20 @@ function getDetailKosPublik($id_kos)
       u.no_hp AS no_hp_pemilik,
       u.foto AS foto_pemilik,
       u.last_login_at AS last_login_at,
+      CASE WHEN COUNT(DISTINCT lpro.id_langganan) > 0 THEN 1 ELSE 0 END AS pemilik_pro,
       COUNT(DISTINCT CASE WHEN km.status = 'tersedia' THEN km.id_kamar END) AS kamar_tersedia,
+      COUNT(DISTINCT CASE WHEN km.status = 'tidak_tersedia' THEN km.id_kamar END) AS kamar_tidak_tersedia,
+      COUNT(DISTINCT CASE WHEN km.status = 'terisi' THEN km.id_kamar END) AS kamar_terisi,
       MIN(CASE WHEN km.status = 'tersedia' THEN hk.harga_total END) AS harga_mulai
     FROM kos k
     INNER JOIN users u ON u.id_user = k.id_pemilik
     LEFT JOIN kamar km ON km.id_kos = k.id_kos
     LEFT JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     LEFT JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
+    LEFT JOIN langganan lpro ON lpro.id_pemilik = k.id_pemilik
+      AND lpro.status = 'aktif'
+      AND lpro.tanggal_mulai <= CURDATE()
+      AND lpro.tanggal_berakhir >= CURDATE()
     WHERE k.id_kos = ? AND k.status = 'aktif'
     GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, u.nama, u.no_hp, u.foto, u.last_login_at
     LIMIT 1
@@ -514,7 +522,9 @@ function getDetailKosPublik($id_kos)
       tk.kapasitas,
       tk.deskripsi,
       COUNT(km.id_kamar) AS jumlah_kamar,
-      SUM(CASE WHEN km.status = 'tersedia' THEN 1 ELSE 0 END) AS kamar_tersedia
+      SUM(CASE WHEN km.status = 'tersedia' THEN 1 ELSE 0 END) AS kamar_tersedia,
+      SUM(CASE WHEN km.status = 'tidak_tersedia' THEN 1 ELSE 0 END) AS kamar_tidak_tersedia,
+      SUM(CASE WHEN km.status = 'terisi' THEN 1 ELSE 0 END) AS kamar_terisi
     FROM tipe_kamar tk
     LEFT JOIN kamar km ON km.id_tipe_kamar = tk.id_tipe_kamar
     WHERE tk.id_kos = ?

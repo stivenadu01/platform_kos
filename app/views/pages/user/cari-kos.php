@@ -47,7 +47,7 @@ $initialState = [
           Temukan kos berdasarkan lokasi
         </h1>
         <p class="mt-2 text-sm leading-6 text-slate-500">
-          Cari kampus, jalan, atau tempat di Kupang dari peta. Pilih lokasi lalu tentukan radius kos yang kamu inginkan.
+          Cari berdasarkan tempat, jalan, kawasan, atau lokasi lain di Kupang. Pilih lokasi lalu tentukan radius kos yang kamu inginkan.
         </p>
       </div>
 
@@ -62,7 +62,7 @@ $initialState = [
               type="search"
               autocomplete="off"
               class="w-full bg-transparent py-2 text-sm outline-none"
-              placeholder="Cari kampus, jalan, atau lokasi di Kupang...">
+              placeholder="Cari tempat, jalan, kawasan, atau lokasi di Kupang...">
             <button
               x-show="locationQuery"
               x-cloak

@@ -8,8 +8,8 @@
       </div>
     </a>
   </div>
-  <nav class="flex min-h-[calc(100vh-4rem)] flex-col p-4">
-    <div class="space-y-1">
+  <nav class="flex h-[calc(100vh-4rem)] min-h-0 flex-col p-4">
+    <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 space-y-1 [scrollbar-width:thin]">
     <a href="<?= BASE_URL ?>/admin" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">📊</span><span>Dashboard</span>
     </a>
@@ -23,9 +23,15 @@
     <a href="<?= BASE_URL ?>/admin/laporan" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">⚑</span><span>Laporan Kos</span>
     </a>
+    <a href="<?= BASE_URL ?>/admin/langganan" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+      <span class="text-lg">💳</span><span>Langganan</span>
+    </a>
+    <a href="<?= BASE_URL ?>/admin/langganan/metode-pembayaran" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+      <span class="text-lg">⚙️</span><span>Metode Pembayaran</span>
+    </a>
     </div>
 
-    <div class="mt-auto border-t border-slate-100 pt-4">
+    <div class="shrink-0 border-t border-slate-100 pt-4">
       <button
         type="button"
         @click="$store.auth.logout()"

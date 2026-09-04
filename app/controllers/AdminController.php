@@ -7,7 +7,7 @@ class AdminController
     model('Admin');
     view('admin/dashboard', [
       'title' => 'Dashboard Admin',
-      'summary' => getAdminVerificationSummary()
+      'dashboard' => getAdminDashboardData()
     ], 'admin');
   }
 
@@ -35,6 +35,20 @@ class AdminController
     view('admin/laporan', [
       'title' => 'Laporan Kos',
       'summary' => getAdminLaporanSummary()
+    ], 'admin');
+  }
+
+  public function metodePembayaran()
+  {
+    view('admin/metode-pembayaran', [
+      'title' => 'Metode Pembayaran Langganan',
+    ], 'admin');
+  }
+
+  public function langganan()
+  {
+    view('admin/langganan', [
+      'title' => 'Verifikasi Langganan',
     ], 'admin');
   }
 }

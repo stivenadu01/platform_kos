@@ -16,6 +16,8 @@ post('/api/auth/password', 'ApiAuthController@changePassword', ['auth']);
 post('/api/auth/request-reset', 'ApiAuthController@requestReset');
 post('/api/auth/reset-password', 'ApiAuthController@resetPassword');
 
+post('/api/payment/midtrans/notification', 'ApiLanggananController@midtransNotification');
+
 
 get('/api/fasilitas', 'ApiFasilitasController@index');
 
@@ -44,15 +46,15 @@ delete('/api/pemilik/kos/foto/{id_kos}/{id_foto}', 'ApiFotoController@destroy', 
 // =========================================================
 // PENGHUNI - PEMILIK
 // =========================================================
-get('/api/pemilik/penghuni', 'ApiPenghuniController@index', ['auth', 'role:pemilik']);
-get('/api/pemilik/penghuni/kamar', 'ApiPenghuniController@kamar', ['auth', 'role:pemilik']);
-get('/api/pemilik/penghuni/user-by-nik', 'ApiPenghuniController@userByNik', ['auth', 'role:pemilik']);
-get('/api/pemilik/penghuni/show', 'ApiPenghuniController@show', ['auth', 'role:pemilik']);
-post('/api/pemilik/penghuni', 'ApiPenghuniController@store', ['auth', 'role:pemilik']);
-put('/api/pemilik/penghuni', 'ApiPenghuniController@update', ['auth', 'role:pemilik']);
-post('/api/pemilik/penghuni/update', 'ApiPenghuniController@update', ['auth', 'role:pemilik']);
-put('/api/pemilik/penghuni/keluar', 'ApiPenghuniController@keluar', ['auth', 'role:pemilik']);
-delete('/api/pemilik/penghuni', 'ApiPenghuniController@destroy', ['auth', 'role:pemilik']);
+get('/api/pemilik/penghuni', 'ApiPenghuniController@index', ['auth', 'role:pemilik','pro']);
+get('/api/pemilik/penghuni/kamar', 'ApiPenghuniController@kamar', ['auth', 'role:pemilik','pro']);
+get('/api/pemilik/penghuni/user-by-nik', 'ApiPenghuniController@userByNik', ['auth', 'role:pemilik','pro']);
+get('/api/pemilik/penghuni/show', 'ApiPenghuniController@show', ['auth', 'role:pemilik','pro']);
+post('/api/pemilik/penghuni', 'ApiPenghuniController@store', ['auth', 'role:pemilik','pro']);
+put('/api/pemilik/penghuni', 'ApiPenghuniController@update', ['auth', 'role:pemilik','pro']);
+post('/api/pemilik/penghuni/update', 'ApiPenghuniController@update', ['auth', 'role:pemilik','pro']);
+put('/api/pemilik/penghuni/keluar', 'ApiPenghuniController@keluar', ['auth', 'role:pemilik','pro']);
+delete('/api/pemilik/penghuni', 'ApiPenghuniController@destroy', ['auth', 'role:pemilik','pro']);
 
 // =========================================================
 // KAMAR - PEMILIK
@@ -84,10 +86,19 @@ put('/api/pemilik/kamar/status', 'ApiKamarController@status', ['auth', 'role:pem
 // =========================================================
 // TAGIHAN & PEMBAYARAN - PEMILIK
 // =========================================================
-get('/api/pemilik/tagihan', 'ApiTagihanController@index', ['auth', 'role:pemilik']);
-get('/api/pemilik/tagihan/show', 'ApiTagihanController@show', ['auth', 'role:pemilik']);
-post('/api/pemilik/tagihan/penyesuaian', 'ApiTagihanController@adjustment', ['auth', 'role:pemilik']);
-post('/api/pemilik/tagihan/pembayaran', 'ApiTagihanController@payment', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan', 'ApiLanggananController@index', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan/checkout', 'ApiLanggananController@checkoutInfo', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan/pembayaran', 'ApiLanggananController@pembayaran', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan/pembayaran/{id}/midtrans-status', 'ApiLanggananController@midtransStatus', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan/pembayaran/{id}', 'ApiLanggananController@pembayaranShow', ['auth', 'role:pemilik']);
+post('/api/pemilik/langganan/pembayaran', 'ApiLanggananController@buatPembayaran', ['auth', 'role:pemilik']);
+post('/api/pemilik/langganan/pembayaran/bukti', 'ApiLanggananController@uploadBukti', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan/riwayat', 'ApiLanggananController@history', ['auth', 'role:pemilik']);
+
+get('/api/pemilik/tagihan', 'ApiTagihanController@index', ['auth', 'role:pemilik','pro']);
+get('/api/pemilik/tagihan/show', 'ApiTagihanController@show', ['auth', 'role:pemilik','pro']);
+post('/api/pemilik/tagihan/penyesuaian', 'ApiTagihanController@adjustment', ['auth', 'role:pemilik','pro']);
+post('/api/pemilik/tagihan/pembayaran', 'ApiTagihanController@payment', ['auth', 'role:pemilik','pro']);
 
 
 
@@ -99,6 +110,10 @@ get('/api/kos/search', 'ApiKosSearchController@index');
 get('/api/kos/{id}', 'ApiKosSearchController@show');
 
 // =========================================================
+// ADMIN - DASHBOARD
+// =========================================================
+get('/api/admin/dashboard', 'ApiAdminController@dashboard', ['auth', 'role:admin']);
+
 // ADMIN - MANAJEMEN PENGGUNA
 get('/api/admin/pengguna', 'ApiAdminController@userList', ['auth', 'role:admin']);
 post('/api/admin/pengguna', 'ApiAdminController@userCreate', ['auth', 'role:admin']);
@@ -130,6 +145,17 @@ get('/api/laporan/kos/saya', 'ApiLaporanController@mine', ['auth', 'role:pelangg
 // =========================================================
 // ADMIN - LAPORAN KOS
 // =========================================================
+get('/api/admin/langganan', 'ApiAdminController@subscriptions', ['auth', 'role:admin']);
+get('/api/admin/langganan/metode-pembayaran', 'ApiAdminController@paymentMethods', ['auth', 'role:admin']);
+get('/api/admin/langganan/metode-pembayaran/ringkasan', 'ApiAdminController@paymentMethodSummary', ['auth', 'role:admin']);
+post('/api/admin/langganan/metode-pembayaran', 'ApiAdminController@paymentMethodSave', ['auth', 'role:admin']);
+post('/api/admin/langganan/metode-pembayaran/status', 'ApiAdminController@paymentMethodStatus', ['auth', 'role:admin']);
+// Route statis harus didaftarkan sebelum route parameter agar /pembayaran tidak dianggap sebagai {id}.
+get('/api/admin/langganan/pembayaran', 'ApiAdminController@subscriptionPayments', ['auth', 'role:admin']);
+get('/api/admin/langganan/pembayaran/{id}', 'ApiAdminController@subscriptionPaymentShow', ['auth', 'role:admin']);
+post('/api/admin/langganan/pembayaran/keputusan', 'ApiAdminController@subscriptionPaymentDecision', ['auth', 'role:admin']);
+get('/api/admin/langganan/{id}', 'ApiAdminController@subscriptionShow', ['auth', 'role:admin']);
+
 get('/api/admin/laporan', 'ApiAdminLaporanController@index', ['auth', 'role:admin']);
 get('/api/admin/laporan/{id}', 'ApiAdminLaporanController@show', ['auth', 'role:admin']);
 post('/api/admin/laporan/keputusan', 'ApiAdminLaporanController@decision', ['auth', 'role:admin']);

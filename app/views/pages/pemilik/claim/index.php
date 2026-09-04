@@ -1,8 +1,8 @@
 <div x-data="claimPage()" x-init="init()" class="space-y-6">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
     <div>
-      <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">Claim Riwayat Kos</h1>
-      <p class="mt-1 text-sm text-slate-500">Periksa permintaan mahasiswa yang mengaku pernah tinggal di kos Anda.</p>
+      <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">Klaim Riwayat Kos</h1>
+      <p class="mt-1 text-sm text-slate-500">Periksa permintaan penghuni yang mengaku pernah tinggal di kos Anda.</p>
     </div>
     <button type="button" @click="load()" class="btn-secondary">↻ Refresh</button>
   </div>
@@ -18,14 +18,14 @@
     <div x-show="!loading && !items.length" class="p-10 text-center">
       <div class="text-4xl">✓</div>
       <h2 class="mt-3 font-semibold text-slate-900">Belum ada claim</h2>
-      <p class="mt-1 text-sm text-slate-500">Claim mahasiswa akan muncul di halaman ini.</p>
+      <p class="mt-1 text-sm text-slate-500">Permintaan penghuni akan muncul di halaman ini.</p>
     </div>
 
-    <div x-show="!loading && items.length" class="overflow-x-auto">
+    <div x-show="!loading && items.length" class="!hidden md:!block overflow-x-auto">
       <table class="w-full min-w-[950px] text-sm">
         <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
           <tr>
-            <th class="px-5 py-3">Mahasiswa</th>
+            <th class="px-5 py-3">Penghuni</th>
             <th class="px-5 py-3">Riwayat</th>
             <th class="px-5 py-3">NIK</th>
             <th class="px-5 py-3">Status</th>
@@ -54,6 +54,23 @@
         </tbody>
       </table>
     </div>
+
+    <div x-show="!loading && items.length" class="!block md:!hidden divide-y divide-slate-200">
+      <template x-for="item in items" :key="'m-' + item.id_claim">
+        <article class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama_mahasiswa"></div><div class="mt-1 text-xs text-slate-500 truncate" x-text="item.nama_kos + ' · Kamar ' + item.nomor_kamar"></div></div>
+            <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+            <div><div class="text-slate-400">NIK</div><div class="mt-1 font-mono text-slate-700 break-all" x-text="item.nik_penghuni || item.nik_diajukan || '-' "></div></div>
+            <div><div class="text-slate-400">Diajukan</div><div class="mt-1 font-medium text-slate-700" x-text="formatDate(item.tanggal_pengajuan)"></div></div>
+            <div class="col-span-2"><div class="text-slate-400">Riwayat tinggal</div><div class="mt-1 text-slate-700" x-text="`Kamar ${item.nomor_kamar} · ${item.tanggal_masuk} - ${item.tanggal_keluar || 'masih tinggal'}`"></div></div>
+          </div>
+          <button type="button" @click="openDetail(item)" class="mt-3 btn-secondary text-xs w-full sm:w-auto">Periksa Klaim</button>
+        </article>
+      </template>
+    </div>
   </div>
 
   <div x-show="detailOpen" x-cloak class="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-5">
@@ -61,7 +78,7 @@
     <div class="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-2xl">
       <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
         <div>
-          <h2 class="font-bold text-slate-900">Periksa Claim</h2>
+          <h2 class="font-bold text-slate-900">Periksa Klaim</h2>
           <p class="mt-1 text-xs text-slate-500" x-text="detail?.nama_kos || ''"></p>
         </div>
         <button type="button" @click="closeDetail()" class="h-9 w-9 rounded-lg hover:bg-slate-100">✕</button>
@@ -70,7 +87,7 @@
       <div class="space-y-5 p-5 sm:p-6" x-show="detail">
         <div class="grid gap-4 sm:grid-cols-2">
           <div class="rounded-xl bg-slate-50 p-4">
-            <div class="text-xs text-slate-400">Akun mahasiswa</div>
+            <div class="text-xs text-slate-400">Akun penghuni</div>
             <div class="mt-1 font-semibold text-slate-900" x-text="detail?.nama_mahasiswa"></div>
             <div class="mt-1 text-sm text-slate-600" x-text="detail?.email_mahasiswa"></div>
             <div class="text-sm text-slate-600" x-text="detail?.no_hp_mahasiswa || '-' "></div>
@@ -84,7 +101,7 @@
         </div>
 
         <div x-show="detail?.catatan_mahasiswa">
-          <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Catatan mahasiswa</div>
+          <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Catatan penghuni</div>
           <div class="mt-2 whitespace-pre-line rounded-xl border border-slate-200 p-4 text-sm leading-6 text-slate-700" x-text="detail?.catatan_mahasiswa"></div>
         </div>
 
@@ -109,7 +126,7 @@
         </div>
 
         <div x-show="detail?.status !== 'menunggu'" class="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-          Claim ini sudah diproses.
+          Klaim ini sudah diproses.
           <span x-show="detail?.catatan_pemilik" x-text="detail?.catatan_pemilik"></span>
         </div>
       </div>

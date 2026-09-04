@@ -112,6 +112,10 @@
             Terisi
           </option>
 
+          <option value="tidak_tersedia">
+            Tidak tersedia
+          </option>
+
           <option value="perbaikan">
             Perbaikan
           </option>
@@ -166,7 +170,7 @@
     <div
       x-show="!loading && kamar.length > 0"
       x-cloak
-      class="overflow-x-auto">
+      class="!hidden md:!block overflow-x-auto">
 
       <table class="w-full text-sm">
 
@@ -298,6 +302,10 @@
                       Tersedia
                     </option>
 
+                    <option value="tidak_tersedia">
+                      Tidak tersedia
+                    </option>
+
                     <option value="perbaikan">
                       Perbaikan
                     </option>
@@ -347,6 +355,27 @@
 
       </table>
 
+    </div>
+
+    <div x-show="!loading && kamar.length > 0" class="!block md:!hidden divide-y divide-slate-200">
+      <template x-for="item in kamar" :key="'m-' + item.id_kamar">
+        <article class="p-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0"><div class="font-semibold text-slate-900" x-text="item.nama_kos"></div><div class="mt-1 text-sm text-slate-700" x-text="'Kamar ' + item.nomor_kamar"></div><div class="mt-1 text-xs text-slate-500" x-text="item.tipe_kamar || 'Tipe belum diatur'"></div></div>
+            <template x-if="item.status === 'terisi'"><span class="shrink-0 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">Terisi</span></template>
+            <template x-if="item.status !== 'terisi'"><span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" x-text="item.status === 'tersedia' ? 'Tersedia' : item.status === 'tidak_tersedia' ? 'Tidak tersedia' : item.status === 'perbaikan' ? 'Perbaikan' : 'Nonaktif'"></span></template>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+            <div><div class="text-slate-400">Kapasitas</div><div class="mt-1 font-medium text-slate-700" x-text="item.kapasitas + ' orang'"></div></div>
+            <div><div class="text-slate-400">Harga</div><div class="mt-1 font-medium text-slate-700" x-text="item.harga_min === null ? 'Belum diatur' : Number(item.harga_min) === Number(item.harga_max) ? $store.utils.formatRupiah(item.harga_min) : $store.utils.formatRupiah(item.harga_min) + ' - ' + $store.utils.formatRupiah(item.harga_max)"></div></div>
+          </div>
+          <div class="mt-3 flex flex-wrap gap-2">
+            <a :href="BASE_URL + '/pemilik/kamar/edit?id_kamar=' + item.id_kamar" class="btn-secondary text-xs">Edit</a>
+            <a :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar" class="btn-secondary text-xs">Kelola Tipe</a>
+            <button type="button" @click="remove(item)" class="btn-danger text-xs">Hapus</button>
+          </div>
+        </article>
+      </template>
     </div>
 
   </div>

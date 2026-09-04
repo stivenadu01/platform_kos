@@ -11,7 +11,7 @@
           Temukan Kos yang Tepat
         </h2>
         <p class="mt-2 text-sm text-muted max-w-sm">
-          Cari kos berdasarkan kampus, lokasi, harga, fasilitas, dan ketersediaan kamar.
+          Cari kos berdasarkan lokasi, harga, fasilitas, kapasitas, dan ketersediaan kamar.
         </p>
       </div>
     </div>
@@ -26,7 +26,7 @@
           </h1>
 
           <p class="mt-2 text-sm text-muted">
-            Masuk untuk melanjutkan ke BetaKos.
+            Masuk untuk mengelola akun dan melanjutkan aktivitas di BetaKos.
           </p>
         </div>
 

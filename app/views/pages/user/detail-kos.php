@@ -20,6 +20,7 @@ foreach (preg_split('/\s+/', $pemilikNama) as $kata) {
 }
 $pemilikInisial = $pemilikInisial ?: 'PK';
 $pemilikFoto = $kos['foto_pemilik'] ?? null;
+$pemilikPro = !empty($kos['pemilik_pro']);
 
 $lastLoginAt = $kos['last_login_at'] ?? null;
 $lastLoginLabel = 'Belum pernah login';
@@ -109,7 +110,14 @@ if (!empty($lastLoginAt)) {
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold capitalize text-primary"><?= htmlspecialchars($kos['jenis']) ?></span>
-            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><?= (int)$kos['kamar_tersedia'] ?> kamar tersedia</span>
+            <?php if ($pemilikPro): ?>
+              <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">★ Pemilik Pro</span>
+            <?php endif; ?>
+            <?php if ((int)$kos['kamar_tersedia'] > 0): ?>
+              <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><?= (int)$kos['kamar_tersedia'] ?> kamar tersedia</span>
+            <?php else: ?>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Saat ini tidak tersedia</span>
+            <?php endif; ?>
           </div>
           <h1 class="mt-3 font-[Poppins] text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"><?= htmlspecialchars($kos['nama_kos']) ?></h1>
           <p class="mt-2 flex items-start gap-2 text-sm leading-6 text-slate-500"><span>⌖</span><span><?= nl2br(htmlspecialchars($kos['alamat'])) ?></span></p>
@@ -173,7 +181,11 @@ if (!empty($lastLoginAt)) {
                           <h3 class="text-lg font-bold text-slate-900"><?= htmlspecialchars($type['nama_tipe']) ?></h3>
                           <div class="mt-2 flex flex-wrap gap-2 text-xs">
                             <span class="rounded-full bg-primary-soft px-2.5 py-1 font-semibold text-primary">Kapasitas <?= (int)$type['kapasitas'] ?> orang</span>
-                            <span class="rounded-full <?= (int)$type['kamar_tersedia'] > 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' ?> px-2.5 py-1 font-semibold"><?= (int)$type['kamar_tersedia'] ?> tersedia</span>
+                            <?php if ((int)$type['kamar_tersedia'] > 0): ?>
+                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700"><?= (int)$type['kamar_tersedia'] ?> tersedia</span>
+                          <?php else: ?>
+                            <span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">Saat ini tidak tersedia</span>
+                          <?php endif; ?>
                           </div>
                         </div>
                       </div>
@@ -252,7 +264,12 @@ if (!empty($lastLoginAt)) {
                   </div>
                 <?php endif; ?>
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-semibold text-slate-800"><?= htmlspecialchars($pemilikNama) ?></p>
+                  <div class="flex items-center gap-2">
+                    <p class="truncate text-sm font-semibold text-slate-800"><?= htmlspecialchars($pemilikNama) ?></p>
+                    <?php if ($pemilikPro): ?>
+                      <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">PRO</span>
+                    <?php endif; ?>
+                  </div>
                   <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
                     <span class="h-2 w-2 shrink-0 rounded-full <?= !empty($lastLoginAt) ? 'bg-emerald-500' : 'bg-slate-300' ?>"></span>
                     <span><?= htmlspecialchars($lastLoginLabel) ?></span>

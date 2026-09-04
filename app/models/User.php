@@ -359,7 +359,7 @@ function editUser($id, $data)
   $email = strtolower(trim($data['email'] ?? ''));
   $no_hp = trim($data['no_hp'] ?? '') ?: null;
   $alamat = trim($data['alamat'] ?? '') ?: null;
-  $role = $data['role'] ?? 'mahasiswa';
+  $role = $data['role'] ?? 'pelanggan';
 
   if (!$nama || !$email) {
     throw new Exception(

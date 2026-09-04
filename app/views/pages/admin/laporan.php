@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Laporan Kos</h1>
-      <p class="mt-1 text-sm text-slate-500">Periksa laporan dari mahasiswa dan tindak lanjuti informasi kos yang bermasalah.</p>
+      <p class="mt-1 text-sm text-slate-500">Periksa laporan pengguna dan tindak lanjuti informasi kos yang bermasalah.</p>
     </div>
     <button @click="load(1)" class="btn-secondary text-sm">↻ Refresh</button>
   </div>
@@ -40,9 +40,22 @@
     <div x-show="!loading && !result.items.length" class="p-10 text-center">
       <div class="text-4xl">⚑</div>
       <h3 class="mt-3 font-semibold text-slate-900">Belum ada laporan</h3>
-      <p class="mt-1 text-sm text-slate-500">Laporan dari mahasiswa akan muncul di sini.</p>
+      <p class="mt-1 text-sm text-slate-500">Laporan dari pengguna akan muncul di sini.</p>
     </div>
-    <div x-show="!loading && result.items.length" class="overflow-x-auto">
+    <div x-show="!loading && result.items.length" class="!block md:!hidden divide-y divide-slate-200">
+      <template x-for="item in result.items" :key="'m-' + item.id_laporan">
+        <article class="p-4 space-y-3">
+          <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama_kos"></div><div class="text-xs text-slate-400 mt-1" x-text="'ID Kos #' + item.id_kos"></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span></div>
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Pelapor</div><div class="mt-1 font-semibold text-slate-800 truncate" x-text="item.nama_pelapor"></div><div class="text-slate-500 truncate" x-text="item.email_pelapor"></div></div>
+            <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Alasan</div><div class="mt-1 font-semibold text-slate-700" x-text="reasonLabel(item.alasan)"></div></div>
+          </div>
+          <div class="flex items-center justify-between gap-3"><span class="text-xs text-slate-500" x-text="formatDate(item.created_at)"></span><button @click="openDetail(item.id_laporan)" class="btn-secondary text-xs">Periksa</button></div>
+        </article>
+      </template>
+    </div>
+
+    <div x-show="!loading && result.items.length" class="!hidden md:!block overflow-x-auto overscroll-x-contain">
       <table class="w-full min-w-[1000px] text-sm">
         <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
           <tr>

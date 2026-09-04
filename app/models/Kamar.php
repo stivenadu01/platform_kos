@@ -489,13 +489,14 @@ function updateKamarStatus($id_kamar, $status, $id_pemilik)
    */
   $allowedStatus = [
     'tersedia',
+    'tidak_tersedia',
     'perbaikan',
     'nonaktif'
   ];
 
   if (!in_array($status, $allowedStatus, true)) {
     throw new Exception(
-      'Status kamar harus ditentukan oleh sistem.'
+      'Status kamar tidak valid.'
     );
   }
 

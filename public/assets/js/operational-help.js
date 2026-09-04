@@ -83,14 +83,22 @@
     },
     '/pemilik/pembayaran': {
       title: 'Tagihan & Pembayaran',
-      intro: 'Ini adalah pusat keuangan operasional penghuni: melihat tagihan, menambahkan penyesuaian, dan mencatat pembayaran.',
+      intro: 'Ini adalah pusat keuangan operasional penghuni. Gunakan Detail untuk melihat satu tagihan pada halaman khusus dan kelola pembayarannya dari sana.',
       steps: [
         ['help-tagihan-summary', 'Ringkasan tagihan', 'Lihat jumlah tagihan belum lunas, sebagian, lunas, dan total sisa pembayaran.'],
         ['help-tagihan-filter', 'Cari dan filter', 'Gunakan nomor tagihan, kos, kamar, atau status untuk menemukan tagihan tertentu.'],
         ['help-tagihan-list', 'Daftar tagihan', 'Periksa periode, total, sisa, jatuh tempo, dan status sebelum melakukan tindakan.'],
-        ['help-tagihan-detail', 'Detail tagihan', 'Buka Detail untuk melihat penghuni, penyesuaian, dan riwayat pembayaran dalam satu periode.', 'open-tagihan-detail'],
-        ['help-tagihan-payment', 'Catat pembayaran', 'Catat pembayaran yang benar-benar diterima. Pilih penghuni, jumlah, metode, waktu, dan catatan bila diperlukan.'],
-        ['help-tagihan-adjustment', 'Penyesuaian', 'Gunakan penyesuaian untuk menambah atau mengurangi nilai tagihan dengan tanggal efektif dan alasan yang jelas.']
+        ['help-tagihan-detail', 'Buka detail tagihan', 'Klik Detail untuk berpindah ke halaman khusus yang berisi informasi penghuni, penyesuaian, dan riwayat pembayaran.']
+      ]
+    },
+    '/pemilik/pembayaran/detail': {
+      title: 'Detail Tagihan',
+      intro: 'Halaman ini memusatkan seluruh informasi satu tagihan agar pengelolaan tidak bergantung pada banyak popup.',
+      steps: [
+        ['help-tagihan-detail-summary', 'Ringkasan tagihan', 'Periksa periode, jatuh tempo, harga dasar, penyesuaian, total, dan sisa tagihan.'],
+        ['help-tagihan-detail-occupants', 'Penghuni', 'Lihat penghuni yang terhubung dengan periode tagihan ini.'],
+        ['help-tagihan-adjustment', 'Penyesuaian', 'Tambahkan biaya atau potongan pada bagian ini. Penyesuaian disimpan bersama alasan dan tanggal efektif.'],
+        ['help-tagihan-payment', 'Pembayaran', 'Gunakan bagian ini untuk mencatat pembayaran yang benar-benar diterima.']
       ]
     },
     '/pemilik/kos/tambah': {
@@ -157,15 +165,6 @@
       init() {
         this.resizeHandler = () => this.refreshTarget();
         this.scrollHandler = () => this.refreshTarget();
-        window.addEventListener('betakos:tagihan-detail-opened', () => {
-          if (!this.open || this.advancing) return;
-          const step = this.guide?.steps?.[this.current];
-          if (step?.[0] !== 'help-tagihan-detail') return;
-          this.waitForElement('[data-help="help-tagihan-payment"]', () => {
-            this.current += 1;
-            this.$nextTick(() => this.resolveTarget());
-          });
-        });
         window.addEventListener('resize', this.resizeHandler);
         window.addEventListener('scroll', this.scrollHandler, true);
         window.addEventListener('betakos:operational-help', () => this.start());
@@ -192,23 +191,6 @@
         const step = this.guide.steps?.[this.current];
         if (!step) {
           this.close();
-          return;
-        }
-
-        // Beberapa bantuan operasional perlu menjalankan aksi nyata sebelum
-        // pindah ke langkah berikutnya. Contoh: membuka Detail Tagihan.
-        if (step[3] === 'open-tagihan-detail' && this.target) {
-          this.advancing = true;
-          this.target.click();
-          this.waitForElement('[data-help="help-tagihan-payment"]', () => {
-            this.advancing = false;
-            if (this.current >= this.guide.steps.length - 1) {
-              this.close();
-              return;
-            }
-            this.current += 1;
-            this.$nextTick(() => this.resolveTarget());
-          });
           return;
         }
 
@@ -243,7 +225,6 @@
         };
 
         if (!find()) {
-          // Modal/detail dapat muncul setelah Alpine menyelesaikan render.
           this.waitForElement('[data-help="' + step[0] + '"]', () => this.resolveTarget(), 2500);
         }
       },

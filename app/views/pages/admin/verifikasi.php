@@ -1,6 +1,6 @@
 <div x-data="adminVerifikasiPage()" x-init="init()" class="space-y-6">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div><h1 class="text-xl sm:text-2xl font-bold text-slate-900">Verifikasi Kos</h1><p class="mt-1 text-sm text-slate-500">Periksa data kos sebelum dipublikasikan kepada mahasiswa.</p></div>
+    <div><h1 class="text-xl sm:text-2xl font-bold text-slate-900">Verifikasi Kos</h1><p class="mt-1 text-sm text-slate-500">Periksa data kos sebelum dipublikasikan kepada pengguna.</p></div>
     <div class="flex gap-2">
       <button @click="load('menunggu')" :class="tab === 'menunggu' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'" class="px-4 py-2 rounded-xl text-sm font-semibold">Menunggu <span x-text="summary.menunggu"></span></button>
       <button @click="load('disetujui')" :class="tab === 'disetujui' ? 'bg-primary text-white' : 'bg-white text-slate-600 border border-slate-200'" class="px-4 py-2 rounded-xl text-sm font-semibold">Disetujui</button>

@@ -23,6 +23,46 @@ function run_middleware($middlewares = [])
       }
     }
 
+    // PRO SUBSCRIPTION MIDDLEWARE
+    // Memastikan pemilik memiliki langganan Pro yang masih berlaku.
+    // Untuk halaman web, arahkan ke halaman Langganan agar pengguna dapat
+    // melihat alasan akses ditolak dan paket yang tersedia. Untuk API,
+    // kembalikan 403 agar frontend dapat menampilkan locked state.
+    if ($mw === 'pro') {
+      $user = $_SESSION['user'] ?? null;
+
+      if (!$user || ($user['role'] ?? '') !== 'pemilik') {
+        response([
+          'success' => false,
+          'message' => 'Fitur ini hanya tersedia untuk pemilik kos.'
+        ], 403);
+        exit;
+      }
+
+      model('Langganan');
+      $status = getStatusLanggananPemilik((int) $user['id_user']);
+
+      if (!$status['is_pro']) {
+        $requestUri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+        $isApi = str_contains($requestUri, '/api/');
+
+        if ($isApi) {
+          response([
+            'success' => false,
+            'code' => 'PRO_REQUIRED',
+            'message' => 'Fitur ini membutuhkan BetaKos Pro.',
+            'data' => [
+              'requires_pro' => true,
+              'upgrade_url' => BASE_URL . '/pemilik/langganan?upgrade=1'
+            ]
+          ], 403);
+        }
+
+        header('Location: ' . BASE_URL . '/pemilik/langganan?upgrade=1');
+        exit;
+      }
+    }
+
     // ROLE MIDDLEWARE
     if (str_starts_with($mw, 'role:')) {
       $roles = explode(':', $mw)[1]  ?? '';
