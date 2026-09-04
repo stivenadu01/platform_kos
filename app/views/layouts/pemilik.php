@@ -15,6 +15,16 @@
     type="image/x-icon"
     href="<?= BASE_URL ?>/assets/icon/favicon.ico">
 
+  <meta name="theme-color" content="#2563eb">
+
+  <link
+    rel="manifest"
+    href="<?= BASE_URL ?>/assets/icon/site.webmanifest">
+
+  <link
+    rel="apple-touch-icon"
+    href="<?= BASE_URL ?>/assets/icon/apple-touch-icon.png">
+
   <link
     rel="stylesheet"
     href="<?= BASE_URL ?>/assets/css/app.css">
@@ -41,10 +51,23 @@
 
 <body class="bg-slate-50 text-slate-800">
 
+  <script>
+    // Set the shell state before the first paint. Alpine will bind the same value afterwards.
+    (() => {
+      let collapsed = false;
+      try { collapsed = localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1'; } catch (_) {}
+      document.body.setAttribute('data-betakos-pemilik-sidebar-collapsed', collapsed ? 'true' : 'false');
+      window.__BETAKOS_PEMILIK_SIDEBAR_COLLAPSED__ = collapsed;
+    })();
+  </script>
   <div
-    x-data="{ sidebarOpen: false, sidebarCollapsed: localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1' }"
+    id="pemilik-layout-shell"
+    x-data="{ sidebarOpen: false, sidebarCollapsed: window.__BETAKOS_PEMILIK_SIDEBAR_COLLAPSED__ === true }"
     @betakos:onboarding-open-sidebar.window="sidebarOpen = true; sidebarCollapsed = false"
-    class="min-h-screen">
+    :data-sidebar-collapsed="sidebarCollapsed"
+    data-layout-shell="pemilik"
+    class="min-h-screen"
+    x-init="$el.setAttribute('data-sidebar-hydrated', 'true'); document.body.removeAttribute('data-betakos-admin-sidebar-collapsed'); document.body.removeAttribute('data-betakos-pemilik-sidebar-collapsed')">
 
     <!-- MOBILE BACKDROP -->
     <div
@@ -58,7 +81,7 @@
     <?php include __DIR__ . '/../partials/pemilik/sidebar.php'; ?>
 
     <!-- MAIN -->
-    <div class="min-h-screen transition-[margin] duration-300" :class="sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'">
+    <div class="pemilik-main-shell min-h-screen">
 
       <?php include __DIR__ . '/../partials/pemilik/topbar.php'; ?>
 

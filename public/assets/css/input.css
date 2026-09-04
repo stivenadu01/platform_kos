@@ -869,3 +869,81 @@ body.scroll-locked {
     justify-content: center;
   }
 }
+
+
+/* =========================================================
+   🧭 SIDEBAR SHELL
+   State-driven layout: do not depend on Tailwind classes
+   generated from Alpine :class expressions.
+   ========================================================= */
+
+@media (min-width: 1024px) {
+  [data-layout-shell="admin"] .admin-sidebar,
+  [data-layout-shell="pemilik"] .pemilik-sidebar {
+    width: 16rem;
+  }
+
+  body[data-betakos-admin-sidebar-collapsed="true"] [data-layout-shell="admin"] .admin-sidebar,
+  body[data-betakos-pemilik-sidebar-collapsed="true"] [data-layout-shell="pemilik"] .pemilik-sidebar {
+    width: 5rem;
+  }
+
+  [data-layout-shell="admin"][data-sidebar-collapsed="true"] .admin-sidebar,
+  [data-layout-shell="pemilik"][data-sidebar-collapsed="true"] .pemilik-sidebar {
+    width: 5rem;
+  }
+
+  [data-layout-shell="admin"] .admin-main-shell,
+  [data-layout-shell="pemilik"] .pemilik-main-shell {
+    margin-left: 16rem;
+  }
+
+  body[data-betakos-admin-sidebar-collapsed="true"] [data-layout-shell="admin"] .admin-main-shell,
+  body[data-betakos-pemilik-sidebar-collapsed="true"] [data-layout-shell="pemilik"] .pemilik-main-shell {
+    margin-left: 5rem;
+  }
+
+  [data-layout-shell="admin"][data-sidebar-collapsed="true"] .admin-main-shell,
+  [data-layout-shell="pemilik"][data-sidebar-collapsed="true"] .pemilik-main-shell {
+    margin-left: 5rem;
+  }
+
+  [data-layout-shell="admin"] .admin-topbar {
+    left: 16rem;
+  }
+
+  body[data-betakos-admin-sidebar-collapsed="true"] [data-layout-shell="admin"] .admin-topbar {
+    left: 5rem;
+  }
+
+  [data-layout-shell="admin"][data-sidebar-collapsed="true"] .admin-topbar {
+    left: 5rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  [data-layout-shell="admin"] .admin-main-shell,
+  [data-layout-shell="pemilik"] .pemilik-main-shell {
+    margin-left: 0;
+  }
+
+  [data-layout-shell="admin"] .admin-topbar {
+    left: 0;
+  }
+}
+
+
+/* Transitions are enabled after initial state hydration to prevent page-navigation flicker. */
+[data-layout-shell][data-sidebar-hydrated="true"] .admin-sidebar,
+[data-layout-shell][data-sidebar-hydrated="true"] .pemilik-sidebar {
+  transition: width 300ms ease, transform 300ms ease;
+}
+
+[data-layout-shell][data-sidebar-hydrated="true"] .admin-main-shell,
+[data-layout-shell][data-sidebar-hydrated="true"] .pemilik-main-shell {
+  transition: margin-left 300ms ease;
+}
+
+[data-layout-shell="admin"][data-sidebar-hydrated="true"] .admin-topbar {
+  transition: left 300ms ease;
+}

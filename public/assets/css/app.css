@@ -2191,11 +2191,6 @@
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
-  .transition-\[margin\] {
-    transition-property: margin;
-    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
-    transition-duration: var(--tw-duration, var(--default-transition-duration));
-  }
   .transition-\[width\,transform\] {
     transition-property: width,transform;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -2534,6 +2529,16 @@
       display: flex;
     }
   }
+  .sm\:hidden {
+    @media (width >= 40rem) {
+      display: none;
+    }
+  }
+  .sm\:inline-flex {
+    @media (width >= 40rem) {
+      display: inline-flex;
+    }
+  }
   .sm\:h-44 {
     @media (width >= 40rem) {
       height: calc(var(--spacing) * 44);
@@ -2840,29 +2845,9 @@
       top: calc(var(--spacing) * 24);
     }
   }
-  .lg\:left-20 {
-    @media (width >= 64rem) {
-      left: calc(var(--spacing) * 20);
-    }
-  }
-  .lg\:left-64 {
-    @media (width >= 64rem) {
-      left: calc(var(--spacing) * 64);
-    }
-  }
   .lg\:col-span-2 {
     @media (width >= 64rem) {
       grid-column: span 2 / span 2;
-    }
-  }
-  .lg\:ml-20 {
-    @media (width >= 64rem) {
-      margin-left: calc(var(--spacing) * 20);
-    }
-  }
-  .lg\:ml-64 {
-    @media (width >= 64rem) {
-      margin-left: calc(var(--spacing) * 64);
     }
   }
   .lg\:block {
@@ -2893,16 +2878,6 @@
   .lg\:min-h-\[430px\] {
     @media (width >= 64rem) {
       min-height: 430px;
-    }
-  }
-  .lg\:w-20 {
-    @media (width >= 64rem) {
-      width: calc(var(--spacing) * 20);
-    }
-  }
-  .lg\:w-64 {
-    @media (width >= 64rem) {
-      width: calc(var(--spacing) * 64);
     }
   }
   .lg\:translate-x-0 {
@@ -3272,6 +3247,52 @@ html.scroll-locked, body.scroll-locked {
   [data-sidebar-collapsed="true"] > div:last-child button {
     justify-content: center;
   }
+}
+@media (min-width: 1024px) {
+  [data-layout-shell="admin"] .admin-sidebar, [data-layout-shell="pemilik"] .pemilik-sidebar {
+    width: 16rem;
+  }
+  body[data-betakos-admin-sidebar-collapsed="true"] [data-layout-shell="admin"] .admin-sidebar, body[data-betakos-pemilik-sidebar-collapsed="true"] [data-layout-shell="pemilik"] .pemilik-sidebar {
+    width: 5rem;
+  }
+  [data-layout-shell="admin"][data-sidebar-collapsed="true"] .admin-sidebar, [data-layout-shell="pemilik"][data-sidebar-collapsed="true"] .pemilik-sidebar {
+    width: 5rem;
+  }
+  [data-layout-shell="admin"] .admin-main-shell, [data-layout-shell="pemilik"] .pemilik-main-shell {
+    margin-left: 16rem;
+  }
+  body[data-betakos-admin-sidebar-collapsed="true"] [data-layout-shell="admin"] .admin-main-shell, body[data-betakos-pemilik-sidebar-collapsed="true"] [data-layout-shell="pemilik"] .pemilik-main-shell {
+    margin-left: 5rem;
+  }
+  [data-layout-shell="admin"][data-sidebar-collapsed="true"] .admin-main-shell, [data-layout-shell="pemilik"][data-sidebar-collapsed="true"] .pemilik-main-shell {
+    margin-left: 5rem;
+  }
+  [data-layout-shell="admin"] .admin-topbar {
+    left: 16rem;
+  }
+  body[data-betakos-admin-sidebar-collapsed="true"] [data-layout-shell="admin"] .admin-topbar {
+    left: 5rem;
+  }
+  [data-layout-shell="admin"][data-sidebar-collapsed="true"] .admin-topbar {
+    left: 5rem;
+  }
+}
+@media (max-width: 1023px) {
+  [data-layout-shell="admin"] .admin-main-shell, [data-layout-shell="pemilik"] .pemilik-main-shell {
+    margin-left: 0;
+  }
+  [data-layout-shell="admin"] .admin-topbar {
+    left: 0;
+  }
+}
+[data-layout-shell][data-sidebar-hydrated="true"] .admin-sidebar, [data-layout-shell][data-sidebar-hydrated="true"] .pemilik-sidebar {
+  transition: width 300ms ease, transform 300ms ease;
+}
+[data-layout-shell][data-sidebar-hydrated="true"] .admin-main-shell, [data-layout-shell][data-sidebar-hydrated="true"] .pemilik-main-shell {
+  transition: margin-left 300ms ease;
+}
+[data-layout-shell="admin"][data-sidebar-hydrated="true"] .admin-topbar {
+  transition: left 300ms ease;
 }
 @property --tw-backdrop-blur {
   syntax: "*";

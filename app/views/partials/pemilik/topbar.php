@@ -63,6 +63,25 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   <!-- RIGHT -->
   <div class="flex items-center gap-3">
 
+    <button
+      type="button"
+      data-pwa-install data-pwa-install-mobile
+      hidden
+      class="inline-flex sm:hidden w-10 h-10 items-center justify-center rounded-lg border border-primary/20 bg-primary-soft text-primary hover:bg-blue-100"
+      title="Pasang BetaKos di perangkat"
+      aria-label="Pasang BetaKos di perangkat">
+      <span aria-hidden="true">📱</span>
+    </button>
+    <button
+      type="button"
+      data-pwa-install
+      hidden
+      class="hidden sm:inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2 text-sm font-semibold text-primary hover:bg-blue-100"
+      title="Pasang BetaKos di perangkat">
+      <span aria-hidden="true">📱</span>
+      Unduh Aplikasi
+    </button>
+
     <!-- CONTEXTUAL HELP -->
     <button
       type="button"
