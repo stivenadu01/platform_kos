@@ -15,17 +15,17 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     bg-white
     border-r border-slate-200
     flex flex-col
-    transform transition-[width,transform] duration-300
-    lg:translate-x-0
+    transform lg:translate-x-0
+    pemilik-sidebar
   "
-  :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full', sidebarCollapsed ? 'lg:w-20' : 'lg:w-64']">
+  :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
   <!-- LOGO -->
   <div class="h-16 shrink-0 px-5 flex items-center border-b border-slate-200">
 
     <a
       :href="window.BASE_URL + '/pemilik'"
-      class="flex items-center gap-3"">
+      class="flex items-center gap-3">
 
       <img
         :src="window.BASE_URL + '/assets/icon/logo.png'"

@@ -1,4 +1,4 @@
-<aside :data-sidebar-collapsed="sidebarCollapsed" :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full', sidebarCollapsed ? 'lg:w-20' : 'lg:w-64']" class="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-[width,transform] duration-300 lg:translate-x-0">
+<aside :data-sidebar-collapsed="sidebarCollapsed" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="admin-sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-[width,transform] duration-300 lg:translate-x-0">
   <div class="h-16 px-5 flex items-center border-b border-slate-200">
     <a href="<?= BASE_URL ?>/admin" title="Dashboard" class="flex items-center gap-3">
       <img src="<?= BASE_URL ?>/assets/icon/logo.png" alt="BetaKos" class="w-9 h-9 object-contain">
