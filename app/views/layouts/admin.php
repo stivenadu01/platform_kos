@@ -19,12 +19,12 @@
   <script defer src="https://unpkg.com/alpinejs"></script>
 </head>
 <body class="bg-slate-50 text-slate-800">
-  <div x-data="{ sidebarOpen: false }" class="min-h-screen">
+  <div x-data="{ sidebarOpen: false, sidebarCollapsed: localStorage.getItem('betakos_admin_sidebar_collapsed') === '1' }" class="min-h-screen">
     <div x-show="sidebarOpen" x-cloak @click="sidebarOpen = false" class="fixed inset-0 bg-black/40 z-40 lg:hidden"></div>
     <?php include ROOT_PATH . '/app/views/partials/admin/sidebar.php'; ?>
-    <div class="lg:ml-64 min-h-screen min-w-0 overflow-x-hidden">
+    <div class="min-h-screen min-w-0 overflow-x-hidden transition-[margin] duration-300" :class="sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'">
       <?php include ROOT_PATH . '/app/views/partials/admin/topbar.php'; ?>
-      <main class="p-4 sm:p-6 lg:p-8 min-w-0 overflow-x-hidden">
+      <main class="p-4 pt-20 sm:p-6 sm:pt-20 lg:p-8 lg:pt-24 min-w-0 overflow-x-hidden">
         <?= $content ?>
       </main>
     </div>

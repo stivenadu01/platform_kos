@@ -47,7 +47,7 @@
 
       <div class="form-group">
         <label class="label">Kos</label>
-        <select x-model="idKos" @change="applyFilter()" class="input">
+        <select x-model="idKos" @change="applyFilter()" class="select">
           <option value="">Semua kos</option>
           <template x-for="kos in kosList" :key="kos.id_kos">
             <option :value="kos.id_kos" x-text="kos.nama_kos"></option>
@@ -57,7 +57,7 @@
 
       <div class="form-group">
         <label class="label">Kamar</label>
-        <select x-model="idKamar" @change="applyFilter()" class="input">
+        <select x-model="idKamar" @change="applyFilter()" class="select">
           <option value="">Semua kamar</option>
           <template x-for="kamar in filteredKamarList" :key="kamar.id_kamar">
             <option :value="kamar.id_kamar" x-text="kamar.nomor_kamar"></option>
@@ -67,7 +67,7 @@
 
       <div class="form-group">
         <label class="label">Status</label>
-        <select x-model="status" @change="applyFilter()" class="input">
+        <select x-model="status" @change="applyFilter()" class="select">
           <option value="">Semua status</option>
           <option value="belum_lunas">Belum lunas</option>
           <option value="sebagian">Sebagian</option>

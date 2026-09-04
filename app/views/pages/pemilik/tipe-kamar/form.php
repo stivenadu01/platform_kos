@@ -7,13 +7,13 @@
   <div x-show="loading" class="card p-10 text-center text-sm text-slate-500">Memuat data tipe kamar...</div>
   <form x-show="!loading" x-cloak @submit.prevent="saveType" class="card space-y-6 border border-slate-200 shadow-sm">
     <div data-help="help-tipe-form-main" class="grid gap-5 md:grid-cols-2">
-      <div class="form-group"><label class="label">Kos <span class="text-red-500">*</span></label><select data-onboarding="tipe-field-kos" x-model="form.id_kos" class="input" required>
+      <div class="form-group"><label class="label">Kos <span class="text-red-500">*</span></label><select data-onboarding="tipe-field-kos" x-model="form.id_kos" class="select" required>
           <option value="">Pilih kos</option><template x-for="kos in kosList" :key="kos.id_kos">
             <option :value="kos.id_kos" x-text="kos.nama_kos"></option>
           </template>
         </select></div>
       <div class="form-group"><label class="label">Nama Tipe <span class="text-red-500">*</span></label><input data-onboarding="tipe-field-nama" x-model="form.nama_tipe" class="input" maxlength="100" placeholder="Standard" required></div>
-      <div class="form-group"><label class="label">Kapasitas <span class="text-red-500">*</span></label><input data-onboarding="tipe-field-kapasitas" type="number" x-model.number="form.kapasitas" min="1" max="255" class="input" required></div>
+      <div class="form-group"><label class="label">Kapasitas <span class="text-red-500">*</span></label><input data-onboarding="tipe-field-kapasitas" type="number" x-model.number="form.kapasitas" min="1" max="255" class="input-number" required></div>
       <div class="form-group md:col-span-2"><label class="label">Deskripsi</label><textarea x-model="form.deskripsi" class="input resize-none" rows="3"></textarea></div>
     </div>
     <div data-help="help-tipe-form-price" data-onboarding="tipe-field-harga" class="border-t border-slate-200 pt-5">
@@ -24,9 +24,9 @@
         </div><button type="button" @click="addPrice()" class="btn-secondary">+ Tambah</button>
       </div>
       <div class="mt-4 space-y-3"><template x-for="(item, index) in harga" :key="index">
-          <div class="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><select x-model.number="item.jumlah_orang" class="input"><template x-for="number in availablePriceNumbers(index)" :key="number">
+          <div class="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><select x-model.number="item.jumlah_orang" class="select"><template x-for="number in availablePriceNumbers(index)" :key="number">
                 <option :value="number" x-text="number + ' orang'"></option>
-              </template></select><input type="number" x-model.number="item.harga_total" min="0" step="1000" class="input" placeholder="700000" required><button type="button" @click="harga.splice(index, 1)" class="btn-danger">Hapus</button></div>
+              </template></select><input type="number" x-model.number="item.harga_total" min="0" step="1000" class="input-number" placeholder="700000" required><button type="button" @click="harga.splice(index, 1)" class="btn-danger">Hapus</button></div>
         </template></div>
     </div>
     <div data-help="help-tipe-form-facility" data-onboarding="tipe-field-fasilitas" class="border-t border-slate-200 pt-5">

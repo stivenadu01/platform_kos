@@ -8,30 +8,31 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
 ?>
 
 <aside
+  :data-sidebar-collapsed="sidebarCollapsed"
   class="
     fixed inset-y-0 left-0 z-50
     w-64
     bg-white
     border-r border-slate-200
     flex flex-col
-    transform transition-transform duration-300
+    transform transition-[width,transform] duration-300
     lg:translate-x-0
   "
-  :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+  :class="[sidebarOpen ? 'translate-x-0' : '-translate-x-full', sidebarCollapsed ? 'lg:w-20' : 'lg:w-64']">
 
   <!-- LOGO -->
   <div class="h-16 shrink-0 px-5 flex items-center border-b border-slate-200">
 
     <a
       :href="window.BASE_URL + '/pemilik'"
-      class="flex items-center gap-3">
+      class="flex items-center gap-3"">
 
       <img
         :src="window.BASE_URL + '/assets/icon/logo.png'"
         alt="BetaKos"
         class="w-9 h-9 object-contain">
 
-      <div>
+      <div class="sidebar-brand-label">
         <div class="font-bold text-slate-900">
           BetaKos
         </div>
@@ -66,7 +67,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         🏠
       </span>
 
-      <span>
+      <span class="sidebar-label">
         Dashboard
       </span>
 
@@ -91,7 +92,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         👤
       </span>
 
-      <span>
+      <span class="sidebar-label">
         Profil Saya
       </span>
 
@@ -99,12 +100,9 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
 
 
     <!-- SECTION KOS -->
-    <div class="pt-5 pb-2 px-4">
+    <div class="sidebar-section-label pt-5 pb-2 px-4">
 
-      <span
-        class="text-xs font-semibold uppercase tracking-wider text-slate-400">
-        Manajemen Kos
-      </span>
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Manajemen Kos</span>
 
     </div>
 
@@ -127,7 +125,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         🏢
       </span>
 
-      <span>
+      <span class="sidebar-label">
         Kos Saya
       </span>
 
@@ -152,7 +150,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         🚪
       </span>
 
-      <span>
+      <span class="sidebar-label">
         Kelola Kamar
       </span>
 
@@ -176,11 +174,11 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         👥
       </span>
 
-      <span>
+      <span class="sidebar-label">
         Penghuni
       </span>
       <?php if (!$__pemilikIsPro): ?>
-        <span class="ml-auto text-[10px] font-bold text-primary">PRO</span>
+        <span class="sidebar-label ml-auto text-[10px] font-bold text-primary">PRO</span>
       <?php endif; ?>
 
     </a>
@@ -203,21 +201,19 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         💳
       </span>
 
-      <span>
+      <span class="sidebar-label">
         Tagihan & Pembayaran
       </span>
       <?php if (!$__pemilikIsPro): ?>
-        <span class="ml-auto text-[10px] font-bold text-primary">PRO</span>
+        <span class="sidebar-label ml-auto text-[10px] font-bold text-primary">PRO</span>
       <?php endif; ?>
 
     </a>
 
 
     <!-- SECTION LAYANAN -->
-    <div class="pt-5 pb-2 px-4">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">
-        Layanan
-      </span>
+    <div class="sidebar-section-label pt-5 pb-2 px-4">
+      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Layanan</span>
     </div>
 
 
@@ -226,7 +222,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       :href="window.BASE_URL + '/pemilik/claim'"
       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">✓</span>
-      <span>Klaim Riwayat</span>
+      <span class="sidebar-label">Klaim Riwayat</span>
     </a>
 
 
@@ -235,41 +231,34 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       :href="window.BASE_URL + '/pemilik/langganan'"
       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">⭐</span>
-      <span>Langganan</span>
+      <span class="sidebar-label">Langganan</span>
     </a>
 
 
 
+    <!-- KELUAR (MOBILE) -->
+    <div class="sticky bottom-0 mt-2 border-t border-slate-200 bg-white pt-3 lg:hidden">
+      <button
+        type="button"
+        @click="$store.auth.logout()"
+        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50">
+        <span class="text-lg">⇥</span>
+        <span class="sidebar-label">Keluar</span>
+      </button>
+    </div>
 
   </nav>
 
 
-  <!-- BOTTOM -->
-  <div class="shrink-0 p-4 border-t border-slate-200 bg-white">
-
+  <!-- BOTTOM (DESKTOP) -->
+  <div class="hidden lg:block shrink-0 p-4 border-t border-slate-200 bg-white">
     <button
       type="button"
       @click="$store.auth.logout()"
-      class="
-        w-full
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-red-600
-        hover:bg-red-50
-      ">
-
-      <span class="text-lg">
-        ⇥
-      </span>
-
-      <span>
-        Keluar
-      </span>
-
+      class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50">
+      <span class="text-lg">⇥</span>
+      <span class="sidebar-label">Keluar</span>
     </button>
-
   </div>
 
 </aside>

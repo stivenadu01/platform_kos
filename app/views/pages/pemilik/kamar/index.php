@@ -57,7 +57,7 @@
         <select
           x-model="idKos"
           @change="loadTipe().then(() => load())"
-          class="input">
+          class="select">
 
           <option value="">
             Semua kos
@@ -82,7 +82,7 @@
         <select
           x-model="idTipeKamar"
           @change="load()"
-          class="input">
+          class="select">
           <option value="">Semua tipe</option>
           <template x-for="tipe in tipeList" :key="tipe.id_tipe_kamar">
             <option :value="tipe.id_tipe_kamar" x-text="tipe.nama_tipe"></option>
@@ -98,7 +98,7 @@
         <select
           x-model="status"
           @change="load()"
-          class="input">
+          class="select">
 
           <option value="">
             Semua status
@@ -294,7 +294,7 @@
                 <template x-if="item.status !== 'terisi'">
 
                   <select
-                    class="input py-1.5 text-xs w-auto"
+                    class="select py-1.5 text-xs w-auto"
                     :value="item.status"
                     @change="changeStatus(item, $event.target.value)">
 

@@ -61,7 +61,7 @@ $initialState = [
               @keydown.enter.prevent="selectFirstLocation()"
               type="search"
               autocomplete="off"
-              class="w-full bg-transparent py-2 text-sm outline-none"
+              class="bg-transparent py-2 outline-none input-number"
               placeholder="Cari tempat, jalan, kawasan, atau lokasi di Kupang...">
             <button
               x-show="locationQuery"
@@ -149,7 +149,7 @@ $initialState = [
       <div class="mt-5 space-y-5">
         <label class="block">
           <span class="text-xs font-medium text-slate-600">Radius dari lokasi</span>
-          <select x-model="filters.jarak_max" @change="search(1)" :disabled="!selectedLocation" class="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm disabled:cursor-not-allowed disabled:bg-slate-100">
+          <select x-model="filters.jarak_max" @change="search(1)" :disabled="!selectedLocation" class="mt-1.5 disabled:cursor-not-allowed disabled:bg-slate-100 select">
             <option value="">Semua jarak</option>
             <option value="1">≤ 1 km</option>
             <option value="3">≤ 3 km</option>
@@ -163,7 +163,7 @@ $initialState = [
 
         <label class="block">
           <span class="text-xs font-medium text-slate-600">Jenis kos</span>
-          <select x-model="filters.jenis" @change="search(1)" class="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm">
+          <select x-model="filters.jenis" @change="search(1)" class="mt-1.5 select">
             <option value="">Semua jenis</option>
             <option value="putra">Putra</option>
             <option value="putri">Putri</option>
@@ -173,7 +173,7 @@ $initialState = [
 
         <label class="block">
           <span class="text-xs font-medium text-slate-600">Kapasitas minimal</span>
-          <select x-model="filters.kapasitas" @change="search(1)" class="mt-1.5 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm">
+          <select x-model="filters.kapasitas" @change="search(1)" class="mt-1.5 select">
             <option value="">Bebas</option>
             <option value="1">1 orang</option>
             <option value="2">2 orang</option>
@@ -185,8 +185,8 @@ $initialState = [
         <div>
           <span class="text-xs font-medium text-slate-600">Harga per bulan</span>
           <div class="mt-1.5 grid grid-cols-2 gap-2">
-            <input x-model="filters.harga_min" @change="search(1)" type="number" min="0" step="10000" placeholder="Min" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
-            <input x-model="filters.harga_max" @change="search(1)" type="number" min="0" step="10000" placeholder="Max" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm">
+            <input x-model="filters.harga_min" @change="search(1)" type="number" min="0" step="10000" placeholder="Min" class="input-number">
+            <input x-model="filters.harga_max" @change="search(1)" type="number" min="0" step="10000" placeholder="Max" class="input-number">
           </div>
         </div>
 
@@ -213,7 +213,7 @@ $initialState = [
                   :value="String(item.id_fasilitas)"
                   x-model="filters.fasilitas"
                   @change="search(1)"
-                  class="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary">
+                  class="h-4 w-4 rounded text-primary focus:ring-primary input-number">
                 <span x-text="item.nama_fasilitas"></span>
               </label>
             </template>

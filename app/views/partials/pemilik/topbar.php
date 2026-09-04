@@ -22,6 +22,16 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   <!-- LEFT -->
   <div class="flex items-center gap-3">
 
+    <!-- DESKTOP SIDEBAR TOGGLE -->
+    <button
+      type="button"
+      @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('betakos_pemilik_sidebar_collapsed', sidebarCollapsed ? '1' : '0')"
+      class="hidden lg:inline-flex w-10 h-10 rounded-lg hover:bg-slate-100 items-center justify-center text-slate-600"
+      :title="sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'"
+      :aria-label="sidebarCollapsed ? 'Perluas sidebar' : 'Ciutkan sidebar'">
+      <span x-text="sidebarCollapsed ? '»' : '«'"></span>
+    </button>
+
     <!-- MOBILE MENU -->
     <button
       type="button"

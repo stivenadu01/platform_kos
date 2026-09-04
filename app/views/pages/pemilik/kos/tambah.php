@@ -81,7 +81,7 @@
 
         <select
           data-onboarding="kos-field-jenis" x-model="form.jenis"
-          class="input"
+          class="select"
           required>
 
           <option value="">

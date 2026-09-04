@@ -24,7 +24,7 @@
       </div>
       <div>
         <label class="label">Peran</label>
-        <select x-model="filters.role" @change="applyFilters()" class="input mt-1 w-full">
+        <select x-model="filters.role" @change="applyFilters()" class="select mt-1">
           <option value="">Semua peran</option>
           <option value="pelanggan">Pelanggan</option>
           <option value="pemilik">Pemilik</option>
@@ -33,7 +33,7 @@
       </div>
       <div>
         <label class="label">Verifikasi</label>
-        <select x-model="filters.verification" @change="applyFilters()" class="input mt-1 w-full">
+        <select x-model="filters.verification" @change="applyFilters()" class="select mt-1">
           <option value="">Semua</option>
           <option value="terverifikasi">Terverifikasi</option>
           <option value="belum">Belum diverifikasi</option>
@@ -41,7 +41,7 @@
       </div>
       <div>
         <label class="label">Status</label>
-        <select x-model="filters.status" @change="applyFilters()" class="input mt-1 w-full">
+        <select x-model="filters.status" @change="applyFilters()" class="select mt-1">
           <option value="">Semua status</option>
           <option value="aktif">Aktif</option>
           <option value="nonaktif">Nonaktif</option>
@@ -72,7 +72,12 @@
         <article class="p-4 space-y-3">
           <div class="flex items-start justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
-              <div class="w-10 h-10 shrink-0 rounded-full bg-primary-soft text-primary flex items-center justify-center font-bold" x-text="initial(user.nama)"></div>
+              <template x-if="user.foto">
+                <img :src="window.BASE_URL + '/uploads' + user.foto" :alt="user.nama || 'Foto pengguna'" class="w-10 h-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200" loading="lazy" @error="$event.target.style.display='none'">
+              </template>
+              <template x-if="!user.foto">
+                <div class="w-10 h-10 shrink-0 rounded-full bg-primary-soft text-primary flex items-center justify-center font-bold" x-text="initial(user.nama)"></div>
+              </template>
               <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="user.nama"></div><div class="text-xs text-slate-500 truncate" x-text="user.email"></div><div class="text-xs text-slate-400" x-text="user.no_hp || 'No. HP belum diisi'"></div></div>
             </div>
             <span class="shrink-0 px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium" x-text="roleLabel(user.role)"></span>
@@ -111,7 +116,12 @@
             <tr class="hover:bg-slate-50/70">
               <td class="px-5 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center font-bold" x-text="initial(user.nama)"></div>
+                  <template x-if="user.foto">
+                    <img :src="window.BASE_URL + '/uploads' + user.foto" :alt="user.nama || 'Foto pengguna'" class="w-10 h-10 shrink-0 rounded-full object-cover ring-1 ring-slate-200" loading="lazy" @error="$event.target.style.display='none'">
+                  </template>
+                  <template x-if="!user.foto">
+                    <div class="w-10 h-10 shrink-0 rounded-full bg-primary-soft text-primary flex items-center justify-center font-bold" x-text="initial(user.nama)"></div>
+                  </template>
                   <div class="min-w-0">
                     <div class="font-semibold text-slate-900 truncate max-w-[260px]" x-text="user.nama"></div>
                     <div class="text-xs text-slate-500 truncate max-w-[260px]" x-text="user.email"></div>
@@ -165,7 +175,7 @@
           <div><label class="label">Email *</label><input x-model="form.email" type="email" class="input mt-1 w-full" required></div>
           <div><label class="label">Nomor HP *</label><input x-model="form.no_hp" type="tel" class="input mt-1 w-full" required></div>
           <div><label class="label">NIK *</label><input x-model="form.nik" class="input mt-1 w-full" inputmode="numeric" maxlength="16" required></div>
-          <div><label class="label">Peran *</label><select x-model="form.role" class="input mt-1 w-full"><option value="pelanggan">Pelanggan</option><option value="pemilik">Pemilik</option><option value="admin">Admin</option></select></div>
+          <div><label class="label">Peran *</label><select x-model="form.role" class="select mt-1"><option value="pelanggan">Pelanggan</option><option value="pemilik">Pemilik</option><option value="admin">Admin</option></select></div>
           <div><label class="label">Kata Sandi *</label><input x-model="form.password" type="password" minlength="8" class="input mt-1 w-full" required placeholder="Minimal 8 karakter"></div>
         </div>
         <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm text-emerald-800">✓ Pengguna yang ditambahkan melalui Admin langsung memiliki status <b>terverifikasi</b> dan <b>aktif</b>, sehingga tidak perlu klik link verifikasi email.</div>

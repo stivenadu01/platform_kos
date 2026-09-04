@@ -42,8 +42,8 @@
 <body class="bg-slate-50 text-slate-800">
 
   <div
-    x-data="{ sidebarOpen: false }"
-    @betakos:onboarding-open-sidebar.window="sidebarOpen = true"
+    x-data="{ sidebarOpen: false, sidebarCollapsed: localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1' }"
+    @betakos:onboarding-open-sidebar.window="sidebarOpen = true; sidebarCollapsed = false"
     class="min-h-screen">
 
     <!-- MOBILE BACKDROP -->
@@ -58,7 +58,7 @@
     <?php include __DIR__ . '/../partials/pemilik/sidebar.php'; ?>
 
     <!-- MAIN -->
-    <div class="lg:ml-64 min-h-screen">
+    <div class="min-h-screen transition-[margin] duration-300" :class="sidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'">
 
       <?php include __DIR__ . '/../partials/pemilik/topbar.php'; ?>
 

@@ -76,7 +76,7 @@
             <label class="label">Jumlah Orang</label>
             <select
               x-model.number="item.jumlah_orang"
-              class="input">
+              class="select">
               <template x-for="jumlah in availableJumlahOrang(index)" :key="jumlah">
                 <option :value="jumlah" x-text="jumlah + ' orang'"></option>
               </template>
@@ -92,7 +92,7 @@
                 x-model.number="item.harga_total"
                 min="0"
                 step="1000"
-                class="input pl-11"
+                class="input-number pl-11"
                 placeholder="700000"
                 required>
             </div>

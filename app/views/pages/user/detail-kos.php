@@ -301,7 +301,7 @@ if (!empty($lastLoginAt)) {
           </div>
           <div>
             <label class="label">Alasan laporan *</label>
-            <select x-model="reportForm.alasan" class="input mt-1 w-full" required>
+            <select x-model="reportForm.alasan" class="select mt-1" required>
               <option value="">Pilih alasan</option>
               <option value="informasi_tidak_sesuai">Informasi tidak sesuai</option>
               <option value="foto_tidak_sesuai">Foto tidak sesuai</option>

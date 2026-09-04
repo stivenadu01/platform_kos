@@ -48,7 +48,7 @@
 
       <select
         x-model="form.id_kos"
-        class="input"
+        class="select"
         required>
 
         <option value="">
@@ -94,7 +94,7 @@
           Tipe Kamar
         </label>
 
-        <select x-model="form.id_tipe_kamar" class="input" required>
+        <select x-model="form.id_tipe_kamar" class="select" required>
           <option value="">Pilih tipe kamar</option>
           <template x-for="item in tipeList" :key="item.id_tipe_kamar">
             <option :value="item.id_tipe_kamar" x-text="item.nama_tipe + ' (' + item.kapasitas + ' orang)'"></option>
