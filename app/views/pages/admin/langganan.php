@@ -236,34 +236,39 @@
             <div>
               <h3 class="font-bold text-slate-900">Riwayat Pembayaran</h3>
               <p class="mt-1 text-xs text-slate-500">Klik transaksi untuk memeriksa detail dan bukti pembayaran, termasuk transaksi yang sudah diverifikasi atau ditolak.</p>
-              <!-- Desktop: tabel -->
-              <div class="mt-3 hidden md:block admin-scroll-x border border-slate-200 rounded-xl">
+              <div class="mt-3 admin-scroll-x border border-slate-200 rounded-xl">
                 <table class="min-w-full text-sm">
-                  <thead class="bg-slate-50"><tr>
-                    <th class="text-left px-4 py-3">Order</th><th class="text-left px-4 py-3">Jenis</th><th class="text-left px-4 py-3">Nominal</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Tanggal</th><th class="text-left px-4 py-3">Bukti</th>
-                  </tr></thead>
+                  <thead class="bg-slate-50">
+                    <tr>
+                      <th class="text-left px-4 py-3">Order</th>
+                      <th class="text-left px-4 py-3">Jenis</th>
+                      <th class="text-left px-4 py-3">Nominal</th>
+                      <th class="text-left px-4 py-3">Status</th>
+                      <th class="text-left px-4 py-3">Tanggal</th>
+                      <th class="text-left px-4 py-3">Bukti</th>
+                    </tr>
+                  </thead>
                   <tbody class="divide-y divide-slate-100">
-                    <template x-for="payment in detail.pembayaran" :key="'desktop-' + payment.id_pembayaran_langganan">
+                    <template x-for="payment in detail.pembayaran" :key="payment.id_pembayaran_langganan">
                       <tr class="hover:bg-slate-50 cursor-pointer" @click="showPayment(payment.id_pembayaran_langganan)">
-                        <td class="px-4 py-3 font-semibold" x-text="payment.nomor_order"></td><td class="px-4 py-3" x-text="payment.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru'"></td><td class="px-4 py-3" x-text="formatRupiah(payment.nominal)"></td><td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-semibold" :class="paymentStatusClass(payment.status)" x-text="paymentStatusLabel(payment.status)"></span></td><td class="px-4 py-3 whitespace-nowrap" x-text="formatDateTime(payment.tanggal_pembayaran)"></td><td class="px-4 py-3"><span x-show="payment.bukti_pembayaran" class="text-xs font-semibold text-primary">Lihat bukti</span><span x-show="!payment.bukti_pembayaran" class="text-xs text-slate-400">Tidak ada</span></td>
+                        <td class="px-4 py-3 font-semibold" x-text="payment.nomor_order"></td>
+                        <td class="px-4 py-3" x-text="payment.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru'"></td>
+                        <td class="px-4 py-3" x-text="formatRupiah(payment.nominal)"></td>
+                        <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-semibold" :class="paymentStatusClass(payment.status)" x-text="paymentStatusLabel(payment.status)"></span></td>
+                        <td class="px-4 py-3 whitespace-nowrap" x-text="formatDateTime(payment.tanggal_pembayaran)"></td>
+                        <td class="px-4 py-3">
+                          <span x-show="payment.bukti_pembayaran" class="text-xs font-semibold text-primary">Lihat bukti</span>
+                          <span x-show="!payment.bukti_pembayaran" class="text-xs text-slate-400">Tidak ada</span>
+                        </td>
                       </tr>
                     </template>
-                    <tr x-show="!detail.pembayaran?.length"><td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat pembayaran.</td></tr>
+                    <tr x-show="!detail.pembayaran?.length">
+                      <td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat pembayaran.</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
-
-              <!-- Mobile: card -->
-              <div class="mt-3 space-y-3 md:hidden">
-                <template x-for="payment in detail.pembayaran" :key="'mobile-' + payment.id_pembayaran_langganan">
-                  <button type="button" class="w-full text-left rounded-xl border border-slate-200 bg-white p-4 hover:bg-slate-50 active:bg-slate-100 transition" @click="showPayment(payment.id_pembayaran_langganan)">
-                    <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="payment.nomor_order"></div><div class="mt-1 text-xs text-slate-500" x-text="payment.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru'"></div></div><span class="shrink-0 rounded-full px-2 py-1 text-xs font-semibold" :class="paymentStatusClass(payment.status)" x-text="paymentStatusLabel(payment.status)"></span></div>
-                    <div class="mt-3 grid grid-cols-2 gap-3 text-sm"><div><div class="text-xs text-slate-500">Nominal</div><div class="mt-0.5 font-semibold text-slate-900" x-text="formatRupiah(payment.nominal)"></div></div><div><div class="text-xs text-slate-500">Tanggal</div><div class="mt-0.5 font-medium text-slate-700" x-text="formatDateTime(payment.tanggal_pembayaran)"></div></div></div>
-                    <div class="mt-3 flex items-center justify-between border-t border-slate-100 pt-3"><span class="text-xs" :class="payment.bukti_pembayaran ? 'font-semibold text-primary' : 'text-slate-400'" x-text="payment.bukti_pembayaran ? 'Lihat bukti pembayaran' : 'Tidak ada bukti pembayaran'"></span><span class="text-xs font-semibold text-primary">Lihat detail →</span></div>
-                  </button>
-                </template>
-                <div x-show="!detail.pembayaran?.length" class="rounded-xl border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">Belum ada riwayat pembayaran.</div>
-              </div>
+            </div>
 
             <div>
               <h3 class="font-bold text-slate-900">Riwayat Langganan Pemilik</h3>
@@ -285,16 +290,13 @@
               <div class="mt-1 text-amber-800" x-text="detail.catatan"></div>
             </div>
 
-            <div x-show="detailPayment" x-cloak class="rounded-xl border border-slate-200 p-4">
-              <div class="flex items-start justify-between gap-3">
+            <div x-show="detailPayment" class="rounded-xl border border-slate-200 p-4">
+              <div class="flex items-center justify-between gap-3">
                 <div>
                   <h3 class="font-bold text-slate-900">Detail Pembayaran yang Dipilih</h3>
                   <p class="text-xs text-slate-500 mt-1" x-text="detailPayment?.nomor_order"></p>
                 </div>
-                <div class="flex items-center gap-2 shrink-0">
-                  <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentStatusClass(detailPayment?.status)" x-text="paymentStatusLabel(detailPayment?.status)"></span>
-                  <button type="button" @click="closePaymentDetail()" class="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50" aria-label="Tutup detail pembayaran">✕</button>
-                </div>
+                <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentStatusClass(detailPayment?.status)" x-text="paymentStatusLabel(detailPayment?.status)"></span>
               </div>
               <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                 <div>
@@ -468,11 +470,6 @@
         } catch (e) {} finally {
           this.detailLoading = false;
         }
-      },
-
-      closePaymentDetail() {
-        this.detailPayment = null;
-        this.catatan = '';
       },
 
       closeDetail() {

@@ -4,7 +4,7 @@
     <p class="mt-4 text-sm font-semibold text-primary">Checkout Langganan</p>
     <h2 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">BetaKos Pro</h2>
     <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-      Pembayaran dilakukan secara manual. <span x-text="isRenewal ? 'Perpanjangan akan aktif kembali setelah pembayaran diverifikasi admin dan menggunakan harga perpanjangan.' : 'Langganan baru aktif setelah pembayaran diverifikasi admin dan menggunakan harga awal.'"></span>
+      <span x-text="isFreeFirst ? 'Pro 1 bulan pertama gratis dan langsung aktif tanpa pembayaran.' : (isRenewal ? 'Perpanjangan akan aktif kembali setelah pembayaran diverifikasi admin dan menggunakan harga perpanjangan.' : 'Langganan baru menggunakan harga awal dan perlu pembayaran manual.')"></span>
     </p>
   </div>
 
@@ -31,11 +31,34 @@
         <div class="card border-2 border-primary shadow-sm">
           <div>
             <label class="text-sm font-semibold text-slate-700">Durasi Pro</label>
-            <select x-model="packageCode" @change="selectPackage()" class="input mt-2 w-full">
-              <template x-for="item in packages" :key="item.id_paket_langganan">
-                <option :value="item.kode" x-text="item.durasi_bulan + ' bulan — ' + formatRupiah(isRenewal ? item.harga_perpanjangan : item.harga_bulanan)"></option>
-              </template>
-            </select>
+            <div class="relative mt-2" @click.outside="packageOpen = false">
+              <button type="button" @click="packageOpen = !packageOpen" class="input w-full flex items-center justify-between gap-3 text-left !text-slate-800">
+                <span class="min-w-0 flex items-center gap-2 !text-slate-800">
+                  <span x-show="selectedPackage?.durasi_bulan === 12" class="shrink-0">⭐</span>
+                  <span class="truncate !text-slate-800" x-text="selectedPackage ? selectedPackage.durasi_bulan + ' bulan — ' + formatRupiah(isRenewal ? selectedPackage.harga_perpanjangan : selectedPackage.harga_bulanan) : 'Pilih durasi'"></span>
+                </span>
+                <span class="text-slate-400">⌄</span>
+              </button>
+              <div x-show="packageOpen" x-transition class="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                <template x-for="item in packages" :key="item.id_paket_langganan">
+                  <button type="button" @click="packageCode = item.kode; selectPackage(); packageOpen = false" class="w-full px-4 py-3 text-left transition hover:bg-slate-50" :class="{'bg-amber-50 text-amber-900': item.durasi_bulan === 12}">
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="font-medium" x-text="(item.durasi_bulan === 12 ? '⭐ ' : '') + item.durasi_bulan + ' bulan'"></span>
+                      <span class="font-bold" x-text="formatRupiah(isRenewal ? item.harga_perpanjangan : item.harga_bulanan)"></span>
+                    </div>
+                    <div x-show="item.durasi_bulan === 12" class="mt-1 text-xs font-semibold text-amber-700">Penawaran Terbaik</div>
+                  </button>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <div x-show="selectedPackage?.durasi_bulan === 12" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+            <div class="font-bold">⭐ Penawaran Terbaik: Pro 12 Bulan</div>
+            <div class="mt-1">
+              <span x-show="!isRenewal">Dapatkan BetaKos Pro selama 12 bulan dengan harga <strong x-text="formatRupiah(displayPrice)"></strong>.</span>
+              <span x-show="isRenewal">Perpanjang BetaKos Pro selama 12 bulan dengan harga <strong x-text="formatRupiah(displayPrice)"></strong> (setara <span x-text="formatRupiah(Math.round(displayPrice / (selectedPackage?.durasi_bulan || 1)))"></span>/bulan).</span>
+            </div>
           </div>
 
           <div class="flex items-start justify-between gap-4 mt-5">
@@ -51,6 +74,8 @@
             </div>
           </div>
 
+          <div x-show="isFreeFirst" class="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-800">Pro 1 bulan pertama gratis. Tidak perlu transfer dan tidak perlu upload bukti pembayaran.</div>
+
           <div class="mt-5 border-t border-slate-100 pt-5">
             <p class="text-sm font-semibold text-slate-900">Fitur Pro</p>
             <ul class="mt-3 space-y-2 text-sm text-slate-700">
@@ -61,7 +86,7 @@
           </div>
         </div>
 
-        <div class="card border border-slate-200">
+        <div x-show="!isFreeFirst" class="card border border-slate-200">
           <h3 class="font-bold text-slate-900">Metode Pembayaran</h3>
           <p class="mt-1 text-sm text-slate-500">Pilih rekening tujuan yang sudah dikonfigurasi oleh BetaKos.</p>
 
@@ -112,6 +137,7 @@
         </div>
 
         <form class="mt-5 space-y-4" @submit.prevent="submit()">
+          <template x-if="!isFreeFirst">
           <div>
             <label class="text-sm font-medium text-slate-700">Bukti pembayaran</label>
             <input
@@ -122,16 +148,17 @@
               required>
             <p class="mt-1 text-xs leading-5 text-slate-500">JPG, PNG, atau WebP. Maksimal 5 MB.</p>
           </div>
+          </template>
 
-          <div class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
+          <div x-show="!isFreeFirst" class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
             Setelah submit, admin akan memeriksa pembayaran. Jangan melakukan pembayaran/order kedua selama order ini masih menunggu verifikasi.
           </div>
 
           <button
             type="submit"
             class="btn-primary w-full"
-            :disabled="submitting || !selectedMethod || availableMethodCount === 0">
-            <span x-text="submitting ? 'Mengirim...' : 'Kirim Pembayaran'"></span>
+            :disabled="submitting || (!isFreeFirst && (!selectedMethod || availableMethodCount === 0))">
+            <span x-text="submitting ? 'Memproses...' : (isFreeFirst ? 'Aktifkan Pro Gratis' : 'Kirim Pembayaran')"></span>
           </button>
         </form>
       </aside>
@@ -145,6 +172,7 @@ function pemilikLanggananCheckout() {
     loading: true,
     submitting: false,
     packageCode: <?= json_encode((string)query('paket', 'pro')) ?>,
+    packageOpen: false,
     packages: [],
     selectedPackage: null,
     pendingPayment: null,
@@ -153,6 +181,7 @@ function pemilikLanggananCheckout() {
     selectedMethod: 0,
     get availableMethodCount() { return this.paymentMethods.length; },
     get displayPrice() { return this.isRenewal ? Number(this.selectedPackage?.harga_perpanjangan || 0) : Number(this.selectedPackage?.harga_bulanan || 0); },
+    get isFreeFirst() { return !this.isRenewal && Number(this.selectedPackage?.durasi_bulan || 0) === 1 && Number(this.selectedPackage?.harga_bulanan || 0) === 0; },
 
     async init() {
       try {
@@ -178,24 +207,29 @@ function pemilikLanggananCheckout() {
     },
 
     async submit() {
-      if (!this.selectedPackage || !this.selectedMethod) return;
-
-      const file = this.$refs.proof?.files?.[0];
-      if (!file) {
-        Alpine.store('ui').toast('Bukti pembayaran wajib diunggah.', 'error');
-        return;
-      }
+      if (!this.selectedPackage) return;
+      if (!this.isFreeFirst && !this.selectedMethod) return;
 
       const form = new FormData();
       form.append('kode_paket', this.selectedPackage.kode);
-      form.append('metode_pembayaran', this.selectedMethod);
-      form.append('bukti_pembayaran', file);
+
+      if (!this.isFreeFirst) {
+        const file = this.$refs.proof?.files?.[0];
+        if (!file) {
+          Alpine.store('ui').toast('Bukti pembayaran wajib diunggah.', 'error');
+          return;
+        }
+        form.append('metode_pembayaran', this.selectedMethod);
+        form.append('bukti_pembayaran', file);
+      }
 
       this.submitting = true;
       try {
         const res = await API.post('/pemilik/langganan/pembayaran', form);
         const id = res.data?.id_pembayaran_langganan;
-        window.location.href = window.BASE_URL + '/pemilik/langganan/pembayaran' + (id ? '?id=' + encodeURIComponent(id) : '');
+        window.location.href = this.isFreeFirst
+          ? window.BASE_URL + '/pemilik/langganan'
+          : window.BASE_URL + '/pemilik/langganan/pembayaran' + (id ? '?id=' + encodeURIComponent(id) : '');
       } catch (e) {
         // API already displays the error toast.
       } finally {

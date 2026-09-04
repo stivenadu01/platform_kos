@@ -327,6 +327,75 @@ function getPembayaranLanggananByIdPemilik($id_pembayaran, $id_pemilik)
   return $row;
 }
 
+function aktifkanLanggananGratisPertama($id_pemilik, $kode_paket)
+{
+  $conn = db();
+  $id_pemilik = (int)$id_pemilik;
+  $kode_paket = trim((string)$kode_paket);
+
+  if ($id_pemilik <= 0) throw new Exception('Pemilik tidak valid.', 422);
+
+  $conn->begin_transaction();
+  try {
+    $stmt = $conn->prepare("SELECT id_user FROM users WHERE id_user = ? FOR UPDATE");
+    $stmt->bind_param('i', $id_pemilik);
+    $stmt->execute();
+    $owner = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$owner) throw new Exception('Pemilik tidak ditemukan.', 404);
+
+    $stmt = $conn->prepare("SELECT id_pembayaran_langganan FROM pembayaran_langganan WHERE id_pemilik = ? AND status = 'menunggu' LIMIT 1 FOR UPDATE");
+    $stmt->bind_param('i', $id_pemilik);
+    $stmt->execute();
+    $pending = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if ($pending) throw new Exception('Masih ada pembayaran langganan yang menunggu verifikasi.', 409);
+
+    $stmt = $conn->prepare("
+      UPDATE langganan
+      SET status = 'berakhir', updated_at = CURRENT_TIMESTAMP
+      WHERE id_pemilik = ? AND status = 'aktif' AND tanggal_berakhir < CURDATE()
+    ");
+    $stmt->bind_param('i', $id_pemilik);
+    $stmt->execute();
+    $stmt->close();
+
+    $paket = getPaketLanggananByKode($kode_paket);
+    if (!$paket) throw new Exception('Paket langganan tidak tersedia.', 404);
+    if ((int)$paket['durasi_bulan'] !== 1 || (float)$paket['harga_bulanan'] > 0) {
+      throw new Exception('Paket ini bukan paket Pro gratis pertama.', 422);
+    }
+
+    $stmt = $conn->prepare("SELECT id_langganan FROM langganan WHERE id_pemilik = ? AND status IN ('aktif', 'berakhir') ORDER BY id_langganan DESC LIMIT 1 FOR UPDATE");
+    $stmt->bind_param('i', $id_pemilik);
+    $stmt->execute();
+    $latest = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if ($latest) throw new Exception('Promo Pro gratis hanya berlaku untuk pemilik yang belum pernah memiliki Pro.', 409);
+
+    $start = new DateTimeImmutable('today');
+    $end = addMonthsSafe($start, 1);
+    $startDate = $start->format('Y-m-d');
+    $endDate = $end->format('Y-m-d');
+
+    $stmt = $conn->prepare("
+      INSERT INTO langganan
+        (id_pemilik, id_paket_langganan, tanggal_mulai, tanggal_berakhir, status, catatan)
+      VALUES (?, ?, ?, ?, 'aktif', NULL)
+    ");
+    $stmt->bind_param('iiss', $id_pemilik, $paket['id_paket_langganan'], $startDate, $endDate);
+    if (!$stmt->execute()) throw new Exception('Gagal mengaktifkan Pro gratis.', 500);
+    $id_langganan = (int)$conn->insert_id;
+    $stmt->close();
+
+    $conn->commit();
+    return $id_langganan;
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+  }
+}
+
 function createPembayaranLangganan($id_pemilik, $kode_paket, $metode, $buktiFile = null)
 {
   $conn = db();
@@ -372,7 +441,12 @@ function createPembayaranLangganan($id_pemilik, $kode_paket, $metode, $buktiFile
     $active = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    $jenis = $active ? 'renewal' : 'baru';
+    // Owner yang pernah memiliki Pro dan subscription terakhirnya sudah berakhir
+    // tetap dihitung sebagai renewal. Ini penting agar harga renewal (mis. 75rb/6 bulan)
+    // sinkron dengan nominal yang ditampilkan dan dicatat di riwayat pembayaran.
+    $latestLangganan = getLatestLanggananPemilik($id_pemilik);
+    $isRenewal = (bool)$active || ($latestLangganan && $latestLangganan['status'] === 'berakhir');
+    $jenis = $isRenewal ? 'renewal' : 'baru';
     $nominalPembayaran = $jenis === 'renewal' ? (float)$paket['harga_perpanjangan'] : (float)$paket['harga_bulanan'];
     $id_langganan = null;
 
@@ -386,7 +460,7 @@ function createPembayaranLangganan($id_pemilik, $kode_paket, $metode, $buktiFile
       $end = addMonthsSafe($today, (int)$paket['durasi_bulan']);
 
       $stmt = $conn->prepare("\n        INSERT INTO langganan\n          (id_pemilik, id_paket_langganan, tanggal_mulai, tanggal_berakhir, status, catatan)\n        VALUES (?, ?, ?, ?, 'menunggu', ?)\n      ");
-      $catatan = getLatestLanggananPemilik($id_pemilik)
+      $catatan = $isRenewal
         ? 'Menunggu verifikasi renewal setelah subscription sebelumnya berakhir.'
         : 'Menunggu verifikasi pembayaran langganan.';
       $startDate = $today->format('Y-m-d');

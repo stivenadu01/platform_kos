@@ -50,7 +50,7 @@ VALUES
   (
     'pro',
     'BetaKos Pro',
-    10000,
+    0,
     1,
     'Fitur manajemen operasional dan keuangan untuk pemilik kos.',
     JSON_ARRAY(

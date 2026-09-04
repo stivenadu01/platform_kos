@@ -94,12 +94,30 @@
             </div>
 
             <div class="mt-5">
-              <label class="text-sm font-semibold text-slate-700">Pilih durasi</label>
-              <select x-model="selectedPackageCode" class="input mt-2 w-full">
-                <template x-for="item in paket" :key="item.id_paket_langganan">
-                  <option :value="item.kode" x-text="item.durasi_bulan === 1 ? '1 Bulan — ' + formatRupiah(status.is_pro || status.status === 'berakhir' ? item.harga_perpanjangan : item.harga_bulanan) : item.durasi_bulan + ' Bulan — ' + formatRupiah(status.is_pro || status.status === 'berakhir' ? item.harga_perpanjangan : item.harga_bulanan)"></option>
-                </template>
-              </select>
+              <div class="flex items-center justify-between gap-3">
+                <label class="text-sm font-semibold text-slate-700">Pilih durasi</label>
+                <span x-show="paket.some(item => item.durasi_bulan === 12)" class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">⭐ Penawaran Terbaik: 12 Bulan</span>
+              </div>
+              <div class="relative mt-2" @click.outside="packageOpen = false">
+                <button type="button" @click="packageOpen = !packageOpen" class="input w-full flex items-center justify-between gap-3 text-left !text-slate-800">
+                  <span class="min-w-0 flex items-center gap-2 !text-slate-800">
+                    <span x-show="selectedPackage?.durasi_bulan === 12" class="shrink-0">⭐</span>
+                    <span class="truncate !text-slate-800" x-text="selectedPackage ? selectedPackage.durasi_bulan + ' Bulan — ' + formatRupiah(priceFor(selectedPackage)) : 'Pilih durasi'"></span>
+                  </span>
+                  <span class="text-slate-400">⌄</span>
+                </button>
+                <div x-show="packageOpen" x-transition class="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                  <template x-for="item in paket" :key="item.id_paket_langganan">
+                    <button type="button" @click="selectedPackageCode = item.kode; packageOpen = false" class="w-full px-4 py-3 text-left transition hover:bg-slate-50" :class="{'bg-amber-50 text-amber-900': item.durasi_bulan === 12}">
+                      <div class="flex items-center justify-between gap-3">
+                        <span class="font-medium" x-text="(item.durasi_bulan === 12 ? '⭐ ' : '') + item.durasi_bulan + ' Bulan'"></span>
+                        <span class="font-bold" x-text="formatRupiah(priceFor(item))"></span>
+                      </div>
+                      <div x-show="item.durasi_bulan === 12" class="mt-1 text-xs font-semibold text-amber-700">Penawaran Terbaik</div>
+                    </button>
+                  </template>
+                </div>
+              </div>
             </div>
 
             <div class="mt-4 grid grid-cols-2 gap-3">
@@ -111,6 +129,12 @@
                 <div class="text-xs text-slate-500">Harga perpanjangan</div>
                 <div class="mt-1 font-bold text-slate-900" x-text="formatRupiah(selectedPackage?.harga_perpanjangan)"></div>
               </div>
+            </div>
+
+            <div x-show="selectedPackage?.durasi_bulan === 12" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
+              <strong>⭐ Penawaran Terbaik</strong><br>
+              <span x-show="!status.is_pro && status.status !== 'berakhir'">Pro 12 bulan hanya <strong x-text="formatRupiah(selectedPrice)"></strong>. Cocok untuk mendapatkan akses Pro lebih lama dengan satu kali pembayaran.</span>
+              <span x-show="status.is_pro || status.status === 'berakhir'">Perpanjangan Pro 12 bulan hanya <strong x-text="formatRupiah(selectedPrice)"></strong> (setara <span x-text="formatRupiah(Math.round(selectedPrice / (selectedPackage?.durasi_bulan || 1)))"></span>/bulan).</span>
             </div>
 
             <div class="mt-4 rounded-xl bg-primary-soft px-4 py-3">
@@ -228,6 +252,7 @@ function pemilikLanggananPage() {
     history: [],
     pendingPayment: null,
     selectedPackageCode: 'pro',
+    packageOpen: false,
 
     get selectedPackage() {
       return this.paket.find(item => item.kode === this.selectedPackageCode) || this.paket[0] || null;
@@ -236,6 +261,12 @@ function pemilikLanggananPage() {
       const item = this.selectedPackage;
       if (!item) return 0;
       return this.status.is_pro || this.status.status === 'berakhir' ? Number(item.harga_perpanjangan || 0) : Number(item.harga_bulanan || 0);
+    },
+    priceFor(item) {
+      if (!item) return 0;
+      return this.status.is_pro || this.status.status === 'berakhir'
+        ? Number(item.harga_perpanjangan || 0)
+        : Number(item.harga_bulanan || 0);
     },
     get checkoutUrl() {
       return window.BASE_URL + '/pemilik/langganan/checkout?paket=' + encodeURIComponent(this.selectedPackageCode);

@@ -92,11 +92,36 @@ class ApiLanggananController
     try {
       $idPemilik = $this->pemilikId();
       $kodePaket = trim((string)input('kode_paket', ''));
+      if ($kodePaket === '') {
+        throw new Exception('Paket wajib dipilih.', 422);
+      }
+
+      $status = getStatusLanggananPemilik($idPemilik);
+      $isRenewal = in_array($status['status'], ['aktif', 'berakhir'], true);
+      $paket = getPaketLanggananByKode($kodePaket);
+      if (!$paket) {
+        throw new Exception('Paket langganan tidak tersedia.', 404);
+      }
+
+      // Pro 1 bulan pertama gratis: tidak membuat pembayaran dan langsung aktif.
+      if (!$isRenewal && (float)$paket['harga_bulanan'] <= 0 && (int)$paket['durasi_bulan'] === 1) {
+        $idLangganan = aktifkanLanggananGratisPertama($idPemilik, $kodePaket);
+        response([
+          'success' => true,
+          'message' => 'Pro 1 bulan gratis berhasil diaktifkan.',
+          'data' => [
+            'id_langganan' => $idLangganan,
+            'gratis' => true,
+          ]
+        ], 201);
+        return;
+      }
+
       $metode = (int)input('metode_pembayaran', 0);
       $file = request_file('bukti_pembayaran');
 
-      if ($kodePaket === '' || $metode === '') {
-        throw new Exception('Paket dan metode pembayaran wajib dipilih.', 422);
+      if ($metode <= 0) {
+        throw new Exception('Metode pembayaran wajib dipilih.', 422);
       }
       if (!$file) {
         throw new Exception('Bukti pembayaran wajib diunggah.', 422);
