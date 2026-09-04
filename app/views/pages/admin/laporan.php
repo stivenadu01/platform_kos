@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Laporan Kos</h1>
-      <p class="mt-1 text-sm text-slate-500">Periksa laporan dari mahasiswa dan tindak lanjuti informasi kos yang bermasalah.</p>
+      <p class="mt-1 text-sm text-slate-500">Periksa laporan pengguna dan tindak lanjuti informasi kos yang bermasalah.</p>
     </div>
     <button @click="load(1)" class="btn-secondary text-sm">↻ Refresh</button>
   </div>
@@ -40,7 +40,7 @@
     <div x-show="!loading && !result.items.length" class="p-10 text-center">
       <div class="text-4xl">⚑</div>
       <h3 class="mt-3 font-semibold text-slate-900">Belum ada laporan</h3>
-      <p class="mt-1 text-sm text-slate-500">Laporan dari mahasiswa akan muncul di sini.</p>
+      <p class="mt-1 text-sm text-slate-500">Laporan dari pengguna akan muncul di sini.</p>
     </div>
     <div x-show="!loading && result.items.length" class="!block md:!hidden divide-y divide-slate-200">
       <template x-for="item in result.items" :key="'m-' + item.id_laporan">

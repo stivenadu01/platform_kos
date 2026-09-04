@@ -16,6 +16,8 @@ post('/api/auth/password', 'ApiAuthController@changePassword', ['auth']);
 post('/api/auth/request-reset', 'ApiAuthController@requestReset');
 post('/api/auth/reset-password', 'ApiAuthController@resetPassword');
 
+post('/api/payment/midtrans/notification', 'ApiLanggananController@midtransNotification');
+
 
 get('/api/fasilitas', 'ApiFasilitasController@index');
 
@@ -87,6 +89,7 @@ put('/api/pemilik/kamar/status', 'ApiKamarController@status', ['auth', 'role:pem
 get('/api/pemilik/langganan', 'ApiLanggananController@index', ['auth', 'role:pemilik']);
 get('/api/pemilik/langganan/checkout', 'ApiLanggananController@checkoutInfo', ['auth', 'role:pemilik']);
 get('/api/pemilik/langganan/pembayaran', 'ApiLanggananController@pembayaran', ['auth', 'role:pemilik']);
+get('/api/pemilik/langganan/pembayaran/{id}/midtrans-status', 'ApiLanggananController@midtransStatus', ['auth', 'role:pemilik']);
 get('/api/pemilik/langganan/pembayaran/{id}', 'ApiLanggananController@pembayaranShow', ['auth', 'role:pemilik']);
 post('/api/pemilik/langganan/pembayaran', 'ApiLanggananController@buatPembayaran', ['auth', 'role:pemilik']);
 post('/api/pemilik/langganan/pembayaran/bukti', 'ApiLanggananController@uploadBukti', ['auth', 'role:pemilik']);

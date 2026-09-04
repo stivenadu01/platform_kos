@@ -3,7 +3,8 @@ spl_autoload_register(function ($class) {
   // folder utama controller
   $baseDirs = [
     ROOT_PATH . '/app/controllers/',
-    ROOT_PATH . '/app/controllers/api/'
+    ROOT_PATH . '/app/controllers/api/',
+    ROOT_PATH . '/app/services/'
   ];
 
   foreach ($baseDirs as $baseDir) {

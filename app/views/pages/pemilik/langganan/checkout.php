@@ -88,37 +88,26 @@
 
         <div x-show="!isFreeFirst" class="card border border-slate-200">
           <h3 class="font-bold text-slate-900">Metode Pembayaran</h3>
-          <p class="mt-1 text-sm text-slate-500">Pilih rekening tujuan yang sudah dikonfigurasi oleh BetaKos.</p>
+          <p class="mt-1 text-sm text-slate-500">Pilih QRIS untuk pembayaran otomatis atau transfer manual dengan verifikasi admin.</p>
 
           <div class="mt-4 grid gap-3">
-            <template x-for="method in paymentMethods" :key="method.id_metode_pembayaran">
-              <button
-                type="button"
-                @click="selectedMethod = Number(method.id_metode_pembayaran)"
-                class="text-left rounded-xl border p-4 transition"
-                :class="selectedMethod === Number(method.id_metode_pembayaran) ? 'border-primary bg-primary-soft ring-1 ring-primary' : 'border-slate-200 hover:border-slate-300'">
+            <template x-for="method in paymentMethods" :key="method.jenis === 'qris' ? 'qris' : method.id_metode_pembayaran">
+              <button type="button" @click="selectedMethod = method.jenis === 'qris' ? 'qris' : Number(method.id_metode_pembayaran)" class="text-left rounded-xl border p-4 transition" :class="selectedMethod === (method.jenis === 'qris' ? 'qris' : Number(method.id_metode_pembayaran)) ? 'border-primary bg-primary-soft ring-1 ring-primary' : 'border-slate-200 hover:border-slate-300'">
                 <div class="flex items-center justify-between gap-3">
                   <div>
-                    <span class="font-semibold text-slate-900" x-text="method.jenis === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet'"></span>
+                    <span class="font-semibold text-slate-900" x-text="method.jenis === 'qris' ? 'QRIS Dinamis' : (method.jenis === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet')"></span>
                     <span class="block text-xs text-slate-500 mt-1" x-text="method.nama_provider"></span>
                   </div>
-                  <span class="h-4 w-4 rounded-full border flex items-center justify-center" :class="selectedMethod === Number(method.id_metode_pembayaran) ? 'border-primary' : 'border-slate-300'">
-                    <span x-show="selectedMethod === Number(method.id_metode_pembayaran)" class="h-2 w-2 rounded-full bg-primary"></span>
-                  </span>
+                  <span class="h-4 w-4 rounded-full border flex items-center justify-center" :class="selectedMethod === (method.jenis === 'qris' ? 'qris' : Number(method.id_metode_pembayaran)) ? 'border-primary' : 'border-slate-300'"><span x-show="selectedMethod === (method.jenis === 'qris' ? 'qris' : Number(method.id_metode_pembayaran))" class="h-2 w-2 rounded-full bg-primary"></span></span>
                 </div>
-                <div class="mt-3 text-sm text-slate-600">
-                  <span class="font-semibold" x-text="method.nomor_tujuan"></span>
-                  <span class="mx-1">•</span>
-                  <span x-text="'a.n. ' + method.nama_penerima"></span>
-                </div>
+                <template x-if="method.jenis === 'qris'"><div class="mt-3 text-sm leading-6 text-slate-600">QR akan dibuat khusus untuk order ini dan nominal sudah dikunci sesuai paket.</div></template>
+                <template x-if="method.jenis !== 'qris'"><div class="mt-3 text-sm text-slate-600"><span class="font-semibold" x-text="method.nomor_tujuan"></span><span class="mx-1">•</span><span x-text="'a.n. ' + method.nama_penerima"></span></div></template>
                 <div x-show="method.keterangan" class="mt-2 text-xs text-slate-500" x-text="method.keterangan"></div>
               </button>
             </template>
           </div>
 
-          <div x-show="availableMethodCount === 0" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
-            Metode pembayaran belum tersedia. Admin perlu mengaktifkan minimal satu metode pembayaran pada menu <b>Metode Pembayaran</b>.
-          </div>
+          <div x-show="paymentMethods.length === 0" class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">Metode pembayaran belum tersedia.</div>
         </div>
       </section>
 
@@ -137,7 +126,7 @@
         </div>
 
         <form class="mt-5 space-y-4" @submit.prevent="submit()">
-          <template x-if="!isFreeFirst">
+          <template x-if="!isFreeFirst && selectedMethod !== 'qris'">
           <div>
             <label class="text-sm font-medium text-slate-700">Bukti pembayaran</label>
             <input
@@ -151,13 +140,14 @@
           </template>
 
           <div x-show="!isFreeFirst" class="rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs leading-5 text-blue-800">
-            Setelah submit, admin akan memeriksa pembayaran. Jangan melakukan pembayaran/order kedua selama order ini masih menunggu verifikasi.
+            <span x-show="selectedMethod === 'qris'">Setelah QRIS dibuat, scan QR menggunakan aplikasi pembayaran yang mendukung QRIS. Status pembayaran diperbarui otomatis.</span>
+            <span x-show="selectedMethod !== 'qris'">Setelah submit, admin akan memeriksa pembayaran. Jangan melakukan pembayaran/order kedua selama order ini masih menunggu verifikasi.</span>
           </div>
 
           <button
             type="submit"
             class="btn-primary w-full"
-            :disabled="submitting || (!isFreeFirst && (!selectedMethod || availableMethodCount === 0))">
+            :disabled="submitting || (!isFreeFirst && !selectedMethod)">
             <span x-text="submitting ? 'Memproses...' : (isFreeFirst ? 'Aktifkan Pro Gratis' : 'Kirim Pembayaran')"></span>
           </button>
         </form>
@@ -178,7 +168,7 @@ function pemilikLanggananCheckout() {
     pendingPayment: null,
     isRenewal: false,
     paymentMethods: [],
-    selectedMethod: 0,
+    selectedMethod: 'qris',
     get availableMethodCount() { return this.paymentMethods.length; },
     get displayPrice() { return this.isRenewal ? Number(this.selectedPackage?.harga_perpanjangan || 0) : Number(this.selectedPackage?.harga_bulanan || 0); },
     get isFreeFirst() { return !this.isRenewal && Number(this.selectedPackage?.durasi_bulan || 0) === 1 && Number(this.selectedPackage?.harga_bulanan || 0) === 0; },
@@ -193,8 +183,7 @@ function pemilikLanggananCheckout() {
         this.selectedPackage = this.packages.find(item => item.kode === this.packageCode) || this.packages[0] || null;
         if (this.selectedPackage) this.packageCode = this.selectedPackage.kode;
 
-        const first = this.paymentMethods[0];
-        this.selectedMethod = first ? Number(first.id_metode_pembayaran) : 0;
+        this.selectedMethod = 'qris';
       } catch (e) {
         // API already displays the error toast.
       } finally {
@@ -214,13 +203,15 @@ function pemilikLanggananCheckout() {
       form.append('kode_paket', this.selectedPackage.kode);
 
       if (!this.isFreeFirst) {
-        const file = this.$refs.proof?.files?.[0];
-        if (!file) {
-          Alpine.store('ui').toast('Bukti pembayaran wajib diunggah.', 'error');
-          return;
+        form.append('metode_pembayaran', this.selectedMethod === 'qris' ? 'qris' : String(this.selectedMethod));
+        if (this.selectedMethod !== 'qris') {
+          const file = this.$refs.proof?.files?.[0];
+          if (!file) {
+            Alpine.store('ui').toast('Bukti pembayaran wajib diunggah.', 'error');
+            return;
+          }
+          form.append('bukti_pembayaran', file);
         }
-        form.append('metode_pembayaran', this.selectedMethod);
-        form.append('bukti_pembayaran', file);
       }
 
       this.submitting = true;

@@ -43,6 +43,14 @@ class ApiLanggananController
       $pending = getPendingPembayaranLanggananPemilik($idPemilik);
       model('MetodePembayaranLangganan');
       $methods = getMetodePembayaranLangganan(true);
+      array_unshift($methods, [
+        'id_metode_pembayaran' => 0,
+        'jenis' => 'qris',
+        'nama_provider' => 'QRIS',
+        'nomor_tujuan' => '',
+        'nama_penerima' => '',
+        'keterangan' => 'QRIS dinamis. Nominal dan QR dibuat otomatis untuk setiap transaksi.',
+      ]);
       $status = getStatusLanggananPemilik($idPemilik);
       $isRenewal = in_array($status['status'], ['aktif', 'berakhir'], true);
 
@@ -117,15 +125,32 @@ class ApiLanggananController
         return;
       }
 
-      $metode = (int)input('metode_pembayaran', 0);
-      $file = request_file('bukti_pembayaran');
+      $metodeInput = trim((string)input('metode_pembayaran', ''));
 
-      if ($metode <= 0) {
-        throw new Exception('Metode pembayaran wajib dipilih.', 422);
+      // QRIS Midtrans tidak memakai upload bukti manual.
+      if (strtolower($metodeInput) === 'qris') {
+        $payment = createPembayaranLanggananQris($idPemilik, $kodePaket);
+        try {
+          $midtrans = new MidtransService();
+          $gateway = $midtrans->createQris($payment['nomor_order'], $payment['nominal']);
+          updatePembayaranMidtransCreated($payment['id_pembayaran_langganan'], $gateway);
+        } catch (Throwable $e) {
+          try { batalkanPembayaranMidtransGagal($payment['id_pembayaran_langganan']); } catch (Throwable $ignore) {}
+          throw new Exception('QRIS gagal dibuat. Silakan coba lagi atau gunakan transfer manual.', 502);
+        }
+
+        response([
+          'success' => true,
+          'message' => 'QRIS berhasil dibuat. Silakan lakukan pembayaran.',
+          'data' => ['id_pembayaran_langganan' => $payment['id_pembayaran_langganan']]
+        ], 201);
+        return;
       }
-      if (!$file) {
-        throw new Exception('Bukti pembayaran wajib diunggah.', 422);
-      }
+
+      $metode = (int)$metodeInput;
+      $file = request_file('bukti_pembayaran');
+      if ($metode <= 0) throw new Exception('Metode pembayaran wajib dipilih.', 422);
+      if (!$file) throw new Exception('Bukti pembayaran wajib diunggah.', 422);
 
       $path = uploadImageGeneral($file, 'pembayaran-langganan', null, 5);
       try {
@@ -142,6 +167,70 @@ class ApiLanggananController
       ], 201);
     } catch (Exception $e) {
       response(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: 500);
+    }
+  }
+
+  public function midtransStatus()
+  {
+    try {
+      $id = (int)params('id');
+      $row = getPembayaranLanggananByIdPemilik($id, $this->pemilikId());
+      if (!$row) throw new Exception('Pembayaran langganan tidak ditemukan.', 404);
+      if (($row['provider_pembayaran'] ?? '') !== 'midtrans' || empty($row['provider_order_id'])) {
+        throw new Exception('Pembayaran ini bukan pembayaran Midtrans.', 422);
+      }
+
+      $midtrans = new MidtransService();
+      $gateway = $midtrans->getStatus((string)$row['provider_order_id']);
+
+      // Pulihkan URL QR untuk order lama jika belum tersimpan. Midtrans memberikan
+      // transaction_id saat charge berhasil, dan URL QRIS dapat dibentuk dari ID tersebut.
+      if (($gateway['transaction_status'] ?? '') === 'pending' && empty($row['qr_code_url'])) {
+        $transactionId = (string)($gateway['transaction_id'] ?? $row['provider_transaction_id'] ?? '');
+        if ($transactionId !== '') {
+          updatePembayaranMidtransCreated($id, [
+            'order_id' => $gateway['order_id'] ?? $row['provider_order_id'],
+            'transaction_id' => $transactionId,
+            'transaction_status' => 'pending',
+            'qr_string' => (string)($gateway['qr_string'] ?? ''),
+            'qr_code_url' => $midtrans->getQrisCodeUrl($transactionId),
+          ]);
+        }
+      }
+
+      // Sinkronisasi status dari status API hanya untuk data gateway; aktivasi tetap memakai proses settlement yang idempotent.
+      if (($gateway['transaction_status'] ?? '') === 'settlement') {
+        prosesNotifikasiMidtrans($gateway);
+      } elseif (in_array(($gateway['transaction_status'] ?? ''), ['expire','deny','cancel'], true)) {
+        prosesNotifikasiMidtrans($gateway);
+      }
+
+      $latest = getPembayaranLanggananByIdPemilik($id, $this->pemilikId());
+      response(['success' => true, 'data' => $latest]);
+    } catch (Exception $e) {
+      response(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: 500);
+    }
+  }
+
+  public function midtransNotification()
+  {
+    $raw = file_get_contents('php://input');
+    $payload = json_decode($raw ?: '', true);
+    if (!is_array($payload)) {
+      response(['success' => false, 'message' => 'Payload Midtrans tidak valid.'], 400);
+    }
+
+    try {
+      $midtrans = new MidtransService();
+      if (!$midtrans->verifyNotificationSignature($payload)) {
+        response(['success' => false, 'message' => 'Signature Midtrans tidak valid.'], 401);
+      }
+      $result = prosesNotifikasiMidtrans($payload);
+      response(['success' => true, 'data' => $result]);
+    } catch (Exception $e) {
+      $status = $e->getCode();
+      if ($status < 400 || $status > 599) $status = 500;
+      response(['success' => false, 'message' => $e->getMessage()], $status);
     }
   }
 

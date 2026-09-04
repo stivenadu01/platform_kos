@@ -35,8 +35,24 @@
             </div>
           </div>
 
+          <template x-if="selected.provider_pembayaran === 'midtrans'">
+            <div class="mt-5 rounded-xl border border-primary/20 bg-primary-soft p-5">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h4 class="font-bold text-slate-900">Pembayaran QRIS</h4>
+                  <p class="mt-1 text-sm text-slate-600" x-text="selected.status === 'diverifikasi' ? 'Pembayaran berhasil diterima.' : (selected.status === 'dibatalkan' ? 'QRIS sudah tidak berlaku.' : 'Scan QRIS dengan aplikasi pembayaran yang mendukung QRIS.')"></p>
+                </div>
+                <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="statusClass(selected.status)" x-text="statusLabel(selected.status)"></span>
+              </div>
+              <div x-show="selected.qr_code_url && selected.status === 'menunggu'" class="mt-4 flex justify-center">
+                <img :src="selected.qr_code_url" alt="QRIS pembayaran" class="w-64 h-64 rounded-xl border border-slate-200 bg-white p-3 object-contain">
+              </div>
+              <p x-show="selected.provider_order_id" class="mt-3 text-xs text-slate-500 text-center" x-text="'Order: ' + selected.provider_order_id"></p>
+            </div>
+          </template>
+
           <div class="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
-            <div class="rounded-xl border border-slate-200 p-4">
+            <div x-show="selected.provider_pembayaran !== 'midtrans'" class="rounded-xl border border-slate-200 p-4">
               <h4 class="font-semibold text-slate-900">Tujuan Pembayaran</h4>
               <template x-if="paymentMethod">
                 <div class="mt-3 text-sm leading-6 text-slate-600">
@@ -48,7 +64,7 @@
               <p x-show="!paymentMethod" class="mt-3 text-sm text-red-600">Konfigurasi tujuan pembayaran tidak tersedia.</p>
             </div>
 
-            <div class="rounded-xl border border-slate-200 p-4">
+            <div x-show="selected.provider_pembayaran !== 'midtrans'" class="rounded-xl border border-slate-200 p-4">
               <h4 class="font-semibold text-slate-900">Bukti Pembayaran</h4>
               <template x-if="selected.bukti_pembayaran">
                 <a :href="window.BASE_URL + '/uploads' + selected.bukti_pembayaran" target="_blank" rel="noopener" class="block mt-3">
@@ -58,7 +74,7 @@
               </template>
               <p x-show="!selected.bukti_pembayaran" class="mt-3 text-sm text-slate-500">Belum ada bukti pembayaran.</p>
 
-              <form x-show="selected.status === 'menunggu'" class="mt-4" @submit.prevent="uploadProof()">
+              <form x-show="selected.status === 'menunggu' && selected.provider_pembayaran !== 'midtrans'" class="mt-4" @submit.prevent="uploadProof()">
                 <label class="text-sm font-medium text-slate-700">Ganti/unggah bukti</label>
                 <input x-ref="proof" type="file" accept="image/jpeg,image/png,image/webp" class="input mt-2 w-full" required>
                 <button type="submit" class="btn-secondary mt-3 w-full" :disabled="uploading" x-text="uploading ? 'Mengunggah...' : 'Kirim Bukti Baru'"></button>
@@ -148,6 +164,7 @@ function pemilikLanggananPembayaran() {
     items: [],
     selected: null,
     paymentMethods: [],
+    polling: null,
 
     get paymentMethod() {
       if (this.selected?.provider_pembayaran || this.selected?.nomor_tujuan_pembayaran || this.selected?.nama_penerima_pembayaran) {
@@ -180,8 +197,22 @@ function pemilikLanggananPembayaran() {
 
     async select(id) {
       try {
+        if (this.polling) { clearInterval(this.polling); this.polling = null; }
         const res = await API.get('/pemilik/langganan/pembayaran/' + encodeURIComponent(id), false);
         this.selected = res.data;
+        if (this.selected?.provider_pembayaran === 'midtrans' && this.selected.status === 'menunggu') {
+          this.polling = setInterval(async () => {
+            try {
+              const status = await API.get('/pemilik/langganan/pembayaran/' + encodeURIComponent(id) + '/midtrans-status', false);
+              this.selected = status.data;
+              if (this.selected.status !== 'menunggu') {
+                clearInterval(this.polling); this.polling = null;
+                const list = await API.get('/pemilik/langganan/pembayaran', false);
+                this.items = list.data || [];
+              }
+            } catch (e) {}
+          }, 8000);
+        }
       } catch (e) {}
     },
 
@@ -216,14 +247,14 @@ function pemilikLanggananPembayaran() {
     },
 
     statusLabel(status) {
-      return status === 'menunggu' ? 'Menunggu verifikasi'
+      return status === 'menunggu' ? 'Menunggu pembayaran'
         : status === 'diverifikasi' ? 'Pembayaran diterima'
         : status === 'ditolak' ? 'Pembayaran ditolak'
         : 'Dibatalkan';
     },
 
     methodLabel(method) {
-      return method === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet';
+      return method === 'qris' ? 'QRIS' : (method === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet');
     },
 
     formatRupiah(value) {

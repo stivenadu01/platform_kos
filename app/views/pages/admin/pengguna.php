@@ -2,7 +2,7 @@
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Pengguna</h1>
-      <p class="mt-1 text-sm text-slate-500">Kelola akun mahasiswa, pemilik, dan status verifikasi pengguna.</p>
+      <p class="mt-1 text-sm text-slate-500">Kelola akun pelanggan, pemilik, dan status verifikasi pengguna.</p>
     </div>
     <button @click="openCreate()" class="btn-primary">+ Tambah Pengguna</button>
   </div>
@@ -26,7 +26,7 @@
         <label class="label">Peran</label>
         <select x-model="filters.role" @change="applyFilters()" class="input mt-1 w-full">
           <option value="">Semua peran</option>
-          <option value="pelanggan">Mahasiswa</option>
+          <option value="pelanggan">Pelanggan</option>
           <option value="pemilik">Pemilik</option>
           <option value="admin">Admin</option>
         </select>
@@ -165,7 +165,7 @@
           <div><label class="label">Email *</label><input x-model="form.email" type="email" class="input mt-1 w-full" required></div>
           <div><label class="label">Nomor HP *</label><input x-model="form.no_hp" type="tel" class="input mt-1 w-full" required></div>
           <div><label class="label">NIK *</label><input x-model="form.nik" class="input mt-1 w-full" inputmode="numeric" maxlength="16" required></div>
-          <div><label class="label">Peran *</label><select x-model="form.role" class="input mt-1 w-full"><option value="pelanggan">Mahasiswa</option><option value="pemilik">Pemilik</option><option value="admin">Admin</option></select></div>
+          <div><label class="label">Peran *</label><select x-model="form.role" class="input mt-1 w-full"><option value="pelanggan">Pelanggan</option><option value="pemilik">Pemilik</option><option value="admin">Admin</option></select></div>
           <div><label class="label">Kata Sandi *</label><input x-model="form.password" type="password" minlength="8" class="input mt-1 w-full" required placeholder="Minimal 8 karakter"></div>
         </div>
         <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm text-emerald-800">✓ Pengguna yang ditambahkan melalui Admin langsung memiliki status <b>terverifikasi</b> dan <b>aktif</b>, sehingga tidak perlu klik link verifikasi email.</div>
@@ -178,10 +178,10 @@
 <script>
 function adminPenggunaPage() {
   return {
-    summary: { total: 0, pemilik: 0, mahasiswa: 0, belum_verifikasi: 0, aktif: 0, nonaktif: 0 },
+    summary: { total: 0, pemilik: 0, pelanggan: 0, belum_verifikasi: 0, aktif: 0, nonaktif: 0 },
     summaryCards: [
       { key: 'total', label: 'Total Pengguna' },
-      { key: 'mahasiswa', label: 'Mahasiswa' },
+      { key: 'pelanggan', label: 'Pelanggan' },
       { key: 'pemilik', label: 'Pemilik' },
       { key: 'belum_verifikasi', label: 'Belum Verifikasi' },
       { key: 'aktif', label: 'Aktif' },
@@ -219,7 +219,7 @@ function adminPenggunaPage() {
       for (let i = start; i <= end; i++) out.push(i); return out;
     },
     initial(name) { return String(name || '?').trim().charAt(0).toUpperCase(); },
-    roleLabel(role) { return role === 'pemilik' ? 'Pemilik' : role === 'admin' ? 'Admin' : 'Mahasiswa'; },
+    roleLabel(role) { return role === 'pemilik' ? 'Pemilik' : role === 'admin' ? 'Admin' : 'Pelanggan'; },
     statusLabel(status) { return status === 'aktif' ? 'Aktif' : status === 'ditangguhkan' ? 'Ditangguhkan' : 'Nonaktif'; },
     statusClass(status) { return status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : status === 'ditangguhkan' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'; },
     formatDate(v) { if (!v) return '-'; const d = new Date(String(v).replace(' ', 'T')); return isNaN(d) ? '-' : d.toLocaleDateString('id-ID', { dateStyle: 'medium' }); },

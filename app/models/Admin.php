@@ -276,7 +276,7 @@ function getAdminUserSummary()
     SELECT
       COUNT(*) AS total,
       SUM(CASE WHEN role = 'pemilik' THEN 1 ELSE 0 END) AS pemilik,
-      SUM(CASE WHEN role = 'pelanggan' THEN 1 ELSE 0 END) AS mahasiswa,
+      SUM(CASE WHEN role = 'pelanggan' THEN 1 ELSE 0 END) AS pelanggan,
       SUM(CASE WHEN email_verified_at IS NULL THEN 1 ELSE 0 END) AS belum_verifikasi,
       SUM(CASE WHEN status = 'aktif' THEN 1 ELSE 0 END) AS aktif,
       SUM(CASE WHEN status <> 'aktif' THEN 1 ELSE 0 END) AS nonaktif
@@ -288,7 +288,7 @@ function getAdminUserSummary()
   return [
     'total' => (int)($row['total'] ?? 0),
     'pemilik' => (int)($row['pemilik'] ?? 0),
-    'mahasiswa' => (int)($row['mahasiswa'] ?? 0),
+    'pelanggan' => (int)($row['pelanggan'] ?? 0),
     'belum_verifikasi' => (int)($row['belum_verifikasi'] ?? 0),
     'aktif' => (int)($row['aktif'] ?? 0),
     'nonaktif' => (int)($row['nonaktif'] ?? 0)

@@ -21,7 +21,7 @@
       <div class="flex items-start justify-between gap-3"><div><h2 class="font-bold text-slate-900">Pengguna</h2><p class="text-xs text-slate-500 mt-1">Status dan aktivitas login</p></div><a href="<?= BASE_URL ?>/admin/pengguna" class="text-xs font-semibold text-primary">Kelola →</a></div>
       <div class="mt-5 grid grid-cols-2 gap-3">
         <div class="rounded-xl bg-slate-50 p-3"><div class="text-xs text-slate-500">Pemilik</div><div class="mt-1 text-xl font-bold" x-text="d.pengguna?.pemilik ?? 0"></div></div>
-        <div class="rounded-xl bg-slate-50 p-3"><div class="text-xs text-slate-500">Mahasiswa</div><div class="mt-1 text-xl font-bold" x-text="d.pengguna?.pelanggan ?? 0"></div></div>
+        <div class="rounded-xl bg-slate-50 p-3"><div class="text-xs text-slate-500">Pelanggan</div><div class="mt-1 text-xl font-bold" x-text="d.pengguna?.pelanggan ?? 0"></div></div>
         <div class="rounded-xl bg-slate-50 p-3"><div class="text-xs text-slate-500">Login hari ini</div><div class="mt-1 text-xl font-bold" x-text="d.pengguna?.login_hari_ini ?? 0"></div></div>
         <div class="rounded-xl bg-slate-50 p-3"><div class="text-xs text-slate-500">Login 7 hari</div><div class="mt-1 text-xl font-bold" x-text="d.pengguna?.login_7_hari ?? 0"></div></div>
       </div>
@@ -84,7 +84,7 @@ function adminDashboardPage() {
     loading: false,
     async init() {},
     async load() { this.loading = true; try { const r = await API.get('/admin/dashboard', false); if (r.data) this.d = r.data; } finally { this.loading = false; } },
-    roleLabel(v) { return v === 'pemilik' ? 'Pemilik' : v === 'admin' ? 'Admin' : 'Mahasiswa'; },
+    roleLabel(v) { return v === 'pemilik' ? 'Pemilik' : v === 'admin' ? 'Admin' : 'Pelanggan'; },
     kosStatusLabel(v) { return ({aktif:'Aktif', menunggu_verifikasi:'Menunggu Verifikasi', draft:'Draft', ditolak:'Ditolak'})[v] || v || '-'; },
     kosStatusClass(v) { return v === 'aktif' ? 'bg-emerald-100 text-emerald-700' : v === 'menunggu_verifikasi' ? 'bg-amber-100 text-amber-700' : v === 'ditolak' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600'; },
     reportStatusLabel(v) { return ({menunggu:'Menunggu',diproses:'Diproses'})[v] || v || '-'; },

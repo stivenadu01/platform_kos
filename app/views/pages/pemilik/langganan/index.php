@@ -81,7 +81,11 @@
             </div>
             <p class="mt-4 text-sm leading-6 text-slate-500">Untuk membangun profil dan mempublikasikan kos tanpa biaya.</p>
             <ul class="mt-5 space-y-3 text-sm text-slate-700">
-              <li>✓ Profil pemilik</li><li>✓ Kelola kos</li><li>✓ Tipe dan kamar</li><li>✓ Foto dan listing publik</li><li>✓ Kos dapat ditemukan calon penghuni</li>
+              <li>✓ Profil pemilik</li>
+              <li>✓ Kelola kos</li>
+              <li>✓ Tipe dan kamar</li>
+              <li>✓ Foto dan listing publik</li>
+              <li>✓ Kos dapat ditemukan calon penghuni</li>
             </ul>
           </div>
 
@@ -169,139 +173,151 @@
           </div>
         </div>
 
-      <div class="card border border-slate-200 shadow-sm">
-        <div class="flex items-center justify-between gap-4">
-          <div>
-            <h3 class="font-bold text-slate-900">Riwayat Langganan</h3>
-            <p class="mt-1 text-sm text-slate-500">Riwayat paket akan tersimpan agar masa berlangganan dapat ditelusuri.</p>
+        <div class="card border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h3 class="font-bold text-slate-900">Riwayat Transaksi Langganan</h3>
+              <p class="mt-1 text-sm text-slate-500">Menampilkan paket dan nominal yang benar-benar dipilih pada setiap transaksi, termasuk perpanjangan.</p>
+            </div>
+          </div>
+
+          <div class="mt-5 hidden md:block overflow-x-auto">
+            <table class="w-full min-w-[620px] text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
+                  <th class="pb-3 pr-4">Paket</th>
+                  <th class="pb-3 pr-4">Jenis</th>
+                  <th class="pb-3 pr-4">Nominal</th>
+                  <th class="pb-3 pr-4">Tanggal</th>
+                  <th class="pb-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-if="history.length === 0">
+                  <tr>
+                    <td colspan="5" class="py-10 text-center text-slate-500">Belum ada riwayat transaksi langganan.</td>
+                  </tr>
+                </template>
+                <template x-for="item in history" :key="item.riwayat_id">
+                  <tr class="border-b border-slate-100 last:border-0">
+                    <td class="py-4 pr-4">
+                      <div class="font-semibold text-slate-800" x-text="item.nama_paket"></div>
+                      <div class="mt-1 text-xs text-slate-500" x-text="item.durasi_bulan + ' bulan'"></div>
+                    </td>
+                    <td class="py-4 pr-4" x-text="item.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru'"></td>
+                    <td class="py-4 pr-4 font-semibold" x-text="item.is_gratis ? 'Gratis' : formatRupiah(item.nominal)"></td>
+                    <td class="py-4 pr-4 whitespace-nowrap" x-text="formatDateTime(item.tanggal_transaksi)"></td>
+                    <td class="py-4">
+                      <span
+                        class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
+                        :class="item.status_pembayaran === 'aktif' || item.status_pembayaran === 'diverifikasi' ? 'bg-emerald-50 text-emerald-700' : item.status_pembayaran === 'menunggu' ? 'bg-amber-50 text-amber-700' : item.status_pembayaran === 'berakhir' ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700'"
+                        x-text="item.status_pembayaran === 'aktif' ? 'Aktif' : item.status_pembayaran === 'diverifikasi' ? 'Diverifikasi' : item.status_pembayaran === 'menunggu' ? 'Menunggu verifikasi' : item.status_pembayaran === 'berakhir' ? 'Berakhir' : item.status_pembayaran === 'dibatalkan' ? 'Dibatalkan' : item.status_pembayaran === 'ditolak' ? 'Ditolak' : item.status_pembayaran"></span>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-4 md:hidden space-y-3">
+            <template x-if="history.length === 0">
+              <div class="py-8 text-center text-sm text-slate-500">Belum ada riwayat transaksi langganan.</div>
+            </template>
+            <template x-for="item in history" :key="'m-' + item.riwayat_id">
+              <article class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="font-semibold text-slate-900 truncate" x-text="item.nama_paket"></div>
+                    <div class="mt-1 text-xs text-slate-500" x-text="(item.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru') + ' · ' + item.durasi_bulan + ' bulan'"></div>
+                  </div>
+                  <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="item.status_pembayaran === 'aktif' || item.status_pembayaran === 'diverifikasi' ? 'bg-emerald-50 text-emerald-700' : item.status_pembayaran === 'menunggu' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'" x-text="item.is_gratis ? 'Gratis' : (item.status_pembayaran === 'diverifikasi' ? 'Diverifikasi' : item.status_pembayaran === 'menunggu' ? 'Menunggu verifikasi' : item.status_pembayaran === 'dibatalkan' ? 'Dibatalkan' : item.status_pembayaran === 'ditolak' ? 'Ditolak' : item.status_pembayaran)"></span>
+                </div>
+                <dl class="mt-3 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <dt class="text-slate-400">Nominal</dt>
+                    <dd class="mt-1 font-semibold text-slate-700" x-text="item.is_gratis ? 'Gratis' : formatRupiah(item.nominal)"></dd>
+                  </div>
+                  <div>
+                    <dt class="text-slate-400">Tanggal</dt>
+                    <dd class="mt-1 font-medium text-slate-700" x-text="formatDateTime(item.tanggal_transaksi)"></dd>
+                  </div>
+                </dl>
+              </article>
+            </template>
           </div>
         </div>
-
-        <div class="mt-5 hidden md:block overflow-x-auto">
-          <table class="w-full min-w-[620px] text-sm">
-            <thead>
-              <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
-                <th class="pb-3 pr-4">Paket</th>
-                <th class="pb-3 pr-4">Mulai</th>
-                <th class="pb-3 pr-4">Berakhir</th>
-                <th class="pb-3 pr-4">Harga</th>
-                <th class="pb-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <template x-if="history.length === 0">
-                <tr><td colspan="5" class="py-10 text-center text-slate-500">Belum ada riwayat langganan.</td></tr>
-              </template>
-              <template x-for="item in history" :key="item.id_langganan">
-                <tr class="border-b border-slate-100 last:border-0">
-                  <td class="py-4 pr-4 font-semibold text-slate-800" x-text="item.nama_paket"></td>
-                  <td class="py-4 pr-4" x-text="formatDate(item.tanggal_mulai)"></td>
-                  <td class="py-4 pr-4" x-text="formatDate(item.tanggal_berakhir)"></td>
-                  <td class="py-4 pr-4" x-text="formatRupiah(item.harga_bulanan) + ' / ' + item.durasi_bulan + ' bulan'"></td>
-                  <td class="py-4">
-                    <span
-                      class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
-                      :class="item.status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : item.status === 'menunggu' ? 'bg-amber-50 text-amber-700' : item.status === 'berakhir' ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700'"
-                      x-text="item.status === 'aktif' ? 'Aktif' : item.status === 'menunggu' ? 'Menunggu verifikasi' : item.status === 'berakhir' ? 'Berakhir' : item.status === 'dibatalkan' ? 'Dibatalkan' : item.status"></span>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="mt-4 md:hidden space-y-3">
-          <template x-if="history.length === 0">
-            <div class="py-8 text-center text-sm text-slate-500">Belum ada riwayat langganan.</div>
-          </template>
-          <template x-for="item in history" :key="'m-' + item.id_langganan">
-            <article class="rounded-xl border border-slate-200 bg-slate-50/60 p-4">
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <div class="font-semibold text-slate-900 truncate" x-text="item.nama_paket"></div>
-                  <div class="mt-1 text-xs text-slate-500" x-text="item.durasi_bulan + ' bulan' + ' · ' + formatRupiah(item.harga_bulanan)"></div>
-                </div>
-                <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="item.status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : item.status === 'menunggu' ? 'bg-amber-50 text-amber-700' : item.status === 'berakhir' ? 'bg-slate-100 text-slate-600' : 'bg-red-50 text-red-700'" x-text="item.status === 'aktif' ? 'Aktif' : item.status === 'menunggu' ? 'Menunggu verifikasi' : item.status === 'berakhir' ? 'Berakhir' : item.status === 'dibatalkan' ? 'Dibatalkan' : item.status"></span>
-              </div>
-              <dl class="mt-3 grid grid-cols-2 gap-3 text-xs">
-                <div><dt class="text-slate-400">Mulai</dt><dd class="mt-1 font-medium text-slate-700" x-text="formatDate(item.tanggal_mulai)"></dd></div>
-                <div><dt class="text-slate-400">Berakhir</dt><dd class="mt-1 font-medium text-slate-700" x-text="formatDate(item.tanggal_berakhir)"></dd></div>
-              </dl>
-            </article>
-          </template>
-        </div>
       </div>
-    </div>
   </template>
 </div>
 
 <script>
-function pemilikLanggananPage() {
-  return {
-    loading: true,
-    upgradeRequested: <?= !empty($upgrade_requested) ? 'true' : 'false' ?>,
-    status: {
-      is_pro: false,
-      status: 'gratis',
-      package: null,
-      subscription: null,
-      days_remaining: 0,
-      reminder: null
-    },
-    paket: [],
-    history: [],
-    pendingPayment: null,
-    selectedPackageCode: 'pro',
-    packageOpen: false,
+  function pemilikLanggananPage() {
+    return {
+      loading: true,
+      upgradeRequested: <?= !empty($upgrade_requested) ? 'true' : 'false' ?>,
+      status: {
+        is_pro: false,
+        status: 'gratis',
+        package: null,
+        subscription: null,
+        days_remaining: 0,
+        reminder: null
+      },
+      paket: [],
+      history: [],
+      pendingPayment: null,
+      selectedPackageCode: 'pro',
+      packageOpen: false,
 
-    get selectedPackage() {
-      return this.paket.find(item => item.kode === this.selectedPackageCode) || this.paket[0] || null;
-    },
-    get selectedPrice() {
-      const item = this.selectedPackage;
-      if (!item) return 0;
-      return this.status.is_pro || this.status.status === 'berakhir' ? Number(item.harga_perpanjangan || 0) : Number(item.harga_bulanan || 0);
-    },
-    priceFor(item) {
-      if (!item) return 0;
-      return this.status.is_pro || this.status.status === 'berakhir'
-        ? Number(item.harga_perpanjangan || 0)
-        : Number(item.harga_bulanan || 0);
-    },
-    get checkoutUrl() {
-      return window.BASE_URL + '/pemilik/langganan/checkout?paket=' + encodeURIComponent(this.selectedPackageCode);
-    },
+      get selectedPackage() {
+        return this.paket.find(item => item.kode === this.selectedPackageCode) || this.paket[0] || null;
+      },
+      get selectedPrice() {
+        const item = this.selectedPackage;
+        if (!item) return 0;
+        return this.status.is_pro || this.status.status === 'berakhir' ? Number(item.harga_perpanjangan || 0) : Number(item.harga_bulanan || 0);
+      },
+      priceFor(item) {
+        if (!item) return 0;
+        return this.status.is_pro || this.status.status === 'berakhir' ?
+          Number(item.harga_perpanjangan || 0) :
+          Number(item.harga_bulanan || 0);
+      },
+      get checkoutUrl() {
+        return window.BASE_URL + '/pemilik/langganan/checkout?paket=' + encodeURIComponent(this.selectedPackageCode);
+      },
 
-    async init() {
-      try {
-        const [subscriptionRes, historyRes] = await Promise.all([
-          API.get('/pemilik/langganan', false),
-          API.get('/pemilik/langganan/riwayat', false)
-        ]);
+      async init() {
+        try {
+          const [subscriptionRes, historyRes] = await Promise.all([
+            API.get('/pemilik/langganan', false),
+            API.get('/pemilik/langganan/riwayat', false)
+          ]);
 
-        this.status = subscriptionRes.data.status || this.status;
-        this.paket = subscriptionRes.data.paket || [];
-        const preferred = new URLSearchParams(window.location.search).get('paket');
-        if (preferred && this.paket.some(item => item.kode === preferred)) this.selectedPackageCode = preferred;
-        else if (this.paket.some(item => item.kode === 'pro')) this.selectedPackageCode = 'pro';
-        else if (this.paket[0]) this.selectedPackageCode = this.paket[0].kode;
-        this.pendingPayment = subscriptionRes.data.pending_payment || null;
-        this.history = historyRes.data || [];
-      } finally {
-        this.loading = false;
+          this.status = subscriptionRes.data.status || this.status;
+          this.paket = subscriptionRes.data.paket || [];
+          const preferred = new URLSearchParams(window.location.search).get('paket');
+          if (preferred && this.paket.some(item => item.kode === preferred)) this.selectedPackageCode = preferred;
+          else if (this.paket.some(item => item.kode === 'pro')) this.selectedPackageCode = 'pro';
+          else if (this.paket[0]) this.selectedPackageCode = this.paket[0].kode;
+          this.pendingPayment = subscriptionRes.data.pending_payment || null;
+          this.history = historyRes.data || [];
+        } finally {
+          this.loading = false;
+        }
+      },
+
+      formatRupiah(value) {
+        return Alpine.store('utils').formatRupiah(value);
+      },
+
+      formatDateTime(value) {
+        return Alpine.store('utils').formatDateTime(value);
+      },
+
+      formatDate(value) {
+        return Alpine.store('utils').formatDate(value);
       }
-    },
-
-    formatRupiah(value) {
-      return Alpine.store('utils').formatRupiah(value);
-    },
-
-    formatDate(value) {
-      if (!value) return '-';
-      return new Date(value + 'T00:00:00').toLocaleDateString('id-ID', {
-        day: '2-digit', month: 'short', year: 'numeric'
-      });
-    }
-  };
-}
+    };
+  }
 </script>

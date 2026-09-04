@@ -20,7 +20,7 @@
       <button type="button" @click="loadSubscriptions(card.key === 'pembayaran_menunggu' ? 'menunggu' : card.key === 'akan_berakhir_7_hari' ? 'akan_berakhir' : card.key)"
         class="card border border-slate-200 p-4 text-left hover:border-primary/30 transition">
         <div class="text-xs text-slate-500" x-text="card.label"></div>
-        <div class="mt-1 text-2xl font-bold text-slate-900" x-text="summary[card.key] ?? 0"></div>
+        <div class="mt-1 text-2xl font-bold text-slate-900" x-text="summary[card.key] ?? (card.key === 'akan_berakhir' ? (summary.akan_berakhir_7_hari ?? 0) : 0)"></div>
       </button>
     </template>
 
@@ -122,8 +122,8 @@
 
   <section class="card border border-slate-200 overflow-hidden">
     <div class="px-5 py-4 border-b border-slate-200">
-      <h2 class="font-bold text-slate-900">Pembayaran Menunggu Pemeriksaan</h2>
-      <p class="text-xs text-slate-500 mt-1">Periksa bukti pembayaran manual sebelum mengaktifkan atau memperpanjang Pro.</p>
+      <h2 class="font-bold text-slate-900">Pembayaran Manual Menunggu Pemeriksaan</h2>
+      <p class="text-xs text-slate-500 mt-1">Hanya pembayaran transfer/e-wallet yang memerlukan pemeriksaan admin. QRIS diproses otomatis.</p>
     </div>
     <div x-show="paymentLoading" class="p-10 text-center text-sm text-slate-500">Memuat pembayaran...</div>
     <div x-show="!paymentLoading && pendingPayments.length === 0" class="p-8 text-center text-sm text-slate-500">Tidak ada pembayaran yang menunggu verifikasi.</div>
@@ -147,11 +147,11 @@
               <td class="px-5 py-4" x-text="item.nama_pemilik"></td>
               <td class="px-5 py-4" x-text="item.nama_paket"></td>
               <td class="px-5 py-4 font-semibold" x-text="formatRupiah(item.nominal)"></td>
-              <td class="px-5 py-4" x-text="methodLabel(item.metode_pembayaran)"></td>
+              <td class="px-5 py-4" x-text="methodLabel(item.metode_pembayaran, item.provider_pembayaran)"></td>
               <td class="px-5 py-4 whitespace-nowrap" x-text="formatDateTime(item.tanggal_pembayaran)"></td>
               <td class="px-5 py-4 text-right whitespace-nowrap">
                 <button type="button" @click="showPayment(item.id_pembayaran_langganan)" class="btn-secondary text-xs">Detail</button>
-                <button type="button" @click="decide(item, 'diverifikasi')" class="btn-primary text-xs ml-1">Approve</button>
+                
               </td>
             </tr>
           </template>
@@ -174,14 +174,14 @@
             </div>
             <div>
               <div class="text-slate-400">Metode</div>
-              <div class="mt-1 text-slate-700" x-text="methodLabel(item.metode_pembayaran)"></div>
+              <div class="mt-1 text-slate-700" x-text="methodLabel(item.metode_pembayaran, item.provider_pembayaran)"></div>
             </div>
             <div class="col-span-2">
               <div class="text-slate-400">Tanggal</div>
               <div class="mt-1 text-slate-700" x-text="formatDateTime(item.tanggal_pembayaran)"></div>
             </div>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-2"><button type="button" @click="showPayment(item.id_pembayaran_langganan)" class="btn-secondary text-xs">Detail</button><button type="button" @click="decide(item, 'diverifikasi')" class="btn-primary text-xs">Setujui</button></div>
+          <div class="mt-3"><button type="button" @click="showPayment(item.id_pembayaran_langganan)" class="btn-secondary text-xs w-full">Detail</button></div>
         </article>
       </template>
     </div>
@@ -209,9 +209,9 @@
                 <div class="text-xs text-slate-500 mt-1" x-text="detail.email_pemilik"></div>
               </div>
               <div class="rounded-xl bg-slate-50 p-4">
-                <div class="text-xs text-slate-500">Paket</div>
+                <div class="text-xs text-slate-500">Paket terakhir</div>
                 <div class="mt-1 font-semibold" x-text="detail.nama_paket"></div>
-                <div class="text-xs text-slate-500 mt-1" x-text="formatRupiah(detail.harga_bulanan) + ' awal • ' + formatRupiah(detail.harga_perpanjangan) + ' harga perpanjangan / ' + detail.durasi_bulan + ' bulan'"></div>
+                <div class="text-xs text-slate-500 mt-1" x-text="formatRupiah(detail.harga_bulanan) + ' harga awal • ' + formatRupiah(detail.harga_perpanjangan) + ' harga perpanjangan / ' + detail.durasi_bulan + ' bulan'"></div>
               </div>
               <div class="rounded-xl bg-slate-50 p-4">
                 <div class="text-xs text-slate-500">Status</div>
@@ -236,11 +236,12 @@
             <div>
               <h3 class="font-bold text-slate-900">Riwayat Pembayaran</h3>
               <p class="mt-1 text-xs text-slate-500">Klik transaksi untuk memeriksa detail dan bukti pembayaran, termasuk transaksi yang sudah diverifikasi atau ditolak.</p>
-              <div class="mt-3 admin-scroll-x border border-slate-200 rounded-xl">
+              <div class="mt-3 hidden md:block admin-scroll-x border border-slate-200 rounded-xl">
                 <table class="min-w-full text-sm">
                   <thead class="bg-slate-50">
                     <tr>
                       <th class="text-left px-4 py-3">Order</th>
+                      <th class="text-left px-4 py-3">Paket</th>
                       <th class="text-left px-4 py-3">Jenis</th>
                       <th class="text-left px-4 py-3">Nominal</th>
                       <th class="text-left px-4 py-3">Status</th>
@@ -251,10 +252,14 @@
                   <tbody class="divide-y divide-slate-100">
                     <template x-for="payment in detail.pembayaran" :key="payment.id_pembayaran_langganan">
                       <tr class="hover:bg-slate-50 cursor-pointer" @click="showPayment(payment.id_pembayaran_langganan)">
-                        <td class="px-4 py-3 font-semibold" x-text="payment.nomor_order"></td>
+                        <td class="px-4 py-3 font-semibold max-w-[190px] truncate" x-text="payment.nomor_order"></td>
+                        <td class="px-4 py-3">
+                          <div class="font-semibold" x-text="payment.nama_paket"></div>
+                          <div class="text-xs text-slate-500" x-text="payment.durasi_bulan + ' bulan'"></div>
+                        </td>
                         <td class="px-4 py-3" x-text="payment.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru'"></td>
                         <td class="px-4 py-3" x-text="formatRupiah(payment.nominal)"></td>
-                        <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-semibold" :class="paymentStatusClass(payment.status)" x-text="paymentStatusLabel(payment.status)"></span></td>
+                        <td class="px-4 py-3"><span class="rounded-full px-2 py-1 text-xs font-semibold" :class="paymentStatusClass(payment.status)" x-text="paymentStatusLabel(payment.status, payment.provider_pembayaran)"></span></td>
                         <td class="px-4 py-3 whitespace-nowrap" x-text="formatDateTime(payment.tanggal_pembayaran)"></td>
                         <td class="px-4 py-3">
                           <span x-show="payment.bukti_pembayaran" class="text-xs font-semibold text-primary">Lihat bukti</span>
@@ -263,10 +268,35 @@
                       </tr>
                     </template>
                     <tr x-show="!detail.pembayaran?.length">
-                      <td colspan="6" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat pembayaran.</td>
+                      <td colspan="7" class="px-4 py-6 text-center text-slate-500">Belum ada riwayat pembayaran.</td>
                     </tr>
                   </tbody>
                 </table>
+              </div>
+              <div class="mt-3 md:hidden space-y-3">
+                <template x-if="!detail.pembayaran?.length">
+                  <div class="rounded-xl border border-slate-200 p-4 text-center text-sm text-slate-500">Belum ada riwayat pembayaran.</div>
+                </template>
+                <template x-for="payment in (detail.pembayaran || [])" :key="'mobile-payment-' + payment.id_pembayaran_langganan">
+                  <button type="button" @click="showPayment(payment.id_pembayaran_langganan)" class="w-full rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-left hover:bg-slate-50 transition">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <div class="font-semibold text-slate-900 truncate" x-text="payment.nama_paket"></div>
+                        <div class="mt-1 text-xs text-slate-500 truncate" x-text="(payment.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru') + ' · ' + payment.durasi_bulan + ' bulan'"></div>
+                      </div>
+                      <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentStatusClass(payment.status)" x-text="paymentStatusLabel(payment.status, payment.provider_pembayaran)"></span>
+                    </div>
+                    <dl class="mt-3 grid grid-cols-2 gap-3 text-xs">
+                      <div><dt class="text-slate-400">Nominal</dt><dd class="mt-1 font-semibold text-slate-700" x-text="formatRupiah(payment.nominal)"></dd></div>
+                      <div><dt class="text-slate-400">Tanggal</dt><dd class="mt-1 font-medium text-slate-700" x-text="formatDateTime(payment.tanggal_pembayaran)"></dd></div>
+                      <div class="col-span-2"><dt class="text-slate-400">Order</dt><dd class="mt-1 font-medium text-slate-700 break-all" x-text="payment.nomor_order"></dd></div>
+                    </dl>
+                    <div class="mt-3 flex items-center justify-between gap-3 text-xs">
+                      <span class="text-slate-500" x-text="methodLabel(payment.metode_pembayaran, payment.provider_pembayaran)"></span>
+                      <span class="font-semibold text-primary">Lihat detail →</span>
+                    </div>
+                  </button>
+                </template>
               </div>
             </div>
 
@@ -298,15 +328,21 @@
                 </div>
                 <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="paymentStatusClass(detailPayment?.status)" x-text="paymentStatusLabel(detailPayment?.status)"></span>
               </div>
-              <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div class="mt-4 grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                <div>
+                  <div class="text-xs text-slate-500">Paket</div>
+                  <div class="font-semibold" x-text="detailPayment?.nama_paket || detail?.nama_paket || '-' "></div>
+                  <div class="text-xs text-slate-500 mt-1" x-text="detailPayment?.durasi_bulan ? detailPayment.durasi_bulan + ' bulan' : ''"></div>
+                </div>
                 <div>
                   <div class="text-xs text-slate-500">Nominal</div>
+
                   <div class="font-semibold" x-text="formatRupiah(detailPayment?.nominal)"></div>
                 </div>
                 <div>
                   <div class="text-xs text-slate-500">Metode</div>
-                  <div class="font-semibold" x-text="methodLabel(detailPayment?.metode_pembayaran)"></div>
-                  <div class="text-xs text-slate-500 mt-1" x-text="detailPayment?.provider_pembayaran || '-'"></div>
+                  <div class="font-semibold" x-text="methodLabel(detailPayment?.metode_pembayaran, detailPayment?.provider_pembayaran)"></div>
+                  <div x-show="detailPayment?.provider_pembayaran === 'midtrans'" class="text-xs text-emerald-600 mt-1">Diproses otomatis</div>
                   <div class="text-xs text-slate-500" x-text="detailPayment?.nomor_tujuan_pembayaran || ''"></div>
                 </div>
                 <div>
@@ -328,7 +364,9 @@
               <div x-show="detailPayment?.catatan_admin" class="mt-4 rounded-lg bg-slate-50 p-3 text-sm"><span class="font-semibold">Catatan admin:</span> <span x-text="detailPayment?.catatan_admin"></span></div>
             </div>
 
-            <div x-show="detailPaymentPending" class="border-t border-slate-200 pt-5">
+            <div x-show="detailPayment?.provider_pembayaran === 'midtrans' && detailPayment?.status === 'menunggu'" class="border-t border-slate-200 pt-5"><div class="rounded-xl bg-blue-50 border border-blue-100 p-4 text-sm text-blue-800"><span class="font-semibold">QRIS diproses otomatis.</span> Admin tidak perlu melakukan approve atau reject. Status akan diperbarui dari sistem pembayaran.</div></div>
+
+            <div x-show="detailPaymentPending && detailPayment?.provider_pembayaran !== 'midtrans'" class="border-t border-slate-200 pt-5">
               <h3 class="font-bold text-slate-900">Pemeriksaan Pembayaran</h3>
               <textarea x-model="catatan" rows="3" class="input mt-3 w-full" placeholder="Catatan wajib jika pembayaran ditolak."></textarea>
               <div class="mt-3 flex flex-col sm:flex-row gap-2">
@@ -479,12 +517,12 @@
       },
 
       get detailTitle() {
-        if (this.detail?.nama_paket) return this.detail.nama_paket + ' — ' + (this.detail.nama_pemilik || 'Langganan');
+        if (this.detail?.nama_pemilik) return 'Detail Langganan — ' + this.detail.nama_pemilik;
         return 'Detail Langganan';
       },
 
       get detailPaymentPending() {
-        return !!(this.detailPayment && this.detailPayment.status === 'menunggu');
+        return !!(this.detailPayment && this.detailPayment.status === 'menunggu' && this.detailPayment.provider_pembayaran !== 'midtrans');
       },
 
       async decide(item, decision) {
@@ -532,16 +570,19 @@
           'bg-slate-100 text-slate-500';
       },
 
-      paymentStatusLabel(status) {
-        return status === 'menunggu' ? 'Menunggu verifikasi' :
+      paymentStatusLabel(status, provider = '') {
+        return status === 'menunggu' ? (provider === 'midtrans' ? 'Menunggu pembayaran' : 'Menunggu verifikasi') :
           status === 'diverifikasi' ? 'Diverifikasi' :
           status === 'ditolak' ? 'Ditolak' :
           status === 'dibatalkan' ? 'Dibatalkan' :
           'Belum ada pembayaran';
       },
 
-      methodLabel(method) {
-        return method === 'transfer_bank' ? 'Transfer Bank' : 'E-Wallet';
+      methodLabel(method, provider = '') {
+        if (method === 'qris' || provider === 'midtrans') return 'QRIS';
+        if (method === 'transfer_bank') return 'Transfer Bank';
+        if (method === 'e_wallet') return 'E-Wallet';
+        return method ? 'E-Wallet' : '-';
       },
       formatRupiah(value) {
         return Alpine.store('utils').formatRupiah(value);
