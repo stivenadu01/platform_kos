@@ -134,6 +134,34 @@ class PemilikController
     ]);
   }
 
+  public function detailPembayaran()
+  {
+    $id_tagihan = (int) query('id_tagihan');
+
+    if (!$id_tagihan) {
+      response([
+        'success' => false,
+        'message' => 'ID tagihan tidak valid.'
+      ], 400);
+    }
+
+    model('Tagihan');
+    $tagihan = findTagihanByIdPemilik($id_tagihan, (int) $_SESSION['user']['id_user']);
+
+    if (!$tagihan) {
+      response([
+        'success' => false,
+        'message' => 'Tagihan tidak ditemukan.'
+      ], 404);
+    }
+
+    view('pemilik/pembayaran/detail', [
+      'title' => 'Detail Tagihan',
+      'layout' => 'pemilik',
+      'tagihan' => $tagihan
+    ]);
+  }
+
 
   public function langganan()
   {

@@ -206,7 +206,7 @@
                     </td>
                     <td class="py-4 pr-4" x-text="item.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru'"></td>
                     <td class="py-4 pr-4 font-semibold" x-text="item.is_gratis ? 'Gratis' : formatRupiah(item.nominal)"></td>
-                    <td class="py-4 pr-4 whitespace-nowrap" x-text="formatDateTime(item.tanggal_transaksi)"></td>
+                    <td class="py-4 pr-4 whitespace-nowrap" x-text="formatDate(item.tanggal_transaksi)"></td>
                     <td class="py-4">
                       <span
                         class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -230,7 +230,7 @@
                     <div class="font-semibold text-slate-900 truncate" x-text="item.nama_paket"></div>
                     <div class="mt-1 text-xs text-slate-500" x-text="(item.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Baru') + ' · ' + item.durasi_bulan + ' bulan'"></div>
                   </div>
-                  <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="item.status_pembayaran === 'aktif' || item.status_pembayaran === 'diverifikasi' ? 'bg-emerald-50 text-emerald-700' : item.status_pembayaran === 'menunggu' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'" x-text="item.is_gratis ? 'Gratis' : (item.status_pembayaran === 'diverifikasi' ? 'Diverifikasi' : item.status_pembayaran === 'menunggu' ? 'Menunggu verifikasi' : item.status_pembayaran === 'dibatalkan' ? 'Dibatalkan' : item.status_pembayaran === 'ditolak' ? 'Ditolak' : item.status_pembayaran)"></span>
+                  <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="item.status_pembayaran === 'aktif' || item.status_pembayaran === 'diverifikasi' ? 'bg-emerald-50 text-emerald-700' : item.status_pembayaran === 'menunggu' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'" x-text="item.status_pembayaran === 'aktif' ? 'Aktif' : item.status_pembayaran === 'diverifikasi' ? 'Diverifikasi' : item.status_pembayaran === 'menunggu' ? 'Menunggu verifikasi' : item.status_pembayaran === 'berakhir' ? 'Berakhir' : item.status_pembayaran === 'dibatalkan' ? 'Dibatalkan' : item.status_pembayaran === 'ditolak' ? 'Ditolak' : item.status_pembayaran"></span>
                 </div>
                 <dl class="mt-3 grid grid-cols-2 gap-3 text-xs">
                   <div>

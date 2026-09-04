@@ -20,6 +20,7 @@ get('/pemilik/kos/foto', 'PemilikController@fotoKos', ['auth', 'role:pemilik']);
 
 
 get('/pemilik/pembayaran', 'PemilikController@pembayaran', ['auth', 'role:pemilik', 'pro']);
+get('/pemilik/pembayaran/detail', 'PemilikController@detailPembayaran', ['auth', 'role:pemilik', 'pro']);
 get('/pemilik/langganan', 'PemilikController@langganan', ['auth', 'role:pemilik']);
 get('/pemilik/langganan/checkout', 'PemilikController@langgananCheckout', ['auth', 'role:pemilik']);
 get('/pemilik/langganan/pembayaran', 'PemilikController@langgananPembayaran', ['auth', 'role:pemilik']);

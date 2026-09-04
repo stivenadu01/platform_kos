@@ -241,18 +241,78 @@ function getRiwayatLanggananPemilik($id_pemilik)
         WHEN l.status = 'aktif' AND l.tanggal_berakhir < CURDATE() THEN 'berakhir'
         ELSE l.status
       END AS status_pembayaran,
-      p.kode AS kode_paket,
-      p.nama AS nama_paket,
-      p.durasi_bulan,
+      CASE
+        WHEN l.catatan = 'Aktivasi Pro gratis pertama'
+          OR (
+            l.id_langganan = (
+              SELECT MIN(l2.id_langganan)
+              FROM langganan l2
+              WHERE l2.id_pemilik = l.id_pemilik
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM pembayaran_langganan pl
+              WHERE pl.id_langganan = l.id_langganan
+                AND pl.jenis_pembayaran = 'baru'
+            )
+          ) THEN 'pro'
+        ELSE p.kode
+      END AS kode_paket,
+      CASE
+        WHEN l.catatan = 'Aktivasi Pro gratis pertama'
+          OR (
+            l.id_langganan = (
+              SELECT MIN(l2.id_langganan)
+              FROM langganan l2
+              WHERE l2.id_pemilik = l.id_pemilik
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM pembayaran_langganan pl
+              WHERE pl.id_langganan = l.id_langganan
+                AND pl.jenis_pembayaran = 'baru'
+            )
+          ) THEN 'Pro Bulanan'
+        ELSE p.nama
+      END AS nama_paket,
+      CASE
+        WHEN l.catatan = 'Aktivasi Pro gratis pertama'
+          OR (
+            l.id_langganan = (
+              SELECT MIN(l2.id_langganan)
+              FROM langganan l2
+              WHERE l2.id_pemilik = l.id_pemilik
+            )
+            AND NOT EXISTS (
+              SELECT 1
+              FROM pembayaran_langganan pl
+              WHERE pl.id_langganan = l.id_langganan
+                AND pl.jenis_pembayaran = 'baru'
+            )
+          ) THEN 1
+        ELSE p.durasi_bulan
+      END AS durasi_bulan,
       l.tanggal_mulai,
       l.tanggal_berakhir,
       1 AS is_gratis
     FROM langganan l
     INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan
     WHERE l.id_pemilik = ?
-      AND NOT EXISTS (
-        SELECT 1 FROM pembayaran_langganan pl
-        WHERE pl.id_langganan = l.id_langganan
+      AND (
+        l.catatan = 'Aktivasi Pro gratis pertama'
+        OR (
+          l.id_langganan = (
+            SELECT MIN(l2.id_langganan)
+            FROM langganan l2
+            WHERE l2.id_pemilik = l.id_pemilik
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM pembayaran_langganan pl
+            WHERE pl.id_langganan = l.id_langganan
+              AND pl.jenis_pembayaran = 'baru'
+          )
+        )
       )
     ORDER BY l.tanggal_mulai DESC, l.id_langganan DESC
   ");
@@ -454,7 +514,7 @@ function aktifkanLanggananGratisPertama($id_pemilik, $kode_paket)
     $stmt = $conn->prepare("
       INSERT INTO langganan
         (id_pemilik, id_paket_langganan, tanggal_mulai, tanggal_berakhir, status, catatan)
-      VALUES (?, ?, ?, ?, 'aktif', NULL)
+      VALUES (?, ?, ?, ?, 'aktif', 'Aktivasi Pro gratis pertama')
     ");
     $stmt->bind_param('iiss', $id_pemilik, $paket['id_paket_langganan'], $startDate, $endDate);
     if (!$stmt->execute()) throw new Exception('Gagal mengaktifkan Pro gratis.', 500);
