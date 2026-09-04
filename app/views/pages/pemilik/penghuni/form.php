@@ -74,7 +74,7 @@
         <select
           x-model="form.id_kamar"
           @change="updateSelectedKamar()"
-          class="input"
+          class="select"
           :required="mode === 'tambah'"
           :disabled="mode === 'edit'">
 
@@ -169,7 +169,7 @@
         <input
           type="date"
           x-model="form.tanggal_masuk"
-          class="input"
+          class="input-date"
           :required="mode === 'tambah'">
       </div>
 

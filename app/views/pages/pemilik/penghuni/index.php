@@ -57,7 +57,7 @@
         <select
           x-model="idKos"
           @change="applyFilter()"
-          class="input">
+          class="select">
 
           <option value="">
             Semua kos
@@ -89,7 +89,7 @@
         <select
           x-model="idKamar"
           @change="applyFilter()"
-          class="input">
+          class="select">
 
           <option value="">
             Semua kamar
@@ -121,7 +121,7 @@
         <select
           x-model="status"
           @change="applyFilter()"
-          class="input">
+          class="select">
 
           <option value="">
             Semua status
@@ -504,7 +504,7 @@
           <input
             type="date"
             x-model="tanggalKeluar"
-            class="input"
+            class="input-date"
             required>
 
           <p class="mt-1 text-xs text-slate-500">

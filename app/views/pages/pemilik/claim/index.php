@@ -109,7 +109,7 @@
           <form @submit.prevent="decision" class="space-y-4">
             <div>
               <label class="label">Keputusan</label>
-              <select x-model="form.keputusan" class="input mt-1 w-full">
+              <select x-model="form.keputusan" class="select mt-1">
                 <option value="disetujui">Setujui claim</option>
                 <option value="ditolak">Tolak claim</option>
               </select>

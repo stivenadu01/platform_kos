@@ -90,7 +90,7 @@
       <form @submit.prevent="save()" class="p-5 sm:p-6 space-y-4">
         <div>
           <label class="label">Jenis *</label>
-          <select x-model="form.jenis" class="input mt-1 w-full" required><option value="transfer_bank">Transfer Bank</option><option value="e_wallet">E-Wallet</option></select>
+          <select x-model="form.jenis" class="select mt-1" required><option value="transfer_bank">Transfer Bank</option><option value="e_wallet">E-Wallet</option></select>
         </div>
         <div><label class="label">Nama Bank / E-Wallet *</label><input x-model="form.nama_provider" class="input mt-1 w-full" required maxlength="80" placeholder="Contoh: BCA atau DANA"></div>
         <div><label class="label">Nomor Rekening / E-Wallet *</label><input x-model="form.nomor_tujuan" class="input mt-1 w-full" required maxlength="100" placeholder="Nomor tujuan pembayaran"></div>

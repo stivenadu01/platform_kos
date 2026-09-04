@@ -65,9 +65,9 @@
         <div x-show="showAdjustmentForm" x-cloak class="mb-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <form @submit.prevent="submitAdjustment" class="space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="form-group"><label class="label">Jenis</label><select x-model="adjustment.jenis" class="input" required><option value="tambah">Tambahan</option><option value="kurang">Pengurangan</option></select></div>
-              <div class="form-group"><label class="label">Jumlah</label><input type="number" min="1" step="1" x-model.number="adjustment.jumlah" class="input" required></div>
-              <div class="form-group"><label class="label">Tanggal efektif</label><input type="date" x-model="adjustment.tanggal_efektif" class="input" :min="detail.tanggal_mulai" :max="detail.tanggal_selesai" required></div>
+              <div class="form-group"><label class="label">Jenis</label><select x-model="adjustment.jenis" class="select" required><option value="tambah">Tambahan</option><option value="kurang">Pengurangan</option></select></div>
+              <div class="form-group"><label class="label">Jumlah</label><input type="number" min="1" step="1" x-model.number="adjustment.jumlah" class="input-number" required></div>
+              <div class="form-group"><label class="label">Tanggal efektif</label><input type="date" x-model="adjustment.tanggal_efektif" class="input-date" :min="detail.tanggal_mulai" :max="detail.tanggal_selesai" required></div>
               <div class="form-group"><label class="label">Alasan</label><input type="text" x-model="adjustment.alasan" maxlength="255" class="input" placeholder="Contoh: Denda keterlambatan" required></div>
             </div>
             <div class="flex justify-end gap-3"><button type="button" @click="showAdjustmentForm = false" class="btn-secondary">Batal</button><button type="submit" class="btn-primary" :disabled="saving">Simpan Penyesuaian</button></div>
@@ -92,10 +92,10 @@
           <form @submit.prevent="submitPayment" class="space-y-4">
             <div class="rounded-xl bg-white border border-slate-200 p-4"><div class="flex justify-between text-sm"><span>Total tagihan</span><strong x-text="format(detail.total_tagihan)"></strong></div><div class="flex justify-between text-sm mt-2"><span>Sisa</span><strong x-text="format(detail.sisa_tagihan)"></strong></div></div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="form-group"><label class="label">Penghuni</label><select x-model="payment.id_penghuni" class="input" required><option value="">Pilih penghuni</option><template x-for="item in detail.penghuni" :key="item.id_penghuni"><option :value="item.id_penghuni" x-text="item.nama"></option></template></select></div>
-              <div class="form-group"><label class="label">Jumlah pembayaran</label><input type="number" min="1" step="1" :max="detail.sisa_tagihan" x-model.number="payment.jumlah" class="input" required></div>
-              <div class="form-group"><label class="label">Metode</label><select x-model="payment.metode" class="input" required><option value="tunai">Tunai</option><option value="transfer">Transfer</option><option value="qris">QRIS</option><option value="lainnya">Lainnya</option></select></div>
-              <div class="form-group"><label class="label">Tanggal pembayaran</label><input type="datetime-local" x-model="payment.tanggal_bayar" class="input" required></div>
+              <div class="form-group"><label class="label">Penghuni</label><select x-model="payment.id_penghuni" class="select" required><option value="">Pilih penghuni</option><template x-for="item in detail.penghuni" :key="item.id_penghuni"><option :value="item.id_penghuni" x-text="item.nama"></option></template></select></div>
+              <div class="form-group"><label class="label">Jumlah pembayaran</label><input type="number" min="1" step="1" :max="detail.sisa_tagihan" x-model.number="payment.jumlah" class="input-number" required></div>
+              <div class="form-group"><label class="label">Metode</label><select x-model="payment.metode" class="select" required><option value="tunai">Tunai</option><option value="transfer">Transfer</option><option value="qris">QRIS</option><option value="lainnya">Lainnya</option></select></div>
+              <div class="form-group"><label class="label">Tanggal pembayaran</label><input type="datetime-local" x-model="payment.tanggal_bayar" class="input-datetime" required></div>
             </div>
             <div class="form-group"><label class="label">Catatan</label><textarea x-model="payment.catatan" rows="3" class="input resize-none" placeholder="Catatan pembayaran (opsional)"></textarea></div>
             <div class="flex justify-end gap-3"><button type="button" @click="showPaymentForm = false" class="btn-secondary">Batal</button><button type="submit" class="btn-primary" :disabled="saving">Simpan Pembayaran</button></div>

@@ -24,7 +24,7 @@
       </div>
       <div>
         <label class="label">Status</label>
-        <select x-model="filters.status" @change="applyFilters()" class="input mt-1 w-full">
+        <select x-model="filters.status" @change="applyFilters()" class="select mt-1">
           <option value="">Semua status</option>
           <option value="menunggu">Menunggu</option>
           <option value="diproses">Diproses</option>
@@ -112,7 +112,7 @@
         <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Isi laporan</div><div class="mt-2 rounded-xl border border-slate-200 p-4 text-sm leading-6 text-slate-700 whitespace-pre-line" x-text="detail?.deskripsi"></div></div>
         <div x-show="detail?.catatan_admin" class="rounded-xl bg-slate-50 p-4"><div class="text-xs text-slate-400">Catatan Admin sebelumnya</div><div class="mt-1 text-sm text-slate-700 whitespace-pre-line" x-text="detail?.catatan_admin"></div></div>
         <form @submit.prevent="decision" class="space-y-4 border-t border-slate-200 pt-5">
-          <div><label class="label">Tindakan</label><select x-model="decisionForm.status" class="input mt-1 w-full"><option value="diproses">Tandai Diproses</option><option value="selesai">Selesaikan Laporan</option><option value="ditolak">Tolak Laporan</option></select></div>
+          <div><label class="label">Tindakan</label><select x-model="decisionForm.status" class="select mt-1"><option value="diproses">Tandai Diproses</option><option value="selesai">Selesaikan Laporan</option><option value="ditolak">Tolak Laporan</option></select></div>
           <div><label class="label">Catatan Admin <span class="font-normal text-slate-400">(wajib jika ditolak)</span></label><textarea x-model="decisionForm.catatan_admin" rows="4" class="input mt-1 w-full" placeholder="Jelaskan tindakan atau alasan penolakan..."></textarea></div>
           <div class="flex flex-col sm:flex-row-reverse gap-2"><button class="btn-primary" :disabled="saving" type="submit" x-text="saving ? 'Menyimpan...' : 'Simpan Tindakan'"></button><button type="button" @click="closeDetail()" class="btn-secondary">Batal</button></div>
         </form>

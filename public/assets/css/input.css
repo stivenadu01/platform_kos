@@ -244,6 +244,56 @@
          disabled:cursor-not-allowed;
 }
 
+@utility input-number {
+  @apply input;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.input-number::-webkit-inner-spin-button,
+.input-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+@utility input-date {
+  @apply input;
+  color-scheme: light;
+  font-variant-numeric: tabular-nums;
+}
+
+.input-date::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+  cursor: pointer;
+  padding: 0.15rem;
+  border-radius: 0.375rem;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.input-date::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: var(--color-primary-soft);
+}
+
+@utility input-datetime {
+  @apply input;
+  color-scheme: light;
+  font-variant-numeric: tabular-nums;
+}
+
+.input-datetime::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+  cursor: pointer;
+  padding: 0.15rem;
+  border-radius: 0.375rem;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.input-datetime::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background-color: var(--color-primary-soft);
+}
+
 @utility input-error {
   @apply border-danger
          focus:border-danger
@@ -256,6 +306,15 @@
 
 @utility select {
   @apply input appearance-none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+}
+
+.select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 /* =========================================================
@@ -460,6 +519,16 @@
   tr:last-child td {
     border-bottom: 0;
   }
+}
+
+/* =========================================================
+   🔒 SCROLL LOCK
+   ========================================================= */
+
+html.scroll-locked,
+body.scroll-locked {
+  overflow: hidden !important;
+  overscroll-behavior: none;
 }
 
 /* =========================================================
@@ -771,4 +840,32 @@
 
 @utility mobile-full {
   @apply w-full md:w-auto;
+}
+
+
+/* Desktop sidebar collapse: label visibility and icon alignment are centralized here. */
+@media (min-width: 1024px) {
+  [data-sidebar-collapsed="true"] .sidebar-label,
+  [data-sidebar-collapsed="true"] .sidebar-section-label,
+  [data-sidebar-collapsed="true"] .sidebar-brand-label {
+    display: none;
+  }
+
+  [data-sidebar-collapsed="true"] nav a,
+  [data-sidebar-collapsed="true"] nav button {
+    justify-content: center;
+  }
+
+  [data-sidebar-collapsed="true"] nav a {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  [data-sidebar-collapsed="true"] > div:first-child a {
+    justify-content: center;
+  }
+
+  [data-sidebar-collapsed="true"] > div:last-child button {
+    justify-content: center;
+  }
 }

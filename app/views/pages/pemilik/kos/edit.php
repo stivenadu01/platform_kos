@@ -78,7 +78,7 @@
 
       <select
         x-model="form.jenis"
-        class="input"
+        class="select"
         required>
 
         <option value="putra">

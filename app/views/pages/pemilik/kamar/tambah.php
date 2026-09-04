@@ -39,7 +39,7 @@
         data-help="help-kamar-form-kos" data-onboarding="kamar-field-kos"
         x-model="form.id_kos"
         @change="loadTipe()"
-        class="input"
+        class="select"
         required>
         <option value="">Pilih kos</option>
 
@@ -68,7 +68,7 @@
         data-help="help-kamar-form-type" data-onboarding="kamar-field-tipe"
         x-model="form.id_tipe_kamar"
         @change="loadTypeFacilities()"
-        class="input"
+        class="select"
         required
         :disabled="!form.id_kos">
         <option value="">Pilih tipe kamar</option>
@@ -143,7 +143,7 @@
           x-model.number="form.jumlah"
           min="1"
           max="500"
-          class="input"
+          class="input-number"
           placeholder="10"
           :required="mode === 'bulk'">
 
