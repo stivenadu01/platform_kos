@@ -61,6 +61,25 @@ function findUserByEmail($email)
 }
 
 
+function findUserByNik($nik)
+{
+  $conn = db();
+
+  $stmt = $conn->prepare("
+    SELECT *
+    FROM users
+    WHERE nik = ?
+    LIMIT 1
+  ");
+  $stmt->bind_param('s', $nik);
+  $stmt->execute();
+  $user = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  return $user;
+}
+
+
 /**
  * Menyimpan waktu login terakhir pengguna.
  * Dipanggil hanya setelah autentikasi berhasil.
@@ -344,6 +363,128 @@ function tambahUser($data, $isRegister = false)
   $stmt->close();
 
   return $res;
+}
+
+
+/* =========================================================
+   GOOGLE AUTHENTICATION
+   ========================================================= */
+
+function findUserByGoogleSub($googleSub)
+{
+  $conn = db();
+
+  $stmt = $conn->prepare("
+    SELECT *
+    FROM users
+    WHERE google_sub = ?
+    LIMIT 1
+  ");
+  $stmt->bind_param('s', $googleSub);
+  $stmt->execute();
+  $user = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+
+  return $user;
+}
+
+
+/**
+ * Menghubungkan akun Google terverifikasi ke akun BetaKos yang sudah ada.
+ * Dipanggil di dalam transaction setelah email Google diverifikasi server.
+ */
+function linkGoogleSubToUser($idUser, $googleSub)
+{
+  $conn = db();
+
+  $idUser = (int) $idUser;
+  $googleSub = trim((string) $googleSub);
+
+  if ($idUser <= 0 || $googleSub === '') {
+    throw new Exception('Data penghubung akun Google tidak valid.', 422);
+  }
+
+  $stmt = $conn->prepare("
+    UPDATE users
+    SET google_sub = ?
+    WHERE id_user = ?
+      AND (google_sub IS NULL OR google_sub = '')
+    LIMIT 1
+  " );
+  $stmt->bind_param('si', $googleSub, $idUser);
+  $success = $stmt->execute();
+  $affected = $stmt->affected_rows;
+  $error = $stmt->error;
+  $stmt->close();
+
+  if (!$success) {
+    throw new Exception('Gagal menghubungkan akun Google: ' . $error, 500);
+  }
+
+  return $affected === 1;
+}
+
+function createGoogleUser($data)
+{
+  $conn = db();
+
+  $nama = trim($data['nama'] ?? '');
+  $email = strtolower(trim($data['email'] ?? ''));
+  $no_hp = trim($data['no_hp'] ?? '');
+  $nik = trim($data['nik'] ?? '');
+  $role = trim($data['role'] ?? '');
+  $googleSub = trim($data['google_sub'] ?? '');
+
+  if (!$nama || !$email || !$no_hp || !$nik || !$role || !$googleSub) {
+    throw new Exception('Data pendaftaran Google belum lengkap', 422);
+  }
+
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    throw new Exception('Email tidak valid', 422);
+  }
+
+  if (!preg_match('/^\d{16}$/', $nik)) {
+    throw new Exception('NIK harus terdiri dari 16 digit', 422);
+  }
+
+  if (!in_array($role, ['pelanggan', 'pemilik'], true)) {
+    throw new Exception('Jenis akun tidak valid', 422);
+  }
+
+  // Akun Google tetap memiliki password internal agar kompatibel dengan
+  // mekanisme login/password dan reset password yang sudah ada.
+  $password = password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT);
+  $verifiedAt = date('Y-m-d H:i:s');
+
+  $stmt = $conn->prepare("
+    INSERT INTO users
+      (nama, email, no_hp, nik, password, role, google_sub, email_verified_at, status)
+    VALUES
+      (?, ?, ?, ?, ?, ?, ?, ?, 'aktif')
+  ");
+
+  $stmt->bind_param(
+    'ssssssss',
+    $nama,
+    $email,
+    $no_hp,
+    $nik,
+    $password,
+    $role,
+    $googleSub,
+    $verifiedAt
+  );
+
+  if (!$stmt->execute()) {
+    $error = $stmt->error;
+    $stmt->close();
+    throw new Exception('Gagal membuat akun Google: ' . $error, 500);
+  }
+
+  $idUser = $stmt->insert_id;
+  $stmt->close();
+
+  return $idUser;
 }
 
 

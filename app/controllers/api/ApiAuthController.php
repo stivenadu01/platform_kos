@@ -7,6 +7,7 @@ class ApiAuthController
     model('User');
     require_once ROOT_PATH . '/app/helpers/rate_limit_helper.php';
     require_once ROOT_PATH . '/app/helpers/email_helper.php';
+    require_once ROOT_PATH . '/app/services/GoogleAuthService.php';
   }
 
   public function login()
@@ -150,6 +151,225 @@ class ApiAuthController
     }
   }
 
+
+  public function googleStart()
+  {
+    try {
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+      rateLimit('google_start_' . $ip, 10, 60);
+
+      $mode = trim((string) query('mode', 'login'));
+      $role = trim((string) query('role', ''));
+
+      if (!in_array($mode, ['login', 'register'], true)) {
+        throw new Exception('Mode Google tidak valid.', 400);
+      }
+      if ($mode === 'register' && $role !== '' && !in_array($role, ['pelanggan', 'pemilik'], true)) {
+        throw new Exception('Jenis akun tidak valid.', 422);
+      }
+
+      $state = bin2hex(random_bytes(32));
+      $_SESSION['google_oauth_state'] = $state;
+      $_SESSION['google_oauth_mode'] = $mode;
+      $_SESSION['google_oauth_role'] = $role;
+      $_SESSION['google_oauth_started_at'] = time();
+
+      header('Location: ' . (new GoogleAuthService())->buildAuthorizationUrl($state), true, 302);
+      exit;
+    } catch (Exception $e) {
+      $_SESSION['google_auth_error'] = $e->getMessage();
+      header('Location: ' . rtrim(BASE_URL, '/') . '/login', true, 302);
+      exit;
+    }
+  }
+
+  public function googleCallback()
+  {
+    try {
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+      rateLimit('google_callback_' . $ip, 10, 60);
+
+      $error = trim((string) query('error', ''));
+      if ($error !== '') {
+        $this->clearGoogleOAuthSession();
+        $_SESSION['google_auth_error'] = $error === 'access_denied'
+          ? 'Login dengan Google dibatalkan.'
+          : 'Google tidak dapat menyelesaikan proses login.';
+        header('Location: ' . rtrim(BASE_URL, '/') . '/login', true, 302);
+        exit;
+      }
+
+      $state = trim((string) query('state', ''));
+      $sessionState = (string) ($_SESSION['google_oauth_state'] ?? '');
+      $startedAt = (int) ($_SESSION['google_oauth_started_at'] ?? 0);
+      if ($state === '' || $sessionState === '' || !hash_equals($sessionState, $state)) {
+        $this->clearGoogleOAuthSession();
+        throw new Exception('Sesi keamanan Google tidak valid. Silakan coba lagi.', 400);
+      }
+      if ($startedAt <= 0 || (time() - $startedAt) > 600) {
+        $this->clearGoogleOAuthSession();
+        throw new Exception('Sesi login Google sudah kedaluwarsa. Silakan coba lagi.', 400);
+      }
+
+      $code = trim((string) query('code', ''));
+      if ($code === '') {
+        $this->clearGoogleOAuthSession();
+        throw new Exception('Authorization code Google tidak ditemukan.', 400);
+      }
+
+      $mode = (string) ($_SESSION['google_oauth_mode'] ?? 'login');
+      $role = (string) ($_SESSION['google_oauth_role'] ?? '');
+      $service = new GoogleAuthService();
+      $tokens = $service->exchangeCode($code);
+      $google = $service->verifyIdToken($tokens['id_token']);
+      $this->clearGoogleOAuthSession();
+
+      $user = findUserByGoogleSub($google['sub']);
+      if ($user) {
+        if (($user['status'] ?? 'aktif') !== 'aktif') {
+          throw new Exception('Akun tidak dapat digunakan. Silakan hubungi administrator.', 403);
+        }
+        updateLastLoginAt((int) $user['id_user']);
+        $user['last_login_at'] = date('Y-m-d H:i:s');
+        unset($user['password']);
+        session_regenerate_id(true);
+        $_SESSION['user'] = $user;
+        $destination = (($user['role'] ?? '') === 'pemilik') ? '/pemilik' : (($user['role'] ?? '') === 'admin' ? '/admin' : '/');
+        header('Location: ' . rtrim(BASE_URL, '/') . $destination, true, 302);
+        exit;
+      }
+
+      /*
+       * Jika email Google yang sudah diverifikasi ternyata sudah memiliki akun
+       * BetaKos, hubungkan google_sub ke akun tersebut.
+       *
+       * Ini aman karena identitas Google sudah diverifikasi server (issuer,
+       * audience, email_verified, dan exp) sebelum sampai ke blok ini.
+       * Tidak ada penggabungan jika google_sub tersebut sudah dimiliki akun lain.
+       */
+      $existingByEmail = findUserByEmail($google['email']);
+      if ($existingByEmail) {
+        if (($existingByEmail['status'] ?? 'aktif') !== 'aktif') {
+          throw new Exception('Akun BetaKos tidak dapat digunakan. Silakan hubungi administrator.', 403);
+        }
+
+        $existingGoogleSub = trim((string) ($existingByEmail['google_sub'] ?? ''));
+        if ($existingGoogleSub !== '' && !hash_equals($existingGoogleSub, $google['sub'])) {
+          throw new Exception('Email Google ini sudah terhubung ke akun BetaKos lain. Silakan hubungi administrator.', 409);
+        }
+
+        if ($existingGoogleSub === '') {
+          $linked = linkGoogleSubToUser((int) $existingByEmail['id_user'], $google['sub']);
+          if (!$linked) {
+            // Cek ulang untuk menangani race condition secara aman.
+            $latestUser = findUser((int) $existingByEmail['id_user']);
+            $latestGoogleSub = trim((string) ($latestUser['google_sub'] ?? ''));
+            if ($latestGoogleSub === '' || !hash_equals($latestGoogleSub, $google['sub'])) {
+              throw new Exception('Akun Google gagal dihubungkan ke akun BetaKos. Silakan coba lagi.', 409);
+            }
+            $existingByEmail = $latestUser;
+          } else {
+            $existingByEmail = findUser((int) $existingByEmail['id_user']);
+          }
+        }
+
+        updateLastLoginAt((int) $existingByEmail['id_user']);
+        $existingByEmail['last_login_at'] = date('Y-m-d H:i:s');
+        unset($existingByEmail['password']);
+        session_regenerate_id(true);
+        $_SESSION['user'] = $existingByEmail;
+        $destination = (($existingByEmail['role'] ?? '') === 'pemilik') ? '/pemilik' : (($existingByEmail['role'] ?? '') === 'admin' ? '/admin' : '/');
+        header('Location: ' . rtrim(BASE_URL, '/') . $destination, true, 302);
+        exit;
+      }
+
+      $_SESSION['google_pending_registration'] = [
+        'sub' => $google['sub'],
+        'email' => $google['email'],
+        'nama' => $google['nama'] ?: $google['email'],
+        'picture' => $google['picture'],
+        'role' => in_array($role, ['pelanggan', 'pemilik'], true) ? $role : ''
+      ];
+
+      header('Location: ' . rtrim(BASE_URL, '/') . '/register?google=1', true, 302);
+      exit;
+    } catch (Exception $e) {
+      $this->clearGoogleOAuthSession();
+      $_SESSION['google_auth_error'] = $e->getMessage();
+      header('Location: ' . rtrim(BASE_URL, '/') . '/login', true, 302);
+      exit;
+    }
+  }
+
+  public function googleComplete()
+  {
+    $conn = db();
+    $conn->begin_transaction();
+    try {
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+      rateLimit('google_complete_' . $ip, 10, 60);
+      $pending = $_SESSION['google_pending_registration'] ?? null;
+      if (!is_array($pending) || empty($pending['sub']) || empty($pending['email'])) {
+        throw new Exception('Sesi pendaftaran Google tidak ditemukan. Silakan ulangi dari tombol Google.', 400);
+      }
+
+      $input = input();
+      $role = trim((string) ($input['role'] ?? ($pending['role'] ?? '')));
+      $noHp = trim((string) ($input['no_hp'] ?? ''));
+      $nik = trim((string) ($input['nik'] ?? ''));
+      if (!in_array($role, ['pelanggan', 'pemilik'], true)) {
+        throw new Exception('Pilih jenis akun: Pemilik Kos atau Pencari Kos.', 422);
+      }
+      if ($noHp === '' || $nik === '') {
+        throw new Exception('Nomor HP dan NIK wajib diisi.', 422);
+      }
+      if (!preg_match('/^\d{16}$/', $nik)) {
+        throw new Exception('NIK harus terdiri dari 16 digit.', 422);
+      }
+      if (findUserByEmail($pending['email'])) {
+        throw new Exception('Email sudah digunakan. Silakan masuk dengan email dan kata sandi.', 409);
+      }
+      if (findUserByGoogleSub($pending['sub'])) {
+        throw new Exception('Akun Google ini sudah terdaftar. Silakan masuk dengan Google.', 409);
+      }
+      if (findUserByNik($nik)) {
+        throw new Exception('NIK sudah digunakan.', 409);
+      }
+
+      $idUser = createGoogleUser([
+        'nama' => $pending['nama'],
+        'email' => $pending['email'],
+        'no_hp' => $noHp,
+        'nik' => $nik,
+        'role' => $role,
+        'google_sub' => $pending['sub']
+      ]);
+      $conn->commit();
+
+      $user = findUser($idUser);
+      unset($user['password']);
+      unset($_SESSION['google_pending_registration']);
+      session_regenerate_id(true);
+      $_SESSION['user'] = $user;
+
+      return response([
+        'success' => true,
+        'message' => 'Pendaftaran dengan Google berhasil.',
+        'data' => $user
+      ], 201);
+    } catch (Exception $e) {
+      $conn->rollback();
+      return response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], $e->getCode() ?: 500);
+    }
+  }
+
+  private function clearGoogleOAuthSession(): void
+  {
+    unset($_SESSION['google_oauth_state'], $_SESSION['google_oauth_mode'], $_SESSION['google_oauth_role'], $_SESSION['google_oauth_started_at']);
+  }
 
   public function requestReset()
   {

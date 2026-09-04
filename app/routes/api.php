@@ -6,6 +6,9 @@ get('/api/auth/me', 'ApiAuthController@me', ['auth']);
 // Login & Register
 post('/api/auth/login', 'ApiAuthController@login');
 post('/api/auth/register', 'ApiAuthController@register');
+get('/api/auth/google/start', 'ApiAuthController@googleStart');
+get('/api/auth/google/callback', 'ApiAuthController@googleCallback');
+post('/api/auth/google/complete', 'ApiAuthController@googleComplete');
 // Logout
 post('/api/auth/logout', 'ApiAuthController@logout', ['auth']);
 post('/api/auth/profile', 'ApiAuthController@updateProfile', ['auth']);
