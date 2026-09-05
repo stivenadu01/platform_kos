@@ -188,9 +188,9 @@ unset($_SESSION['google_auth_error']);
   function registerForm() {
     return {
       step: <?= ($googleModeInitial && !empty($googlePending['role'])) ? '2' : '1' ?>,
-      role: <?= json_encode($googlePending['role'] ?? '') ?>,
-      nama: <?= json_encode($googlePending['nama'] ?? '') ?>,
-      email: <?= json_encode($googlePending['email'] ?? '') ?>,
+      role: <?= json_encode_safe($googlePending['role'] ?? '') ?>,
+      nama: <?= json_encode_safe($googlePending['nama'] ?? '') ?>,
+      email: <?= json_encode_safe($googlePending['email'] ?? '') ?>,
       password: '',
       konfirmasi_password: '',
       no_hp: '',

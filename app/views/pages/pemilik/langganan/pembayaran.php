@@ -67,8 +67,8 @@
             <div x-show="selected.provider_pembayaran !== 'midtrans'" class="rounded-xl border border-slate-200 p-4">
               <h4 class="font-semibold text-slate-900">Bukti Pembayaran</h4>
               <template x-if="selected.bukti_pembayaran">
-                <a :href="window.BASE_URL + '/uploads' + selected.bukti_pembayaran" target="_blank" rel="noopener" class="block mt-3">
-                  <img :src="window.BASE_URL + '/uploads' + selected.bukti_pembayaran" alt="Bukti pembayaran" class="max-h-56 w-full object-contain rounded-xl border border-slate-200 bg-slate-50">
+                <a :href="window.BASE_URL + '/api/langganan/pembayaran/' + encodeURIComponent(selected.id_pembayaran_langganan) + '/bukti'" target="_blank" rel="noopener" class="block mt-3">
+                  <img :src="window.BASE_URL + '/api/langganan/pembayaran/' + encodeURIComponent(selected.id_pembayaran_langganan) + '/bukti'" alt="Bukti pembayaran" class="max-h-56 w-full object-contain rounded-xl border border-slate-200 bg-slate-50">
                   <span class="block mt-2 text-xs text-primary">Buka bukti pembayaran</span>
                 </a>
               </template>

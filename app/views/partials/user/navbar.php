@@ -102,6 +102,11 @@
         </a>
       </template>
       <template x-if="$store.auth.user?.role === 'pelanggan'">
+        <a @click="open = false" href="<?= BASE_URL ?>/user/profil" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Profil & Akun
+        </a>
+      </template>
+      <template x-if="$store.auth.user?.role === 'pelanggan'">
         <a @click="open = false" href="<?= BASE_URL ?>/user/laporan" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
           Laporan Saya
         </a>

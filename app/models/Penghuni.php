@@ -453,7 +453,8 @@ function createTagihanPertama(
   if (!$stmt->execute()) {
     $error = $stmt->error;
     $stmt->close();
-    throw new Exception('Gagal membuat tagihan: ' . $error);
+    error_log('Create tagihan DB error: ' . $error);
+    throw new Exception('Gagal membuat tagihan.');
   }
 
   $id_tagihan = $conn->insert_id;
@@ -666,7 +667,8 @@ function siapkanTagihanBerikutnyaUntukPenghuni($tagihan, $jumlah_orang, $tanggal
     if (!$stmt->execute()) {
       $error = $stmt->error;
       $stmt->close();
-      throw new Exception('Gagal menyinkronkan tagihan periode berikutnya: ' . $error);
+      error_log('Sync next tagihan DB error: ' . $error);
+      throw new Exception('Gagal menyinkronkan tagihan periode berikutnya.');
     }
     $stmt->close();
 
@@ -708,7 +710,8 @@ function siapkanTagihanBerikutnyaUntukPenghuni($tagihan, $jumlah_orang, $tanggal
   if (!$stmt->execute()) {
     $error = $stmt->error;
     $stmt->close();
-    throw new Exception('Gagal membuat tagihan periode berikutnya: ' . $error);
+    error_log('Create next tagihan DB error: ' . $error);
+    throw new Exception('Gagal membuat tagihan periode berikutnya.');
   }
 
   $id = $stmt->insert_id;
@@ -865,7 +868,8 @@ function createPenghuni($data, $id_pemilik)
     if (!$stmt->execute()) {
       $error = $stmt->error;
       $stmt->close();
-      throw new Exception('Gagal menyimpan penghuni: ' . $error);
+      error_log('Save penghuni DB error: ' . $error);
+      throw new Exception('Gagal menyimpan penghuni.');
     }
 
     $id_penghuni = $conn->insert_id;
@@ -975,9 +979,8 @@ function createPenghuni($data, $id_pemilik)
         if (!$stmt->execute()) {
           $error = $stmt->error;
           $stmt->close();
-          throw new Exception(
-            'Gagal menyimpan penyesuaian: ' . $error
-          );
+          error_log('Save adjustment DB error: ' . $error);
+          throw new Exception('Gagal menyimpan penyesuaian.');
         }
 
         $stmt->close();
@@ -1017,9 +1020,8 @@ function createPenghuni($data, $id_pemilik)
       if (!$stmt->execute()) {
         $error = $stmt->error;
         $stmt->close();
-        throw new Exception(
-          'Gagal memperbarui tagihan: ' . $error
-        );
+        error_log('Update tagihan DB error: ' . $error);
+        throw new Exception('Gagal memperbarui tagihan.');
       }
 
       $stmt->close();

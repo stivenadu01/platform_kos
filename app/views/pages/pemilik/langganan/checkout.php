@@ -161,7 +161,7 @@ function pemilikLanggananCheckout() {
   return {
     loading: true,
     submitting: false,
-    packageCode: <?= json_encode((string)query('paket', 'pro')) ?>,
+    packageCode: <?= json_encode_safe((string)query('paket', 'pro')) ?>,
     packageOpen: false,
     packages: [],
     selectedPackage: null,

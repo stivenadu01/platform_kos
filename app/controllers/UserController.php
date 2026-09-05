@@ -84,10 +84,16 @@ class UserController
 
   public function profil()
   {
-    view('user/placeholder', [
-      'title' => 'Profil Saya',
-      'heading' => 'Profil Saya',
-      'message' => 'Halaman profil mahasiswa akan dibuat pada fase berikutnya.'
+    model('User');
+    $user = findUser((int)($_SESSION['user']['id_user'] ?? 0));
+    if (!$user) {
+      response(['success' => false, 'message' => 'Data profil tidak ditemukan.'], 404);
+    }
+    unset($user['password']);
+
+    view('user/profil', [
+      'title' => 'Profil & Pengaturan Akun',
+      'profile' => $user
     ]);
   }
 

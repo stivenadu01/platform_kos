@@ -220,7 +220,7 @@
 <script>
   function penghuniFormPage() {
     return {
-      mode: <?= json_encode($mode ?? 'tambah') ?>,
+      mode: <?= json_encode_safe($mode ?? 'tambah') ?>,
       idPenghuni: utils.getQuery('id_penghuni') || '',
 
       kamarList: [],

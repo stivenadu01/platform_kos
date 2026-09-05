@@ -11,6 +11,7 @@ get('/api/auth/google/callback', 'ApiAuthController@googleCallback');
 post('/api/auth/google/complete', 'ApiAuthController@googleComplete');
 // Logout
 post('/api/auth/logout', 'ApiAuthController@logout', ['auth']);
+post('/api/auth/logout-all', 'ApiAuthController@logoutAllDevices', ['auth']);
 post('/api/auth/profile', 'ApiAuthController@updateProfile', ['auth']);
 post('/api/auth/profile/foto', 'ApiAuthController@uploadFotoProfil', ['auth']);
 post('/api/auth/password', 'ApiAuthController@changePassword', ['auth']);
@@ -20,6 +21,7 @@ post('/api/auth/request-reset', 'ApiAuthController@requestReset');
 post('/api/auth/reset-password', 'ApiAuthController@resetPassword');
 
 post('/api/payment/midtrans/notification', 'ApiLanggananController@midtransNotification');
+get('/api/langganan/pembayaran/{id}/bukti', 'ApiLanggananController@buktiPembayaran', ['auth', 'role:admin,pemilik']);
 
 
 get('/api/fasilitas', 'ApiFasilitasController@index');

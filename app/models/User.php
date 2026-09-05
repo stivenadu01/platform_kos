@@ -95,6 +95,36 @@ function updateLastLoginAt($id_user)
 }
 
 
+/**
+ * Tandai email sebagai terverifikasi setelah identitas tepercaya (mis. Google)
+ * berhasil diverifikasi oleh server.
+ */
+function markUserEmailVerified($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("UPDATE users SET email_verified_at = NOW() WHERE id_user = ? AND email_verified_at IS NULL LIMIT 1");
+  $stmt->bind_param('i', $id_user);
+  $success = $stmt->execute();
+  $stmt->close();
+  return $success;
+}
+
+
+/**
+ * Rehash password menggunakan PASSWORD_DEFAULT terbaru tanpa mengubah password.
+ */
+function updateUserPasswordHash($id_user, $passwordRaw)
+{
+  $conn = db();
+  $hash = password_hash($passwordRaw, PASSWORD_DEFAULT);
+  $stmt = $conn->prepare("UPDATE users SET password = ? WHERE id_user = ? LIMIT 1");
+  $stmt->bind_param('si', $hash, $id_user);
+  $success = $stmt->execute();
+  $stmt->close();
+  return $success;
+}
+
+
 /* =========================================================
    USER LIST
    ========================================================= */
@@ -418,7 +448,8 @@ function linkGoogleSubToUser($idUser, $googleSub)
   $stmt->close();
 
   if (!$success) {
-    throw new Exception('Gagal menghubungkan akun Google: ' . $error, 500);
+    error_log('Google account linking DB error: ' . $error);
+    throw new Exception('Gagal menghubungkan akun Google.', 500);
   }
 
   return $affected === 1;
@@ -478,7 +509,8 @@ function createGoogleUser($data)
   if (!$stmt->execute()) {
     $error = $stmt->error;
     $stmt->close();
-    throw new Exception('Gagal membuat akun Google: ' . $error, 500);
+    error_log('Google account creation DB error: ' . $error);
+    throw new Exception('Gagal membuat akun Google.', 500);
   }
 
   $idUser = $stmt->insert_id;
@@ -988,44 +1020,51 @@ function updateUserProfile($id_user, $data)
 {
   $conn = db();
 
+  $id_user = (int)$id_user;
   $nama = trim($data['nama'] ?? '');
-  $email = strtolower(trim($data['email'] ?? ''));
-  $no_hp = trim($data['no_hp'] ?? '') ?: null;
+  $no_hp = trim((string)($data['no_hp'] ?? ''));
 
-  if ($nama === '' || $email === '') {
-    throw new Exception('Nama dan email wajib diisi', 422);
+  if ($no_hp !== '') {
+    $no_hp = normalizeUserPhone($no_hp);
+  } else {
+    $no_hp = null;
   }
 
-  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    throw new Exception('Format email tidak valid', 422);
+  if ($id_user <= 0) {
+    throw new Exception('User tidak valid', 422);
   }
 
-  $stmt = $conn->prepare("SELECT id_user FROM users WHERE email = ? AND id_user <> ? LIMIT 1");
-  $stmt->bind_param('si', $email, $id_user);
-  $stmt->execute();
-  $exists = $stmt->get_result()->fetch_assoc();
-  $stmt->close();
-
-  if ($exists) {
-    throw new Exception('Email sudah digunakan oleh akun lain', 409);
+  if ($nama === '') {
+    throw new Exception('Nama wajib diisi', 422);
   }
 
-  $stmt = $conn->prepare("UPDATE users SET nama = ?, email = ?, no_hp = ? WHERE id_user = ?");
-  $stmt->bind_param('sssi', $nama, $email, $no_hp, $id_user);
+  // Email sengaja tidak dapat diubah melalui endpoint profil.
+  // UI juga menampilkannya sebagai readonly; backend wajib menegakkan aturan ini
+  // agar request yang dibuat manual tidak dapat mengganti email terverifikasi.
+  $stmt = $conn->prepare("UPDATE users SET nama = ?, no_hp = ? WHERE id_user = ? LIMIT 1");
+  $stmt->bind_param('ssi', $nama, $no_hp, $id_user);
 
   if (!$stmt->execute()) {
     $stmt->close();
     throw new Exception('Gagal memperbarui profil', 500);
   }
 
+  $affected = $stmt->affected_rows;
   $stmt->close();
-  return true;
-}
 
+  // affected_rows dapat 0 bila data memang tidak berubah; itu bukan error.
+  return $affected >= 0;
+}
 
 function updateUserFoto($id_user, $foto)
 {
   $conn = db();
+
+  $oldStmt = $conn->prepare("SELECT foto FROM users WHERE id_user = ? LIMIT 1");
+  $oldStmt->bind_param('i', $id_user);
+  $oldStmt->execute();
+  $oldUser = $oldStmt->get_result()->fetch_assoc();
+  $oldStmt->close();
 
   $stmt = $conn->prepare("UPDATE users SET foto = ? WHERE id_user = ?");
   $stmt->bind_param('si', $foto, $id_user);
@@ -1036,6 +1075,38 @@ function updateUserFoto($id_user, $foto)
   }
 
   $stmt->close();
+  return $oldUser['foto'] ?? null;
+}
+
+function normalizeUserPhone($value)
+{
+  $phone = preg_replace('/[\s().-]+/', '', trim((string)$value));
+
+  if (str_starts_with($phone, '+62')) {
+    $phone = '0' . substr($phone, 3);
+  } elseif (str_starts_with($phone, '62')) {
+    $phone = '0' . substr($phone, 2);
+  }
+
+  if (!preg_match('/^08[1-9][0-9]{7,10}$/', $phone)) {
+    throw new Exception('Nomor HP harus berupa nomor seluler Indonesia yang valid (contoh: 081234567890).', 422);
+  }
+
+  return $phone;
+}
+
+function bumpUserAuthSessionVersion($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("UPDATE users SET auth_session_version = auth_session_version + 1 WHERE id_user = ? LIMIT 1");
+  $stmt->bind_param('i', $id_user);
+  $ok = $stmt->execute();
+  $stmt->close();
+
+  if (!$ok) {
+    throw new Exception('Gagal mengakhiri sesi perangkat lain.', 500);
+  }
+
   return true;
 }
 

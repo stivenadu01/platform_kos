@@ -52,6 +52,7 @@ get('/user/riwayat-kos', 'UserController@riwayatKos', ['auth', 'role:pelanggan']
 
 // ADMIN
 get('/admin', 'AdminController@dashboard', ['auth', 'role:admin']);
+get('/admin/profil', 'AdminController@profil', ['auth', 'role:admin']);
 get('/admin/pengguna', 'AdminController@pengguna', ['auth', 'role:admin']);
 get('/admin/verifikasi', 'AdminController@verifikasi', ['auth', 'role:admin']);
 get('/admin/laporan', 'AdminController@laporan', ['auth', 'role:admin']);

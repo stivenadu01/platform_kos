@@ -6,14 +6,14 @@
   </div>
 
   <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
-    <section data-help="help-profil-foto" class="card border border-slate-200 shadow-sm">
+    <section class="card border border-slate-200 shadow-sm">
       <div class="flex flex-col items-center text-center">
         <template x-if="user.foto"><img :src="window.BASE_URL + '/uploads' + user.foto" :alt="user.nama || 'Foto profil'" class="h-28 w-28 rounded-full object-cover ring-1 ring-slate-200"></template>
         <template x-if="!user.foto"><div class="flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-4xl font-bold text-primary ring-1 ring-blue-100" x-text="initial"></div></template>
         <h2 class="mt-4 text-lg font-bold text-slate-900" x-text="user.nama || 'Pengguna'"></h2>
         <p class="text-sm text-slate-500" x-text="user.email || '-'"></p>
         <span class="mt-3 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold capitalize text-blue-700" x-text="user.role || 'pengguna'"></span>
-        <form data-help="help-profil-foto" class="mt-6 w-full" @submit.prevent="uploadFoto">
+        <form class="mt-6 w-full" @submit.prevent="uploadFoto">
           <label class="label text-left">Foto profil</label>
           <input x-ref="foto" type="file" accept="image/jpeg,image/png,image/webp" class="input mt-2" required>
           <button class="btn-secondary mt-3 w-full" :disabled="savingFoto" x-text="savingFoto ? 'Mengunggah...' : 'Ubah Foto'"></button>
@@ -23,19 +23,19 @@
     </section>
 
     <div class="space-y-6">
-      <section data-help="help-profil-data" class="card border border-slate-200 shadow-sm">
+      <section class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Informasi Pribadi</h2>
         <p class="mt-1 text-sm text-slate-500">Nama dan nomor HP dapat diperbarui. Email dan NIK merupakan identitas yang dilindungi.</p>
         <form class="mt-6 grid gap-5 md:grid-cols-2" @submit.prevent="saveProfile">
-          <div><label class="label">Nama lengkap</label><input class="input" data-onboarding="profil-field-nama" type="text" x-model.trim="form.nama" maxlength="150" required></div>
+          <div><label class="label">Nama lengkap</label><input class="input" type="text" x-model.trim="form.nama" maxlength="150" required></div>
           <div><label class="label">Nomor HP</label><input class="input" type="tel" x-model.trim="form.no_hp" maxlength="20" placeholder="081234567890"><p class="mt-1 text-xs text-slate-400">Boleh 08..., 62..., atau +62...; akan dinormalisasi.</p></div>
           <div><label class="label">Email</label><input class="input bg-slate-50" type="email" :value="user.email || '-'" readonly></div>
           <div><label class="label">NIK</label><input class="input bg-slate-50" type="text" :value="user.nik || '-'" readonly></div>
-          <div class="md:col-span-2 flex justify-end"><button class="btn-primary w-auto" data-onboarding="profil-save fast-profil-save" :disabled="savingProfile" x-text="savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
+          <div class="md:col-span-2 flex justify-end"><button class="btn-primary w-auto" :disabled="savingProfile" x-text="savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
         </form>
       </section>
 
-      <section data-help="help-profil-password" class="card border border-slate-200 shadow-sm">
+      <section class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Keamanan Akun</h2>
         <p class="mt-1 text-sm text-slate-500">Ubah kata sandi dan kelola akses perangkat yang sedang login.</p>
         <form class="mt-6 space-y-5" @submit.prevent="changePassword">

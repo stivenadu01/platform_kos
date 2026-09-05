@@ -10,10 +10,10 @@
   <link rel="apple-touch-icon" href="<?= BASE_URL ?>/assets/icon/apple-touch-icon.png">
   <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/app.css">
   <script>
-    window.BASE_URL = <?= json_encode(BASE_URL) ?>;
-    window.NOMOR_WA = <?= json_encode($_ENV['NOMOR_WA'] ?? '') ?>;
-    window.__USER__ = <?= json_encode($_SESSION['user'] ?? null, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
-    window.__CSRF_TOKEN__ = <?= json_encode(csrf_token()) ?>;
+    window.BASE_URL = <?= json_encode_safe(BASE_URL) ?>;
+    window.NOMOR_WA = <?= json_encode_safe($_ENV['NOMOR_WA'] ?? '') ?>;
+    window.__USER__ = <?= json_encode_safe($_SESSION['user'] ?? null, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    window.__CSRF_TOKEN__ = <?= json_encode_safe(csrf_token()) ?>;
   </script>
   <script src="<?= BASE_URL ?>/assets/js/api.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/store.js"></script>

@@ -97,7 +97,8 @@ function createTipeKamar($data, $id_pemilik)
   if (!$stmt->execute()) {
     $error = $stmt->error;
     $stmt->close();
-    throw new Exception('Gagal membuat tipe kamar: ' . $error, 422);
+    error_log('Create tipe kamar DB error: ' . $error);
+    throw new Exception('Gagal membuat tipe kamar.', 500);
   }
 
   $id = $stmt->insert_id;
@@ -166,7 +167,8 @@ function updateTipeKamar($id_tipe_kamar, $data, $id_pemilik)
   $stmt->close();
 
   if (!$result) {
-    throw new Exception('Gagal memperbarui tipe kamar: ' . $error, 422);
+    error_log('Update tipe kamar DB error: ' . $error);
+    throw new Exception('Gagal memperbarui tipe kamar.', 500);
   }
   return true;
 }

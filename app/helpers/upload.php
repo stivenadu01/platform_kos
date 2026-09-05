@@ -30,8 +30,18 @@ function uploadImageGeneral($file, $folder, $filename = null, $maxSizeMB = 10)
     throw new Exception('Format gambar tidak didukung. Gunakan JPG, PNG, atau WebP.', 422);
   }
 
-  if (@getimagesize($file['tmp_name']) === false) {
+  $imageInfo = @getimagesize($file['tmp_name']);
+  if ($imageInfo === false) {
     throw new Exception('File bukan gambar yang valid', 422);
+  }
+
+  $width = (int)($imageInfo[0] ?? 0);
+  $height = (int)($imageInfo[1] ?? 0);
+  // Limit decoded pixel count to reduce memory/CPU abuse from huge images.
+  $maxDimension = 6000;
+  $maxPixels = 25_000_000;
+  if ($width < 1 || $height < 1 || $width > $maxDimension || $height > $maxDimension || ($width * $height) > $maxPixels) {
+    throw new Exception('Dimensi gambar terlalu besar. Maksimum 6000x6000 piksel dan 25 megapiksel.', 413);
   }
 
   $folder = trim($folder, '/');

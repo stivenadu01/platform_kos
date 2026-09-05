@@ -890,9 +890,8 @@ function createTagihanCron(
 
   try {
     if (!$stmt->execute()) {
-      throw new Exception(
-        'Gagal membuat tagihan Cron: ' . $stmt->error
-      );
+      error_log('Cron create tagihan DB error: ' . $stmt->error);
+      throw new Exception('Gagal membuat tagihan Cron.');
     }
 
     $idTagihan = $stmt->insert_id;

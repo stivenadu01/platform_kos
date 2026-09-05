@@ -16,6 +16,9 @@
     <a href="<?= BASE_URL ?>/admin/verifikasi" title="Verifikasi Kos" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">✓</span><span class="sidebar-label">Verifikasi Kos</span>
     </a>
+    <a href="<?= BASE_URL ?>/admin/profil" title="Profil & Pengaturan Akun" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+      <span class="text-lg">👤</span><span class="sidebar-label">Profil & Akun</span>
+    </a>
     <div class="sidebar-section-label pt-4 pb-2 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Manajemen</div>
     <a href="<?= BASE_URL ?>/admin/pengguna" title="Pengguna" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">👥</span><span class="sidebar-label">Pengguna</span>
