@@ -1022,7 +1022,13 @@ function updateUserProfile($id_user, $data)
 
   $id_user = (int)$id_user;
   $nama = trim($data['nama'] ?? '');
-  $no_hp = trim($data['no_hp'] ?? '') ?: null;
+  $no_hp = trim((string)($data['no_hp'] ?? ''));
+
+  if ($no_hp !== '') {
+    $no_hp = normalizeUserPhone($no_hp);
+  } else {
+    $no_hp = null;
+  }
 
   if ($id_user <= 0) {
     throw new Exception('User tidak valid', 422);
@@ -1054,6 +1060,12 @@ function updateUserFoto($id_user, $foto)
 {
   $conn = db();
 
+  $oldStmt = $conn->prepare("SELECT foto FROM users WHERE id_user = ? LIMIT 1");
+  $oldStmt->bind_param('i', $id_user);
+  $oldStmt->execute();
+  $oldUser = $oldStmt->get_result()->fetch_assoc();
+  $oldStmt->close();
+
   $stmt = $conn->prepare("UPDATE users SET foto = ? WHERE id_user = ?");
   $stmt->bind_param('si', $foto, $id_user);
 
@@ -1063,6 +1075,38 @@ function updateUserFoto($id_user, $foto)
   }
 
   $stmt->close();
+  return $oldUser['foto'] ?? null;
+}
+
+function normalizeUserPhone($value)
+{
+  $phone = preg_replace('/[\s().-]+/', '', trim((string)$value));
+
+  if (str_starts_with($phone, '+62')) {
+    $phone = '0' . substr($phone, 3);
+  } elseif (str_starts_with($phone, '62')) {
+    $phone = '0' . substr($phone, 2);
+  }
+
+  if (!preg_match('/^08[1-9][0-9]{7,10}$/', $phone)) {
+    throw new Exception('Nomor HP harus berupa nomor seluler Indonesia yang valid (contoh: 081234567890).', 422);
+  }
+
+  return $phone;
+}
+
+function bumpUserAuthSessionVersion($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("UPDATE users SET auth_session_version = auth_session_version + 1 WHERE id_user = ? LIMIT 1");
+  $stmt->bind_param('i', $id_user);
+  $ok = $stmt->execute();
+  $stmt->close();
+
+  if (!$ok) {
+    throw new Exception('Gagal mengakhiri sesi perangkat lain.', 500);
+  }
+
   return true;
 }
 

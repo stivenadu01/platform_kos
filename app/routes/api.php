@@ -11,6 +11,7 @@ get('/api/auth/google/callback', 'ApiAuthController@googleCallback');
 post('/api/auth/google/complete', 'ApiAuthController@googleComplete');
 // Logout
 post('/api/auth/logout', 'ApiAuthController@logout', ['auth']);
+post('/api/auth/logout-all', 'ApiAuthController@logoutAllDevices', ['auth']);
 post('/api/auth/profile', 'ApiAuthController@updateProfile', ['auth']);
 post('/api/auth/profile/foto', 'ApiAuthController@uploadFotoProfil', ['auth']);
 post('/api/auth/password', 'ApiAuthController@changePassword', ['auth']);

@@ -30,8 +30,8 @@
       <div class="text-sm font-semibold text-slate-800"><?= htmlspecialchars($_SESSION['user']['nama'] ?? 'Administrator') ?></div>
       <div class="text-xs text-slate-500">Administrator</div>
     </div>
-    <div class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center font-semibold">
+    <a href="<?= BASE_URL ?>/admin/profil" title="Profil & Pengaturan Akun" class="w-10 h-10 rounded-full bg-primary-soft text-primary flex items-center justify-center font-semibold">
       <?= htmlspecialchars(strtoupper(substr($_SESSION['user']['nama'] ?? 'A', 0, 1))) ?>
-    </div>
+    </a>
   </div>
 </header>

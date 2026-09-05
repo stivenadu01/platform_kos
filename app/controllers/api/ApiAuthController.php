@@ -58,6 +58,7 @@ class ApiAuthController
 
       unset($user['password']);
       $_SESSION['user'] = $user;
+      $_SESSION['user']['auth_session_version'] = (int)($user['auth_session_version'] ?? 1);
 
       return response([
         'success' => true,
@@ -248,6 +249,7 @@ class ApiAuthController
         session_regenerate_id(true);
         unset($_SESSION['csrf_token']);
         $_SESSION['user'] = $user;
+        $_SESSION['user']['auth_session_version'] = (int)($user['auth_session_version'] ?? 1);
         $destination = (($user['role'] ?? '') === 'pemilik') ? '/pemilik' : (($user['role'] ?? '') === 'admin' ? '/admin' : '/');
         header('Location: ' . rtrim(BASE_URL, '/') . $destination, true, 302);
         exit;
@@ -297,6 +299,7 @@ class ApiAuthController
         session_regenerate_id(true);
         unset($_SESSION['csrf_token']);
         $_SESSION['user'] = $existingByEmail;
+        $_SESSION['user']['auth_session_version'] = (int)($existingByEmail['auth_session_version'] ?? 1);
         $destination = (($existingByEmail['role'] ?? '') === 'pemilik') ? '/pemilik' : (($existingByEmail['role'] ?? '') === 'admin' ? '/admin' : '/');
         header('Location: ' . rtrim(BASE_URL, '/') . $destination, true, 302);
         exit;
@@ -371,6 +374,7 @@ class ApiAuthController
       session_regenerate_id(true);
       unset($_SESSION['csrf_token']);
       $_SESSION['user'] = $user;
+      $_SESSION['user']['auth_session_version'] = (int)($user['auth_session_version'] ?? 1);
 
       return response([
         'success' => true,
@@ -520,6 +524,7 @@ class ApiAuthController
       $user = findUser((int)$userId);
       unset($user['password']);
       $_SESSION['user'] = $user;
+      $_SESSION['user']['auth_session_version'] = (int)($user['auth_session_version'] ?? 1);
 
       return response([
         'success' => true,
@@ -549,11 +554,20 @@ class ApiAuthController
 
       require_once ROOT_PATH . '/app/helpers/upload.php';
       $path = uploadImageGeneral($_FILES['foto'], 'profil', null, 5);
-      updateUserFoto((int)$userId, $path);
+      $oldFoto = updateUserFoto((int)$userId, $path);
+
+      // Hapus foto lama hanya setelah path baru berhasil disimpan ke DB.
+      if ($oldFoto && str_starts_with($oldFoto, '/profil/')) {
+        $oldFile = ROOT_PATH . '/public/uploads' . $oldFoto;
+        if (is_file($oldFile)) {
+          @unlink($oldFile);
+        }
+      }
 
       $user = findUser((int)$userId);
       unset($user['password']);
       $_SESSION['user'] = $user;
+      $_SESSION['user']['auth_session_version'] = (int)($user['auth_session_version'] ?? 1);
 
       return response([
         'success' => true,
@@ -639,6 +653,43 @@ class ApiAuthController
   }
 
 
+  public function logoutAllDevices()
+  {
+    try {
+      $userId = $_SESSION['user']['id_user'] ?? null;
+      if (!$userId) {
+        return response(['success' => false, 'message' => 'Unauthorized'], 401);
+      }
+
+      bumpUserAuthSessionVersion((int)$userId);
+
+      $_SESSION = [];
+      if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(session_name(), '', [
+          'expires' => time() - 42000,
+          'path' => $params['path'],
+          'domain' => $params['domain'],
+          'secure' => $params['secure'],
+          'httponly' => $params['httponly'],
+          'samesite' => $params['samesite'] ?? 'Lax'
+        ]);
+      }
+      session_destroy();
+
+      return response([
+        'success' => true,
+        'message' => 'Semua sesi perangkat telah diakhiri. Silakan login kembali.'
+      ]);
+    } catch (Exception $e) {
+      return response([
+        'success' => false,
+        'message' => $e->getMessage()
+      ], $e->getCode() ?: 500);
+    }
+  }
+
+
   public function me()
   {
     $userId = $_SESSION['user']['id_user'] ?? null;
@@ -662,6 +713,7 @@ class ApiAuthController
       unset($user['password']);
 
       $_SESSION['user'] = $user;
+      $_SESSION['user']['auth_session_version'] = (int)($user['auth_session_version'] ?? 1);
 
       return response([
         'success' => true,

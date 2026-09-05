@@ -27,7 +27,9 @@ function run_middleware($middlewares = [])
       // tidak tetap dapat memakai session lama.
       model('User');
       $freshUser = findUser((int) $_SESSION['user']['id_user']);
-      if (!$freshUser || ($freshUser['status'] ?? 'aktif') !== 'aktif') {
+      $sessionVersion = (int) ($_SESSION['user']['auth_session_version'] ?? 1);
+      $dbSessionVersion = $freshUser ? (int) ($freshUser['auth_session_version'] ?? 1) : 0;
+      if (!$freshUser || ($freshUser['status'] ?? 'aktif') !== 'aktif' || $sessionVersion !== $dbSessionVersion) {
         $_SESSION = [];
         if (ini_get('session.use_cookies')) {
           $params = session_get_cookie_params();
