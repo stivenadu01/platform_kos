@@ -335,8 +335,8 @@
 
       kos: {
         id_kos: <?= (int) $kos['id_kos'] ?>,
-        nama_kos: <?= json_encode($kos['nama_kos'] ?? '') ?>,
-        alamat: <?= json_encode($kos['alamat'] ?? '') ?>
+        nama_kos: <?= json_encode_safe($kos['nama_kos'] ?? '') ?>,
+        alamat: <?= json_encode_safe($kos['alamat'] ?? '') ?>
       },
 
       foto: [],

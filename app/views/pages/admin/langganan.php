@@ -355,8 +355,8 @@
                 </div>
               </div>
               <template x-if="detailPayment?.bukti_pembayaran">
-                <a :href="window.BASE_URL + '/uploads' + detailPayment.bukti_pembayaran" target="_blank" rel="noopener" class="block mt-4">
-                  <img :src="window.BASE_URL + '/uploads' + detailPayment.bukti_pembayaran" alt="Bukti pembayaran" class="max-h-[420px] w-full object-contain rounded-xl border border-slate-200 bg-slate-50">
+                <a :href="window.BASE_URL + '/api/langganan/pembayaran/' + encodeURIComponent(detailPayment.id_pembayaran_langganan) + '/bukti'" target="_blank" rel="noopener" class="block mt-4">
+                  <img :src="window.BASE_URL + '/api/langganan/pembayaran/' + encodeURIComponent(detailPayment.id_pembayaran_langganan) + '/bukti'" alt="Bukti pembayaran" class="max-h-[420px] w-full object-contain rounded-xl border border-slate-200 bg-slate-50">
                   <span class="block mt-2 text-xs text-primary">Buka bukti pembayaran</span>
                 </a>
               </template>

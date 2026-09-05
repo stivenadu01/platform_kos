@@ -103,7 +103,7 @@
 <script>
 function profilPemilikPage() {
   return {
-    user: <?= json_encode($profile ?? []) ?>,
+    user: <?= json_encode_safe($profile ?? []) ?>,
     form: { nama: '', email: '', no_hp: '' },
     password: { password_lama: '', password_baru: '', password_konfirmasi: '' },
     savingProfile: false,

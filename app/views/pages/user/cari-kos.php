@@ -36,7 +36,7 @@ $initialState = [
 </style>
 
 <div
-  x-data="kosSearchPage(<?= htmlspecialchars(json_encode($initialState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
+  x-data="kosSearchPage(<?= htmlspecialchars(json_encode_safe($initialState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
   x-init="init()"
   class="min-h-[calc(100vh-4rem)] bg-slate-50">
   <section class="border-b border-slate-200 bg-white">

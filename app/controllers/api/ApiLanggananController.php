@@ -234,6 +234,69 @@ class ApiLanggananController
     }
   }
 
+
+  public function buktiPembayaran()
+  {
+    try {
+      $id = (int)params('id');
+      if ($id <= 0) throw new Exception('Bukti pembayaran tidak ditemukan.', 404);
+
+      $user = $_SESSION['user'] ?? [];
+      $role = (string)($user['role'] ?? '');
+
+      if ($role === 'admin') {
+        $row = getAdminPembayaranLanggananDetail($id);
+      } elseif ($role === 'pemilik') {
+        $row = getPembayaranLanggananByIdPemilik($id, (int)$user['id_user']);
+      } else {
+        throw new Exception('Akses ditolak.', 403);
+      }
+
+      if (!$row) throw new Exception('Bukti pembayaran tidak ditemukan.', 404);
+
+      $relativePath = ltrim(str_replace('\\', '/', trim((string)($row['bukti_pembayaran'] ?? ''))), '/');
+      if ($relativePath === '' || !preg_match('#^pembayaran-langganan/[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp)$#i', $relativePath)) {
+        throw new Exception('Bukti pembayaran tidak ditemukan.', 404);
+      }
+
+      $baseDir = realpath(ROOT_PATH . '/public/uploads/pembayaran-langganan');
+      $target = ROOT_PATH . '/public/uploads/' . $relativePath;
+      $realTarget = realpath($target);
+      if ($baseDir === false || $realTarget === false || !is_file($realTarget)) {
+        throw new Exception('Bukti pembayaran tidak ditemukan.', 404);
+      }
+
+      $basePrefix = rtrim($baseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+      if (!str_starts_with($realTarget, $basePrefix)) {
+        throw new Exception('Bukti pembayaran tidak ditemukan.', 404);
+      }
+
+      $finfo = new finfo(FILEINFO_MIME_TYPE);
+      $mime = $finfo->file($realTarget);
+      $allowedMime = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+        'image/webp' => 'webp',
+      ];
+      if (!isset($allowedMime[$mime])) {
+        throw new Exception('Bukti pembayaran tidak valid.', 422);
+      }
+
+      header('Content-Type: ' . $mime);
+      header('Content-Length: ' . (string)filesize($realTarget));
+      header('Content-Disposition: inline; filename="bukti-pembayaran-' . $id . '.' . $allowedMime[$mime] . '"');
+      header('Cache-Control: private, no-store, max-age=0');
+      header('Pragma: no-cache');
+      header('X-Content-Type-Options: nosniff');
+      readfile($realTarget);
+      exit;
+    } catch (Exception $e) {
+      $status = $e->getCode();
+      if ($status < 400 || $status > 599) $status = 404;
+      response(['success' => false, 'message' => $e->getMessage()], $status);
+    }
+  }
+
   public function uploadBukti()
   {
     require_once ROOT_PATH . '/app/helpers/upload.php';

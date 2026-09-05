@@ -20,6 +20,7 @@ post('/api/auth/request-reset', 'ApiAuthController@requestReset');
 post('/api/auth/reset-password', 'ApiAuthController@resetPassword');
 
 post('/api/payment/midtrans/notification', 'ApiLanggananController@midtransNotification');
+get('/api/langganan/pembayaran/{id}/bukti', 'ApiLanggananController@buktiPembayaran', ['auth', 'role:admin,pemilik']);
 
 
 get('/api/fasilitas', 'ApiFasilitasController@index');

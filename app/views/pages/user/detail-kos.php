@@ -162,7 +162,7 @@ if (!empty($lastLoginAt)) {
                     <?php if (!empty($typePhotos)): ?>
                       <button
                         type="button"
-                        @click='openTypeGallery(<?= json_encode($type['nama_tipe'], JSON_UNESCAPED_UNICODE) ?>, <?= json_encode(array_map(fn($photo) => BASE_URL . '/uploads' . $photo['nama_file'], $typePhotos), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>)'
+                        @click='openTypeGallery(<?= json_encode_safe($type['nama_tipe'], JSON_UNESCAPED_UNICODE) ?>, <?= json_encode_safe(array_map(fn($photo) => BASE_URL . '/uploads' . $photo['nama_file'], $typePhotos), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>)'
                         class="group relative block h-48 w-full overflow-hidden bg-slate-100 text-left sm:h-44"
                         aria-label="Lihat foto <?= htmlspecialchars($type['nama_tipe']) ?>">
                         <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($typePhotos[0]['nama_file']) ?>" alt="<?= htmlspecialchars($type['nama_tipe']) ?>" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
@@ -350,7 +350,7 @@ if (!empty($lastLoginAt)) {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   function kosDetailPage() {
-    const photos = <?= json_encode(array_map(fn($p) => BASE_URL . '/uploads' . $p['nama_file'], $photos), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
+    const photos = <?= json_encode_safe(array_map(fn($p) => BASE_URL . '/uploads' . $p['nama_file'], $photos), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
 
 
     return {
@@ -422,8 +422,8 @@ if (!empty($lastLoginAt)) {
         }
       },
       async share() {
-        const url = <?= json_encode($shareUrl) ?>;
-        const title = <?= json_encode($kos['nama_kos']) ?>;
+        const url = <?= json_encode_safe($shareUrl) ?>;
+        const title = <?= json_encode_safe($kos['nama_kos']) ?>;
         try {
           if (navigator.share) {
             await navigator.share({
@@ -445,13 +445,13 @@ if (!empty($lastLoginAt)) {
   document.addEventListener('DOMContentLoaded', function() {
     const mapEl = document.getElementById('detail-kos-map');
     if (!mapEl || typeof L === 'undefined') return;
-    const lat = <?= json_encode((float)$kos['latitude']) ?>;
-    const lng = <?= json_encode((float)$kos['longitude']) ?>;
+    const lat = <?= json_encode_safe((float)$kos['latitude']) ?>;
+    const lng = <?= json_encode_safe((float)$kos['longitude']) ?>;
     const map = L.map(mapEl).setView([lat, lng], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-    L.marker([lat, lng]).addTo(map).bindPopup(<?= json_encode($kos['nama_kos']) ?>).openPopup();
+    L.marker([lat, lng]).addTo(map).bindPopup(<?= json_encode_safe($kos['nama_kos']) ?>).openPopup();
     setTimeout(() => map.invalidateSize(), 100);
   });
 </script>

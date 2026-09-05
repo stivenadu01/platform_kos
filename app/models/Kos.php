@@ -385,7 +385,8 @@ function searchKosPublik($filters = [])
 
   $stmt = $conn->prepare($countSql);
   if (!$stmt) {
-    throw new Exception('Gagal menyiapkan pencarian kos: ' . $conn->error, 500);
+    error_log('Kos search prepare DB error: ' . $conn->error);
+    throw new Exception('Gagal menyiapkan pencarian kos.', 500);
   }
   if ($types !== '') {
     $stmt->bind_param($types, ...$params);
@@ -438,7 +439,8 @@ function searchKosPublik($filters = [])
 
   $stmt = $conn->prepare($sql);
   if (!$stmt) {
-    throw new Exception('Gagal menyiapkan hasil pencarian kos: ' . $conn->error, 500);
+    error_log('Kos result prepare DB error: ' . $conn->error);
+    throw new Exception('Gagal menyiapkan hasil pencarian kos.', 500);
   }
   $stmt->bind_param($dataTypes, ...$dataParams);
   $stmt->execute();

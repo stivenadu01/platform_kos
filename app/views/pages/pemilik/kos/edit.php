@@ -324,17 +324,17 @@
 
       form: {
 
-        nama_kos: <?= json_encode($kos['nama_kos']) ?>,
+        nama_kos: <?= json_encode_safe($kos['nama_kos']) ?>,
 
-        alamat: <?= json_encode($kos['alamat']) ?>,
+        alamat: <?= json_encode_safe($kos['alamat']) ?>,
 
-        latitude: <?= json_encode($kos['latitude']) ?>,
+        latitude: <?= json_encode_safe($kos['latitude']) ?>,
 
-        longitude: <?= json_encode($kos['longitude']) ?>,
+        longitude: <?= json_encode_safe($kos['longitude']) ?>,
 
-        jenis: <?= json_encode($kos['jenis']) ?>,
+        jenis: <?= json_encode_safe($kos['jenis']) ?>,
 
-        deskripsi: <?= json_encode($kos['deskripsi'] ?? '') ?>,
+        deskripsi: <?= json_encode_safe($kos['deskripsi'] ?? '') ?>,
 
         fasilitas: []
 

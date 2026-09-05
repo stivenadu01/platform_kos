@@ -14,13 +14,42 @@ function run_middleware($middlewares = [])
     if ($mw === 'auth') {
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
       header('Pragma: no-cache');
-      if (!isset($_SESSION['user'])) {
+      if (!isset($_SESSION['user']['id_user'])) {
         response([
           'success' => false,
           'message' => 'Akses ditolak, silakan login terlebih dahulu'
         ], 401);
         exit;
       }
+
+      // Session user bukan sumber kebenaran untuk status/role.
+      // Muat ulang akun dari database agar akun yang dinonaktifkan admin
+      // tidak tetap dapat memakai session lama.
+      model('User');
+      $freshUser = findUser((int) $_SESSION['user']['id_user']);
+      if (!$freshUser || ($freshUser['status'] ?? 'aktif') !== 'aktif') {
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+          $params = session_get_cookie_params();
+          setcookie(session_name(), '', [
+            'expires' => time() - 42000,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'] ?? 'Lax'
+          ]);
+        }
+        session_destroy();
+        response([
+          'success' => false,
+          'message' => 'Sesi berakhir atau akun tidak lagi dapat digunakan. Silakan login kembali.'
+        ], 401);
+        exit;
+      }
+
+      unset($freshUser['password']);
+      $_SESSION['user'] = $freshUser;
     }
 
     // PRO SUBSCRIPTION MIDDLEWARE

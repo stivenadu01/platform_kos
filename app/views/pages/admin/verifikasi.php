@@ -54,7 +54,7 @@
 <script>
 function adminVerifikasiPage() {
   return {
-    items: <?= json_encode($pengajuan ?? []) ?>,
+    items: <?= json_encode_safe($pengajuan ?? []) ?>,
     summary: { menunggu: 0, disetujui: 0, ditolak: 0 },
     tab: 'menunggu', loading: false, detail: null, catatan: '',
     async init() { await this.refresh(false); },

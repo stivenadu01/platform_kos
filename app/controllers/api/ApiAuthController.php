@@ -35,6 +35,11 @@ class ApiAuthController
         throw new Exception("Email atau password tidak valid", 400);
       }
 
+      // Upgrade hash transparan bila algoritma/default cost PHP berubah.
+      if (password_needs_rehash($user['password'], PASSWORD_DEFAULT)) {
+        updateUserPasswordHash((int) $user['id_user'], $password);
+      }
+
       if (empty($user['email_verified_at'])) {
         throw new Exception("Akun belum diverifikasi. Silakan cek email Anda.", 403);
       }
@@ -49,6 +54,7 @@ class ApiAuthController
 
       // Regenerasi session untuk mencegah session fixation.
       session_regenerate_id(true);
+      unset($_SESSION['csrf_token']);
 
       unset($user['password']);
       $_SESSION['user'] = $user;
@@ -73,6 +79,9 @@ class ApiAuthController
     $conn->begin_transaction();
 
     try {
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+      rateLimit('register_' . $ip, 5, 300);
+
       $input = input();
 
       $input['nama'] = trim($input['nama'] ?? '');
@@ -229,10 +238,15 @@ class ApiAuthController
         if (($user['status'] ?? 'aktif') !== 'aktif') {
           throw new Exception('Akun tidak dapat digunakan. Silakan hubungi administrator.', 403);
         }
+        if (empty($user['email_verified_at'])) {
+          markUserEmailVerified((int) $user['id_user']);
+          $user['email_verified_at'] = date('Y-m-d H:i:s');
+        }
         updateLastLoginAt((int) $user['id_user']);
         $user['last_login_at'] = date('Y-m-d H:i:s');
         unset($user['password']);
         session_regenerate_id(true);
+        unset($_SESSION['csrf_token']);
         $_SESSION['user'] = $user;
         $destination = (($user['role'] ?? '') === 'pemilik') ? '/pemilik' : (($user['role'] ?? '') === 'admin' ? '/admin' : '/');
         header('Location: ' . rtrim(BASE_URL, '/') . $destination, true, 302);
@@ -273,10 +287,15 @@ class ApiAuthController
           }
         }
 
+        if (empty($existingByEmail['email_verified_at'])) {
+          markUserEmailVerified((int) $existingByEmail['id_user']);
+          $existingByEmail['email_verified_at'] = date('Y-m-d H:i:s');
+        }
         updateLastLoginAt((int) $existingByEmail['id_user']);
         $existingByEmail['last_login_at'] = date('Y-m-d H:i:s');
         unset($existingByEmail['password']);
         session_regenerate_id(true);
+        unset($_SESSION['csrf_token']);
         $_SESSION['user'] = $existingByEmail;
         $destination = (($existingByEmail['role'] ?? '') === 'pemilik') ? '/pemilik' : (($existingByEmail['role'] ?? '') === 'admin' ? '/admin' : '/');
         header('Location: ' . rtrim(BASE_URL, '/') . $destination, true, 302);
@@ -350,6 +369,7 @@ class ApiAuthController
       unset($user['password']);
       unset($_SESSION['google_pending_registration']);
       session_regenerate_id(true);
+      unset($_SESSION['csrf_token']);
       $_SESSION['user'] = $user;
 
       return response([
@@ -432,6 +452,9 @@ class ApiAuthController
 
   public function resetPassword()
   {
+    $conn = db();
+    $conn->begin_transaction();
+
     try {
       $input = input();
 
@@ -460,26 +483,28 @@ class ApiAuthController
         throw new Exception("Token reset telah kadaluarsa", 410);
       }
 
-      updateUserPassword($resetRequest['id_user'], $newPassword);
+      if (($resetRequest['status'] ?? 'aktif') !== 'aktif') {
+        throw new Exception("Akun tidak dapat digunakan. Silakan hubungi administrator.", 403);
+      }
 
-      /*
-       * Token wajib ditandai used setelah password berhasil diperbarui.
-       * Implementasikan di model sebagai UPDATE ... SET used_at = NOW().
-       */
+      updateUserPassword($resetRequest['id_user'], $newPassword);
       markPasswordResetTokenUsed($resetRequest['id_reset']);
+
+      $conn->commit();
 
       return response([
         'success' => true,
         'message' => 'Password berhasil direset. Silakan login dengan password baru.'
       ]);
     } catch (Exception $e) {
+      $conn->rollback();
+
       return response([
         'success' => false,
         'message' => $e->getMessage()
       ], $e->getCode() ?: 500);
     }
   }
-
 
   public function updateProfile()
   {
@@ -552,6 +577,9 @@ class ApiAuthController
         return response(['success' => false, 'message' => 'Unauthorized'], 401);
       }
 
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+      rateLimit('change_password_' . (int)$userId . '_' . $ip, 5, 900);
+
       $data = input();
       $lama = $data['password_lama'] ?? '';
       $baru = $data['password_baru'] ?? '';
@@ -566,6 +594,10 @@ class ApiAuthController
       }
 
       changeUserPassword((int)$userId, $lama, $baru);
+
+      // Password berubah: ganti session ID agar session fixation lama tidak dipakai.
+      session_regenerate_id(true);
+      unset($_SESSION['csrf_token']);
 
       return response([
         'success' => true,

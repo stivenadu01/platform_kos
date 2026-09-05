@@ -80,7 +80,7 @@
 <script>
 function adminDashboardPage() {
   return {
-    d: <?= json_encode($dashboard, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
+    d: <?= json_encode_safe($dashboard, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
     loading: false,
     async init() {},
     async load() { this.loading = true; try { const r = await API.get('/admin/dashboard', false); if (r.data) this.d = r.data; } finally { this.loading = false; } },
