@@ -1,47 +1,83 @@
-<section class="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-  <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-    <div class="relative px-6 py-10 text-center sm:px-10 sm:py-14">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary-soft text-3xl text-primary">
-        ♡
+<div x-data="favoritePage()" x-init="init()" class="min-h-[calc(100vh-4rem)] bg-slate-50">
+  <section class="border-b border-slate-200 bg-white">
+    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <a href="<?= BASE_URL ?>/cari-kos" class="text-sm font-semibold text-slate-500 hover:text-primary">← Kembali ke pencarian</a>
+      <div class="mt-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold text-primary">Kos tersimpan</p>
+          <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-900">Kos Favorit</h1>
+          <p class="mt-2 text-sm leading-6 text-slate-500">Simpan kos yang menarik agar mudah dibandingkan dan dihubungi kembali.</p>
+        </div>
+        <a href="<?= BASE_URL ?>/cari-kos" class="rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white hover:bg-primary-dark">Cari kos lagi</a>
       </div>
-
-      <span class="mt-6 inline-flex items-center rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-        Segera Tersedia
-      </span>
-
-      <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-        Kos Favorit
-      </h1>
-
-      <p class="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
-        Fitur favorit sedang kami siapkan. Nantinya kamu dapat menyimpan kos yang menarik
-        agar mudah ditemukan kembali tanpa harus mencarinya dari awal.
-      </p>
-
-      <div class="mx-auto mt-8 grid max-w-2xl gap-3 text-left sm:grid-cols-3">
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xl">♡</div>
-          <p class="mt-2 text-sm font-semibold text-slate-900">Simpan kos</p>
-          <p class="mt-1 text-xs leading-5 text-slate-500">Tandai kos yang kamu sukai.</p>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xl">↗</div>
-          <p class="mt-2 text-sm font-semibold text-slate-900">Akses kembali</p>
-          <p class="mt-1 text-xs leading-5 text-slate-500">Temukan kandidat kos dengan lebih cepat.</p>
-        </div>
-        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div class="text-xl">✓</div>
-          <p class="mt-2 text-sm font-semibold text-slate-900">Lebih praktis</p>
-          <p class="mt-1 text-xs leading-5 text-slate-500">Kumpulan kos pilihan dalam satu halaman.</p>
-        </div>
-      </div>
-
-      <a
-        href="<?= BASE_URL ?>/cari-kos"
-        class="mt-8 inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark"
-      >
-        Cari Kos Sekarang
-      </a>
     </div>
-  </div>
-</section>
+  </section>
+
+  <main class="mx-auto max-w-7xl px-4 py-6 pb-10 sm:px-6 lg:px-8">
+    <div x-show="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <template x-for="i in 6" :key="i"><div class="h-80 animate-pulse rounded-2xl bg-slate-200"></div></template>
+    </div>
+
+    <div x-show="!loading && items.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <template x-for="item in items" :key="item.id_kos">
+        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <a :href="'<?= BASE_URL ?>/kos/' + item.id_kos" class="group block">
+            <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
+              <img :src="item.foto ? '<?= BASE_URL ?>/uploads' + item.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'" :alt="item.nama_kos" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" @error="$event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'">
+              <span class="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm" x-text="item.jenis"></span>
+            </div>
+            <div class="p-4">
+              <h2 class="font-semibold text-slate-900" x-text="item.nama_kos"></h2>
+              <p class="mt-1 line-clamp-2 text-xs text-slate-500" x-text="item.alamat"></p>
+              <p class="mt-3 text-xs font-semibold text-slate-600" x-text="item.kamar_tersedia + ' kamar tersedia'"></p>
+              <p class="mt-1 font-bold text-primary" x-text="item.harga_mulai !== null ? formatRupiah(item.harga_mulai) + ' / bulan' : 'Harga belum tersedia'"></p>
+            </div>
+          </a>
+          <div class="flex items-center justify-between border-t border-slate-100 px-4 py-3">
+            <span class="text-xs text-slate-400" x-text="formatDate(item.difavorit_at)"></span>
+            <button type="button" @click="remove(item.id_kos)" class="text-xs font-bold text-red-600 hover:underline">Hapus favorit</button>
+          </div>
+        </article>
+      </template>
+    </div>
+
+    <div x-show="!loading && !items.length" class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+      <div class="text-5xl">♡</div>
+      <h2 class="mt-3 font-semibold text-slate-900">Belum ada kos favorit</h2>
+      <p class="mt-1 text-sm text-slate-500">Saat menemukan kos yang menarik, tekan ikon hati untuk menyimpannya.</p>
+      <a href="<?= BASE_URL ?>/cari-kos" class="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Mulai cari kos</a>
+    </div>
+  </main>
+</div>
+
+<script>
+function favoritePage() {
+  return {
+    items: [],
+    loading: false,
+    async init() { await this.load(); },
+    async load() {
+      this.loading = true;
+      try {
+        const res = await API.get('/pelanggan/favorit');
+        this.items = Array.isArray(res?.data) ? res.data : [];
+      } catch (e) {
+        console.error('Gagal memuat favorit:', e);
+        this.items = [];
+      } finally { this.loading = false; }
+    },
+    async remove(id_kos) {
+      try {
+        await API.post('/pelanggan/favorit', { id_kos: Number(id_kos) });
+        this.items = this.items.filter(item => Number(item.id_kos) !== Number(id_kos));
+      } catch (e) { console.error('Gagal menghapus favorit:', e); }
+    },
+    formatDate(value) {
+      if (!value) return '';
+      const date = new Date(String(value).replace(' ', 'T'));
+      if (Number.isNaN(date.getTime())) return '';
+      return 'Disimpan ' + date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+  };
+}
+</script>

@@ -110,6 +110,22 @@
 
     </div>
 
+    <div class="form-group">
+
+      <label class="label">
+        Aturan / Ketentuan Kos
+      </label>
+
+      <textarea
+        x-model="form.aturan"
+        class="input min-h-28"
+        maxlength="3000"
+        placeholder="Contoh: Tamu maksimal sampai pukul 22.00, dilarang membawa hewan peliharaan, dan wajib menjaga kebersihan."></textarea>
+
+      <p class="mt-1 text-xs text-slate-400">Tuliskan aturan yang perlu diketahui calon penghuni sebelum menghubungi pemilik.</p>
+
+    </div>
+
     <!-- FASILITAS -->
     <div class="pt-4 border-t border-slate-200">
 
@@ -173,95 +189,67 @@
     </div>
 
     <!-- LOKASI -->
-    <div class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-location" data-onboarding="kos-field-lokasi" class="pt-4 border-t border-slate-200">
+      <div>
+        <h3 class="font-semibold text-slate-900">Lokasi Kos</h3>
+        <p class="mt-1 text-sm text-slate-500">Tempel link Google Maps kos agar saat pengunjung membuka lokasi, Google Maps langsung menuju tempat yang Anda pilih.</p>
+      </div>
 
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-
-        <div>
-
-          <h3 class="font-semibold text-slate-900">
-            Lokasi Kos
-          </h3>
-
-          <p class="text-sm text-slate-500 mt-1">
-            Klik lokasi baru pada peta atau geser marker.
-          </p>
-
+      <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <label class="label">Link Google Maps</label>
+        <div class="mt-2 flex flex-col gap-2 sm:flex-row">
+          <input
+            type="url"
+            x-model="form.google_maps_url"
+            class="input flex-1"
+            placeholder="Tempel link Google Maps di sini"
+            inputmode="url">
+          <button type="button" @click="applyGoogleMapsLink()" class="btn-primary min-h-12 whitespace-nowrap">
+            Gunakan Link
+          </button>
         </div>
+        <p class="mt-2 text-xs leading-5 text-slate-500">
+          <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" class="font-semibold text-blue-600 hover:text-blue-700 hover:underline">Buka Google Maps ↗</a>
+          → pilih/cari kos → <b>Bagikan</b> → <b>Salin link</b> → tempel di sini. Link seperti <span class="font-mono">google.com/maps/place/...</span> dapat menyimpan tujuan tempatnya, bukan hanya koordinat.
+        </p>
+        <a
+          href="https://www.google.com/maps"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:w-auto">
+          🗺️ Buka Google Maps
+        </a>
+        <div x-show="form.google_maps_url" x-cloak class="mt-3 rounded-xl bg-white px-3 py-2 text-xs text-slate-600">
+          <span class="font-semibold text-slate-800">Link Google Maps tersimpan.</span>
+          Koordinat juga akan diambil dari link untuk kebutuhan pencarian dan jarak.
+        </div>
+      </div>
 
-
-        <button
-          type="button"
-          @click="getCurrentLocation()"
-          :disabled="locating"
-          class="btn-secondary whitespace-nowrap">
-
-          <span x-show="!locating">
-            📍 Lokasi Saat Ini
-          </span>
-
-          <span
-            x-show="locating"
-            x-cloak>
-            Mencari lokasi...
-          </span>
-
+      <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <button type="button" @click="getCurrentLocation()" :disabled="locating" class="btn-secondary min-h-12">
+          <span x-show="!locating">📍 Pakai Lokasi Saat Ini</span>
+          <span x-show="locating" x-cloak>Mencari lokasi...</span>
         </button>
-
+        <button type="button" @click="clearGoogleMapsLink()" :disabled="!form.google_maps_url" class="btn-secondary min-h-12">
+          Hapus Link Google Maps
+        </button>
       </div>
 
-
-      <!-- MAP -->
-      <div
-        id="map-edit-kos"
-        class="mt-4 w-full h-[380px] rounded-xl overflow-hidden border border-slate-200">
-      </div>
-
-
-      <!-- COORDINATES -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div class="form-group">
-
-          <label class="label">
-            Latitude
-          </label>
-
-          <input
-            type="text"
-            x-model="form.latitude"
-            class="input bg-slate-50"
-            readonly
-            required>
-
+          <label class="label">Latitude</label>
+          <input type="text" x-model="form.latitude" class="input" inputmode="decimal" placeholder="Contoh: -10.1550825" required>
         </div>
-
-
         <div class="form-group">
-
-          <label class="label">
-            Longitude
-          </label>
-
-          <input
-            type="text"
-            x-model="form.longitude"
-            class="input bg-slate-50"
-            readonly
-            required>
-
+          <label class="label">Longitude</label>
+          <input type="text" x-model="form.longitude" class="input" inputmode="decimal" placeholder="Contoh: 123.6163430" required>
         </div>
-
       </div>
 
-
-      <p class="mt-3 text-xs text-slate-500">
-        💡 Klik lokasi baru pada peta, geser marker, atau gunakan
-        <strong>Lokasi Saat Ini</strong>.
+      <p class="mt-3 text-xs leading-5 text-slate-500">
+        Jika memakai <b>Lokasi Saat Ini</b>, BetaKos hanya menyimpan latitude dan longitude; link Google Maps akan dikosongkan.
       </p>
-
     </div>
-
 
     <!-- ACTION -->
     <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-200">
@@ -296,18 +284,6 @@
 </div>
 
 
-<!-- LEAFLET -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  crossorigin="">
-
-<script
-  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-  crossorigin="">
-</script>
-
-
 <script>
   function kosEditForm() {
 
@@ -316,8 +292,6 @@
       loading: false,
       locating: false,
 
-      map: null,
-      marker: null,
 
       fasilitas: [],
       fasilitasLoading: false,
@@ -332,9 +306,13 @@
 
         longitude: <?= json_encode_safe($kos['longitude']) ?>,
 
+        google_maps_url: <?= json_encode_safe($kos['google_maps_url'] ?? '') ?>,
+
         jenis: <?= json_encode_safe($kos['jenis']) ?>,
 
         deskripsi: <?= json_encode_safe($kos['deskripsi'] ?? '') ?>,
+
+        aturan: <?= json_encode_safe($kos['aturan'] ?? '') ?>,
 
         fasilitas: []
 
@@ -342,171 +320,88 @@
 
 
       init() {
-
-        this.$nextTick(() => {
-
-          this.initMap();
-
-        });
-
         this.loadDataFasilitas();
-
       },
 
+      extractCoordinatesFromGoogleMapsUrl(value) {
+        const url = String(value || '').trim();
+        if (!url) return null;
 
-      initMap() {
-
-        const lat =
-          Number(this.form.latitude);
-
-        const lng =
-          Number(this.form.longitude);
-
-
-        /*
-         * Pastikan koordinat lama valid.
-         */
-        const validLocation =
-          Number.isFinite(lat) &&
-          Number.isFinite(lng);
-
-
-        /*
-         * Kalau koordinat lama valid,
-         * gunakan posisi kos.
-         *
-         * Kalau tidak valid,
-         * gunakan posisi Kupang.
-         */
-        const initialLat =
-          validLocation ?
-          lat :
-          -10.1600;
-
-        const initialLng =
-          validLocation ?
-          lng :
-          123.6000;
-
-        const initialZoom =
-          validLocation ?
-          17 :
-          13;
-
-
-        this.map = L.map('map-edit-kos')
-          .setView(
-            [
-              initialLat,
-              initialLng
-            ],
-            initialZoom
-          );
-
-
-        L.tileLayer(
-          'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
+        const decode = (text) => {
+          try { return decodeURIComponent(text); } catch (_) { return text; }
+        };
+        const decoded = decode(url);
+        const patterns = [
+          /!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/i,
+          /@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/i,
+          /[?&](?:query|q|ll|center)=(-?\d+(?:\.\d+)?)[,%20]+(-?\d+(?:\.\d+)?)/i
+        ];
+        for (const pattern of patterns) {
+          const match = decoded.match(pattern);
+          if (!match) continue;
+          const lat = Number(match[1]);
+          const lng = Number(match[2]);
+          if (Number.isFinite(lat) && Number.isFinite(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            return { lat, lng };
           }
-        ).addTo(this.map);
+        }
+        return null;
+      },
 
-
-        /*
-         * Marker posisi lama
-         */
-        if (validLocation) {
-
-          this.createMarker(
-            initialLat,
-            initialLng
-          );
-
+      async applyGoogleMapsLink() {
+        const value = String(this.form.google_maps_url || '').trim();
+        if (!value) {
+          Alpine.store('ui').toast('Tempel link Google Maps terlebih dahulu.', 'warning');
+          return;
+        }
+        let parsed;
+        try { parsed = new URL(value); } catch (_) {
+          Alpine.store('ui').toast('Link Google Maps tidak valid.', 'warning');
+          return;
+        }
+        const host = parsed.hostname.toLowerCase();
+        const allowed = host === 'maps.app.goo.gl' || host === 'goo.gl' || host === 'google.com' || host === 'google.co.id' || host.endsWith('.google.com') || host.endsWith('.google.co.id');
+        if (!allowed) {
+          Alpine.store('ui').toast('Gunakan link yang berasal dari Google Maps.', 'warning');
+          return;
         }
 
-
-        /*
-         * Klik peta
-         */
-        this.map.on('click', (event) => {
-
-          this.setLocation(
-            event.latlng.lat,
-            event.latlng.lng
-          );
-
-        });
-
-      },
-
-
-      createMarker(lat, lng) {
-
-        this.marker = L.marker(
-          [lat, lng], {
-            draggable: true
+        // Link pendek maps.app.goo.gl tidak memuat koordinat di URL browser.
+        // Resolusi dilakukan server-side agar redirect Google dapat diikuti tanpa API key.
+        let coords = this.extractCoordinatesFromGoogleMapsUrl(value);
+        if (!coords && (host === 'maps.app.goo.gl' || host === 'goo.gl')) {
+          this.isLoading = true;
+          try {
+            // Gunakan helper API agar CSRF token ikut dikirim. Endpoint resolver
+            // adalah POST dan seluruh request state-changing BetaKos wajib membawa token.
+            const result = await API.post('/pemilik/kos/resolve-google-maps', { url: value }, false);
+            if (!result || !result.success) {
+              throw new Error(result?.message || 'Link Google Maps tidak dapat diproses.');
+            }
+            coords = { lat: Number(result.data.latitude), lng: Number(result.data.longitude) };
+          } catch (error) {
+            Alpine.store('ui').toast(error.message || 'Gagal membaca link Google Maps.', 'warning');
+            this.isLoading = false;
+            return;
+          } finally {
+            this.isLoading = false;
           }
-        ).addTo(this.map);
-
-
-        this.marker.on(
-          'dragend',
-          (event) => {
-
-            const position =
-              event.target.getLatLng();
-
-            this.setLocation(
-              position.lat,
-              position.lng
-            );
-
-          }
-        );
-
-      },
-
-
-      setLocation(lat, lng) {
-
-        lat = Number(lat);
-        lng = Number(lng);
-
-
-        this.form.latitude =
-          lat.toFixed(7);
-
-        this.form.longitude =
-          lng.toFixed(7);
-
-
-        if (!this.marker) {
-
-          this.createMarker(
-            lat,
-            lng
-          );
-
-        } else {
-
-          this.marker.setLatLng([
-            lat,
-            lng
-          ]);
-
         }
 
-
-        this.map.setView(
-          [lat, lng],
-          Math.max(
-            this.map.getZoom(),
-            16
-          )
-        );
-
+        if (!coords) {
+          Alpine.store('ui').toast('Koordinat tidak ditemukan di link ini. Coba salin link dari tombol Bagikan Google Maps.', 'warning');
+          return;
+        }
+        this.form.latitude = coords.lat.toFixed(7);
+        this.form.longitude = coords.lng.toFixed(7);
+        this.form.google_maps_url = value;
+        Alpine.store('ui').toast('Link Google Maps dan koordinat berhasil digunakan.', 'success');
       },
 
+      clearGoogleMapsLink() {
+        this.form.google_maps_url = '';
+        Alpine.store('ui').toast('Link Google Maps dihapus. Koordinat tetap disimpan.', 'success');
+      },
 
       getCurrentLocation() {
 
@@ -529,10 +424,9 @@
 
           (position) => {
 
-            this.setLocation(
-              position.coords.latitude,
-              position.coords.longitude
-            );
+            this.form.latitude = Number(position.coords.latitude).toFixed(7);
+            this.form.longitude = Number(position.coords.longitude).toFixed(7);
+            this.form.google_maps_url = '';
 
 
             this.locating = false;

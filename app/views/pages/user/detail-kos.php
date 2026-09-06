@@ -9,6 +9,10 @@ if ($phone !== '' && str_starts_with($phone, '0')) {
 }
 $waText = 'Halo, saya melihat kos ' . ($kos['nama_kos'] ?? '') . ' di BetaKos. Saya ingin menanyakan ketersediaan kamar.';
 $waUrl = $phone !== '' ? 'https://wa.me/' . $phone . '?text=' . rawurlencode($waText) : '';
+$googleMapsUrl = trim((string)($kos['google_maps_url'] ?? ''));
+if ($googleMapsUrl === '') {
+  $googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode((string)$kos['latitude'] . ',' . (string)$kos['longitude']);
+}
 $shareUrl = BASE_URL . '/kos/' . (int)$kos['id_kos'];
 $isPelanggan = isset($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pelanggan';
 
@@ -21,6 +25,32 @@ foreach (preg_split('/\s+/', $pemilikNama) as $kata) {
 $pemilikInisial = $pemilikInisial ?: 'PK';
 $pemilikFoto = $kos['foto_pemilik'] ?? null;
 $pemilikPro = !empty($kos['pemilik_pro']);
+$rekomendasi = $kos['rekomendasi'] ?? [];
+$selectedLat = isset($_GET['lat']) && is_numeric($_GET['lat']) ? (float)$_GET['lat'] : null;
+$selectedLng = isset($_GET['lng']) && is_numeric($_GET['lng']) ? (float)$_GET['lng'] : null;
+$selectedPlace = trim((string)($_GET['lokasi'] ?? ''));
+$selectedDistance = null;
+if ($selectedLat !== null && $selectedLng !== null) {
+  $lat1 = deg2rad((float)$kos['latitude']);
+  $lat2 = deg2rad($selectedLat);
+  $dLat = deg2rad($selectedLat - (float)$kos['latitude']);
+  $dLng = deg2rad($selectedLng - (float)$kos['longitude']);
+  $a = sin($dLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($dLng / 2) ** 2;
+  $selectedDistance = round(6371 * 2 * asin(min(1, sqrt($a))), 2);
+}
+$updatedAt = $kos['updated_at'] ?? null;
+$updatedLabel = 'Informasi diperbarui';
+if ($updatedAt) {
+  try {
+    $updatedDate = new DateTime($updatedAt);
+    $now = new DateTime();
+    $days = max(0, (int)$updatedDate->diff($now)->days);
+    if ($days === 0) $updatedLabel = 'Diperbarui hari ini';
+    elseif ($days === 1) $updatedLabel = 'Diperbarui kemarin';
+    elseif ($days < 30) $updatedLabel = 'Diperbarui ' . $days . ' hari lalu';
+    else $updatedLabel = 'Diperbarui ' . $updatedDate->format('d M Y');
+  } catch (Exception $e) {}
+}
 
 $lastLoginAt = $kos['last_login_at'] ?? null;
 $lastLoginLabel = 'Belum pernah login';
@@ -46,16 +76,7 @@ if (!empty($lastLoginAt)) {
 }
 ?>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-  #detail-kos-map {
-    z-index: 1;
-  }
-
-  .leaflet-pane,
-  .leaflet-control {
-    z-index: 2;
-  }
 </style>
 
 <div x-data="kosDetailPage()" class="bg-slate-50">
@@ -78,6 +99,12 @@ if (!empty($lastLoginAt)) {
               Login untuk melapor
             </a>
           <?php endif; ?>
+          <?php if ($isPelanggan): ?>
+            <button @click="toggleFavorite()" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary" :aria-pressed="favorited">
+              <span class="text-lg leading-none" x-text="favorited ? '♥' : '♡'"></span>
+              <span x-text="favorited ? 'Favorit tersimpan' : 'Simpan favorit'"></span>
+            </button>
+          <?php endif; ?>
           <button @click="share()" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
             ↗ Bagikan
           </button>
@@ -86,7 +113,7 @@ if (!empty($lastLoginAt)) {
     </div>
   </section>
 
-  <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+  <main class="mx-auto max-w-7xl px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
     <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       <?php if ($photos): ?>
         <div class="grid min-h-[280px] gap-1 bg-slate-100 lg:grid-cols-[1.65fr_1fr]">
@@ -121,6 +148,14 @@ if (!empty($lastLoginAt)) {
           </div>
           <h1 class="mt-3 font-[Poppins] text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"><?= htmlspecialchars($kos['nama_kos']) ?></h1>
           <p class="mt-2 flex items-start gap-2 text-sm leading-6 text-slate-500"><span>⌖</span><span><?= nl2br(htmlspecialchars($kos['alamat'])) ?></span></p>
+          <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <span class="rounded-full bg-slate-100 px-3 py-1.5 font-medium"><?= htmlspecialchars($updatedLabel) ?></span>
+            <?php if ($selectedDistance !== null): ?>
+              <span class="rounded-full bg-primary-soft px-3 py-1.5 font-semibold text-primary">
+                <?= htmlspecialchars($selectedDistance . ' km') ?> dari <?= htmlspecialchars($selectedPlace !== '' ? $selectedPlace : 'lokasi pilihanmu') ?>
+              </span>
+            <?php endif; ?>
+          </div>
 
           <div class="mt-8">
             <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Tentang kos</h2>
@@ -139,6 +174,24 @@ if (!empty($lastLoginAt)) {
               </div>
             <?php else: ?>
               <p class="mt-3 text-sm text-slate-500">Belum ada fasilitas yang dicantumkan.</p>
+            <?php endif; ?>
+          </div>
+
+          <div class="mt-8">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Aturan / Ketentuan</h2>
+                <p class="mt-1 text-sm text-slate-500">Hal penting yang perlu diketahui sebelum menghubungi pemilik.</p>
+              </div>
+            </div>
+            <?php if (trim((string)($kos['aturan'] ?? '')) !== ''): ?>
+              <div class="mt-4 whitespace-pre-line rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
+                <?= htmlspecialchars(trim($kos['aturan'])) ?>
+              </div>
+            <?php else: ?>
+              <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
+                Pemilik belum mencantumkan aturan khusus untuk kos ini. Silakan tanyakan langsung kepada pemilik.
+              </div>
             <?php endif; ?>
           </div>
 
@@ -234,18 +287,56 @@ if (!empty($lastLoginAt)) {
             <?php endif; ?>
           </div>
 
+          <?php
+            $mapLat = (float)($kos['latitude'] ?? 0);
+            $mapLng = (float)($kos['longitude'] ?? 0);
+            $hasCoordinates = is_finite($mapLat) && is_finite($mapLng) && $mapLat >= -90 && $mapLat <= 90 && $mapLng >= -180 && $mapLng <= 180;
+            $googleEmbedUrl = $hasCoordinates
+              ? 'https://www.google.com/maps?q=' . rawurlencode($mapLat . ',' . $mapLng) . '&z=17&output=embed'
+              : '';
+          ?>
           <div class="mt-8">
-            <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi</h2>
-            <div id="detail-kos-map" class="mt-4 h-[300px] overflow-hidden rounded-2xl border border-slate-200 sm:h-[360px]"></div>
-            <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=<?= rawurlencode($kos['latitude'] . ',' . $kos['longitude']) ?>" class="mt-3 inline-flex text-sm font-semibold text-primary hover:text-primary-dark">Buka di Google Maps →</a>
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-lg text-blue-600">📍</span>
+                  <div>
+                    <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi</h2>
+                    <p class="mt-0.5 text-sm text-slate-500">Lihat posisi kos dan buka lokasi lengkap di Google Maps.</p>
+                  </div>
+                </div>
+              </div>
+              <a target="_blank" rel="noopener noreferrer" href="<?= htmlspecialchars($googleMapsUrl) ?>" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark">
+                Buka di Google Maps <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+
+            <?php if ($hasCoordinates): ?>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+                <iframe
+                  src="<?= htmlspecialchars($googleEmbedUrl) ?>"
+                  title="Peta lokasi <?= htmlspecialchars($kos['nama_kos'] ?? 'kos') ?>"
+                  class="block h-[280px] w-full sm:h-[360px] lg:h-[420px]"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  allowfullscreen>
+                </iframe>
+              </div>
+
+            <?php else: ?>
+              <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+                <p class="font-semibold text-slate-700">Lokasi belum tersedia</p>
+                <p class="mt-1 text-sm text-slate-500">Kos ini belum memiliki koordinat yang dapat ditampilkan.</p>
+              </div>
+            <?php endif; ?>
           </div>
+
         </div>
 
         <aside class="lg:sticky lg:top-24 lg:self-start">
           <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Hubungi pemilik</p>
             <h2 class="mt-1 text-lg font-bold text-slate-900">Tertarik dengan kos ini?</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-500">Tanyakan ketersediaan tipe kamar dan detail harga langsung kepada pemilik.</p>
 
             <?php if ($waUrl): ?>
               <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="mt-5 flex min-h-12 w-full items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Tanya Pemilik via WhatsApp</a>
@@ -267,7 +358,7 @@ if (!empty($lastLoginAt)) {
                   <div class="flex items-center gap-2">
                     <p class="truncate text-sm font-semibold text-slate-800"><?= htmlspecialchars($pemilikNama) ?></p>
                     <?php if ($pemilikPro): ?>
-                      <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700">PRO</span>
+                      <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-700">Pemilik Pro</span>
                     <?php endif; ?>
                   </div>
                   <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
@@ -282,6 +373,19 @@ if (!empty($lastLoginAt)) {
       </div>
     </section>
   </main>
+
+  <div class="fixed inset-x-0 bottom-0 z-[1000] border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] backdrop-blur lg:hidden">
+    <div class="mx-auto flex max-w-7xl items-center gap-2">
+      <?php if ($isPelanggan): ?>
+        <button @click="toggleFavorite()" type="button" class="inline-flex min-h-12 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-2xl text-slate-700" :aria-label="favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'" x-text="favorited ? '♥' : '♡'"></button>
+      <?php endif; ?>
+      <?php if ($waUrl): ?>
+        <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Hubungi Pemilik</a>
+      <?php else: ?>
+        <div class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-slate-100 px-5 py-3 text-sm font-semibold text-slate-500">Kontak belum tersedia</div>
+      <?php endif; ?>
+    </div>
+  </div>
 
   <?php if ($isPelanggan): ?>
     <div x-show="reportOpen" x-cloak @keydown.escape.window="reportOpen = false" class="fixed inset-0 z-[2100] flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-5">
@@ -347,7 +451,6 @@ if (!empty($lastLoginAt)) {
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   function kosDetailPage() {
     const photos = <?= json_encode_safe(array_map(fn($p) => BASE_URL . '/uploads' . $p['nama_file'], $photos), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?>;
@@ -363,6 +466,8 @@ if (!empty($lastLoginAt)) {
       typeGalleryOpen: false,
       reportOpen: false,
       reportSaving: false,
+      favorited: <?= $kos['is_favorited'] ? 'true' : 'false' ?>,
+      favoriteSaving: false,
       reportSuccess: false,
       reportForm: {
         alasan: '',
@@ -395,6 +500,18 @@ if (!empty($lastLoginAt)) {
       previousTypePhoto() {
         if (!this.typeGalleryPhotos.length) return;
         this.typeGalleryIndex = (this.typeGalleryIndex - 1 + this.typeGalleryPhotos.length) % this.typeGalleryPhotos.length;
+      },
+      async toggleFavorite() {
+        if (this.favoriteSaving) return;
+        this.favoriteSaving = true;
+        try {
+          const res = await API.post('/pelanggan/favorit', { id_kos: <?= (int)$kos['id_kos'] ?> });
+          if (res?.data?.favorited !== undefined) this.favorited = !!res.data.favorited;
+        } catch (e) {
+          console.error('Gagal memperbarui favorit:', e);
+        } finally {
+          this.favoriteSaving = false;
+        }
       },
       async submitReport() {
         if (!this.reportForm.alasan || this.reportForm.deskripsi.trim().length < 10) return;
@@ -442,16 +559,4 @@ if (!empty($lastLoginAt)) {
     };
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
-    const mapEl = document.getElementById('detail-kos-map');
-    if (!mapEl || typeof L === 'undefined') return;
-    const lat = <?= json_encode_safe((float)$kos['latitude']) ?>;
-    const lng = <?= json_encode_safe((float)$kos['longitude']) ?>;
-    const map = L.map(mapEl).setView([lat, lng], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-    L.marker([lat, lng]).addTo(map).bindPopup(<?= json_encode_safe($kos['nama_kos']) ?>).openPopup();
-    setTimeout(() => map.invalidateSize(), 100);
-  });
 </script>

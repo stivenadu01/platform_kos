@@ -33,3 +33,5 @@ function json_encode_safe($value, $flags = 0)
     $flags | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
   );
 }
+
+require_once __DIR__ . '/location_helper.php';

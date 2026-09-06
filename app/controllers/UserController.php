@@ -5,18 +5,19 @@ class UserController
   public function home()
   {
     model('Kos');
-    model('Kos');
 
     view('home', [
       'title' => 'Temukan Kos di Kupang',
-      'kosUnggulan' => getKosUnggulanUntukHome(6)
+      'kosUnggulan' => getKosUnggulanUntukHome(6),
+      'locationPresets' => getPublicLocationPresets()
     ]);
   }
 
   public function search()
   {
     view('user/cari-kos', [
-      'title' => 'Cari Kos'
+      'title' => 'Cari Kos',
+      'locationPresets' => getPublicLocationPresets()
     ]);
   }
 
@@ -40,6 +41,11 @@ class UserController
         'message' => 'Kos tidak ditemukan atau sudah tidak tersedia.'
       ], 404);
     }
+
+    $currentUser = $_SESSION['user'] ?? null;
+    $kos['is_favorited'] = $currentUser && ($currentUser['role'] ?? '') === 'pelanggan'
+      ? isKosFavorit((int)$currentUser['id_user'], $id_kos)
+      : false;
 
     view('user/detail-kos', [
       'title' => $kos['nama_kos'] . ' - BetaKos',

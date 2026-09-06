@@ -18,132 +18,67 @@ $initialState = [
 ];
 ?>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<style>
-  #search-map {
-    z-index: 1;
-  }
-
-  .leaflet-pane,
-  .leaflet-control {
-    z-index: 2;
-  }
-
-  .leaflet-top,
-  .leaflet-bottom {
-    z-index: 10;
-  }
-</style>
 
 <div
   x-data="kosSearchPage(<?= htmlspecialchars(json_encode_safe($initialState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
   x-init="init()"
   class="min-h-[calc(100vh-4rem)] bg-slate-50">
   <section class="border-b border-slate-200 bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <p class="text-sm font-semibold text-primary">Cari Kos</p>
         <h1 class="mt-1 font-[Poppins] text-3xl font-bold tracking-tight text-slate-900">
-          Temukan kos berdasarkan lokasi
+          Temukan kos di lokasi yang kamu inginkan
         </h1>
         <p class="mt-2 text-sm leading-6 text-slate-500">
-          Cari berdasarkan tempat, jalan, kawasan, atau lokasi lain di Kupang. Pilih lokasi lalu tentukan radius kos yang kamu inginkan.
+          Pilih kampus, area, tempat penting, atau gunakan lokasi kamu untuk melihat kos di sekitarnya.
         </p>
       </div>
 
-      <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div class="relative p-3 sm:p-4">
-          <div class="flex items-center gap-3 px-2">
-            <span class="text-lg text-slate-400">⌖</span>
-            <input
-              x-model="locationQuery"
-              @input.debounce.600ms="onLocationInput()"
-              @keydown.enter.prevent="selectFirstLocation()"
-              type="search"
-              autocomplete="off"
-              class="bg-transparent py-2 outline-none input-number"
-              placeholder="Cari tempat, jalan, kawasan, atau lokasi di Kupang...">
-            <button
-              x-show="locationQuery"
-              x-cloak
-              @click="clearLocation()"
-              type="button"
-              class="rounded-lg px-2 py-1 text-xs text-slate-400 hover:bg-slate-100">Hapus</button>
+      <div
+        class="mt-6 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+        @betakos-location-selected.window="selectLocation($event.detail)"
+        @betakos-location-query.window="locationQuery = $event.detail.query; selectedLocation = null; search(1)">
+        <?php $pickerMode = 'search'; ?>
+        <?php include ROOT_PATH . '/app/views/partials/user/location-picker.php'; ?>
+
+        <template x-if="selectedLocation">
+          <div class="mt-3 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+            <span class="text-xs font-medium text-slate-500">Lokasi:</span>
+            <span class="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-semibold text-primary" x-text="shortLocationName(selectedLocation.nama)"></span>
+            <button type="button" @click="clearLocation()" class="text-xs font-semibold text-slate-400 hover:text-red-600">Hapus lokasi</button>
           </div>
+        </template>
 
-          <div
-            x-show="locationResults.length && !selectedLocation"
-            x-cloak
-            class="absolute left-3 right-3 top-[58px] z-[1000] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:left-4 sm:right-4">
-            <template x-for="item in locationResults" :key="item.latitude + ',' + item.longitude + item.nama">
-              <button
-                @click="selectLocation(item)"
-                type="button"
-                class="flex w-full items-start gap-3 border-b border-slate-100 px-4 py-3 text-left last:border-0 hover:bg-slate-50">
-                <span class="mt-0.5 text-primary">⌖</span>
-                <span class="min-w-0">
-                  <span class="block text-sm font-semibold text-slate-800" x-text="shortLocationName(item.nama)"></span>
-                  <span class="mt-0.5 block text-xs text-slate-500" x-text="item.nama"></span>
-                </span>
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <div class="border-t border-slate-100 bg-slate-50 p-3 sm:p-4">
-          <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div class="min-w-0">
-              <p class="text-xs font-semibold text-primary">Lokasi pencarian</p>
-              <p
-                class="mt-0.5 truncate text-sm font-medium text-slate-700"
-                x-text="selectedLocation ? selectedLocation.nama : 'Pilih lokasi dari pencarian atau peta'"></p>
-            </div>
-            <button
-              x-show="selectedLocation"
-              x-cloak
-              @click="clearLocation()"
-              type="button"
-              class="text-xs font-semibold text-primary hover:underline">Ganti lokasi</button>
-          </div>
-
-          <div id="search-map" class="h-64 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:h-80"></div>
-
-          <p class="mt-2 text-[11px] leading-5 text-slate-500">
-            Cari lokasi di atas, gunakan lokasi perangkat, atau klik langsung pada peta untuk menentukan titik pencarian.
-          </p>
-
-          <div class="mt-3 flex flex-col gap-2 sm:flex-row">
-            <button
-              @click="useMyLocation()"
-              type="button"
-              :disabled="locating"
-              class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60">
-              <span x-text="locating ? 'Mencari lokasi...' : '📍 Gunakan lokasi saya'"></span>
-            </button>
-            <button
-              @click="search(1)"
-              type="button"
-              :disabled="!selectedLocation || loading"
-              class="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50">
-              Cari kos di sekitar
-            </button>
-          </div>
-
-          <p
-            x-show="locationError"
-            x-cloak
-            class="mt-2 text-xs font-medium text-red-600"
-            x-text="locationError"></p>
-        </div>
+        <p x-show="locationError" x-cloak class="mt-2 text-xs font-medium text-red-600" x-text="locationError"></p>
       </div>
     </div>
   </section>
 
+  <div class="mx-auto max-w-7xl px-4 pt-5 sm:px-6 lg:hidden">
+    <button @click="filterOpen = true" type="button" class="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm">
+      <span>☷ Filter pencarian</span>
+      <span class="text-primary" x-text="activeFilterCount ? activeFilterCount + ' aktif' : 'Atur filter'"></span>
+    </button>
+  </div>
+
+  <div x-show="filterOpen" x-cloak @keydown.escape.window="filterOpen = false" class="fixed inset-0 z-[1500] lg:hidden">
+    <div class="absolute inset-0 bg-slate-900/40" @click="filterOpen = false"></div>
+  </div>
+
   <div class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
-    <aside class="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-20">
+    <aside
+      x-bind:class="filterOpen ? 'fixed inset-x-4 bottom-4 top-20 z-[1600] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl' : 'hidden lg:block lg:sticky lg:top-20'"
+      class="h-fit">
       <div class="flex items-center justify-between">
-        <h2 class="font-semibold text-slate-900">Filter</h2>
-        <button type="button" @click="resetFilters()" class="text-xs font-semibold text-primary">Reset</button>
+        <div>
+          <h2 class="font-semibold text-slate-900">Filter</h2>
+          <p class="mt-0.5 text-[11px] text-slate-400">Sesuaikan hasil dengan kebutuhanmu.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button type="button" @click="resetFilters()" class="text-xs font-semibold text-primary">Reset</button>
+          <button type="button" @click="filterOpen = false" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 lg:hidden">✕</button>
+        </div>
       </div>
 
       <div class="mt-5 space-y-5">
@@ -225,6 +160,8 @@ $initialState = [
         </div>
       </div>
 
+      <button type="button" @click="filterOpen = false" class="mt-5 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white lg:hidden">Terapkan Filter</button>
+
     </aside>
 
     <main>
@@ -246,7 +183,8 @@ $initialState = [
 
       <div x-show="!loading && kosList.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <template x-for="kos in kosList" :key="kos.id_kos">
-          <a :href="'<?= BASE_URL ?>/kos/' + kos.id_kos" class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+            <a :href="detailUrl(kos)" class="block">
             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
               <img
                 :src="kos.foto ? '<?= BASE_URL ?>/uploads' + kos.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'"
@@ -270,14 +208,28 @@ $initialState = [
                 <span class="text-xs text-slate-500" x-text="kos.kamar_tersedia + ' kamar tersedia'"></span>
               </div>
             </div>
-          </a>
+            </a>
+            <div class="flex items-center justify-between border-t border-slate-100 px-4 py-3">
+              <span class="text-[11px] text-slate-400">Detail & lokasi tersedia</span>
+              <button
+                x-show="$store.auth.user?.role === 'pelanggan'"
+                type="button"
+                @click.stop.prevent="toggleFavorite(kos)"
+                class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold transition hover:bg-primary-soft"
+                :class="kos.is_favorited ? 'text-primary' : 'text-slate-500'"
+                :aria-label="kos.is_favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'">
+                <span class="text-base" x-text="kos.is_favorited ? '♥' : '♡'"></span>
+                <span x-text="kos.is_favorited ? 'Tersimpan' : 'Favorit'"></span>
+              </button>
+            </div>
+          </article>
         </template>
       </div>
 
       <div x-show="!loading && !kosList.length" class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
         <div class="text-4xl">⌂</div>
         <h3 class="mt-3 font-semibold text-slate-900">Kos tidak ditemukan</h3>
-        <p class="mt-1 text-sm text-slate-500">Coba ganti lokasi, radius, atau filter lainnya.</p>
+        <p class="mt-1 text-sm text-slate-500">Coba ganti kata pencarian, radius, atau filter lainnya.</p>
       </div>
 
       <div x-show="pagination.total_pages > 1" class="mt-6 flex items-center justify-center gap-2">
@@ -289,7 +241,6 @@ $initialState = [
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   function kosSearchPage(initialState = {}) {
     const validCoord = (value) => Number.isFinite(Number(value));
@@ -301,17 +252,15 @@ $initialState = [
 
     return {
       locationQuery: initialState.q || initialState.lokasi || '',
-      locationResults: [],
       selectedLocation: null,
-      map: null,
-      marker: null,
       locating: false,
       locationError: '',
       loading: false,
+      filterOpen: false,
       shareMessage: '',
       kosList: [],
       filters: {
-        q: '',
+        q: initialState.q || '',
         latitude: '',
         longitude: '',
         jarak_max: initialState.jarak_max || '',
@@ -338,9 +287,41 @@ $initialState = [
           `${this.pagination.total} kos ditemukan`;
       },
 
-      async init() {
-        this.$nextTick(() => this.initMap());
+      get activeFilterCount() {
+        let count = 0;
+        if (this.filters.jarak_max) count++;
+        if (this.filters.jenis) count++;
+        if (this.filters.kapasitas) count++;
+        if (this.filters.harga_min || this.filters.harga_max) count++;
+        if (this.filters.fasilitas.length) count++;
+        return count;
+      },
 
+      detailUrl(kos) {
+        const params = new URLSearchParams();
+        if (this.selectedLocation) {
+          params.set('lokasi', this.shortLocationName(this.selectedLocation.nama));
+          params.set('lat', this.selectedLocation.latitude);
+          params.set('lng', this.selectedLocation.longitude);
+        }
+        const query = params.toString();
+        return '<?= BASE_URL ?>/kos/' + kos.id_kos + (query ? '?' + query : '');
+      },
+
+      async toggleFavorite(kos) {
+        if (!kos || kos._favoriteSaving) return;
+        kos._favoriteSaving = true;
+        try {
+          const res = await API.post('/pelanggan/favorit', { id_kos: Number(kos.id_kos) });
+          if (res?.data?.favorited !== undefined) kos.is_favorited = !!res.data.favorited;
+        } catch (e) {
+          console.error('Gagal memperbarui favorit:', e);
+        } finally {
+          kos._favoriteSaving = false;
+        }
+      },
+
+      async init() {
         await this.loadFasilitas();
 
         // Restore a shared search directly from URL.
@@ -358,29 +339,16 @@ $initialState = [
           this.filters.latitude = lat;
           this.filters.longitude = lng;
 
-          this.$nextTick(() => {
-            this.setMapMarker(lat, lng);
-            setTimeout(() => this.map?.invalidateSize(), 100);
-          });
 
           await this.search(1, false);
           return;
         }
 
-        // If only text was supplied, search suggestions and let the user choose.
-        if (this.locationQuery) {
-          await this.searchLocations();
-        }
+        if (this.locationQuery) this.filters.q = this.locationQuery;
 
-        // First visit: try to initialize from the user's current location.
-        // We keep radius empty, so location is used for the marker/distance,
-        // while all kos remain eligible until the user chooses a radius.
-        if (!this.locationQuery && !this.selectedLocation) {
-          const located = await this.requestInitialLocation();
-          if (!located) {
-            await this.search(1, false);
-          }
-        }
+        // First visit: do not request geolocation automatically.
+        // The user chooses "Cari di lokasi sekitar saya" explicitly.
+        await this.search(1, false);
       },
 
       async loadFasilitas() {
@@ -452,213 +420,38 @@ $initialState = [
         });
       },
 
-      initMap() {
-        if (this.map || typeof L === 'undefined') return;
-
-        const defaultLat = -10.1772;
-        const defaultLng = 123.6070;
-
-        this.map = L.map('search-map', {
-          zoomControl: true,
-          attributionControl: true
-        }).setView([defaultLat, defaultLng], 12);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(this.map);
-
-        this.map.on('click', (event) => this.setMapLocation(event.latlng.lat, event.latlng.lng));
-        setTimeout(() => this.map.invalidateSize(), 150);
-      },
-
       onLocationInput() {
-        // Saat user mulai mengetik pencarian baru, lokasi sebelumnya tidak lagi
-        // menjadi pilihan aktif sehingga dropdown hasil pencarian dapat muncul.
-        if (this.selectedLocation) {
-          this.selectedLocation = null;
-          this.filters.latitude = '';
-          this.filters.longitude = '';
-          if (this.marker) {
-            this.marker.remove();
-            this.marker = null;
-          }
-        }
+        this.filters.q = this.locationQuery.trim();
+        this.selectedLocation = null;
+        this.filters.latitude = '';
+        this.filters.longitude = '';
         this.shareMessage = '';
-        this.searchLocations();
-      },
-
-      async searchLocations() {
-        const query = this.locationQuery.trim();
-        this.locationError = '';
-
-        if (query.length < 3) {
-          this.locationResults = [];
-          return;
-        }
-
-        try {
-          const res = await fetch('<?= BASE_URL ?>/api/lokasi/search?q=' + encodeURIComponent(query), {
-            headers: {
-              'Accept': 'application/json'
-            }
-          });
-
-          if (res.ok) {
-            const json = await res.json();
-            if (json.success && Array.isArray(json.data) && json.data.length) {
-              this.locationResults = json.data;
-              return;
-            }
-          }
-        } catch (e) {
-          console.warn('Proxy lokasi gagal, mencoba Nominatim langsung.', e);
-        }
-
-        try {
-          const queryVariants = [
-            `${query}, Kupang, Nusa Tenggara Timur, Indonesia`,
-            `${query}, Kota Kupang, Indonesia`,
-            `${query}, Indonesia`
-          ];
-          let items = [];
-          for (const qv of queryVariants) {
-            const url = 'https://nominatim.openstreetmap.org/search?' + new URLSearchParams({
-              q: qv,
-              format: 'jsonv2',
-              addressdetails: '1',
-              limit: '8',
-              countrycodes: 'id',
-              'accept-language': 'id'
-            });
-            const res = await fetch(url, {
-              headers: {
-                'Accept': 'application/json'
-              }
-            });
-            if (res.ok) {
-              const part = await res.json();
-              if (Array.isArray(part)) items.push(...part);
-            }
-            if (items.length >= 6) break;
-          }
-          const seen = new Set();
-          this.locationResults = items.filter(item => item.lat && item.lon).map(item => ({
-            nama: item.display_name || query,
-            latitude: Number(item.lat),
-            longitude: Number(item.lon),
-            type: item.type || null
-          })).filter(item => {
-            const key = `${item.latitude},${item.longitude}`;
-            if (seen.has(key)) return false;
-            seen.add(key);
-            return true;
-          }).sort((a, b) => {
-            const n = query.toLowerCase();
-            const ap = a.nama.toLowerCase().indexOf(n);
-            const bp = b.nama.toLowerCase().indexOf(n);
-            return (ap < 0 ? 999999 : ap) - (bp < 0 ? 999999 : bp);
-          }).slice(0, 6);
-
-          if (!this.locationResults.length) {
-            this.locationError = 'Lokasi tidak ditemukan. Coba nama tempat yang lebih spesifik.';
-          }
-        } catch (e) {
-          console.error(e);
-          this.locationResults = [];
-          this.locationError = 'Pencarian lokasi gagal. Pastikan koneksi internet tersedia.';
-        }
-      },
-
-      selectFirstLocation() {
-        if (this.locationResults.length) this.selectLocation(this.locationResults[0]);
       },
 
       selectLocation(item, updateUrl = true) {
         const lat = Number(item.latitude);
         const lng = Number(item.longitude);
-
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-          this.locationError = 'Koordinat lokasi tidak valid.';
-          return;
-        }
-
-        this.locationError = '';
-        this.selectedLocation = {
-          nama: item.nama,
-          latitude: lat,
-          longitude: lng
-        };
-        this.locationQuery = item.nama;
-        this.locationResults = [];
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        this.selectedLocation = { nama: item.nama || 'Lokasi pilihan', latitude: lat, longitude: lng };
+        this.locationQuery = item.nama || '';
+        this.filters.q = '';
         this.filters.latitude = lat;
         this.filters.longitude = lng;
-
-        this.$nextTick(() => {
-          this.setMapMarker(lat, lng);
-          setTimeout(() => this.map?.invalidateSize(), 100);
-        });
-
         if (updateUrl) this.syncUrl(true, 1);
         this.search(1, false);
-      },
-
-      setMapLocation(lat, lng) {
-        this.locationError = '';
-        this.selectedLocation = {
-          nama: `Titik peta (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
-          latitude: lat,
-          longitude: lng
-        };
-        this.locationQuery = '';
-        this.locationResults = [];
-        this.filters.latitude = lat;
-        this.filters.longitude = lng;
-        this.setMapMarker(lat, lng);
-        this.syncUrl(true, 1);
-        this.search(1, false);
-      },
-
-      setMapMarker(lat, lng) {
-        this.initMap();
-        if (!this.map) return;
-
-        this.map.setView([lat, lng], Math.max(this.map.getZoom(), 14));
-
-        if (this.marker) {
-          this.marker.setLatLng([lat, lng]);
-        } else {
-          this.marker = L.marker([lat, lng]).addTo(this.map);
-        }
-
-        this.marker.bindPopup('Lokasi pencarian').openPopup();
       },
 
       clearLocation() {
         this.selectedLocation = null;
         this.locationQuery = '';
-        this.locationResults = [];
         this.locationError = '';
+        this.filters.q = '';
         this.filters.latitude = '';
         this.filters.longitude = '';
         this.kosList = [];
-        this.pagination = {
-          page: 1,
-          per_page: 12,
-          total: 0,
-          total_pages: 0
-        };
-
-        if (this.marker) {
-          this.marker.remove();
-          this.marker = null;
-        }
-        if (this.map) {
-          this.map.setView([-10.1772, 123.6070], 12);
-          setTimeout(() => this.map.invalidateSize(), 100);
-        }
-
+        this.pagination = { page: 1, per_page: 12, total: 0, total_pages: 0 };
         this.syncUrl(false, 1);
+        this.search(1, false);
       },
 
       async useMyLocation() {
@@ -702,6 +495,8 @@ $initialState = [
           params.set('lokasi', this.shortLocationName(this.selectedLocation.nama));
           params.set('lat', Number(this.selectedLocation.latitude).toFixed(7));
           params.set('lng', Number(this.selectedLocation.longitude).toFixed(7));
+        } else if (this.filters.q) {
+          params.set('q', this.filters.q);
         }
 
         if (this.filters.jarak_max) params.set('radius', this.filters.jarak_max);
@@ -734,6 +529,7 @@ $initialState = [
         }
 
         if (updateUrl) this.syncUrl(false, page);
+        this.filters.q = this.selectedLocation ? '' : this.locationQuery.trim();
         this.loading = true;
         this.locationError = '';
 

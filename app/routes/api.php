@@ -25,12 +25,14 @@ get('/api/langganan/pembayaran/{id}/bukti', 'ApiLanggananController@buktiPembaya
 
 
 get('/api/fasilitas', 'ApiFasilitasController@index');
+get('/api/lokasi/search', 'ApiLokasiController@search');
 
 // =====================================================
 // PEMILIK - KOS
 // =====================================================
 get('/api/pemilik/kos', 'ApiKosController@index', ['auth', 'role:pemilik']);
 get('/api/pemilik/kos/fasilitas', 'ApiKosController@fasilitas', ['auth', 'role:pemilik']);
+post('/api/pemilik/kos/resolve-google-maps', 'ApiKosController@resolveGoogleMapsLink', ['auth', 'role:pemilik']);
 get('/api/pemilik/kos/{id}', 'ApiKosController@show', ['auth', 'role:pemilik']);
 post('/api/pemilik/kos', 'ApiKosController@store', ['auth', 'role:pemilik']);
 put('/api/pemilik/kos/{id}', 'ApiKosController@update', ['auth', 'role:pemilik']);
@@ -110,9 +112,11 @@ post('/api/pemilik/tagihan/pembayaran', 'ApiTagihanController@payment', ['auth',
 // =========================================================
 // USER - LOKASI & PENCARIAN KOS
 // =========================================================
-get('/api/lokasi/search', 'ApiLokasiController@search');
 get('/api/kos/search', 'ApiKosSearchController@index');
+get('/api/kos/{id}/favorit', 'ApiKosSearchController@favoriteStatus', ['auth', 'role:pelanggan']);
 get('/api/kos/{id}', 'ApiKosSearchController@show');
+get('/api/pelanggan/favorit', 'ApiKosSearchController@favoriteList', ['auth', 'role:pelanggan']);
+post('/api/pelanggan/favorit', 'ApiKosSearchController@toggleFavorite', ['auth', 'role:pelanggan']);
 
 // =========================================================
 // ADMIN - DASHBOARD
