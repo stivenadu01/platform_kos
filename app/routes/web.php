@@ -58,3 +58,5 @@ get('/admin/verifikasi', 'AdminController@verifikasi', ['auth', 'role:admin']);
 get('/admin/laporan', 'AdminController@laporan', ['auth', 'role:admin']);
 get('/admin/langganan', 'AdminController@langganan', ['auth', 'role:admin']);
 get('/admin/langganan/metode-pembayaran', 'AdminController@metodePembayaran', ['auth', 'role:admin']);
+get('/admin/data-master', 'AdminController@dataMaster', ['auth', 'role:admin']);
+get('/admin/lokasi', 'AdminController@lokasi', ['auth', 'role:admin']);

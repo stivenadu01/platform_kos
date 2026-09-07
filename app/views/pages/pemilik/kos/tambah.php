@@ -120,20 +120,29 @@
 
     </div>
 
-    <div class="form-group">
-
-      <label class="label">
-        Aturan / Ketentuan Kos
-      </label>
-
-      <textarea
-        x-model="form.aturan"
-        class="input min-h-28"
-        maxlength="3000"
-        placeholder="Contoh: Tamu maksimal sampai pukul 22.00, dilarang membawa hewan peliharaan, dan wajib menjaga kebersihan."></textarea>
-
-      <p class="mt-1 text-xs text-slate-400">Tuliskan aturan yang perlu diketahui calon penghuni sebelum menghubungi pemilik.</p>
-
+    <!-- ATURAN -->
+    <div data-help="help-kos-form-rules" data-onboarding="kos-field-aturan" class="pt-4 border-t border-slate-200">
+      <div>
+        <h3 class="font-semibold text-slate-900">Aturan / Ketentuan Kos</h3>
+        <p class="text-sm text-slate-500 mt-1">Pilih aturan yang berlaku di kos. Data ini akan ditampilkan pada detail kos.</p>
+      </div>
+      <div x-show="aturanLoading" class="mt-4 text-sm text-slate-500">Memuat daftar aturan...</div>
+      <div x-show="!aturanLoading && aturan.length === 0" class="mt-4 p-4 rounded-lg bg-slate-50 text-sm text-slate-500">Belum ada daftar aturan aktif.</div>
+      <div x-show="!aturanLoading && aturan.length > 0" class="mt-4 space-y-5">
+        <template x-for="group in aturanGroups" :key="group.key">
+          <div x-show="group.items.length > 0">
+            <h4 class="text-xs font-bold uppercase tracking-wide text-slate-500" x-text="group.label"></h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
+              <template x-for="item in group.items" :key="item.id_aturan">
+                <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
+                  <input type="checkbox" :value="item.id_aturan" x-model="form.aturan" class="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary">
+                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary" x-html="iconSvg(item.icon, 'h-4 w-4')"></span><span class="min-w-0"><span class="text-sm text-slate-700" x-text="item.nama_aturan"></span><span x-show="item.deskripsi" class="block text-xs text-slate-400 mt-0.5" x-text="item.deskripsi"></span></span>
+                </label>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
     </div>
 
     <!-- FASILITAS -->
@@ -185,10 +194,8 @@
               x-model="form.fasilitas"
               class="rounded border-slate-300 text-primary focus:ring-primary">
 
-            <span
-              class="text-sm text-slate-700"
-              x-text="item.nama_fasilitas">
-            </span>
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-primary" x-html="iconSvg(item.icon, 'h-4 w-4')"></span>
+            <span class="text-sm text-slate-700" x-text="item.nama_fasilitas"></span>
 
           </label>
 
@@ -299,12 +306,16 @@
   function kosForm() {
 
     return {
+      iconPaths: <?= json_encode_safe(array_map(fn($v)=>$v['path'], masterIconCatalog()), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>,
+      iconSvg(i,c='h-4 w-4') { const p=this.iconPaths[i]||this.iconPaths['map-pin']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="${c}" aria-hidden="true">${p}</svg>`; },
 
       loading: false,
       locating: false,
 
       fasilitas: [],
       fasilitasLoading: false,
+      aturan: [],
+      aturanLoading: false,
       form: {
         nama_kos: '',
         alamat: '',
@@ -313,13 +324,14 @@
         google_maps_url: '',
         jenis: '',
         deskripsi: '',
-        aturan: '',
+        aturan: [],
         fasilitas: []
       },
 
 
       init() {
         this.loadFasilitas();
+        this.loadAturan();
       },
 
       extractCoordinatesFromGoogleMapsUrl(value) {
@@ -528,6 +540,22 @@
 
         }
 
+      },
+
+      get aturanGroups() {
+        const labels = { penghuni: 'Penghuni', tamu: 'Tamu', jam: 'Jam & waktu', kebersihan: 'Kebersihan', hewan: 'Hewan', keamanan: 'Keamanan', umum: 'Umum' };
+        const map = {};
+        (this.aturan || []).forEach(item => { const key = item.kategori || 'umum'; if (!map[key]) map[key] = { key, label: labels[key] || key, items: [] }; map[key].items.push(item); });
+        return Object.values(map);
+      },
+
+      async loadAturan() {
+        this.aturanLoading = true;
+        try {
+          const res = await API.get('/pemilik/kos/aturan');
+          if (res.success) this.aturan = res.data || [];
+        } catch (error) { console.error('Gagal memuat aturan:', error); }
+        finally { this.aturanLoading = false; }
       },
 
       async loadFasilitas() {

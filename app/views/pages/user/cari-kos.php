@@ -31,7 +31,7 @@ $initialState = [
           Temukan kos di lokasi yang kamu inginkan
         </h1>
         <p class="mt-2 text-sm leading-6 text-slate-500">
-          Pilih kampus, area, tempat penting, atau gunakan lokasi kamu untuk melihat kos di sekitarnya.
+          Pilih kampus, area, lokasi populer, atau gunakan lokasi kamu untuk melihat kos di sekitarnya.
         </p>
       </div>
 

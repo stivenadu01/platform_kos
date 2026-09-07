@@ -38,6 +38,9 @@ if ($selectedLat !== null && $selectedLng !== null) {
   $a = sin($dLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($dLng / 2) ** 2;
   $selectedDistance = round(6371 * 2 * asin(min(1, sqrt($a))), 2);
 }
+$aboutText = trim((string)($kos['deskripsi'] ?? '')) ?: 'Pemilik belum menambahkan deskripsi kos.';
+$aboutIsLong = mb_strlen($aboutText) > 420;
+
 $updatedAt = $kos['updated_at'] ?? null;
 $updatedLabel = 'Informasi diperbarui';
 if ($updatedAt) {
@@ -49,7 +52,8 @@ if ($updatedAt) {
     elseif ($days === 1) $updatedLabel = 'Diperbarui kemarin';
     elseif ($days < 30) $updatedLabel = 'Diperbarui ' . $days . ' hari lalu';
     else $updatedLabel = 'Diperbarui ' . $updatedDate->format('d M Y');
-  } catch (Exception $e) {}
+  } catch (Exception $e) {
+  }
 }
 
 $lastLoginAt = $kos['last_login_at'] ?? null;
@@ -77,6 +81,25 @@ if (!empty($lastLoginAt)) {
 ?>
 
 <style>
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .detail-section {
+    scroll-margin-top: 7rem;
+  }
+
+  .about-collapsed {
+    max-height: 10.5rem;
+    overflow: hidden;
+    position: relative;
+  }
+
+  @media (min-width: 640px) {
+    .about-collapsed {
+      max-height: 12.25rem;
+    }
+  }
 </style>
 
 <div x-data="kosDetailPage()" class="bg-slate-50">
@@ -112,6 +135,30 @@ if (!empty($lastLoginAt)) {
       </div>
     </div>
   </section>
+
+  <div
+    x-show="showSectionTabs"
+    x-cloak
+    x-transition:enter="transition ease-out duration-200"
+    x-transition:enter-start="opacity-0 -translate-y-2"
+    x-transition:enter-end="opacity-100 translate-y-0"
+    x-transition:leave="transition ease-in duration-150"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="sticky top-16 z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur lg:hidden">
+    <nav class="mx-auto flex max-w-7xl overflow-x-auto px-2 scrollbar-none" aria-label="Navigasi detail kos">
+      <template x-for="tab in sectionTabs" :key="tab.id">
+        <button
+          type="button"
+          @click="scrollToSection(tab.id)"
+          :class="activeSection === tab.id ? 'border-primary text-primary' : 'border-transparent text-slate-500'"
+          class="shrink-0 border-b-2 px-3 py-3 text-xs font-bold transition sm:px-4 sm:text-sm"
+          x-text="tab.label"></button>
+      </template>
+    </nav>
+  </div>
+
+  <div id="detail-tabs-sentinel" class="h-px w-full"></div>
 
   <main class="mx-auto max-w-7xl px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
     <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
@@ -157,45 +204,81 @@ if (!empty($lastLoginAt)) {
             <?php endif; ?>
           </div>
 
-          <div class="mt-8">
+          <section id="tentang-kos" class="detail-section mt-8">
             <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Tentang kos</h2>
-            <p class="mt-3 whitespace-pre-line text-sm leading-7 text-slate-600"><?= htmlspecialchars(trim($kos['deskripsi'] ?? '') ?: 'Pemilik belum menambahkan deskripsi kos.') ?></p>
-          </div>
+            <div x-data="{ expanded: false }" class="mt-3">
+              <div class="text-sm leading-7 text-slate-600" :class="<?= $aboutIsLong ? "expanded ? '' : 'about-collapsed'" : "''" ?>">
+                <?= nl2br(htmlspecialchars($aboutText)) ?>
+              </div>
+              <?php if ($aboutIsLong): ?>
+                <button
+                  type="button"
+                  @click="expanded = !expanded"
+                  class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark">
+                  <span x-text="expanded ? 'Sembunyikan' : 'Lihat selengkapnya'"></span>
+                  <span aria-hidden="true" x-text="expanded ? '↑' : '↓'"></span>
+                </button>
+              <?php endif; ?>
+            </div>
+          </section>
 
-          <div class="mt-8">
+          <section id="fasilitas" class="detail-section mt-8">
             <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Fasilitas</h2>
             <?php if ($facilities): ?>
               <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <?php foreach ($facilities as $facility): ?>
-                  <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
-                    <span class="mr-2 text-primary">✓</span><?= htmlspecialchars($facility['nama_fasilitas']) ?>
+                  <?php
+                    $facilityIcon = trim((string)($facility['icon'] ?? ''));
+                    if (!in_array($facilityIcon, masterIconKeys(), true)) {
+                      $facilityIcon = 'info';
+                    }
+                    $facilityName = (string)($facility['nama_fasilitas'] ?? 'Fasilitas');
+                  ?>
+                  <div class="group flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:px-4">
+                    <span
+                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"
+                      title="<?= htmlspecialchars(masterIconLabel($facilityIcon), ENT_QUOTES, 'UTF-8') ?>"
+                      aria-hidden="true">
+                      <?= masterIconSvg($facilityIcon, 'h-5 w-5') ?>
+                    </span>
+                    <span class="min-w-0 text-sm font-semibold leading-5 text-slate-700">
+                      <?= htmlspecialchars($facilityName) ?>
+                    </span>
                   </div>
                 <?php endforeach; ?>
               </div>
             <?php else: ?>
               <p class="mt-3 text-sm text-slate-500">Belum ada fasilitas yang dicantumkan.</p>
             <?php endif; ?>
-          </div>
+          </section>
 
-          <div class="mt-8">
+          <section id="aturan" class="detail-section mt-8">
             <div class="flex items-center justify-between gap-3">
               <div>
                 <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Aturan / Ketentuan</h2>
                 <p class="mt-1 text-sm text-slate-500">Hal penting yang perlu diketahui sebelum menghubungi pemilik.</p>
               </div>
             </div>
-            <?php if (trim((string)($kos['aturan'] ?? '')) !== ''): ?>
-              <div class="mt-4 whitespace-pre-line rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
-                <?= htmlspecialchars(trim($kos['aturan'])) ?>
+            <?php $aturanKos = is_array($kos['aturan'] ?? null) ? $kos['aturan'] : []; ?>
+            <?php if ($aturanKos): ?>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <?php foreach ($aturanKos as $aturan): ?>
+                  
+                  <div class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary" aria-hidden="true"><?= masterIconSvg($aturan['icon'] ?? 'ban', 'h-5 w-5') ?></span>
+                    <div class="min-w-0">
+                      <p class="text-sm font-semibold text-slate-800"><?= htmlspecialchars($aturan['nama_aturan']) ?></p>
+                      <?php if (!empty($aturan['deskripsi'])): ?><p class="mt-1 text-xs leading-5 text-slate-500"><?= htmlspecialchars($aturan['deskripsi']) ?></p><?php endif; ?>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
               </div>
             <?php else: ?>
-              <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">
-                Pemilik belum mencantumkan aturan khusus untuk kos ini. Silakan tanyakan langsung kepada pemilik.
-              </div>
+              <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">Pemilik belum mencantumkan aturan khusus untuk kos ini. Silakan tanyakan langsung kepada pemilik.</div>
             <?php endif; ?>
-          </div>
+          </section>
 
-          <div class="mt-8">
+          <section id="tipe-harga" class="detail-section mt-8">
             <div class="flex items-end justify-between gap-3">
               <div>
                 <h2 class="font-[Poppins] text-xl font-bold text-slate-900 sm:text-2xl">Tipe & Harga Kamar</h2>
@@ -207,9 +290,9 @@ if (!empty($lastLoginAt)) {
               <div class="mt-4 grid gap-4 sm:grid-cols-2">
                 <?php foreach ($roomTypes as $type): ?>
                   <?php
-                    $typePrices = $type['harga'] ?? [];
-                    $typeFacilities = $type['fasilitas'] ?? [];
-                    $typePhotos = $type['foto'] ?? [];
+                  $typePrices = $type['harga'] ?? [];
+                  $typeFacilities = $type['fasilitas'] ?? [];
+                  $typePhotos = $type['foto'] ?? [];
                   ?>
                   <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <?php if (!empty($typePhotos)): ?>
@@ -235,10 +318,10 @@ if (!empty($lastLoginAt)) {
                           <div class="mt-2 flex flex-wrap gap-2 text-xs">
                             <span class="rounded-full bg-primary-soft px-2.5 py-1 font-semibold text-primary">Kapasitas <?= (int)$type['kapasitas'] ?> orang</span>
                             <?php if ((int)$type['kamar_tersedia'] > 0): ?>
-                            <span class="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700"><?= (int)$type['kamar_tersedia'] ?> tersedia</span>
-                          <?php else: ?>
-                            <span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">Saat ini tidak tersedia</span>
-                          <?php endif; ?>
+                              <span class="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700"><?= (int)$type['kamar_tersedia'] ?> tersedia</span>
+                            <?php else: ?>
+                              <span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600">Saat ini tidak tersedia</span>
+                            <?php endif; ?>
                           </div>
                         </div>
                       </div>
@@ -268,7 +351,16 @@ if (!empty($lastLoginAt)) {
                         <?php if ($typeFacilities): ?>
                           <div class="mt-2 flex flex-wrap gap-2">
                             <?php foreach ($typeFacilities as $facility): ?>
-                              <span class="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600">✓ <?= htmlspecialchars($facility['nama_fasilitas']) ?></span>
+                              <?php
+                                $roomFacilityIcon = trim((string)($facility['icon'] ?? ''));
+                                if (!in_array($roomFacilityIcon, masterIconKeys(), true)) {
+                                  $roomFacilityIcon = 'info';
+                                }
+                              ?>
+                              <span class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600">
+                                <?= masterIconSvg($roomFacilityIcon, 'h-3.5 w-3.5 text-primary') ?>
+                                <?= htmlspecialchars($facility['nama_fasilitas'] ?? 'Fasilitas') ?>
+                              </span>
                             <?php endforeach; ?>
                           </div>
                         <?php else: ?>
@@ -285,24 +377,23 @@ if (!empty($lastLoginAt)) {
                 <p class="mt-1 text-xs text-slate-500">Pemilik belum menambahkan tipe kamar untuk kos ini.</p>
               </div>
             <?php endif; ?>
-          </div>
+          </section>
 
           <?php
-            $mapLat = (float)($kos['latitude'] ?? 0);
-            $mapLng = (float)($kos['longitude'] ?? 0);
-            $hasCoordinates = is_finite($mapLat) && is_finite($mapLng) && $mapLat >= -90 && $mapLat <= 90 && $mapLng >= -180 && $mapLng <= 180;
-            $googleEmbedUrl = $hasCoordinates
-              ? 'https://www.google.com/maps?q=' . rawurlencode($mapLat . ',' . $mapLng) . '&z=17&output=embed'
-              : '';
+          $mapLat = (float)($kos['latitude'] ?? 0);
+          $mapLng = (float)($kos['longitude'] ?? 0);
+          $hasCoordinates = is_finite($mapLat) && is_finite($mapLng) && $mapLat >= -90 && $mapLat <= 90 && $mapLng >= -180 && $mapLng <= 180;
+          $googleEmbedUrl = $hasCoordinates
+            ? 'https://www.google.com/maps?q=' . rawurlencode($mapLat . ',' . $mapLng) . '&z=17&output=embed'
+            : '';
           ?>
-          <div class="mt-8">
+          <section id="lokasi" class="detail-section mt-8">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div class="flex items-center gap-2">
                   <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-lg text-blue-600">📍</span>
                   <div>
-                    <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi</h2>
-                    <p class="mt-0.5 text-sm text-slate-500">Lihat posisi kos dan buka lokasi lengkap di Google Maps.</p>
+                    <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi dan lingkungan sekitar</h2>
                   </div>
                 </div>
               </div>
@@ -311,25 +402,64 @@ if (!empty($lastLoginAt)) {
               </a>
             </div>
 
+            <?php $lokasiPopulerSekitar = $lokasiPopulerSekitar ?? []; ?>
+
+            <?php if ($lokasiPopulerSekitar): ?>
+              <div class="mt-6">
+                <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tempat terdekat</p>
+                <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <?php foreach ($lokasiPopulerSekitar as $lokasi): ?>
+                    <?php
+                    $kategori = $lokasi['kategori'] ?? '';
+                    $kategoriIcon = $lokasi['icon'] ?? lokasiKategoriIcon($kategori);
+                    $kategoriLabel = lokasiKategoriLabel($kategori);
+                    $jarak = (float)$lokasi['jarak_km'];
+                    $jarakText = $jarak < 1
+                      ? number_format(max(1, round($jarak * 1000)), 0, ',', '.') . ' m'
+                      : number_format($jarak, 1, ',', '.') . ' km';
+                    ?>
+                    <a
+                      href="<?= htmlspecialchars($lokasi['google_maps_url'] ?: ('https://www.google.com/maps/search/?api=1&query=' . rawurlencode($lokasi['latitude'] . ',' . $lokasi['longitude']))) ?>"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="group rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm">
+                      <div class="flex items-start gap-3">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary" title="<?= htmlspecialchars($kategoriLabel) ?>"><?= masterIconSvg($kategoriIcon, 'h-5 w-5') ?></span>
+                        <div class="min-w-0 flex-1">
+                          <p class="line-clamp-2 text-sm font-bold text-slate-800 group-hover:text-primary"><?= htmlspecialchars($lokasi['nama']) ?></p>
+                          <p class="mt-2 text-xs font-bold text-primary sm:hidden"><?= htmlspecialchars($jarakText) ?></p>
+                        </div>
+                        <span class="hidden shrink-0 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary sm:inline-flex">
+                          <?= htmlspecialchars($jarakText) ?>
+                        </span>
+                      </div>
+                    </a>
+                  <?php endforeach; ?>
+                </div>
+              </div>
+            <?php endif; ?>
+
             <?php if ($hasCoordinates): ?>
-              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+              <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
                 <iframe
                   src="<?= htmlspecialchars($googleEmbedUrl) ?>"
                   title="Peta lokasi <?= htmlspecialchars($kos['nama_kos'] ?? 'kos') ?>"
-                  class="block h-[280px] w-full sm:h-[360px] lg:h-[420px]"
+                  class="block aspect-square w-full sm:aspect-auto sm:h-[360px] lg:h-[420px]"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
                   allowfullscreen>
                 </iframe>
               </div>
-
             <?php else: ?>
-              <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
+              <div class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
                 <p class="font-semibold text-slate-700">Lokasi belum tersedia</p>
                 <p class="mt-1 text-sm text-slate-500">Kos ini belum memiliki koordinat yang dapat ditampilkan.</p>
               </div>
             <?php endif; ?>
-          </div>
+
+
+
+          </section>
 
         </div>
 
@@ -459,6 +589,29 @@ if (!empty($lastLoginAt)) {
     return {
       galleryPhotos: photos,
       galleryIndex: 0,
+      showSectionTabs: false,
+      activeSection: 'tentang-kos',
+      sectionTabs: [{
+          id: 'tentang-kos',
+          label: 'Tentang kos'
+        },
+        {
+          id: 'fasilitas',
+          label: 'Fasilitas'
+        },
+        {
+          id: 'aturan',
+          label: 'Aturan'
+        },
+        {
+          id: 'tipe-harga',
+          label: 'Tipe & harga'
+        },
+        {
+          id: 'lokasi',
+          label: 'Lokasi'
+        }
+      ],
       galleryOpen: false,
       typeGalleryPhotos: [],
       typeGalleryIndex: 0,
@@ -472,6 +625,9 @@ if (!empty($lastLoginAt)) {
       reportForm: {
         alasan: '',
         deskripsi: ''
+      },
+      init() {
+        this.$nextTick(() => this.initSectionNavigation());
       },
       openGallery(index) {
         if (!this.galleryPhotos.length) return;
@@ -501,11 +657,54 @@ if (!empty($lastLoginAt)) {
         if (!this.typeGalleryPhotos.length) return;
         this.typeGalleryIndex = (this.typeGalleryIndex - 1 + this.typeGalleryPhotos.length) % this.typeGalleryPhotos.length;
       },
+      scrollToSection(id) {
+        const target = document.getElementById(id);
+        if (!target) return;
+        this.activeSection = id;
+        const navbarOffset = 64;
+        const tabsOffset = window.innerWidth < 1024 ? 49 : 0;
+        const top = target.getBoundingClientRect().top + window.scrollY - navbarOffset - tabsOffset - 8;
+        window.scrollTo({
+          top,
+          behavior: 'smooth'
+        });
+      },
+      initSectionNavigation() {
+        const sentinel = document.getElementById('detail-tabs-sentinel');
+        if (sentinel && 'IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(([entry]) => {
+            this.showSectionTabs = !entry.isIntersecting;
+          }, {
+            threshold: 0
+          });
+          observer.observe(sentinel);
+        } else {
+          this.showSectionTabs = window.scrollY > 120;
+        }
+
+        const sections = this.sectionTabs
+          .map(tab => document.getElementById(tab.id))
+          .filter(Boolean);
+        if ('IntersectionObserver' in window && sections.length) {
+          const sectionObserver = new IntersectionObserver((entries) => {
+            const visible = entries
+              .filter(entry => entry.isIntersecting)
+              .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+            if (visible.length) this.activeSection = visible[0].target.id;
+          }, {
+            rootMargin: '-120px 0px -60% 0px',
+            threshold: 0.01
+          });
+          sections.forEach(section => sectionObserver.observe(section));
+        }
+      },
       async toggleFavorite() {
         if (this.favoriteSaving) return;
         this.favoriteSaving = true;
         try {
-          const res = await API.post('/pelanggan/favorit', { id_kos: <?= (int)$kos['id_kos'] ?> });
+          const res = await API.post('/pelanggan/favorit', {
+            id_kos: <?= (int)$kos['id_kos'] ?>
+          });
           if (res?.data?.favorited !== undefined) this.favorited = !!res.data.favorited;
         } catch (e) {
           console.error('Gagal memperbarui favorit:', e);
@@ -558,5 +757,4 @@ if (!empty($lastLoginAt)) {
       }
     };
   }
-
 </script>

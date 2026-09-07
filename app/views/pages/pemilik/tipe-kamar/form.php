@@ -36,7 +36,7 @@
           <p class="mt-1 text-sm text-slate-500">Hanya fasilitas berkategori kamar yang dapat dipilih.</p>
         </div>
       </div>
-      <div class="mt-4 grid gap-2 sm:grid-cols-2"><template x-for="item in fasilitas" :key="item.id_fasilitas"><label class="flex items-center gap-2 rounded-lg border border-slate-200 p-3 text-sm"><input type="checkbox" :value="Number(item.id_fasilitas)" x-model="fasilitasTerpilih"><span x-text="item.nama_fasilitas"></span></label></template></div>
+      <div class="mt-4 grid gap-2 sm:grid-cols-2"><template x-for="item in fasilitas" :key="item.id_fasilitas"><label class="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-sm cursor-pointer hover:bg-slate-50"><input type="checkbox" :value="Number(item.id_fasilitas)" x-model="fasilitasTerpilih" class="rounded border-slate-300 text-primary focus:ring-primary"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-primary" x-html="iconSvg(item.icon, 'h-4 w-4')"></span><span x-text="item.nama_fasilitas"></span></label></template></div>
     </div>
     <div class="flex justify-end gap-3 border-t border-slate-200 pt-5"><a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary">Batal</a><button type="submit" data-help="help-tipe-form-save" data-onboarding="tipe-save" class="btn-primary" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Tipe'"></button></div>
   </form>
@@ -46,6 +46,8 @@
 <script>
   function tipeKamarForm() {
     return {
+      iconPaths: <?= json_encode_safe(array_map(fn($v)=>$v['path'], masterIconCatalog()), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>,
+      iconSvg(i,c='h-4 w-4') { const p=this.iconPaths[i]||this.iconPaths['map-pin']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="${c}" aria-hidden="true">${p}</svg>`; },
       id: utils.getQuery('id_tipe_kamar') || '',
       loading: true,
       saving: false,

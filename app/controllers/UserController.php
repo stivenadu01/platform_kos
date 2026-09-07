@@ -24,6 +24,7 @@ class UserController
   public function detailKos()
   {
     model('Kos');
+    model('LokasiReferensi');
 
     $id_kos = (int) params('id');
     if ($id_kos <= 0) {
@@ -47,9 +48,17 @@ class UserController
       ? isKosFavorit((int)$currentUser['id_user'], $id_kos)
       : false;
 
+    $lokasiPopulerSekitar = [];
+    $kosLat = is_numeric($kos['latitude'] ?? null) ? (float)$kos['latitude'] : null;
+    $kosLng = is_numeric($kos['longitude'] ?? null) ? (float)$kos['longitude'] : null;
+    if ($kosLat !== null && $kosLng !== null) {
+      $lokasiPopulerSekitar = getLokasiPopulerSekitar($kosLat, $kosLng, 6, 20);
+    }
+
     view('user/detail-kos', [
       'title' => $kos['nama_kos'] . ' - BetaKos',
-      'kos' => $kos
+      'kos' => $kos,
+      'lokasiPopulerSekitar' => $lokasiPopulerSekitar
     ]);
   }
 

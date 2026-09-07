@@ -26,6 +26,9 @@
     <a href="<?= BASE_URL ?>/admin/laporan" title="Laporan Kos" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">⚑</span><span class="sidebar-label">Laporan Kos</span>
     </a>
+    <a href="<?= BASE_URL ?>/admin/data-master" title="Data Master" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+      <span class="text-lg">🗂️</span><span class="sidebar-label">Data Master</span>
+    </a>
     <a href="<?= BASE_URL ?>/admin/langganan" title="Langganan" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
       <span class="text-lg">💳</span><span class="sidebar-label">Langganan</span>
     </a>

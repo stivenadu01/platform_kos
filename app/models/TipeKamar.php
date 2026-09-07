@@ -284,7 +284,7 @@ function getUnitKamarByTipe($id_tipe_kamar)
 function getFasilitasTipeKamar($id_tipe_kamar)
 {
   $conn = db();
-  $stmt = $conn->prepare("SELECT f.id_fasilitas, f.nama_fasilitas FROM fasilitas f INNER JOIN tipe_kamar_fasilitas tf ON tf.id_fasilitas = f.id_fasilitas WHERE tf.id_tipe_kamar = ? AND f.kategori = 'kamar' ORDER BY f.nama_fasilitas ASC");
+  $stmt = $conn->prepare("SELECT f.id_fasilitas, f.nama_fasilitas, f.icon FROM fasilitas f INNER JOIN tipe_kamar_fasilitas tf ON tf.id_fasilitas = f.id_fasilitas WHERE tf.id_tipe_kamar = ? AND f.kategori = 'kamar' AND f.status = 'aktif' ORDER BY f.nama_fasilitas ASC");
   $stmt->bind_param('i', $id_tipe_kamar);
   $stmt->execute();
   $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -308,7 +308,7 @@ function syncFasilitasTipeKamar($id_tipe_kamar, $ids, $id_pemilik)
 
     if ($ids) {
       $placeholders = implode(',', array_fill(0, count($ids), '?'));
-      $stmt = $conn->prepare("SELECT id_fasilitas FROM fasilitas WHERE kategori = 'kamar' AND id_fasilitas IN ($placeholders)");
+      $stmt = $conn->prepare("SELECT id_fasilitas FROM fasilitas WHERE kategori = 'kamar' AND status = 'aktif' AND id_fasilitas IN ($placeholders)");
       $types = str_repeat('i', count($ids));
       $stmt->bind_param($types, ...$ids);
       $stmt->execute();

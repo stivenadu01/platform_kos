@@ -27,6 +27,11 @@ class ApiLokasiController
       ], 422);
     }
 
+    // Batasi pencarian eksternal ke wilayah Nusa Tenggara Timur (NTT).
+    // Bounding box dipakai bersama filter address agar hasil di luar NTT tidak
+    // ikut masuk meskipun Nominatim mengembalikan hasil yang mirip namanya.
+    $nttViewbox = '118.8,-8.0,125.2,-11.2';
+
     // Gunakan beberapa variasi query. Ini membantu pencarian singkat seperti
     // "stik" agar tetap menemukan STIKOM Uyelindo.
     $queries = [
@@ -45,6 +50,8 @@ class ApiLokasiController
         'addressdetails' => 1,
         'limit' => 8,
         'countrycodes' => 'id',
+        'viewbox' => $nttViewbox,
+        'bounded' => 1,
         'accept-language' => 'id'
       ]);
 
@@ -76,6 +83,17 @@ class ApiLokasiController
 
         $lat = (float)$item['lat'];
         $lng = (float)$item['lon'];
+        $address = is_array($item['address'] ?? null) ? $item['address'] : [];
+        $state = mb_strtolower(trim((string)($address['state'] ?? '')));
+        $stateCode = mb_strtoupper(trim((string)($address['ISO3166-2-lvl4'] ?? '')));
+
+        // Hanya terima hasil yang teridentifikasi sebagai NTT. Beberapa hasil
+        // Nominatim dapat berada di dalam bounding box tetapi bukan bagian NTT.
+        $isNtt = $stateCode === 'ID-NT'
+          || mb_strpos($state, 'nusa tenggara timur') !== false
+          || mb_strpos($state, 'ntt') !== false;
+        if (!$isNtt) continue;
+
         $displayName = trim($item['display_name'] ?? $q);
         $key = $lat . ',' . $lng;
 

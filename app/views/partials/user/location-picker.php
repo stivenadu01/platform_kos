@@ -4,7 +4,7 @@ $pickerGroups = $locationPresets ?? ['kampus' => [], 'area' => [], 'penting' => 
 $pickerTabs = [
   'kampus' => 'Kampus',
   'area' => 'Area',
-  'penting' => 'Tempat penting',
+  'penting' => 'Lokasi populer',
 ];
 $pickerConfig = [
   'baseUrl' => BASE_URL,
@@ -16,8 +16,10 @@ $pickerConfig = [
 <div
   x-data="BetaKosLocationPicker(<?= htmlspecialchars(json_encode_safe($pickerConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
   class="relative"
-  @keydown.escape.window="open = false">
-  <form @submit.prevent="submitQuery()" class="relative flex items-center gap-3">
+  x-init="init()"
+  @keydown.escape.window="closePicker()"
+  @click.outside="closePicker()">
+  <form x-show="!open" @submit.prevent="submitQuery()" class="relative flex items-center gap-3">
     <?php if ($pickerMode === 'search'): ?>
       <button
         type="button"
@@ -63,10 +65,48 @@ $pickerConfig = [
     x-show="open"
     x-cloak
     x-transition.origin.top
-    @click.outside="closePicker()"
-    class="absolute left-0 right-0 top-full z-[120] mt-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-300/40">
+    class="fixed inset-x-0 bottom-0 top-16 z-[120] flex flex-col overflow-hidden border-t border-slate-200 bg-white shadow-2xl">
 
-    <div class="max-h-[70vh] overflow-y-auto">
+    <div class="border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <form @submit.prevent="submitQuery()" class="flex items-center gap-3">
+        <button
+          type="button"
+          @click="closePicker()"
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-2xl text-slate-500 hover:bg-slate-100"
+          aria-label="Tutup pencarian lokasi">←</button>
+
+        <span class="text-xl text-slate-400" aria-hidden="true">⌕</span>
+
+        <input
+          x-ref="locationInput"
+          x-model="locationQuery"
+          @input="onQueryInput()"
+          @keydown.enter.prevent="submitQuery()"
+          type="search"
+          autocomplete="off"
+          class="min-w-0 flex-1 bg-transparent py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 sm:text-base"
+          placeholder="Cari kampus, area, atau tempat..."
+          aria-label="Cari lokasi kos">
+
+        <button
+          x-show="locationQuery"
+          x-cloak
+          @click="locationQuery = ''; suggestions = []; $nextTick(() => $refs.locationInput?.focus())"
+          type="button"
+          class="shrink-0 rounded-lg px-2 py-1 text-xs text-slate-400 hover:bg-slate-100"
+          aria-label="Hapus pencarian">Hapus</button>
+
+        <?php if ($pickerMode === 'home'): ?>
+          <button
+            type="submit"
+            class="shrink-0 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-dark sm:px-5">
+            Cari Kos
+          </button>
+        <?php endif; ?>
+      </form>
+    </div>
+
+    <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain">
       <button
         type="button"
         @click="useMyLocation()"
@@ -123,7 +163,7 @@ $pickerConfig = [
           <div class="flex items-center justify-between gap-3">
             <div>
               <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pilihan populer</p>
-              <p class="mt-1 text-sm font-semibold text-slate-800" x-text="activeTab === 'kampus' ? 'Kampus di Kupang' : (activeTab === 'area' ? 'Area populer di Kupang' : 'Tempat penting di Kupang')"></p>
+              <p class="mt-1 text-sm font-semibold text-slate-800" x-text="activeTab === 'kampus' ? 'Kampus di Kupang' : (activeTab === 'area' ? 'Area populer di Kupang' : 'Lokasi populer di Kupang')"></p>
             </div>
           </div>
 

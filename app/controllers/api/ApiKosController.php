@@ -6,6 +6,7 @@ class ApiKosController
   {
     model('Kos');
     model('Fasilitas');
+    model('Aturan');
   }
 
   private function owner()
@@ -42,10 +43,8 @@ class ApiKosController
       ], 404);
     }
 
-    $kos['fasilitas'] = getFasilitasByKos(
-      $id_kos,
-      $user['id_user']
-    );
+    $kos['fasilitas'] = getFasilitasByKos($id_kos, $user['id_user']);
+    $kos['aturan'] = getAturanByKos($id_kos, $user['id_user']);
 
     response([
       'success' => true,
@@ -73,11 +72,8 @@ class ApiKosController
       ], 500);
     }
 
-    syncFasilitasKos(
-      $id_kos,
-      $user['id_user'],
-      $data['fasilitas'] ?? []
-    );
+    syncFasilitasKos($id_kos, $user['id_user'], $data['fasilitas'] ?? []);
+    syncAturanKos($id_kos, $user['id_user'], $data['aturan'] ?? []);
 
     response([
       'success' => true,
@@ -120,11 +116,8 @@ class ApiKosController
       ], 500);
     }
 
-    syncFasilitasKos(
-      $id_kos,
-      $user['id_user'],
-      $data['fasilitas'] ?? []
-    );
+    syncFasilitasKos($id_kos, $user['id_user'], $data['fasilitas'] ?? []);
+    syncAturanKos($id_kos, $user['id_user'], $data['aturan'] ?? []);
 
     response([
       'success' => true,
@@ -183,8 +176,8 @@ class ApiKosController
       response(['success' => false, 'message' => 'Nama kos maksimal 200 karakter'], 422);
     }
 
-    if (mb_strlen(trim((string)($data['aturan'] ?? ''))) > 3000) {
-      response(['success' => false, 'message' => 'Aturan kos maksimal 3.000 karakter'], 422);
+    if (isset($data['aturan']) && !is_array($data['aturan'])) {
+      response(['success' => false, 'message' => 'Format aturan kos tidak valid'], 422);
     }
 
     if (!in_array($data['jenis'], ['putra', 'putri', 'campur'], true)) {

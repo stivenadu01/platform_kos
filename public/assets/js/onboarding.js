@@ -219,6 +219,7 @@
               ['kos-field-alamat', 'Alamat', 'Masukkan alamat lengkap kos.'],
               ['kos-field-jenis', 'Jenis Kos', 'Pilih jenis kos yang sesuai.'],
               ['kos-field-deskripsi', 'Deskripsi', 'Jelaskan kos secara singkat agar calon penghuni memahami tempatnya.'],
+              ['kos-field-aturan', 'Aturan Kos', 'Pilih aturan yang berlaku di kos agar calon penghuni dapat mengetahuinya sejak awal.'],
               ['kos-field-fasilitas', 'Fasilitas Kos', 'Pilih fasilitas yang tersedia di kos.'],
               ['kos-field-lokasi', 'Lokasi Kos', 'Tentukan lokasi kos pada peta.'],
               ['kos-save', 'Simpan Kos', 'Setelah data lengkap, simpan kos.']
