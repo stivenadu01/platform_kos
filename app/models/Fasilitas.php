@@ -73,7 +73,8 @@ function getFasilitasByKos(
 function syncFasilitasKos(
   $id_kos,
   $id_pemilik,
-  $fasilitas
+  $fasilitas,
+  $manageTransaction = true
 ) {
   $conn = db();
 
@@ -138,7 +139,9 @@ function syncFasilitasKos(
    * Mulai transaksi supaya proses sinkronisasi
    * dilakukan secara konsisten.
    */
-  $conn->begin_transaction();
+  if ($manageTransaction) {
+    $conn->begin_transaction();
+  }
 
   try {
 
@@ -185,6 +188,7 @@ function syncFasilitasKos(
         SELECT id_fasilitas
         FROM fasilitas
         WHERE kategori = 'kos'
+          AND status = 'aktif'
           AND id_fasilitas IN ($placeholders)
       ");
 
@@ -247,12 +251,16 @@ function syncFasilitasKos(
     }
 
 
-    $conn->commit();
+    if ($manageTransaction) {
+      $conn->commit();
+    }
 
     return true;
   } catch (Throwable $e) {
 
-    $conn->rollback();
+    if ($manageTransaction) {
+      $conn->rollback();
+    }
 
     throw $e;
   }

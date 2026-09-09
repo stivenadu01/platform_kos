@@ -1,4 +1,15 @@
-const CACHE_NAME = 'betakos-static-v3';
+const CACHE_NAME = 'betakos-static-v4';
+
+// Scope mengikuti lokasi instalasi aplikasi, baik pada root domain maupun
+// subfolder seperti /platform_kos/public.
+const APP_BASE = new URL(self.registration.scope).pathname.replace(/\/$/, '');
+const appUrl = (path) => `${APP_BASE}${path}`;
+const appPath = (pathname) => {
+  if (APP_BASE && pathname.startsWith(`${APP_BASE}/`)) {
+    return pathname.slice(APP_BASE.length);
+  }
+  return pathname;
+};
 
 const STATIC_ASSETS = [
   '/assets/css/app.css',
@@ -12,7 +23,7 @@ const STATIC_ASSETS = [
   '/assets/icon/apple-touch-icon.png',
   '/assets/icon/favicon.ico',
   '/assets/icon/site.webmanifest'
-];
+].map(appUrl);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -40,18 +51,19 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+  const pathname = appPath(url.pathname);
 
   // Jangan cache API, halaman dinamis, upload, atau request lintas origin.
   // Data login, transaksi, tagihan, dan halaman dashboard harus selalu dari server terbaru.
   if (url.origin !== self.location.origin) return;
-  if (url.pathname === '/service-worker.js') return;
-  if (url.pathname.startsWith('/api/')) return;
-  if (url.pathname.startsWith('/uploads/')) return;
+  if (pathname === '/service-worker.js') return;
+  if (pathname.startsWith('/api/')) return;
+  if (pathname.startsWith('/uploads/')) return;
   if (request.mode === 'navigate') return;
 
   const isStaticAsset =
-    url.pathname.startsWith('/assets/') ||
-    url.pathname === '/service-worker.js';
+    pathname.startsWith('/assets/') ||
+    pathname === '/service-worker.js';
 
   if (!isStaticAsset) return;
 

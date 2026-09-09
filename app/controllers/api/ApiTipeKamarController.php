@@ -29,21 +29,35 @@ class ApiTipeKamarController
   public function store()
   {
     try {
-      $id = createTipeKamar(input(), $this->ownerId());
+      $id = saveTipeKamarComplete(input(), $this->ownerId());
       response(['success' => true, 'message' => 'Tipe kamar berhasil dibuat.', 'data' => ['id_tipe_kamar' => $id]], 201);
     } catch (Throwable $e) {
-      response(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: 422);
+      $this->saveFailure($e, 'Gagal membuat tipe kamar. Silakan coba kembali.');
     }
   }
 
   public function update()
   {
     try {
-      updateTipeKamar((int) input('id_tipe_kamar'), input(), $this->ownerId());
+      $data = input();
+      $id = (int) ($data['id_tipe_kamar'] ?? 0);
+      if ($id < 1) throw new Exception('ID tipe kamar tidak valid.', 422);
+      saveTipeKamarComplete($data, $this->ownerId(), $id);
       response(['success' => true, 'message' => 'Tipe kamar berhasil diperbarui.']);
     } catch (Throwable $e) {
-      response(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: 422);
+      $this->saveFailure($e, 'Gagal memperbarui tipe kamar. Silakan coba kembali.');
     }
+  }
+
+  private function saveFailure(Throwable $error, string $fallbackMessage)
+  {
+    error_log('Tipe kamar save error: ' . $error->getMessage());
+    $status = (int) $error->getCode();
+    if ($status < 400 || $status > 599) $status = 500;
+    response([
+      'success' => false,
+      'message' => $status < 500 ? $error->getMessage() : $fallbackMessage
+    ], $status);
   }
 
   public function destroy()

@@ -25,6 +25,10 @@
 
   <form @submit.prevent="submit" class="card border border-slate-200 shadow-sm space-y-6">
 
+    <nav x-show="mode === 'tambah'" class="grid grid-cols-2 gap-2 border-b border-slate-200 pb-5" aria-label="Tahapan tambah penghuni">
+      <template x-for="(label, index) in ['Verifikasi NIK', 'Data & Kamar']" :key="label"><div class="flex items-center gap-2 rounded-xl px-3 py-2" :class="step === index + 1 ? 'bg-primary-soft text-primary' : step > index + 1 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400'"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold" :class="step === index + 1 ? 'bg-primary text-white' : step > index + 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'" x-text="step > index + 1 ? '✓' : index + 1"></span><span class="text-xs font-semibold sm:text-sm" x-text="label"></span></div></template>
+    </nav>
+
     <div
       x-show="mode === 'tambah' && step === 1"
       x-cloak
@@ -191,6 +195,8 @@
       x-cloak
       class="flex justify-end gap-3 border-t border-slate-200 pt-5">
 
+      <button x-show="mode === 'tambah'" type="button" @click="backToNik()" class="btn-secondary">← Ubah NIK</button>
+
       <a
         href="<?= BASE_URL ?>/pemilik/penghuni"
         class="btn-secondary">
@@ -348,6 +354,14 @@
         } finally {
           this.lookingUp = false;
         }
+      },
+
+      backToNik() {
+        this.step = 1;
+        this.matchedUser = false;
+        this.form.nama = '';
+        this.form.no_hp = '';
+        this.$nextTick(() => this.$root.scrollIntoView({ behavior: 'smooth', block: 'start' }));
       },
 
       async submit() {

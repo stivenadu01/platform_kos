@@ -38,36 +38,51 @@ function toggleKosFavorit($id_user, $id_kos)
   if ($id_user <= 0 || $id_kos <= 0) throw new Exception('Kos tidak valid.', 422);
   $conn = db();
 
-  $stmt = $conn->prepare("SELECT id_kos FROM kos WHERE id_kos = ? AND status = 'aktif' LIMIT 1");
-  $stmt->bind_param('i', $id_kos);
-  $stmt->execute();
-  $kos = $stmt->get_result()->fetch_assoc();
-  $stmt->close();
-  if (!$kos) throw new Exception('Kos tidak ditemukan atau sudah tidak tersedia.', 404);
-
-  $stmt = $conn->prepare('SELECT id_favorit FROM kos_favorit WHERE id_user = ? AND id_kos = ? LIMIT 1');
-  $stmt->bind_param('ii', $id_user, $id_kos);
-  $stmt->execute();
-  $row = $stmt->get_result()->fetch_assoc();
-  $stmt->close();
-
-  if ($row) {
-    $stmt = $conn->prepare('DELETE FROM kos_favorit WHERE id_favorit = ?');
-    $stmt->bind_param('i', $row['id_favorit']);
+  $conn->begin_transaction();
+  try {
+    // Lock baris kos sebagai titik serialisasi yang selalu tersedia. Dengan
+    // demikian dua request toggle untuk kos yang sama tidak dapat sama-sama
+    // membaca kondisi "belum favorit" lalu melakukan INSERT bersamaan.
+    $stmt = $conn->prepare("SELECT id_kos FROM kos WHERE id_kos = ? AND status = 'aktif' LIMIT 1 FOR UPDATE");
+    $stmt->bind_param('i', $id_kos);
     $stmt->execute();
+    $kos = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    return false;
-  }
+    if (!$kos) throw new Exception('Kos tidak ditemukan atau sudah tidak tersedia.', 404);
 
-  $stmt = $conn->prepare('INSERT INTO kos_favorit (id_user, id_kos) VALUES (?, ?)');
-  $stmt->bind_param('ii', $id_user, $id_kos);
-  if (!$stmt->execute()) {
-    $error = $stmt->error;
+    $stmt = $conn->prepare('SELECT id_favorit FROM kos_favorit WHERE id_user = ? AND id_kos = ? LIMIT 1');
+    $stmt->bind_param('ii', $id_user, $id_kos);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    throw new Exception('Gagal menyimpan favorit: ' . $error, 500);
+
+    if ($row) {
+      $stmt = $conn->prepare('DELETE FROM kos_favorit WHERE id_favorit = ?');
+      $stmt->bind_param('i', $row['id_favorit']);
+      if (!$stmt->execute()) {
+        $error = $stmt->error;
+        $stmt->close();
+        throw new Exception('Gagal menghapus favorit: ' . $error, 500);
+      }
+      $stmt->close();
+      $conn->commit();
+      return false;
+    }
+
+    $stmt = $conn->prepare('INSERT INTO kos_favorit (id_user, id_kos) VALUES (?, ?)');
+    $stmt->bind_param('ii', $id_user, $id_kos);
+    if (!$stmt->execute()) {
+      $error = $stmt->error;
+      $stmt->close();
+      throw new Exception('Gagal menyimpan favorit: ' . $error, 500);
+    }
+    $stmt->close();
+    $conn->commit();
+    return true;
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
   }
-  $stmt->close();
-  return true;
 }
 
 function getFavoritKosByUser($id_user)
@@ -85,6 +100,7 @@ function getFavoritKosByUser($id_user)
     LEFT JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
     LEFT JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     WHERE kf.id_user = ?
+      AND k.status = 'aktif'
     GROUP BY kf.id_favorit, k.id_kos, k.nama_kos, k.alamat, k.jenis, k.deskripsi, kf.created_at
     ORDER BY kf.id_favorit DESC");
   $stmt->bind_param('i', $id_user);
@@ -272,7 +288,7 @@ function createKos($id_pemilik, $data)
 }
 
 
-function updateKos($id_kos, $id_pemilik, $data)
+function updateKos($id_kos, $id_pemilik, $data, $resetToDraft = false)
 {
   $conn = db();
 
@@ -284,6 +300,8 @@ function updateKos($id_kos, $id_pemilik, $data)
   $jenis = $data['jenis'];
   $deskripsi = trim($data['deskripsi'] ?? '');
 
+  $statusUpdate = $resetToDraft ? ",\n      status = 'draft'" : '';
+
   $stmt = $conn->prepare("
     UPDATE kos
     SET
@@ -293,7 +311,7 @@ function updateKos($id_kos, $id_pemilik, $data)
       longitude = ?,
       google_maps_url = ?,
       jenis = ?,
-      deskripsi = ?
+      deskripsi = ?{$statusUpdate}
     WHERE id_kos = ?
       AND id_pemilik = ?
   ");
@@ -701,6 +719,8 @@ function getDetailKosPublik($id_kos)
     FROM fasilitas f
     JOIN kos_fasilitas kf ON kf.id_fasilitas = f.id_fasilitas
     WHERE kf.id_kos = ?
+      AND f.kategori = 'kos'
+      AND f.status = 'aktif'
     ORDER BY f.nama_fasilitas ASC
   ");
   $stmt->bind_param('i', $id_kos);

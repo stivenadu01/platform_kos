@@ -82,8 +82,11 @@ function createTipeKamar($data, $id_pemilik)
   $kapasitas = (int) ($data['kapasitas'] ?? 0);
   $deskripsi = trim($data['deskripsi'] ?? '');
 
-  if (!$id_kos || $nama_tipe === '' || $kapasitas < 1) {
+  if (!$id_kos || $nama_tipe === '' || $kapasitas < 1 || $kapasitas > 255) {
     throw new Exception('Kos, nama tipe, dan kapasitas wajib diisi.', 422);
+  }
+  if (mb_strlen($nama_tipe) > 100) {
+    throw new Exception('Nama tipe maksimal 100 karakter.', 422);
   }
 
   $conn = db();
@@ -116,8 +119,11 @@ function updateTipeKamar($id_tipe_kamar, $data, $id_pemilik)
   $nama_tipe = trim($data['nama_tipe'] ?? '');
   $kapasitas = (int) ($data['kapasitas'] ?? 0);
   $deskripsi = trim($data['deskripsi'] ?? '');
-  if ($nama_tipe === '' || $kapasitas < 1) {
+  if ($nama_tipe === '' || $kapasitas < 1 || $kapasitas > 255) {
     throw new Exception('Nama tipe dan kapasitas wajib diisi.', 422);
+  }
+  if (mb_strlen($nama_tipe) > 100) {
+    throw new Exception('Nama tipe maksimal 100 karakter.', 422);
   }
 
   $conn = db();
@@ -220,7 +226,7 @@ function getHargaTipeKamar($id_tipe_kamar)
   return $data;
 }
 
-function saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik)
+function saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik, $manageTransaction = true)
 {
   if (!findTipeKamarByIdPemilik($id_tipe_kamar, $id_pemilik)) {
     throw new Exception('Tipe kamar tidak ditemukan.', 404);
@@ -228,12 +234,19 @@ function saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik)
   if (!is_array($harga)) {
     throw new Exception('Format harga tidak valid.', 422);
   }
+  if (count($harga) < 1) {
+    throw new Exception('Minimal satu harga tipe kamar wajib diisi.', 422);
+  }
 
   $normalized = [];
   foreach ($harga as $item) {
-    $jumlah = (int) ($item['jumlah_orang'] ?? 0);
+    if (!is_array($item)) {
+      throw new Exception('Konfigurasi harga tidak valid.', 422);
+    }
+    $jumlahRaw = $item['jumlah_orang'] ?? null;
+    $jumlah = filter_var($jumlahRaw, FILTER_VALIDATE_INT);
     $nilai = $item['harga_total'] ?? null;
-    if ($jumlah < 1 || $jumlah > $kapasitas || $nilai === null || $nilai === '' || !is_numeric($nilai) || (float) $nilai < 0) {
+    if ($jumlah === false || $jumlah < 1 || $jumlah > $kapasitas || $nilai === null || $nilai === '' || !is_numeric($nilai) || !is_finite((float) $nilai) || (float) $nilai <= 0) {
       throw new Exception('Konfigurasi harga tidak valid.', 422);
     }
     if (isset($normalized[$jumlah])) {
@@ -243,7 +256,7 @@ function saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik)
   }
 
   $conn = db();
-  $conn->begin_transaction();
+  if ($manageTransaction) $conn->begin_transaction();
   try {
     $stmt = $conn->prepare('DELETE FROM harga_kamar WHERE id_tipe_kamar = ?');
     $stmt->bind_param('i', $id_tipe_kamar);
@@ -262,9 +275,9 @@ function saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik)
       }
     }
     $stmt->close();
-    $conn->commit();
+    if ($manageTransaction) $conn->commit();
   } catch (Throwable $e) {
-    $conn->rollback();
+    if ($manageTransaction) $conn->rollback();
     throw $e;
   }
   return true;
@@ -292,18 +305,31 @@ function getFasilitasTipeKamar($id_tipe_kamar)
   return $data;
 }
 
-function syncFasilitasTipeKamar($id_tipe_kamar, $ids, $id_pemilik)
+function syncFasilitasTipeKamar($id_tipe_kamar, $ids, $id_pemilik, $manageTransaction = true)
 {
   if (!findTipeKamarByIdPemilik($id_tipe_kamar, $id_pemilik)) {
     throw new Exception('Tipe kamar tidak ditemukan.', 404);
   }
-  $ids = array_values(array_unique(array_filter(array_map('intval', is_array($ids) ? $ids : []), fn($id) => $id > 0)));
+  if (!is_array($ids)) {
+    throw new Exception('Format fasilitas tipe kamar tidak valid.', 422);
+  }
+  $normalizedIds = [];
+  foreach ($ids as $id) {
+    $validId = filter_var($id, FILTER_VALIDATE_INT);
+    if ($validId === false || $validId < 1) {
+      throw new Exception('Fasilitas tipe kamar tidak valid.', 422);
+    }
+    $normalizedIds[] = $validId;
+  }
+  $ids = array_values(array_unique($normalizedIds));
   $conn = db();
-  $conn->begin_transaction();
+  if ($manageTransaction) $conn->begin_transaction();
   try {
     $stmt = $conn->prepare('DELETE FROM tipe_kamar_fasilitas WHERE id_tipe_kamar = ?');
     $stmt->bind_param('i', $id_tipe_kamar);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+      throw new Exception('Gagal menghapus fasilitas lama.', 500);
+    }
     $stmt->close();
 
     if ($ids) {
@@ -321,16 +347,65 @@ function syncFasilitasTipeKamar($id_tipe_kamar, $ids, $id_pemilik)
       $stmt = $conn->prepare('INSERT INTO tipe_kamar_fasilitas (id_tipe_kamar, id_fasilitas) VALUES (?, ?)');
       foreach ($ids as $id) {
         $stmt->bind_param('ii', $id_tipe_kamar, $id);
-        $stmt->execute();
+        if (!$stmt->execute()) {
+          throw new Exception('Gagal menyimpan fasilitas tipe kamar.', 500);
+        }
       }
       $stmt->close();
     }
+    if ($manageTransaction) $conn->commit();
+  } catch (Throwable $e) {
+    if ($manageTransaction) $conn->rollback();
+    throw $e;
+  }
+  return true;
+}
+
+/**
+ * Simpan data utama, harga, dan fasilitas tipe kamar sebagai satu unit kerja.
+ * Foto tetap di luar transaksi karena diunggah setelah ID tipe kamar tersedia.
+ */
+function saveTipeKamarComplete($data, $id_pemilik, $id_tipe_kamar = 0)
+{
+  if (!is_array($data)) {
+    throw new Exception('Format data tipe kamar tidak valid.', 422);
+  }
+
+  $harga = $data['harga'] ?? null;
+  $fasilitas = $data['id_fasilitas'] ?? null;
+  if (!is_array($harga)) {
+    throw new Exception('Format harga tipe kamar tidak valid.', 422);
+  }
+  if (!is_array($fasilitas)) {
+    throw new Exception('Format fasilitas tipe kamar tidak valid.', 422);
+  }
+
+  $kapasitas = (int) ($data['kapasitas'] ?? 0);
+  $conn = db();
+  $conn->begin_transaction();
+
+  try {
+    if ($id_tipe_kamar > 0) {
+      if (!findTipeKamarByIdPemilik($id_tipe_kamar, $id_pemilik)) {
+        throw new Exception('Tipe kamar tidak ditemukan.', 404);
+      }
+
+      // Harga lama diganti lebih dahulu di transaksi yang sama agar kapasitas
+      // baru diperiksa terhadap konfigurasi harga baru, bukan data lama.
+      saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik, false);
+      updateTipeKamar($id_tipe_kamar, $data, $id_pemilik);
+    } else {
+      $id_tipe_kamar = createTipeKamar($data, $id_pemilik);
+      saveHargaTipeKamar($id_tipe_kamar, $harga, $kapasitas, $id_pemilik, false);
+    }
+
+    syncFasilitasTipeKamar($id_tipe_kamar, $fasilitas, $id_pemilik, false);
     $conn->commit();
+    return $id_tipe_kamar;
   } catch (Throwable $e) {
     $conn->rollback();
     throw $e;
   }
-  return true;
 }
 
 function getFotoTipeKamar($id_tipe_kamar)

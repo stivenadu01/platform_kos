@@ -42,37 +42,9 @@ function run()
   global $routes;
 
   $method = $_SERVER['REQUEST_METHOD'];
-  $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-  // Normalisasi prefix deployment.
-  // Mendukung akses langsung melalui:
-  //   /pemilik
-  //   /public/pemilik
-  //   /platform_kos/pemilik
-  //   /platform_kos/public/pemilik
-  $prefixes = [
-    '/platform_kos/public',
-    '/platform_kos',
-    '/public'
-  ];
-
-  foreach ($prefixes as $prefix) {
-    if ($uri === $prefix) {
-      $uri = '/';
-      break;
-    }
-
-    if (str_starts_with($uri, $prefix . '/')) {
-      $uri = substr($uri, strlen($prefix));
-      break;
-    }
-  }
-
-  $uri = rtrim($uri, '/');
-  // kalau kosong, jadikan '/'
-  if ($uri === '') {
-    $uri = '/';
-  }
+  // Router dan response helper wajib menafsirkan path deployment dengan cara
+  // yang sama agar endpoint API selalu mengembalikan JSON.
+  $uri = normalized_request_path();
 
   // support method spoofing (PUT, DELETE)
   if ($method === 'POST' && isset($_POST['_method'])) {

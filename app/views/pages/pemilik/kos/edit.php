@@ -26,6 +26,12 @@
     @submit.prevent="submit"
     class="card border border-slate-200 shadow-sm p-6 space-y-6">
 
+    <nav class="grid grid-cols-1 gap-2 border-b border-slate-200 pb-5 sm:grid-cols-3" aria-label="Tahapan edit kos">
+      <template x-for="(label, index) in steps" :key="label"><div class="flex items-center gap-2 rounded-xl px-3 py-2" :class="step === index + 1 ? 'bg-primary-soft text-primary' : step > index + 1 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400'"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold" :class="step === index + 1 ? 'bg-primary text-white' : step > index + 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'" x-text="step > index + 1 ? '✓' : index + 1"></span><span class="text-sm font-semibold" x-text="label"></span></div></template>
+    </nav>
+
+    <div x-show="step === 1" x-cloak data-step-panel="1" class="space-y-6">
+
 
     <!-- INFORMASI -->
     <div>
@@ -110,6 +116,10 @@
 
     </div>
 
+    </div>
+
+    <div x-show="step === 2" x-cloak data-step-panel="2" class="space-y-6">
+
     <!-- ATURAN -->
     <div data-help="help-kos-form-rules" data-onboarding="kos-field-aturan" class="pt-4 border-t border-slate-200">
       <div>
@@ -119,19 +129,15 @@
       <div x-show="aturanLoading" class="mt-4 text-sm text-slate-500">Memuat daftar aturan...</div>
       <div x-show="!aturanLoading && aturan.length === 0" class="mt-4 p-4 rounded-lg bg-slate-50 text-sm text-slate-500">Belum ada daftar aturan aktif.</div>
       <div x-show="!aturanLoading && aturan.length > 0" class="mt-4 space-y-5">
-        <template x-for="group in aturanGroups" :key="group.key">
-          <div x-show="group.items.length > 0">
-            <h4 class="text-xs font-bold uppercase tracking-wide text-slate-500" x-text="group.label"></h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
-              <template x-for="item in group.items" :key="item.id_aturan">
-                <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition">
-                  <input type="checkbox" :value="item.id_aturan" x-model="form.aturan" class="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary">
-                  <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary" x-html="iconSvg(item.icon, 'h-4 w-4')"></span><span class="min-w-0"><span class="text-sm text-slate-700" x-text="item.nama_aturan"></span><span x-show="item.deskripsi" class="block text-xs text-slate-400 mt-0.5" x-text="item.deskripsi"></span></span>
-                </label>
-              </template>
-            </div>
-          </div>
-        </template>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          <template x-for="item in aturan" :key="item.id_aturan">
+            <label class="flex min-h-14 items-center gap-3 rounded-xl border border-slate-200 p-3 cursor-pointer transition hover:border-primary/30 hover:bg-slate-50">
+              <input type="checkbox" :value="item.id_aturan" x-model="form.aturan" class="rounded border-slate-300 text-primary focus:ring-primary">
+              <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary" x-html="iconSvg(item.icon, 'h-4 w-4')"></span>
+              <span class="min-w-0 text-sm font-medium text-slate-700" x-text="item.nama_aturan"></span>
+            </label>
+          </template>
+        </div>
       </div>
     </div>
 
@@ -195,8 +201,10 @@
 
     </div>
 
+    </div>
+
     <!-- LOKASI -->
-    <div data-help="help-kos-form-location" data-onboarding="kos-field-lokasi" class="pt-4 border-t border-slate-200">
+    <div x-show="step === 3" x-cloak data-step-panel="3" data-help="help-kos-form-location" data-onboarding="kos-field-lokasi" class="space-y-5">
       <div>
         <h3 class="font-semibold text-slate-900">Lokasi Kos</h3>
         <p class="mt-1 text-sm text-slate-500">Tempel link Google Maps kos agar saat pengunjung membuka lokasi, Google Maps langsung menuju tempat yang Anda pilih.</p>
@@ -259,15 +267,22 @@
     </div>
 
     <!-- ACTION -->
-    <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 border-t border-slate-200">
+    <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between">
 
       <a
+        x-show="step === 1"
         href="<?= BASE_URL ?>/pemilik/kos"
         class="btn-secondary text-center">
         Batal
       </a>
 
+      <button x-show="step > 1" x-cloak type="button" @click="previousStep()" class="btn-secondary">← Sebelumnya</button>
+
+      <button x-show="step < 3" type="button" @click="nextStep()" class="btn-primary sm:ml-auto">Selanjutnya →</button>
+
       <button
+        x-show="step === 3"
+        x-cloak
         type="submit"
         class="btn-primary"
         :disabled="loading || !form.latitude || !form.longitude">
@@ -300,12 +315,22 @@
 
       loading: false,
       locating: false,
+      step: 1,
+      steps: ['Informasi', 'Aturan & Fasilitas', 'Lokasi'],
 
 
       fasilitas: [],
       fasilitasLoading: false,
       aturan: [],
       aturanLoading: false,
+      currentStatus: <?= json_encode_safe($kos['status'] ?? 'draft') ?>,
+      originalCritical: {
+        nama_kos: <?= json_encode_safe($kos['nama_kos']) ?>,
+        alamat: <?= json_encode_safe($kos['alamat']) ?>,
+        latitude: <?= json_encode_safe($kos['latitude']) ?>,
+        longitude: <?= json_encode_safe($kos['longitude']) ?>,
+        google_maps_url: <?= json_encode_safe($kos['google_maps_url'] ?? '') ?>
+      },
 
       form: {
 
@@ -333,6 +358,24 @@
       init() {
         this.loadDataFasilitas();
         this.loadDataAturan();
+      },
+
+      validateStep() {
+        const panel = this.$root.querySelector(`[data-step-panel="${this.step}"]`);
+        const invalid = panel ? panel.querySelector(':invalid') : null;
+        if (invalid) { invalid.reportValidity(); invalid.focus(); return false; }
+        return true;
+      },
+
+      nextStep() {
+        if (!this.validateStep()) return;
+        this.step = Math.min(3, this.step + 1);
+        this.$nextTick(() => this.$root.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+      },
+
+      previousStep() {
+        this.step = Math.max(1, this.step - 1);
+        this.$nextTick(() => this.$root.scrollIntoView({ behavior: 'smooth', block: 'start' }));
       },
 
       extractCoordinatesFromGoogleMapsUrl(value) {
@@ -504,6 +547,25 @@
       },
 
 
+      normalizeCriticalText(value) {
+        return String(value ?? '').trim().replace(/\s+/g, ' ');
+      },
+
+      hasVerificationCriticalChanges() {
+        if (this.normalizeCriticalText(this.form.nama_kos) !== this.normalizeCriticalText(this.originalCritical.nama_kos)) return true;
+        if (this.normalizeCriticalText(this.form.alamat) !== this.normalizeCriticalText(this.originalCritical.alamat)) return true;
+
+        const oldLat = Number(this.originalCritical.latitude);
+        const newLat = Number(this.form.latitude);
+        const oldLng = Number(this.originalCritical.longitude);
+        const newLng = Number(this.form.longitude);
+        if (Math.abs(oldLat - newLat) > 0.00000001) return true;
+        if (Math.abs(oldLng - newLng) > 0.00000001) return true;
+
+        return String(this.originalCritical.google_maps_url ?? '').trim()
+          !== String(this.form.google_maps_url ?? '').trim();
+      },
+
       async submit() {
 
         if (
@@ -518,6 +580,13 @@
 
           return;
 
+        }
+
+        if (this.currentStatus === 'aktif' && this.hasVerificationCriticalChanges()) {
+          const confirmed = await Alpine.store('ui').confirm(
+            'Perubahan nama, alamat, atau lokasi memerlukan verifikasi ulang. Kos akan kembali menjadi draft dan sementara tidak tampil di pencarian. Lanjutkan?'
+          );
+          if (!confirmed) return;
         }
 
 
@@ -549,13 +618,6 @@
 
         }
 
-      },
-
-      get aturanGroups() {
-        const labels = { penghuni: 'Penghuni', tamu: 'Tamu', jam: 'Jam & waktu', kebersihan: 'Kebersihan', hewan: 'Hewan', keamanan: 'Keamanan', umum: 'Umum' };
-        const map = {};
-        (this.aturan || []).forEach(item => { const key = item.kategori || 'umum'; if (!map[key]) map[key] = { key, label: labels[key] || key, items: [] }; map[key].items.push(item); });
-        return Object.values(map);
       },
 
       async loadDataAturan() {

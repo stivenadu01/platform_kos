@@ -60,20 +60,23 @@ class ApiKosController
 
     $this->validate($data);
 
-    $id_kos = createKos(
-      $user['id_user'],
-      $data
-    );
+    $conn = db();
+    $conn->begin_transaction();
 
-    if (!$id_kos) {
-      response([
-        'success' => false,
-        'message' => 'Gagal menambahkan kos'
-      ], 500);
+    try {
+      $id_kos = createKos($user['id_user'], $data);
+
+      if (!$id_kos) {
+        throw new RuntimeException('Gagal menambahkan kos');
+      }
+
+      syncFasilitasKos($id_kos, $user['id_user'], $data['fasilitas'] ?? [], false);
+      syncAturanKos($id_kos, $user['id_user'], $data['aturan'] ?? [], false);
+      $conn->commit();
+    } catch (Throwable $e) {
+      $conn->rollback();
+      $this->databaseFailure($e, 'Gagal menambahkan kos. Silakan coba kembali.');
     }
-
-    syncFasilitasKos($id_kos, $user['id_user'], $data['fasilitas'] ?? []);
-    syncAturanKos($id_kos, $user['id_user'], $data['aturan'] ?? []);
 
     response([
       'success' => true,
@@ -93,35 +96,55 @@ class ApiKosController
 
     $this->validate($data);
 
-    if (!findKosById(
+    $existingKos = findKosById(
       $id_kos,
       $user['id_user']
-    )) {
+    );
+
+    if (!$existingKos) {
       response([
         'success' => false,
         'message' => 'Kos tidak ditemukan'
       ], 404);
     }
 
-    $success = updateKos(
-      $id_kos,
-      $user['id_user'],
-      $data
-    );
-
-    if (!$success) {
+    if (($existingKos['status'] ?? '') === 'menunggu_verifikasi') {
       response([
         'success' => false,
-        'message' => 'Gagal mengubah data kos'
-      ], 500);
+        'message' => 'Kos yang sedang menunggu verifikasi tidak dapat diedit.'
+      ], 409);
     }
 
-    syncFasilitasKos($id_kos, $user['id_user'], $data['fasilitas'] ?? []);
-    syncAturanKos($id_kos, $user['id_user'], $data['aturan'] ?? []);
+    $requiresReverification = ($existingKos['status'] ?? '') === 'aktif'
+      && $this->hasVerificationCriticalChanges($existingKos, $data);
+
+    $conn = db();
+    $conn->begin_transaction();
+
+    try {
+      $success = updateKos($id_kos, $user['id_user'], $data, $requiresReverification);
+
+      if (!$success) {
+        throw new RuntimeException('Gagal mengubah data kos');
+      }
+
+      syncFasilitasKos($id_kos, $user['id_user'], $data['fasilitas'] ?? [], false);
+      syncAturanKos($id_kos, $user['id_user'], $data['aturan'] ?? [], false);
+      $conn->commit();
+    } catch (Throwable $e) {
+      $conn->rollback();
+      $this->databaseFailure($e, 'Gagal mengubah data kos. Silakan coba kembali.');
+    }
 
     response([
       'success' => true,
-      'message' => 'Data kos berhasil diperbarui'
+      'message' => $requiresReverification
+        ? 'Data kos berhasil diperbarui dan perlu diajukan untuk verifikasi ulang.'
+        : 'Data kos berhasil diperbarui',
+      'data' => [
+        'status' => $requiresReverification ? 'draft' : ($existingKos['status'] ?? 'draft'),
+        'requires_reverification' => $requiresReverification
+      ]
     ]);
   }
 
@@ -220,6 +243,40 @@ class ApiKosController
         response(['success' => false, 'message' => 'Link harus berasal dari Google Maps'], 422);
       }
     }
+  }
+
+  private function databaseFailure(Throwable $error, string $fallbackMessage): void
+  {
+    error_log('Kos save error: ' . $error->getMessage());
+
+    $status = (int) $error->getCode();
+    if ($status < 400 || $status > 599) $status = 500;
+
+    response([
+      'success' => false,
+      'message' => $status < 500 ? $error->getMessage() : $fallbackMessage
+    ], $status);
+  }
+
+  private function hasVerificationCriticalChanges(array $existing, array $data): bool
+  {
+    $normalizeText = static function ($value): string {
+      return preg_replace('/\s+/u', ' ', trim((string) $value)) ?? trim((string) $value);
+    };
+
+    if ($normalizeText($existing['nama_kos'] ?? '') !== $normalizeText($data['nama_kos'] ?? '')) return true;
+    if ($normalizeText($existing['alamat'] ?? '') !== $normalizeText($data['alamat'] ?? '')) return true;
+
+    $oldLatitude = (float) ($existing['latitude'] ?? 0);
+    $newLatitude = (float) ($data['latitude'] ?? 0);
+    $oldLongitude = (float) ($existing['longitude'] ?? 0);
+    $newLongitude = (float) ($data['longitude'] ?? 0);
+    if (abs($oldLatitude - $newLatitude) > 0.00000001) return true;
+    if (abs($oldLongitude - $newLongitude) > 0.00000001) return true;
+
+    $oldMapsUrl = trim((string) ($existing['google_maps_url'] ?? ''));
+    $newMapsUrl = trim((string) ($data['google_maps_url'] ?? ''));
+    return $oldMapsUrl !== $newMapsUrl;
   }
 
   public function resolveGoogleMapsLink()

@@ -162,25 +162,27 @@ if (!empty($lastLoginAt)) {
 
   <main class="mx-auto max-w-7xl px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">
     <section class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <?php if ($photos): ?>
-        <div class="grid min-h-[280px] gap-1 bg-slate-100 lg:grid-cols-[1.65fr_1fr]">
-          <button type="button" @click="openGallery(0)" class="group relative min-h-[280px] overflow-hidden lg:min-h-[430px]">
-            <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($mainPhoto) ?>" alt="<?= htmlspecialchars($kos['nama_kos']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]">
-            <span class="absolute bottom-4 left-4 rounded-lg bg-black/60 px-3 py-2 text-xs font-semibold text-white">Lihat semua foto</span>
-          </button>
-          <div class="hidden grid-cols-2 gap-1 lg:grid">
-            <?php foreach (array_slice($photos, 1, 4) as $i => $photo): ?>
-              <button type="button" @click="openGallery(<?= $i + 1 ?>)" class="overflow-hidden">
-                <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($photo['nama_file']) ?>" alt="<?= htmlspecialchars($kos['nama_kos']) ?>" class="h-full min-h-[140px] w-full object-cover transition hover:scale-[1.02]">
-              </button>
-            <?php endforeach; ?>
+      <section id="foto" class="detail-section">
+        <?php if ($photos): ?>
+          <div class="grid min-h-[250px] gap-1 bg-slate-100 sm:min-h-[300px] lg:grid-cols-[1.65fr_1fr]">
+            <button type="button" @click="openGallery(0)" class="group relative min-h-[280px] overflow-hidden lg:min-h-[430px]">
+              <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($mainPhoto) ?>" alt="<?= htmlspecialchars($kos['nama_kos']) ?>" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]">
+              <span class="absolute bottom-4 left-4 rounded-lg bg-black/60 px-3 py-2 text-xs font-semibold text-white">Lihat semua foto</span>
+            </button>
+            <div class="hidden grid-cols-2 gap-1 lg:grid">
+              <?php foreach (array_slice($photos, 1, 4) as $i => $photo): ?>
+                <button type="button" @click="openGallery(<?= $i + 1 ?>)" class="overflow-hidden">
+                  <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($photo['nama_file']) ?>" alt="<?= htmlspecialchars($kos['nama_kos']) ?>" class="h-full min-h-[140px] w-full object-cover transition hover:scale-[1.02]">
+                </button>
+              <?php endforeach; ?>
+            </div>
           </div>
-        </div>
-      <?php else: ?>
-        <div class="flex min-h-[280px] items-center justify-center bg-slate-100 text-sm text-slate-400 lg:min-h-[430px]">Foto kos belum tersedia</div>
-      <?php endif; ?>
+        <?php else: ?>
+          <div class="flex min-h-[250px] items-center justify-center bg-slate-100 text-sm text-slate-400 sm:min-h-[300px] lg:min-h-[380px]">Foto kos belum tersedia</div>
+        <?php endif; ?>
+      </section>
 
-      <div class="grid gap-8 p-5 sm:p-7 lg:grid-cols-[1fr_360px] lg:p-8">
+      <div class="grid gap-6 p-4 sm:gap-8 sm:p-7 lg:grid-cols-[1fr_360px] lg:p-8">
         <div>
           <div class="flex flex-wrap items-center gap-2">
             <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold capitalize text-primary"><?= htmlspecialchars($kos['jenis']) ?></span>
@@ -225,23 +227,23 @@ if (!empty($lastLoginAt)) {
           <section id="fasilitas" class="detail-section mt-8">
             <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Fasilitas</h2>
             <?php if ($facilities): ?>
-              <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
                 <?php foreach ($facilities as $facility): ?>
                   <?php
-                    $facilityIcon = trim((string)($facility['icon'] ?? ''));
-                    if (!in_array($facilityIcon, masterIconKeys(), true)) {
-                      $facilityIcon = 'info';
-                    }
-                    $facilityName = (string)($facility['nama_fasilitas'] ?? 'Fasilitas');
+                  $facilityIcon = trim((string)($facility['icon'] ?? ''));
+                  if (!in_array($facilityIcon, masterIconKeys(), true)) {
+                    $facilityIcon = 'info';
+                  }
+                  $facilityName = (string)($facility['nama_fasilitas'] ?? 'Fasilitas');
                   ?>
-                  <div class="group flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:px-4">
+                  <div class="group flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:min-h-12 sm:px-3 sm:py-2">
                     <span
-                      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"
+                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary sm:h-8 sm:w-8"
                       title="<?= htmlspecialchars(masterIconLabel($facilityIcon), ENT_QUOTES, 'UTF-8') ?>"
                       aria-hidden="true">
-                      <?= masterIconSvg($facilityIcon, 'h-5 w-5') ?>
+                      <?= masterIconSvg($facilityIcon, 'h-3.5 w-3.5 sm:h-4 sm:w-4') ?>
                     </span>
-                    <span class="min-w-0 text-sm font-semibold leading-5 text-slate-700">
+                    <span class="min-w-0 text-xs font-semibold leading-4 text-slate-700 sm:text-sm sm:leading-5">
                       <?= htmlspecialchars($facilityName) ?>
                     </span>
                   </div>
@@ -252,24 +254,18 @@ if (!empty($lastLoginAt)) {
             <?php endif; ?>
           </section>
 
-          <section id="aturan" class="detail-section mt-8">
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Aturan / Ketentuan</h2>
-                <p class="mt-1 text-sm text-slate-500">Hal penting yang perlu diketahui sebelum menghubungi pemilik.</p>
-              </div>
+          <section id="aturan" class="detail-section mt-7">
+            <div>
+              <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Aturan / Ketentuan</h2>
+
             </div>
             <?php $aturanKos = is_array($kos['aturan'] ?? null) ? $kos['aturan'] : []; ?>
             <?php if ($aturanKos): ?>
-              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 <?php foreach ($aturanKos as $aturan): ?>
-                  
-                  <div class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary" aria-hidden="true"><?= masterIconSvg($aturan['icon'] ?? 'ban', 'h-5 w-5') ?></span>
-                    <div class="min-w-0">
-                      <p class="text-sm font-semibold text-slate-800"><?= htmlspecialchars($aturan['nama_aturan']) ?></p>
-                      <?php if (!empty($aturan['deskripsi'])): ?><p class="mt-1 text-xs leading-5 text-slate-500"><?= htmlspecialchars($aturan['deskripsi']) ?></p><?php endif; ?>
-                    </div>
+                  <div class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 sm:min-h-12 sm:px-3 sm:py-2">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary sm:h-8 sm:w-8" aria-hidden="true"><?= masterIconSvg($aturan['icon'] ?? 'ban', 'h-3.5 w-3.5 sm:h-4 sm:w-4') ?></span>
+                    <p class="min-w-0 text-xs font-semibold leading-4 text-slate-800 sm:text-sm sm:leading-5"><?= htmlspecialchars($aturan['nama_aturan']) ?></p>
                   </div>
                 <?php endforeach; ?>
               </div>
@@ -352,10 +348,10 @@ if (!empty($lastLoginAt)) {
                           <div class="mt-2 flex flex-wrap gap-2">
                             <?php foreach ($typeFacilities as $facility): ?>
                               <?php
-                                $roomFacilityIcon = trim((string)($facility['icon'] ?? ''));
-                                if (!in_array($roomFacilityIcon, masterIconKeys(), true)) {
-                                  $roomFacilityIcon = 'info';
-                                }
+                              $roomFacilityIcon = trim((string)($facility['icon'] ?? ''));
+                              if (!in_array($roomFacilityIcon, masterIconKeys(), true)) {
+                                $roomFacilityIcon = 'info';
+                              }
                               ?>
                               <span class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600">
                                 <?= masterIconSvg($roomFacilityIcon, 'h-3.5 w-3.5 text-primary') ?>
@@ -404,8 +400,26 @@ if (!empty($lastLoginAt)) {
 
             <?php $lokasiPopulerSekitar = $lokasiPopulerSekitar ?? []; ?>
 
+            <?php if ($hasCoordinates): ?>
+              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+                <iframe
+                  src="<?= htmlspecialchars($googleEmbedUrl) ?>"
+                  title="Peta lokasi <?= htmlspecialchars($kos['nama_kos'] ?? 'kos') ?>"
+                  class="block aspect-[16/8] w-full sm:h-[300px] sm:aspect-auto lg:h-[340px]"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            <?php else: ?>
+              <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5 text-center">
+                <p class="font-semibold text-slate-700">Lokasi belum tersedia</p>
+                <p class="mt-1 text-sm text-slate-500">Kos ini belum memiliki koordinat yang dapat ditampilkan.</p>
+              </div>
+            <?php endif; ?>
+
             <?php if ($lokasiPopulerSekitar): ?>
-              <div class="mt-6">
+              <div class="mt-5">
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Tempat terdekat</p>
                 <div class="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   <?php foreach ($lokasiPopulerSekitar as $lokasi): ?>
@@ -422,9 +436,9 @@ if (!empty($lastLoginAt)) {
                       href="<?= htmlspecialchars($lokasi['google_maps_url'] ?: ('https://www.google.com/maps/search/?api=1&query=' . rawurlencode($lokasi['latitude'] . ',' . $lokasi['longitude']))) ?>"
                       target="_blank"
                       rel="noopener noreferrer"
-                      class="group rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm">
+                      class="group rounded-xl border border-slate-200 bg-white p-3 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-sm">
                       <div class="flex items-start gap-3">
-                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary" title="<?= htmlspecialchars($kategoriLabel) ?>"><?= masterIconSvg($kategoriIcon, 'h-5 w-5') ?></span>
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-soft text-primary" title="<?= htmlspecialchars($kategoriLabel) ?>"><?= masterIconSvg($kategoriIcon, 'h-4 w-4') ?></span>
                         <div class="min-w-0 flex-1">
                           <p class="line-clamp-2 text-sm font-bold text-slate-800 group-hover:text-primary"><?= htmlspecialchars($lokasi['nama']) ?></p>
                           <p class="mt-2 text-xs font-bold text-primary sm:hidden"><?= htmlspecialchars($jarakText) ?></p>
@@ -439,23 +453,7 @@ if (!empty($lastLoginAt)) {
               </div>
             <?php endif; ?>
 
-            <?php if ($hasCoordinates): ?>
-              <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
-                <iframe
-                  src="<?= htmlspecialchars($googleEmbedUrl) ?>"
-                  title="Peta lokasi <?= htmlspecialchars($kos['nama_kos'] ?? 'kos') ?>"
-                  class="block aspect-square w-full sm:aspect-auto sm:h-[360px] lg:h-[420px]"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                  allowfullscreen>
-                </iframe>
-              </div>
-            <?php else: ?>
-              <div class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center">
-                <p class="font-semibold text-slate-700">Lokasi belum tersedia</p>
-                <p class="mt-1 text-sm text-slate-500">Kos ini belum memiliki koordinat yang dapat ditampilkan.</p>
-              </div>
-            <?php endif; ?>
+
 
 
 
@@ -592,6 +590,10 @@ if (!empty($lastLoginAt)) {
       showSectionTabs: false,
       activeSection: 'tentang-kos',
       sectionTabs: [{
+          id: 'foto',
+          label: 'Foto'
+        },
+        {
           id: 'tentang-kos',
           label: 'Tentang kos'
         },

@@ -54,7 +54,7 @@ function adminFasilitasPage() {
     openEdit(i){this.editing=i.id_fasilitas;this.form={nama_fasilitas:i.nama_fasilitas||'',kategori:i.kategori||'kos',icon:i.icon||'sparkles',status:i.status||'aktif'};this.modalOpen=true},
     close(){this.modalOpen=false},
     async save(){this.saving=true;try{let r=this.editing?await API.put('/admin/fasilitas/'+this.editing,this.form):await API.post('/admin/fasilitas',this.form);if(r.success){this.close();await this.load()}}catch(e){console.error(e)}finally{this.saving=false}},
-    async remove(i){if(!confirm('Hapus data ini?'))return;try{await API.delete('/admin/fasilitas/'+i.id_fasilitas);await this.load()}catch(e){console.error(e)}}
+    async remove(i){if(!await Alpine.store('ui').confirm('Hapus data ini?'))return;try{await API.delete('/admin/fasilitas/'+i.id_fasilitas);await this.load()}catch(e){console.error(e)}}
   }
 }
 </script>

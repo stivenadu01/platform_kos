@@ -152,11 +152,19 @@
                 Foto
               </a>
 
-              <a
-                href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>"
-                class="btn-secondary flex-1 text-center">
-                Edit
-              </a>
+              <?php if ($item['status'] === 'menunggu_verifikasi'): ?>
+                <span
+                  class="btn-secondary flex-1 cursor-not-allowed text-center opacity-50"
+                  title="Kos tidak dapat diedit selama menunggu verifikasi admin">
+                  Edit
+                </span>
+              <?php else: ?>
+                <a
+                  href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>"
+                  class="btn-secondary flex-1 text-center">
+                  Edit
+                </a>
+              <?php endif; ?>
 
               <button
                 type="button"

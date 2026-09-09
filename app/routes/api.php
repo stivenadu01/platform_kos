@@ -4,11 +4,11 @@
 // Session user
 get('/api/auth/me', 'ApiAuthController@me', ['auth']);
 // Login & Register
-post('/api/auth/login', 'ApiAuthController@login');
-post('/api/auth/register', 'ApiAuthController@register');
+post('/api/auth/login', 'ApiAuthController@login', ['csrf']);
+post('/api/auth/register', 'ApiAuthController@register', ['csrf']);
 get('/api/auth/google/start', 'ApiAuthController@googleStart');
 get('/api/auth/google/callback', 'ApiAuthController@googleCallback');
-post('/api/auth/google/complete', 'ApiAuthController@googleComplete');
+post('/api/auth/google/complete', 'ApiAuthController@googleComplete', ['csrf']);
 // Logout
 post('/api/auth/logout', 'ApiAuthController@logout', ['auth']);
 post('/api/auth/logout-all', 'ApiAuthController@logoutAllDevices', ['auth']);
@@ -17,8 +17,8 @@ post('/api/auth/profile/foto', 'ApiAuthController@uploadFotoProfil', ['auth']);
 post('/api/auth/password', 'ApiAuthController@changePassword', ['auth']);
 
 // Password Reset
-post('/api/auth/request-reset', 'ApiAuthController@requestReset');
-post('/api/auth/reset-password', 'ApiAuthController@resetPassword');
+post('/api/auth/request-reset', 'ApiAuthController@requestReset', ['csrf']);
+post('/api/auth/reset-password', 'ApiAuthController@resetPassword', ['csrf']);
 
 post('/api/payment/midtrans/notification', 'ApiLanggananController@midtransNotification');
 get('/api/langganan/pembayaran/{id}/bukti', 'ApiLanggananController@buktiPembayaran', ['auth', 'role:admin,pemilik']);

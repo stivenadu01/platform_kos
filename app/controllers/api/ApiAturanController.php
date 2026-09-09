@@ -26,7 +26,7 @@ class ApiAturanController
 
   public function adminIndex()
   {
-    try { response(['success'=>true,'data'=>getAturanAdmin(trim((string)query('search','')),trim((string)query('kategori','')),trim((string)query('status','')))]); }
+    try { response(['success'=>true,'data'=>getAturanAdmin(trim((string)query('search','')),trim((string)query('status','')))]); }
     catch(Throwable $e){ error_log('Admin aturan list error: '.$e->getMessage()); response(['success'=>false,'message'=>'Gagal memuat aturan.'],500); }
   }
   public function adminShow(){ $row=getAturanById((int)params('id')); if(!$row) response(['success'=>false,'message'=>'Aturan tidak ditemukan.'],404); response(['success'=>true,'data'=>$row]); }

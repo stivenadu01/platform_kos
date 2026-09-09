@@ -89,6 +89,13 @@ class PemilikController
       ], 404);
     }
 
+    if (($kos['status'] ?? '') === 'menunggu_verifikasi') {
+      response([
+        'success' => false,
+        'message' => 'Kos yang sedang menunggu verifikasi tidak dapat diedit.'
+      ], 409);
+    }
+
     view('pemilik/kos/edit', [
       'title' => 'Edit Kos',
       'layout' => 'pemilik',
