@@ -181,26 +181,64 @@ function updateTipeKamar($id_tipe_kamar, $data, $id_pemilik)
 
 function deleteTipeKamar($id_tipe_kamar, $id_pemilik)
 {
-  $existing = findTipeKamarByIdPemilik($id_tipe_kamar, $id_pemilik);
-  if (!$existing) {
-    throw new Exception('Tipe kamar tidak ditemukan.', 404);
-  }
-
   $conn = db();
-  $stmt = $conn->prepare('SELECT COUNT(*) AS total FROM kamar WHERE id_tipe_kamar = ?');
-  $stmt->bind_param('i', $id_tipe_kamar);
-  $stmt->execute();
-  $total = (int) ($stmt->get_result()->fetch_assoc()['total'] ?? 0);
-  $stmt->close();
-  if ($total > 0) {
-    throw new Exception('Tipe kamar tidak dapat dihapus karena masih memiliki unit kamar.', 422);
+  $fotoPaths = [];
+  $conn->begin_transaction();
+
+  try {
+    // Kunci tipe kamar selama pemeriksaan agar unit baru tidak dapat masuk
+    // di antara validasi dan penghapusan.
+    $stmt = $conn->prepare("\n      SELECT t.id_tipe_kamar\n      FROM tipe_kamar t\n      INNER JOIN kos k ON k.id_kos = t.id_kos\n      WHERE t.id_tipe_kamar = ? AND k.id_pemilik = ?\n      LIMIT 1\n      FOR UPDATE\n    ");
+    $stmt->bind_param('ii', $id_tipe_kamar, $id_pemilik);
+    $stmt->execute();
+    $existing = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$existing) {
+      throw new Exception('Tipe kamar tidak ditemukan.', 404);
+    }
+
+    $stmt = $conn->prepare('SELECT COUNT(*) AS total FROM kamar WHERE id_tipe_kamar = ?');
+    $stmt->bind_param('i', $id_tipe_kamar);
+    $stmt->execute();
+    $total = (int) ($stmt->get_result()->fetch_assoc()['total'] ?? 0);
+    $stmt->close();
+    if ($total > 0) {
+      throw new Exception('Tipe kamar tidak dapat dihapus karena masih memiliki unit kamar.', 422);
+    }
+
+    // Simpan path sebelum ON DELETE CASCADE menghapus metadata foto.
+    $stmt = $conn->prepare('SELECT nama_file FROM tipe_kamar_foto WHERE id_tipe_kamar = ?');
+    $stmt->bind_param('i', $id_tipe_kamar);
+    $stmt->execute();
+    $fotoPaths = array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'nama_file');
+    $stmt->close();
+
+    $stmt = $conn->prepare('DELETE FROM tipe_kamar WHERE id_tipe_kamar = ?');
+    $stmt->bind_param('i', $id_tipe_kamar);
+    if (!$stmt->execute() || $stmt->affected_rows !== 1) {
+      throw new Exception('Gagal menghapus tipe kamar.', 500);
+    }
+    $stmt->close();
+    $conn->commit();
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
   }
 
-  $stmt = $conn->prepare('DELETE FROM tipe_kamar WHERE id_tipe_kamar = ?');
-  $stmt->bind_param('i', $id_tipe_kamar);
-  $result = $stmt->execute();
-  $stmt->close();
-  return $result;
+  foreach ($fotoPaths as $namaFile) {
+    $namaFile = str_replace('\\', '/', (string) $namaFile);
+    if (!preg_match('#^/tipe-kamar/[A-Za-z0-9_.-]+$#', $namaFile)) {
+      error_log('Lewati path foto tipe kamar tidak valid: ' . $namaFile);
+      continue;
+    }
+
+    $filePath = ROOT_PATH . '/public/uploads' . $namaFile;
+    if (is_file($filePath) && !is_link($filePath) && !@unlink($filePath)) {
+      error_log('Gagal menghapus file foto tipe kamar: ' . $filePath);
+    }
+  }
+
+  return true;
 }
 
 function ensureKosOwned($id_kos, $id_pemilik, $conn)

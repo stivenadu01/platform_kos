@@ -151,22 +151,12 @@ class ApiKosController
 
   public function destroy()
   {
-
     $id_kos = (int) params('id');
     $user = $this->owner();
-
-    if (!findKosById($id_kos, $user['id_user'])) {
-      response([
-        'success' => false,
-        'message' => 'Kos tidak ditemukan'
-      ], 404);
-    }
-
-    if (!deleteKos($id_kos, $user['id_user'])) {
-      response([
-        'success' => false,
-        'message' => 'Gagal menghapus kos'
-      ], 500);
+    try {
+      deleteKos($id_kos, $user['id_user']);
+    } catch (Throwable $e) {
+      $this->databaseFailure($e, 'Gagal menghapus kos. Silakan coba kembali.');
     }
 
     response([

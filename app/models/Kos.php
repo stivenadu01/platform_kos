@@ -340,20 +340,62 @@ function updateKos($id_kos, $id_pemilik, $data, $resetToDraft = false)
 function deleteKos($id_kos, $id_pemilik)
 {
   $conn = db();
+  $fotoPaths = [];
+  $conn->begin_transaction();
 
-  $stmt = $conn->prepare("
-    DELETE FROM kos
-    WHERE id_kos = ?
-      AND id_pemilik = ?
-  ");
+  try {
+    $stmt = $conn->prepare('SELECT id_kos FROM kos WHERE id_kos = ? AND id_pemilik = ? LIMIT 1 FOR UPDATE');
+    $stmt->bind_param('ii', $id_kos, $id_pemilik);
+    $stmt->execute();
+    $owned = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$owned) {
+      throw new Exception('Kos tidak ditemukan.', 404);
+    }
 
-  $stmt->bind_param('ii', $id_kos, $id_pemilik);
+    $stmt = $conn->prepare('SELECT nama_file FROM kos_foto WHERE id_kos = ?');
+    $stmt->bind_param('i', $id_kos);
+    $stmt->execute();
+    $fotoPaths = array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'nama_file');
+    $stmt->close();
 
-  $success = $stmt->execute();
+    $stmt = $conn->prepare("
+      SELECT f.nama_file
+      FROM tipe_kamar_foto f
+      INNER JOIN tipe_kamar t ON t.id_tipe_kamar = f.id_tipe_kamar
+      WHERE t.id_kos = ?
+    ");
+    $stmt->bind_param('i', $id_kos);
+    $stmt->execute();
+    $fotoPaths = array_merge($fotoPaths, array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'nama_file'));
+    $stmt->close();
 
-  $stmt->close();
+    $stmt = $conn->prepare('DELETE FROM kos WHERE id_kos = ? AND id_pemilik = ?');
+    $stmt->bind_param('ii', $id_kos, $id_pemilik);
+    if (!$stmt->execute() || $stmt->affected_rows !== 1) {
+      throw new Exception('Gagal menghapus kos.', 500);
+    }
+    $stmt->close();
+    $conn->commit();
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+  }
 
-  return $success;
+  foreach ($fotoPaths as $namaFile) {
+    $namaFile = str_replace('\\', '/', (string) $namaFile);
+    if (!preg_match('#^/(?:kos|tipe-kamar)/[A-Za-z0-9_.-]+$#', $namaFile)) {
+      error_log('Lewati path foto kos tidak valid: ' . $namaFile);
+      continue;
+    }
+
+    $filePath = ROOT_PATH . '/public/uploads' . $namaFile;
+    if (is_file($filePath) && !is_link($filePath) && !@unlink($filePath)) {
+      error_log('Gagal menghapus file foto saat kos dihapus: ' . $filePath);
+    }
+  }
+
+  return true;
 }
 
 function getKosUnggulanUntukHome($limit = 6)

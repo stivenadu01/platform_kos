@@ -29,7 +29,7 @@
       <div class="mt-4 space-y-3"><template x-for="(item, index) in harga" :key="index">
           <div class="grid gap-3 sm:grid-cols-[1fr_1fr_auto]"><select x-model.number="item.jumlah_orang" class="select"><template x-for="number in availablePriceNumbers(index)" :key="number">
                 <option :value="number" x-text="number + ' orang'"></option>
-              </template></select><input type="number" x-model.number="item.harga_total" min="1" step="1000" class="input-number" placeholder="700000" required><button type="button" @click="harga.splice(index, 1)" class="btn-danger">Hapus</button></div>
+              </template></select><input type="number" x-model.number="item.harga_total" min="1000" step="1000" class="input-number" placeholder="700000" required><button type="button" @click="harga.splice(index, 1)" class="btn-danger">Hapus</button></div>
         </template></div>
     </div>
     <div x-show="step === 3" x-cloak data-step-panel="3" data-help="help-tipe-form-facility" data-onboarding="tipe-field-fasilitas">

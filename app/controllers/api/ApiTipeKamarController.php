@@ -66,7 +66,7 @@ class ApiTipeKamarController
       deleteTipeKamar((int) input('id_tipe_kamar'), $this->ownerId());
       response(['success' => true, 'message' => 'Tipe kamar berhasil dihapus.']);
     } catch (Throwable $e) {
-      response(['success' => false, 'message' => $e->getMessage()], $e->getCode() ?: 422);
+      $this->saveFailure($e, 'Gagal menghapus tipe kamar. Silakan coba kembali.');
     }
   }
 
