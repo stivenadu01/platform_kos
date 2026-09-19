@@ -199,10 +199,7 @@ function validatePenghuniInput($data)
   }
 
   $no_hp = trim($data['no_hp'] ?? '');
-
-  if (mb_strlen($no_hp) > 30) {
-    throw new Exception('Nomor HP terlalu panjang.');
-  }
+  $no_hp = $no_hp !== '' ? normalizeIndonesianPhone($no_hp) : '';
 
   return [
     'id_kamar' => $id_kamar,

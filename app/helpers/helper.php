@@ -20,6 +20,7 @@ function view($page, $data = [], $layout = 'user')
 
 require_once __DIR__ . '/request_helper.php';
 require_once __DIR__ . '/response_helper.php';
+require_once __DIR__ . '/phone_helper.php';
 
 
 /**

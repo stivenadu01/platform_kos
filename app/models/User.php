@@ -236,7 +236,8 @@ function tambahUser($data, $isRegister = false)
 
   $nama = trim($data['nama'] ?? '');
   $email = strtolower(trim($data['email'] ?? ''));
-  $no_hp = trim($data['no_hp'] ?? '') ?: null;
+  $no_hp = trim($data['no_hp'] ?? '');
+  $no_hp = $no_hp !== '' ? normalizeIndonesianPhone($no_hp) : null;
   $nik = trim($data['nik'] ?? '') ?: null;
   $passwordRaw = $data['password'] ?? '';
 
@@ -461,7 +462,7 @@ function createGoogleUser($data)
 
   $nama = trim($data['nama'] ?? '');
   $email = strtolower(trim($data['email'] ?? ''));
-  $no_hp = trim($data['no_hp'] ?? '');
+  $no_hp = normalizeIndonesianPhone($data['no_hp'] ?? '');
   $nik = trim($data['nik'] ?? '');
   $role = trim($data['role'] ?? '');
   $googleSub = trim($data['google_sub'] ?? '');
@@ -530,7 +531,8 @@ function editUser($id, $data)
 
   $nama = trim($data['nama'] ?? '');
   $email = strtolower(trim($data['email'] ?? ''));
-  $no_hp = trim($data['no_hp'] ?? '') ?: null;
+  $no_hp = trim($data['no_hp'] ?? '');
+  $no_hp = $no_hp !== '' ? normalizeIndonesianPhone($no_hp) : null;
   $alamat = trim($data['alamat'] ?? '') ?: null;
   $role = $data['role'] ?? 'pelanggan';
 
@@ -1080,19 +1082,7 @@ function updateUserFoto($id_user, $foto)
 
 function normalizeUserPhone($value)
 {
-  $phone = preg_replace('/[\s().-]+/', '', trim((string)$value));
-
-  if (str_starts_with($phone, '+62')) {
-    $phone = '0' . substr($phone, 3);
-  } elseif (str_starts_with($phone, '62')) {
-    $phone = '0' . substr($phone, 2);
-  }
-
-  if (!preg_match('/^08[1-9][0-9]{7,10}$/', $phone)) {
-    throw new Exception('Nomor HP harus berupa nomor seluler Indonesia yang valid (contoh: 081234567890).', 422);
-  }
-
-  return $phone;
+  return normalizeIndonesianPhone($value);
 }
 
 function bumpUserAuthSessionVersion($id_user)
