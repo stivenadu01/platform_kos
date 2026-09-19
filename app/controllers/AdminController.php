@@ -59,6 +59,20 @@ class AdminController
     ], 'admin');
   }
 
+  public function dataMaster()
+  {
+    view('admin/data-master', [
+      'title' => 'Data Master',
+    ], 'admin');
+  }
+
+  public function lokasi()
+  {
+    view('admin/lokasi', [
+      'title' => 'Kelola Lokasi Referensi',
+    ], 'admin');
+  }
+
   public function langganan()
   {
     view('admin/langganan', [

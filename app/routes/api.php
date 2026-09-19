@@ -4,11 +4,11 @@
 // Session user
 get('/api/auth/me', 'ApiAuthController@me', ['auth']);
 // Login & Register
-post('/api/auth/login', 'ApiAuthController@login');
-post('/api/auth/register', 'ApiAuthController@register');
+post('/api/auth/login', 'ApiAuthController@login', ['csrf']);
+post('/api/auth/register', 'ApiAuthController@register', ['csrf']);
 get('/api/auth/google/start', 'ApiAuthController@googleStart');
 get('/api/auth/google/callback', 'ApiAuthController@googleCallback');
-post('/api/auth/google/complete', 'ApiAuthController@googleComplete');
+post('/api/auth/google/complete', 'ApiAuthController@googleComplete', ['csrf']);
 // Logout
 post('/api/auth/logout', 'ApiAuthController@logout', ['auth']);
 post('/api/auth/logout-all', 'ApiAuthController@logoutAllDevices', ['auth']);
@@ -17,20 +17,26 @@ post('/api/auth/profile/foto', 'ApiAuthController@uploadFotoProfil', ['auth']);
 post('/api/auth/password', 'ApiAuthController@changePassword', ['auth']);
 
 // Password Reset
-post('/api/auth/request-reset', 'ApiAuthController@requestReset');
-post('/api/auth/reset-password', 'ApiAuthController@resetPassword');
+post('/api/auth/request-reset', 'ApiAuthController@requestReset', ['csrf']);
+post('/api/auth/reset-password', 'ApiAuthController@resetPassword', ['csrf']);
 
 post('/api/payment/midtrans/notification', 'ApiLanggananController@midtransNotification');
 get('/api/langganan/pembayaran/{id}/bukti', 'ApiLanggananController@buktiPembayaran', ['auth', 'role:admin,pemilik']);
 
 
 get('/api/fasilitas', 'ApiFasilitasController@index');
+get('/api/aturan', 'ApiAturanController@publicIndex');
+get('/api/lokasi/search', 'ApiLokasiController@search');
+get('/api/lokasi/referensi', 'ApiLokasiReferensiController@publicIndex');
 
 // =====================================================
 // PEMILIK - KOS
 // =====================================================
 get('/api/pemilik/kos', 'ApiKosController@index', ['auth', 'role:pemilik']);
 get('/api/pemilik/kos/fasilitas', 'ApiKosController@fasilitas', ['auth', 'role:pemilik']);
+get('/api/pemilik/kos/aturan', 'ApiAturanController@ownerList', ['auth', 'role:pemilik']);
+get('/api/pemilik/kos/aturan/by-kos', 'ApiAturanController@ownerByKos', ['auth', 'role:pemilik']);
+post('/api/pemilik/kos/resolve-google-maps', 'ApiKosController@resolveGoogleMapsLink', ['auth', 'role:pemilik']);
 get('/api/pemilik/kos/{id}', 'ApiKosController@show', ['auth', 'role:pemilik']);
 post('/api/pemilik/kos', 'ApiKosController@store', ['auth', 'role:pemilik']);
 put('/api/pemilik/kos/{id}', 'ApiKosController@update', ['auth', 'role:pemilik']);
@@ -110,14 +116,36 @@ post('/api/pemilik/tagihan/pembayaran', 'ApiTagihanController@payment', ['auth',
 // =========================================================
 // USER - LOKASI & PENCARIAN KOS
 // =========================================================
-get('/api/lokasi/search', 'ApiLokasiController@search');
 get('/api/kos/search', 'ApiKosSearchController@index');
+get('/api/kos/{id}/favorit', 'ApiKosSearchController@favoriteStatus', ['auth', 'role:pelanggan']);
 get('/api/kos/{id}', 'ApiKosSearchController@show');
+get('/api/pelanggan/favorit', 'ApiKosSearchController@favoriteList', ['auth', 'role:pelanggan']);
+post('/api/pelanggan/favorit', 'ApiKosSearchController@toggleFavorite', ['auth', 'role:pelanggan']);
 
 // =========================================================
 // ADMIN - DASHBOARD
 // =========================================================
 get('/api/admin/dashboard', 'ApiAdminController@dashboard', ['auth', 'role:admin']);
+
+// ADMIN - DATA MASTER
+get('/api/admin/fasilitas', 'ApiFasilitasAdminController@index', ['auth', 'role:admin']);
+get('/api/admin/fasilitas/{id}', 'ApiFasilitasAdminController@show', ['auth', 'role:admin']);
+post('/api/admin/fasilitas', 'ApiFasilitasAdminController@store', ['auth', 'role:admin']);
+put('/api/admin/fasilitas/{id}', 'ApiFasilitasAdminController@update', ['auth', 'role:admin']);
+delete('/api/admin/fasilitas/{id}', 'ApiFasilitasAdminController@delete', ['auth', 'role:admin']);
+get('/api/admin/aturan', 'ApiAturanController@adminIndex', ['auth', 'role:admin']);
+get('/api/admin/aturan/{id}', 'ApiAturanController@adminShow', ['auth', 'role:admin']);
+post('/api/admin/aturan', 'ApiAturanController@adminStore', ['auth', 'role:admin']);
+put('/api/admin/aturan/{id}', 'ApiAturanController@adminUpdate', ['auth', 'role:admin']);
+delete('/api/admin/aturan/{id}', 'ApiAturanController@adminDelete', ['auth', 'role:admin']);
+get('/api/admin/lokasi', 'ApiLokasiReferensiController@index', ['auth', 'role:admin']);
+post('/api/admin/lokasi/resolve-google-maps', 'ApiLokasiReferensiController@resolveGoogleMapsLink', ['auth', 'role:admin']);
+get('/api/admin/lokasi/{id}', 'ApiLokasiReferensiController@show', ['auth', 'role:admin']);
+post('/api/admin/lokasi', 'ApiLokasiReferensiController@store', ['auth', 'role:admin']);
+put('/api/admin/lokasi/{id}', 'ApiLokasiReferensiController@update', ['auth', 'role:admin']);
+delete('/api/admin/lokasi/{id}', 'ApiLokasiReferensiController@destroy', ['auth', 'role:admin']);
+
+
 
 // ADMIN - MANAJEMEN PENGGUNA
 get('/api/admin/pengguna', 'ApiAdminController@userList', ['auth', 'role:admin']);

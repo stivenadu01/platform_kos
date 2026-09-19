@@ -3,42 +3,20 @@
 function getAllFasilitas($kategori = 'kos')
 {
   $conn = db();
-
-  $sql = "
-    SELECT
-      id_fasilitas,
-      nama_fasilitas,
-      kategori
-    FROM fasilitas
-  ";
+  $sql = "SELECT id_fasilitas, nama_fasilitas, kategori, icon FROM fasilitas WHERE status = 'aktif'";
   $params = [];
   $types = '';
-
   if (in_array($kategori, ['kos', 'kamar'], true)) {
-    $sql .= ' WHERE kategori = ?';
+    $sql .= ' AND kategori = ?';
     $params[] = $kategori;
     $types = 's';
   }
-
   $sql .= ' ORDER BY nama_fasilitas ASC';
   $stmt = $conn->prepare($sql);
-
-  if ($types !== '') {
-    $stmt->bind_param($types, ...$params);
-  }
-
+  if ($types !== '') $stmt->bind_param($types, ...$params);
   $stmt->execute();
-
-  $result = $stmt->get_result();
-
-  $data = [];
-
-  while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
-  }
-
+  $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   $stmt->close();
-
   return $data;
 }
 
@@ -52,7 +30,8 @@ function getFasilitasByKos(
   $stmt = $conn->prepare("
     SELECT
       f.id_fasilitas,
-      f.nama_fasilitas
+      f.nama_fasilitas,
+      f.icon
     FROM fasilitas f
 
     INNER JOIN kos_fasilitas kf
@@ -64,6 +43,7 @@ function getFasilitasByKos(
     WHERE k.id_kos = ?
       AND k.id_pemilik = ?
       AND f.kategori = 'kos'
+      AND f.status = 'aktif'
 
     ORDER BY f.nama_fasilitas ASC
   ");
@@ -93,7 +73,8 @@ function getFasilitasByKos(
 function syncFasilitasKos(
   $id_kos,
   $id_pemilik,
-  $fasilitas
+  $fasilitas,
+  $manageTransaction = true
 ) {
   $conn = db();
 
@@ -158,7 +139,9 @@ function syncFasilitasKos(
    * Mulai transaksi supaya proses sinkronisasi
    * dilakukan secara konsisten.
    */
-  $conn->begin_transaction();
+  if ($manageTransaction) {
+    $conn->begin_transaction();
+  }
 
   try {
 
@@ -205,6 +188,7 @@ function syncFasilitasKos(
         SELECT id_fasilitas
         FROM fasilitas
         WHERE kategori = 'kos'
+          AND status = 'aktif'
           AND id_fasilitas IN ($placeholders)
       ");
 
@@ -267,13 +251,60 @@ function syncFasilitasKos(
     }
 
 
-    $conn->commit();
+    if ($manageTransaction) {
+      $conn->commit();
+    }
 
     return true;
   } catch (Throwable $e) {
 
-    $conn->rollback();
+    if ($manageTransaction) {
+      $conn->rollback();
+    }
 
     throw $e;
   }
+}
+
+
+function getFasilitasAdmin($search = '', $kategori = '', $status = '')
+{
+  $conn=db(); $where=[]; $types=''; $params=[];
+  if ($search!=='') { $where[]='(nama_fasilitas LIKE ? OR icon LIKE ?)'; $like="%$search%"; $types.='ss'; $params[]=$like; $params[]=$like; }
+  if (in_array($kategori,['kos','kamar'],true)) { $where[]='kategori=?'; $types.='s'; $params[]=$kategori; }
+  if (in_array($status,['aktif','nonaktif'],true)) { $where[]='status=?'; $types.='s'; $params[]=$status; }
+  $sql='SELECT id_fasilitas,nama_fasilitas,kategori,icon,status FROM fasilitas';
+  if($where) $sql.=' WHERE '.implode(' AND ',$where);
+  $sql.=' ORDER BY kategori ASC,nama_fasilitas ASC';
+  $stmt=$conn->prepare($sql); if($types) $stmt->bind_param($types,...$params); $stmt->execute(); $rows=$stmt->get_result()->fetch_all(MYSQLI_ASSOC); $stmt->close();
+  foreach($rows as &$r) $r['id_fasilitas']=(int)$r['id_fasilitas']; unset($r); return $rows;
+}
+
+function getFasilitasByIdAdmin($id)
+{
+  $conn=db(); $stmt=$conn->prepare('SELECT id_fasilitas,nama_fasilitas,kategori,icon,status FROM fasilitas WHERE id_fasilitas=? LIMIT 1'); $stmt->bind_param('i',$id); $stmt->execute(); $row=$stmt->get_result()->fetch_assoc(); $stmt->close(); if($row) $row['id_fasilitas']=(int)$row['id_fasilitas']; return $row;
+}
+
+function validateFasilitasData($data)
+{
+  $nama=trim((string)($data['nama_fasilitas']??'')); $kategori=trim((string)($data['kategori']??'kos')); $icon=trim((string)($data['icon']??'sparkles')); $status=trim((string)($data['status']??'aktif'));
+  if($nama===''||mb_strlen($nama)>150) throw new Exception('Nama fasilitas wajib diisi dan maksimal 150 karakter.',422);
+  if(!in_array($kategori,['kos','kamar'],true)) throw new Exception('Kategori fasilitas tidak valid.',422);
+  if($icon===''||mb_strlen($icon)>100) throw new Exception('Icon fasilitas tidak valid.',422);
+  if (!in_array($icon, masterIconKeys(), true)) throw new Exception('Icon fasilitas tidak tersedia pada katalog BetaKos.', 422);
+  if(!in_array($status,['aktif','nonaktif'],true)) throw new Exception('Status fasilitas tidak valid.',422);
+  return [$nama,$kategori,$icon,$status];
+}
+
+function createFasilitas($data)
+{
+  [$nama,$kategori,$icon,$status]=validateFasilitasData($data); $conn=db(); $stmt=$conn->prepare('INSERT INTO fasilitas(nama_fasilitas,kategori,icon,status) VALUES(?,?,?,?)'); $stmt->bind_param('ssss',$nama,$kategori,$icon,$status); if(!$stmt->execute()){ $e=$stmt->error;$stmt->close();throw new Exception('Gagal menambahkan fasilitas: '.$e,500);} $id=$stmt->insert_id;$stmt->close();return (int)$id;
+}
+function updateFasilitas($id,$data)
+{
+  if($id<=0||!getFasilitasByIdAdmin($id)) throw new Exception('Fasilitas tidak ditemukan.',404); [$nama,$kategori,$icon,$status]=validateFasilitasData($data); $conn=db(); $stmt=$conn->prepare('UPDATE fasilitas SET nama_fasilitas=?,kategori=?,icon=?,status=? WHERE id_fasilitas=?'); $stmt->bind_param('ssssi',$nama,$kategori,$icon,$status,$id); if(!$stmt->execute()){ $e=$stmt->error;$stmt->close();throw new Exception('Gagal memperbarui fasilitas: '.$e,500);} $stmt->close();
+}
+function deleteFasilitas($id)
+{
+  if($id<=0) throw new Exception('ID fasilitas tidak valid.',422); $conn=db(); $stmt=$conn->prepare('DELETE FROM fasilitas WHERE id_fasilitas=?'); $stmt->bind_param('i',$id); $stmt->execute(); $affected=$stmt->affected_rows;$stmt->close(); if(!$affected) throw new Exception('Fasilitas tidak ditemukan.',404);
 }

@@ -7,6 +7,10 @@
     </div>
   </div>
 
+  <nav x-show="wizard" x-cloak class="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-4" aria-label="Tahapan tambah tipe kamar">
+    <template x-for="(label, index) in ['Informasi', 'Harga', 'Fasilitas', 'Foto']" :key="label"><div class="flex items-center gap-2 rounded-xl px-3 py-2" :class="index === 3 ? 'bg-primary-soft text-primary' : 'bg-emerald-50 text-emerald-700'"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" :class="index === 3 ? 'bg-primary' : 'bg-emerald-600'" x-text="index === 3 ? 4 : '✓'"></span><span class="text-xs font-semibold sm:text-sm" x-text="label"></span></div></template>
+  </nav>
+
   <div class="card border border-slate-200 p-5 shadow-sm">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
@@ -84,11 +88,16 @@
       </template>
     </div>
   </div>
+  <div x-show="wizard" x-cloak class="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:flex-row sm:items-center sm:justify-between">
+    <p class="text-sm text-emerald-800">Tipe kamar sudah tersimpan. Foto dapat ditambahkan sekarang atau nanti.</p>
+    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-primary text-center">Selesai</a>
+  </div>
 </div>
 
 <script>
   function tipeKamarFotoPage() {
     return {
+      wizard: utils.getQuery('wizard') === '1',
       id: utils.getQuery('id_tipe_kamar') || '',
       loading: false,
       loadingData: true,

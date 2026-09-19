@@ -2,14 +2,17 @@
 
 function run_middleware($middlewares = [])
 {
-  foreach ($middlewares as $mw) {
-    // CSRF protection for all state-changing HTTP methods.
-    // Login/register/reset are also protected because the token is rendered
-    // into the public auth layout and sent automatically by API.js.
-    if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
-      csrf_validate_request();
-    }
+  // Jalankan validasi CSRF satu kali sebelum middleware lain. Endpoint yang
+  // memakai autentikasi otomatis dilindungi; endpoint publik dapat memilih
+  // middleware `csrf`. Webhook provider tidak memakai keduanya karena
+  // diverifikasi dengan signature provider.
+  $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+  $requiresCsrf = in_array('auth', $middlewares, true) || in_array('csrf', $middlewares, true);
+  if ($requiresCsrf && in_array($requestMethod, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+    csrf_validate_request();
+  }
 
+  foreach ($middlewares as $mw) {
     // AUTH MIDDLEWARE
     if ($mw === 'auth') {
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');

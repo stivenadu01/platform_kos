@@ -14,84 +14,9 @@
           Masukkan nama tempat, jalan, kawasan, atau lokasi tujuan untuk menemukan kos di area yang kamu inginkan.
         </p>
 
-        <form action="<?= BASE_URL ?>/cari-kos" method="GET" class="mt-8 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/60 sm:flex sm:items-center">
-          <div class="flex min-w-0 flex-1 items-center gap-3 px-3 py-2">
-            <span class="text-lg text-slate-400">⌕</span>
-            <input
-              type="text"
-              name="q"
-              placeholder="Contoh: Oesapa, Kelapa Lima, atau Politeknik Negeri Kupang..."
-              class="w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
-            >
-          </div>
-          <button type="submit" class="mt-2 w-full rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-dark sm:mt-0 sm:w-auto">
-            Cari Kos
-          </button>
-        </form>
-
-        <div class="mt-6">
-          <div class="flex items-center gap-2">
-            <span class="h-px flex-1 bg-slate-200"></span>
-            <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Cari berdasarkan lokasi</span>
-            <span class="h-px flex-1 bg-slate-200"></span>
-          </div>
-
-          <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            <?php
-            $kampusCari = [
-              [
-                'nama' => 'Politeknik Negeri Kupang',
-                'label' => 'Politeknik Negeri Kupang',
-                'lat' => -10.1513944,
-                'lng' => 123.6676240,
-              ],
-              [
-                'nama' => 'Universitas Nusa Cendana',
-                'label' => 'Undana',
-                'lat' => -10.1544480,
-                'lng' => 123.6588310,
-              ],
-              [
-                'nama' => 'Universitas Muhammadiyah Kupang',
-                'label' => 'Muhammadiyah',
-                'lat' => -10.1585622,
-                'lng' => 123.6197763,
-              ],
-              [
-                'nama' => 'Sekolah Tinggi Manajemen Informatika Komputer Uyelindo Kupang',
-                'label' => 'STIKOM',
-                'lat' => -10.1629100,
-                'lng' => 123.6238010,
-              ],
-              [
-                'nama' => 'Universitas Citra Bangsa',
-                'label' => 'UCB',
-                'lat' => -10.1626807,
-                'lng' => 123.6236238,
-              ],
-              [
-                'nama' => 'Poltekkes Kemenkes Kupang',
-                'label' => 'Poltekkes',
-                'lat' => -10.1581806,
-                'lng' => 123.6397611,
-              ],
-            ];
-            ?>
-            <?php foreach ($kampusCari as $kampus): ?>
-              <a
-                href="<?= BASE_URL ?>/cari-kos?lokasi=<?= urlencode($kampus['nama']) ?>&lat=<?= urlencode((string) $kampus['lat']) ?>&lng=<?= urlencode((string) $kampus['lng']) ?>"
-                class="group rounded-xl border border-slate-200 bg-white px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-primary hover:bg-primary-soft hover:shadow-sm"
-              >
-                <span class="flex items-start gap-2">
-                  <span class="mt-0.5 text-primary">⌖</span>
-                  <span class="min-w-0">
-                    <span class="block truncate text-xs font-semibold text-slate-800 group-hover:text-primary"><?= htmlspecialchars($kampus['label']) ?></span>
-                    <span class="mt-0.5 block text-[10px] text-slate-400">Lihat kos di sekitarnya →</span>
-                  </span>
-                </span>
-              </a>
-            <?php endforeach; ?>
-          </div>
+        <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/60">
+          <?php $pickerMode = 'home'; ?>
+          <?php include ROOT_PATH . '/app/views/partials/user/location-picker.php'; ?>
         </div>
 
         <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">

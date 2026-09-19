@@ -1,6 +1,157 @@
 <?php
 
+require_once ROOT_PATH . '/app/models/Aturan.php';
+
 require_once ROOT_PATH . '/app/models/TipeKamar.php';
+
+
+
+/* =========================================================
+   PELANGGAN: FAVORIT & LAPORAN KOS
+   ========================================================= */
+
+function getFavoritKosIds($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare('SELECT id_kos FROM kos_favorit WHERE id_user = ? ORDER BY id_favorit DESC');
+  $stmt->bind_param('i', $id_user);
+  $stmt->execute();
+  $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+  return array_map(static fn($row) => (int)$row['id_kos'], $rows);
+}
+
+function isKosFavorit($id_user, $id_kos)
+{
+  if ($id_user <= 0 || $id_kos <= 0) return false;
+  $conn = db();
+  $stmt = $conn->prepare('SELECT 1 FROM kos_favorit WHERE id_user = ? AND id_kos = ? LIMIT 1');
+  $stmt->bind_param('ii', $id_user, $id_kos);
+  $stmt->execute();
+  $exists = (bool)$stmt->get_result()->fetch_row();
+  $stmt->close();
+  return $exists;
+}
+
+function toggleKosFavorit($id_user, $id_kos)
+{
+  if ($id_user <= 0 || $id_kos <= 0) throw new Exception('Kos tidak valid.', 422);
+  $conn = db();
+
+  $conn->begin_transaction();
+  try {
+    // Lock baris kos sebagai titik serialisasi yang selalu tersedia. Dengan
+    // demikian dua request toggle untuk kos yang sama tidak dapat sama-sama
+    // membaca kondisi "belum favorit" lalu melakukan INSERT bersamaan.
+    $stmt = $conn->prepare("SELECT id_kos FROM kos WHERE id_kos = ? AND status = 'aktif' LIMIT 1 FOR UPDATE");
+    $stmt->bind_param('i', $id_kos);
+    $stmt->execute();
+    $kos = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$kos) throw new Exception('Kos tidak ditemukan atau sudah tidak tersedia.', 404);
+
+    $stmt = $conn->prepare('SELECT id_favorit FROM kos_favorit WHERE id_user = ? AND id_kos = ? LIMIT 1');
+    $stmt->bind_param('ii', $id_user, $id_kos);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    if ($row) {
+      $stmt = $conn->prepare('DELETE FROM kos_favorit WHERE id_favorit = ?');
+      $stmt->bind_param('i', $row['id_favorit']);
+      if (!$stmt->execute()) {
+        $error = $stmt->error;
+        $stmt->close();
+        throw new Exception('Gagal menghapus favorit: ' . $error, 500);
+      }
+      $stmt->close();
+      $conn->commit();
+      return false;
+    }
+
+    $stmt = $conn->prepare('INSERT INTO kos_favorit (id_user, id_kos) VALUES (?, ?)');
+    $stmt->bind_param('ii', $id_user, $id_kos);
+    if (!$stmt->execute()) {
+      $error = $stmt->error;
+      $stmt->close();
+      throw new Exception('Gagal menyimpan favorit: ' . $error, 500);
+    }
+    $stmt->close();
+    $conn->commit();
+    return true;
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+  }
+}
+
+function getFavoritKosByUser($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("SELECT
+      k.id_kos, k.nama_kos, k.alamat, k.jenis, k.deskripsi,
+      (SELECT f.nama_file FROM kos_foto f WHERE f.id_kos = k.id_kos ORDER BY f.is_thumbnail DESC, f.urutan ASC, f.id_foto ASC LIMIT 1) AS foto,
+      COUNT(DISTINCT CASE WHEN km.status = 'tersedia' THEN km.id_kamar END) AS kamar_tersedia,
+      MIN(CASE WHEN km.status = 'tersedia' THEN hk.harga_total END) AS harga_mulai,
+      kf.created_at AS difavorit_at
+    FROM kos_favorit kf
+    INNER JOIN kos k ON k.id_kos = kf.id_kos
+    LEFT JOIN kamar km ON km.id_kos = k.id_kos
+    LEFT JOIN tipe_kamar tk ON tk.id_tipe_kamar = km.id_tipe_kamar
+    LEFT JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
+    WHERE kf.id_user = ?
+      AND k.status = 'aktif'
+    GROUP BY kf.id_favorit, k.id_kos, k.nama_kos, k.alamat, k.jenis, k.deskripsi, kf.created_at
+    ORDER BY kf.id_favorit DESC");
+  $stmt->bind_param('i', $id_user);
+  $stmt->execute();
+  $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+  return $rows;
+}
+
+function buatLaporanKos($id_user, $id_kos, $alasan, $deskripsi = '')
+{
+  $allowed = ['informasi_tidak_sesuai','foto_tidak_sesuai','kos_sudah_tidak_tersedia','informasi_menyesatkan','lainnya'];
+  if ($id_user <= 0 || $id_kos <= 0) throw new Exception('Data kos tidak valid.', 422);
+  if (!in_array($alasan, $allowed, true)) throw new Exception('Alasan laporan tidak valid.', 422);
+  $deskripsi = trim((string)$deskripsi);
+  if ($deskripsi === '' || mb_strlen($deskripsi) > 2000) throw new Exception('Keterangan laporan wajib diisi dan maksimal 2000 karakter.', 422);
+
+  $conn = db();
+  $stmt = $conn->prepare("SELECT id_kos FROM kos WHERE id_kos = ? AND status = 'aktif' LIMIT 1");
+  $stmt->bind_param('i', $id_kos);
+  $stmt->execute();
+  $exists = $stmt->get_result()->fetch_assoc();
+  $stmt->close();
+  if (!$exists) throw new Exception('Kos tidak ditemukan atau sudah tidak tersedia.', 404);
+
+  $stmt = $conn->prepare("INSERT INTO laporan_kos (id_kos, id_user, alasan, deskripsi, status) VALUES (?, ?, ?, ?, 'menunggu')");
+  $stmt->bind_param('iiss', $id_kos, $id_user, $alasan, $deskripsi);
+  if (!$stmt->execute()) {
+    $error = $stmt->error;
+    $stmt->close();
+    throw new Exception('Gagal mengirim laporan: ' . $error, 500);
+  }
+  $id = (int)$stmt->insert_id;
+  $stmt->close();
+  return $id;
+}
+
+function getLaporanKosByUser($id_user)
+{
+  $conn = db();
+  $stmt = $conn->prepare("SELECT l.id_laporan, l.id_kos, l.alasan, l.deskripsi, l.status, l.catatan_admin, l.created_at, l.updated_at, k.nama_kos
+    FROM laporan_kos l
+    LEFT JOIN kos k ON k.id_kos = l.id_kos
+    WHERE l.id_user = ?
+    ORDER BY l.id_laporan DESC");
+  $stmt->bind_param('i', $id_user);
+  $stmt->execute();
+  $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $stmt->close();
+  return $rows;
+}
 
 function getKosByPemilik($id_pemilik)
 {
@@ -13,6 +164,7 @@ function getKosByPemilik($id_pemilik)
       k.alamat,
       k.latitude,
       k.longitude,
+      k.google_maps_url,
       k.jenis,
       k.deskripsi,
       k.status,
@@ -65,6 +217,7 @@ function findKosById($id_kos, $id_pemilik)
       alamat,
       latitude,
       longitude,
+      google_maps_url,
       jenis,
       deskripsi,
       status,
@@ -95,6 +248,7 @@ function createKos($id_pemilik, $data)
   $alamat = trim($data['alamat']);
   $latitude = (float) $data['latitude'];
   $longitude = (float) $data['longitude'];
+  $google_maps_url = trim((string)($data['google_maps_url'] ?? '')) ?: null;
   $jenis = $data['jenis'];
   $deskripsi = trim($data['deskripsi'] ?? '');
 
@@ -105,20 +259,22 @@ function createKos($id_pemilik, $data)
       alamat,
       latitude,
       longitude,
+      google_maps_url,
       jenis,
       deskripsi,
       status
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, 'draft')
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'draft')
   ");
 
   $stmt->bind_param(
-    'issddss',
+    'issddsss',
     $id_pemilik,
     $nama_kos,
     $alamat,
     $latitude,
     $longitude,
+    $google_maps_url,
     $jenis,
     $deskripsi
   );
@@ -132,7 +288,7 @@ function createKos($id_pemilik, $data)
 }
 
 
-function updateKos($id_kos, $id_pemilik, $data)
+function updateKos($id_kos, $id_pemilik, $data, $resetToDraft = false)
 {
   $conn = db();
 
@@ -140,8 +296,11 @@ function updateKos($id_kos, $id_pemilik, $data)
   $alamat = trim($data['alamat']);
   $latitude = (float) $data['latitude'];
   $longitude = (float) $data['longitude'];
+  $google_maps_url = trim((string)($data['google_maps_url'] ?? '')) ?: null;
   $jenis = $data['jenis'];
   $deskripsi = trim($data['deskripsi'] ?? '');
+
+  $statusUpdate = $resetToDraft ? ",\n      status = 'draft'" : '';
 
   $stmt = $conn->prepare("
     UPDATE kos
@@ -150,18 +309,20 @@ function updateKos($id_kos, $id_pemilik, $data)
       alamat = ?,
       latitude = ?,
       longitude = ?,
+      google_maps_url = ?,
       jenis = ?,
-      deskripsi = ?
+      deskripsi = ?{$statusUpdate}
     WHERE id_kos = ?
       AND id_pemilik = ?
   ");
 
   $stmt->bind_param(
-    'ssddssii',
+    'ssddsssii',
     $nama_kos,
     $alamat,
     $latitude,
     $longitude,
+    $google_maps_url,
     $jenis,
     $deskripsi,
     $id_kos,
@@ -179,20 +340,62 @@ function updateKos($id_kos, $id_pemilik, $data)
 function deleteKos($id_kos, $id_pemilik)
 {
   $conn = db();
+  $fotoPaths = [];
+  $conn->begin_transaction();
 
-  $stmt = $conn->prepare("
-    DELETE FROM kos
-    WHERE id_kos = ?
-      AND id_pemilik = ?
-  ");
+  try {
+    $stmt = $conn->prepare('SELECT id_kos FROM kos WHERE id_kos = ? AND id_pemilik = ? LIMIT 1 FOR UPDATE');
+    $stmt->bind_param('ii', $id_kos, $id_pemilik);
+    $stmt->execute();
+    $owned = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if (!$owned) {
+      throw new Exception('Kos tidak ditemukan.', 404);
+    }
 
-  $stmt->bind_param('ii', $id_kos, $id_pemilik);
+    $stmt = $conn->prepare('SELECT nama_file FROM kos_foto WHERE id_kos = ?');
+    $stmt->bind_param('i', $id_kos);
+    $stmt->execute();
+    $fotoPaths = array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'nama_file');
+    $stmt->close();
 
-  $success = $stmt->execute();
+    $stmt = $conn->prepare("
+      SELECT f.nama_file
+      FROM tipe_kamar_foto f
+      INNER JOIN tipe_kamar t ON t.id_tipe_kamar = f.id_tipe_kamar
+      WHERE t.id_kos = ?
+    ");
+    $stmt->bind_param('i', $id_kos);
+    $stmt->execute();
+    $fotoPaths = array_merge($fotoPaths, array_column($stmt->get_result()->fetch_all(MYSQLI_ASSOC), 'nama_file'));
+    $stmt->close();
 
-  $stmt->close();
+    $stmt = $conn->prepare('DELETE FROM kos WHERE id_kos = ? AND id_pemilik = ?');
+    $stmt->bind_param('ii', $id_kos, $id_pemilik);
+    if (!$stmt->execute() || $stmt->affected_rows !== 1) {
+      throw new Exception('Gagal menghapus kos.', 500);
+    }
+    $stmt->close();
+    $conn->commit();
+  } catch (Throwable $e) {
+    $conn->rollback();
+    throw $e;
+  }
 
-  return $success;
+  foreach ($fotoPaths as $namaFile) {
+    $namaFile = str_replace('\\', '/', (string) $namaFile);
+    if (!preg_match('#^/(?:kos|tipe-kamar)/[A-Za-z0-9_.-]+$#', $namaFile)) {
+      error_log('Lewati path foto kos tidak valid: ' . $namaFile);
+      continue;
+    }
+
+    $filePath = ROOT_PATH . '/public/uploads' . $namaFile;
+    if (is_file($filePath) && !is_link($filePath) && !@unlink($filePath)) {
+      error_log('Gagal menghapus file foto saat kos dihapus: ' . $filePath);
+    }
+  }
+
+  return true;
 }
 
 function getKosUnggulanUntukHome($limit = 6)
@@ -373,6 +576,11 @@ function searchKosPublik($filters = [])
 
   $whereSql = implode(' AND ', $where);
 
+  $groupBy = 'k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.google_maps_url, k.jenis, k.deskripsi';
+  if ($useLocation) {
+    $groupBy .= ', loc.user_lat, loc.user_lng';
+  }
+
   $countSql = "
     SELECT COUNT(DISTINCT k.id_kos) AS total
     FROM kos k
@@ -432,7 +640,7 @@ function searchKosPublik($filters = [])
     JOIN harga_kamar hk ON hk.id_tipe_kamar = tk.id_tipe_kamar
     $locationJoin
     WHERE $whereSql $distanceWhere
-    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, loc.user_lat, loc.user_lng
+    GROUP BY $groupBy
     $order
     LIMIT ? OFFSET ?
   ";
@@ -484,8 +692,10 @@ function getDetailKosPublik($id_kos)
       k.alamat,
       k.latitude,
       k.longitude,
+      k.google_maps_url,
       k.jenis,
       k.deskripsi,
+      k.updated_at,
       u.nama AS nama_pemilik,
       u.no_hp AS no_hp_pemilik,
       u.foto AS foto_pemilik,
@@ -505,7 +715,7 @@ function getDetailKosPublik($id_kos)
       AND lpro.tanggal_mulai <= CURDATE()
       AND lpro.tanggal_berakhir >= CURDATE()
     WHERE k.id_kos = ? AND k.status = 'aktif'
-    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.jenis, k.deskripsi, u.nama, u.no_hp, u.foto, u.last_login_at
+    GROUP BY k.id_kos, k.nama_kos, k.alamat, k.latitude, k.longitude, k.google_maps_url, k.jenis, k.deskripsi, k.updated_at, u.nama, u.no_hp, u.foto, u.last_login_at
     LIMIT 1
   ");
   $stmt->bind_param('i', $id_kos);
@@ -547,16 +757,20 @@ function getDetailKosPublik($id_kos)
   $kos['tipe_kamar'] = $tipeKamar;
 
   $stmt = $conn->prepare("
-    SELECT f.id_fasilitas, f.nama_fasilitas
+    SELECT f.id_fasilitas, f.nama_fasilitas, f.icon
     FROM fasilitas f
     JOIN kos_fasilitas kf ON kf.id_fasilitas = f.id_fasilitas
     WHERE kf.id_kos = ?
+      AND f.kategori = 'kos'
+      AND f.status = 'aktif'
     ORDER BY f.nama_fasilitas ASC
   ");
   $stmt->bind_param('i', $id_kos);
   $stmt->execute();
   $kos['fasilitas'] = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
   $stmt->close();
+
+  $kos['aturan'] = getAturanByKos((int)$id_kos);
 
   $stmt = $conn->prepare("
     SELECT id_foto, nama_file, urutan, is_thumbnail
@@ -572,69 +786,5 @@ function getDetailKosPublik($id_kos)
   return $kos;
 }
 
-/* =========================================================
-   LAPORAN KOS - PELANGGAN
-   ========================================================= */
 
-function buatLaporanKos($id_user, $id_kos, $alasan, $deskripsi)
-{
-  $conn = db();
-  $id_user = (int)$id_user;
-  $id_kos = (int)$id_kos;
-  $deskripsi = trim($deskripsi);
 
-  $allowed = [
-    'informasi_tidak_sesuai',
-    'foto_tidak_sesuai',
-    'kos_sudah_tidak_tersedia',
-    'informasi_menyesatkan',
-    'lainnya'
-  ];
-
-  if ($id_user <= 0 || $id_kos <= 0) throw new Exception('Data laporan tidak valid.', 422);
-  if (!in_array($alasan, $allowed, true)) throw new Exception('Alasan laporan tidak valid.', 422);
-  if (mb_strlen($deskripsi) < 10) throw new Exception('Jelaskan laporan minimal 10 karakter.', 422);
-  if (mb_strlen($deskripsi) > 2000) throw new Exception('Laporan maksimal 2000 karakter.', 422);
-
-  $stmt = $conn->prepare("SELECT id_kos FROM kos WHERE id_kos = ? LIMIT 1");
-  $stmt->bind_param('i', $id_kos);
-  $stmt->execute();
-  $kos = $stmt->get_result()->fetch_assoc();
-  $stmt->close();
-  if (!$kos) throw new Exception('Kos tidak ditemukan.', 404);
-
-  // Hindari spam laporan identik yang masih menunggu/diproses.
-  $stmt = $conn->prepare("SELECT id_laporan FROM laporan_kos WHERE id_user = ? AND id_kos = ? AND status IN ('menunggu', 'diproses') LIMIT 1");
-  $stmt->bind_param('ii', $id_user, $id_kos);
-  $stmt->execute();
-  $existing = $stmt->get_result()->fetch_assoc();
-  $stmt->close();
-  if ($existing) throw new Exception('Anda sudah memiliki laporan yang sedang diproses untuk kos ini.', 409);
-
-  $stmt = $conn->prepare("INSERT INTO laporan_kos (id_user, id_kos, alasan, deskripsi) VALUES (?, ?, ?, ?)");
-  $stmt->bind_param('iiss', $id_user, $id_kos, $alasan, $deskripsi);
-  if (!$stmt->execute()) {
-    $stmt->close();
-    throw new Exception('Gagal mengirim laporan.', 500);
-  }
-  $id = (int)$stmt->insert_id;
-  $stmt->close();
-  return $id;
-}
-
-function getLaporanKosByUser($id_user)
-{
-  $conn = db();
-  $stmt = $conn->prepare("
-    SELECT id_laporan, id_kos, alasan, deskripsi, status, catatan_admin, created_at, updated_at,
-           (SELECT nama_kos FROM kos WHERE kos.id_kos = laporan_kos.id_kos LIMIT 1) AS nama_kos
-    FROM laporan_kos
-    WHERE id_user = ?
-    ORDER BY id_laporan DESC
-  ");
-  $stmt->bind_param('i', $id_user);
-  $stmt->execute();
-  $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-  $stmt->close();
-  return $data;
-}

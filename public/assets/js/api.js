@@ -40,9 +40,31 @@ const API = (() => {
       }
 
       const res = await fetch(BASE_URL + '/api' + url, options);
-      const json = await res.json();
+      const contentType = (res.headers.get('content-type') || '').toLowerCase();
+      const rawBody = await res.text();
+      let json = null;
 
-      if (!json.success) {
+      if (rawBody !== '' && contentType.includes('application/json')) {
+        try {
+          json = JSON.parse(rawBody);
+        } catch (_) {
+          throw new Error('Respons server tidak dapat dibaca. Silakan coba kembali.');
+        }
+      }
+
+      if (!json) {
+        if (res.status === 401) {
+          throw new Error('Sesi Anda telah berakhir. Silakan login kembali.');
+        }
+
+        throw new Error(
+          res.ok
+            ? 'Server mengembalikan respons yang tidak sesuai.'
+            : `Server mengalami kesalahan (${res.status}). Silakan coba kembali.`
+        );
+      }
+
+      if (!res.ok || !json.success) {
         throw new Error(json.message || 'Terjadi kesalahan');
       }
 
