@@ -109,7 +109,7 @@
       <div class="absolute inset-0 bg-slate-950/45"></div>
       <div class="relative w-full max-w-lg rounded-2xl bg-white p-6 sm:p-8 shadow-2xl">
         <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary text-xl font-bold">✓</div>
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('check-circle-2', 'h-6 w-6') ?></div>
           <div>
             <p class="text-sm font-semibold text-primary">Selamat datang di BetaKos</p>
             <h2 class="text-xl font-bold text-slate-900">Mari siapkan akun Anda</h2>

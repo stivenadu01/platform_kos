@@ -11,29 +11,29 @@
   <nav class="flex h-[calc(100vh-4rem)] min-h-0 flex-col p-4">
     <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 space-y-1 [scrollbar-width:thin]">
     <a href="<?= BASE_URL ?>/admin" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">📊</span><span class="sidebar-label">Dashboard</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('chart-column', 'h-5 w-5') ?></span><span class="sidebar-label">Dashboard</span>
     </a>
     <a href="<?= BASE_URL ?>/admin/verifikasi" title="Verifikasi Kos" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">✓</span><span class="sidebar-label">Verifikasi Kos</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span><span class="sidebar-label">Verifikasi Kos</span>
     </a>
     <a href="<?= BASE_URL ?>/admin/profil" title="Profil & Pengaturan Akun" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">👤</span><span class="sidebar-label">Profil & Akun</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span><span class="sidebar-label">Profil & Akun</span>
     </a>
     <div class="sidebar-section-label pt-4 pb-2 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Manajemen</div>
     <a href="<?= BASE_URL ?>/admin/pengguna" title="Pengguna" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">👥</span><span class="sidebar-label">Pengguna</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span><span class="sidebar-label">Pengguna</span>
     </a>
     <a href="<?= BASE_URL ?>/admin/laporan" title="Laporan Kos" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">⚑</span><span class="sidebar-label">Laporan Kos</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('flag', 'h-5 w-5') ?></span><span class="sidebar-label">Laporan Kos</span>
     </a>
     <a href="<?= BASE_URL ?>/admin/data-master" title="Data Master" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">🗂️</span><span class="sidebar-label">Data Master</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('folder-cog', 'h-5 w-5') ?></span><span class="sidebar-label">Data Master</span>
     </a>
     <a href="<?= BASE_URL ?>/admin/langganan" title="Langganan" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">💳</span><span class="sidebar-label">Langganan</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('credit-card', 'h-5 w-5') ?></span><span class="sidebar-label">Langganan</span>
     </a>
     <a href="<?= BASE_URL ?>/admin/langganan/metode-pembayaran" title="Metode Pembayaran" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">⚙️</span><span class="sidebar-label">Metode Pembayaran</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('settings', 'h-5 w-5') ?></span><span class="sidebar-label">Metode Pembayaran</span>
     </a>
     </div>
 
@@ -43,8 +43,24 @@
         @click="$store.auth.logout()"
         class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
       >
-        <span class="text-lg">↪</span><span class="sidebar-label">Logout</span>
+        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600"><?= masterIconSvg('log-out', 'h-5 w-5') ?></span><span class="sidebar-label">Logout</span>
       </button>
     </div>
   </nav>
 </aside>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const current = window.location.pathname.replace(/\/$/, '') || '/';
+  const links = Array.from(document.querySelectorAll('.admin-sidebar nav a[href]'));
+  let active = null;
+  links.forEach((link) => {
+    const path = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '') || '/';
+    const matches = path.endsWith('/admin') ? current === path : (current === path || current.startsWith(path + '/'));
+    if (matches && (!active || path.length > active.path.length)) active = { link, path };
+  });
+  if (active) {
+    active.link.classList.add('admin-nav-active');
+    active.link.setAttribute('aria-current', 'page');
+  }
+});
+</script>

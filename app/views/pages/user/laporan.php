@@ -27,8 +27,8 @@ $reasonLabels = [
 ];
 ?>
 
-<div x-data="{ openId: null }" class="min-h-[calc(100vh-4rem)] bg-slate-50">
-  <section class="border-b border-slate-200 bg-white">
+<div x-data="{ openId: null }" class="public-page">
+  <section class="public-page-header">
     <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
       <a href="<?= BASE_URL ?>/cari-kos" class="text-sm font-semibold text-slate-500 hover:text-primary">← Kembali</a>
       <div class="mt-4">
@@ -41,7 +41,7 @@ $reasonLabels = [
   <main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
     <?php if (!$laporan): ?>
       <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-2xl">⚑</div>
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><?= masterIconSvg('flag', 'h-7 w-7') ?></div>
         <h2 class="mt-4 font-semibold text-slate-900">Belum ada laporan</h2>
         <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">
           Kamu belum pernah mengirim laporan kos. Jika menemukan informasi yang bermasalah, kamu dapat melaporkannya dari halaman detail kos.

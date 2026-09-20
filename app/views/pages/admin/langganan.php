@@ -1,4 +1,4 @@
-<div x-data="adminLanggananPage()" x-init="init()" class="space-y-6">
+<div x-data="adminLanggananPage()" x-init="init()" class="admin-page">
   <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Manajemen Langganan</p>
@@ -195,7 +195,7 @@
           <h2 class="font-bold text-slate-900" x-text="detailTitle"></h2>
           <p class="text-xs text-slate-500">Detail langganan dan riwayat pembayaran</p>
         </div>
-        <button type="button" @click="closeDetail()" class="w-9 h-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button type="button" @click="closeDetail()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
 
       <div class="p-5 sm:p-6 space-y-6">

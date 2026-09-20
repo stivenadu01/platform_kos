@@ -21,7 +21,7 @@
   <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
   <script defer src="https://unpkg.com/alpinejs"></script>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="admin-ui bg-slate-50 text-slate-800">
   <script>
     // Set the shell state before the first paint. Alpine will bind the same value afterwards.
     (() => {
@@ -36,7 +36,7 @@
     <?php include ROOT_PATH . '/app/views/partials/admin/sidebar.php'; ?>
     <div class="admin-main-shell min-h-screen min-w-0 overflow-x-hidden">
       <?php include ROOT_PATH . '/app/views/partials/admin/topbar.php'; ?>
-      <main class="p-4 pt-20 sm:p-6 sm:pt-20 lg:p-8 lg:pt-24 min-w-0 overflow-x-hidden">
+      <main class="min-w-0 overflow-x-hidden px-3 pb-5 pt-20 sm:px-6 sm:pb-6 sm:pt-20 lg:px-8 lg:pb-8 lg:pt-24">
         <?= $content ?>
       </main>
     </div>

@@ -1,4 +1,4 @@
-<div x-data="riwayatKosPage()" x-init="init()" class="min-h-[calc(100vh-4rem)] bg-slate-50">
+<div x-data="riwayatKosPage()" x-init="init()" class="public-page">
   <section class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
     <div>
       <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">Riwayat Kos Saya</h1>
@@ -8,7 +8,7 @@
     <section>
       <div class="mb-3 flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-slate-900">Riwayat Terhubung</h2>
-        <button type="button" @click="load()" class="btn-secondary text-xs">↻ Refresh</button>
+        <button type="button" @click="load()" class="btn-secondary gap-2 text-xs"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button>
       </div>
       <div x-show="loading" class="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Memuat riwayat...</div>
       <div x-show="!loading && !history.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
@@ -138,7 +138,7 @@
           <h2 class="font-bold text-slate-900">Detail Tagihan</h2>
           <p class="mt-1 text-sm text-slate-500" x-text="billNumber"></p>
         </div>
-        <button type="button" @click="closeBill()" class="h-9 w-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button type="button" @click="closeBill()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
       <div x-show="billLoading" class="mt-5 rounded-xl bg-slate-50 p-8 text-center text-sm text-slate-500">Memuat detail tagihan...</div>
       <div x-show="billError" class="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" x-text="billError"></div>
@@ -191,7 +191,7 @@
           <h2 class="font-bold text-slate-900">Ajukan Claim</h2>
           <p class="mt-1 text-sm text-slate-500" x-text="selected?.nama_kos || ''"></p>
         </div>
-        <button type="button" @click="closeClaim()" class="h-9 w-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button type="button" @click="closeClaim()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
       <form @submit.prevent="submitClaim" class="mt-5 space-y-4">
         <div class="rounded-xl bg-slate-50 p-4 text-sm text-slate-600">NIK akun Anda sudah dicocokkan dengan data penghuni. Pemilik akan memverifikasi claim ini.</div>

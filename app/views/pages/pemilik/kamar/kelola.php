@@ -100,9 +100,7 @@
       x-cloak
       class="py-14 text-center">
 
-      <div class="text-4xl mb-4">
-        🛏️
-      </div>
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('bed', 'h-7 w-7') ?></div>
 
       <h3 class="font-semibold text-slate-900">
         Belum ada kamar

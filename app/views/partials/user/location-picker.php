@@ -30,7 +30,7 @@ $pickerConfig = [
         aria-label="Tutup pencarian lokasi">←</button>
     <?php endif; ?>
 
-    <span class="text-xl text-slate-400" aria-hidden="true">⌕</span>
+    <span class="text-slate-400" aria-hidden="true"><?= masterIconSvg('search', 'h-5 w-5') ?></span>
 
     <input
       x-ref="locationInput"
@@ -75,7 +75,7 @@ $pickerConfig = [
           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-2xl text-slate-500 hover:bg-slate-100"
           aria-label="Tutup pencarian lokasi">←</button>
 
-        <span class="text-xl text-slate-400" aria-hidden="true">⌕</span>
+        <span class="text-slate-400" aria-hidden="true"><?= masterIconSvg('search', 'h-5 w-5') ?></span>
 
         <input
           x-ref="locationInput"
@@ -143,7 +143,7 @@ $pickerConfig = [
                 type="button"
                 @click="choose(item)"
                 class="flex w-full items-start gap-3 px-3 py-3 text-left hover:bg-slate-50">
-                <span class="mt-0.5 text-primary">⌖</span>
+                <span class="mt-0.5 text-primary"><?= masterIconSvg('map-pin', 'h-4 w-4') ?></span>
                 <span class="min-w-0">
                   <span class="block text-sm font-medium text-slate-800" x-text="item.nama"></span>
                   <span class="mt-0.5 block text-xs text-slate-400">Pilih lokasi ini</span>

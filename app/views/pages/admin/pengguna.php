@@ -1,10 +1,10 @@
-<div x-data="adminPenggunaPage()" x-init="init()" class="space-y-6">
+<div x-data="adminPenggunaPage()" x-init="init()" class="admin-page">
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Pengguna</h1>
       <p class="mt-1 text-sm text-slate-500">Kelola akun pelanggan, pemilik, dan status verifikasi pengguna.</p>
     </div>
-    <button @click="openCreate()" class="btn-primary">+ Tambah Pengguna</button>
+    <button @click="openCreate()" class="btn-primary"><?= masterIconSvg('user-plus', 'h-4 w-4') ?> Tambah Pengguna</button>
   </div>
 
   <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
@@ -57,12 +57,12 @@
         <h2 class="font-semibold text-slate-900">Daftar Pengguna</h2>
         <p class="text-xs text-slate-500 mt-1" x-text="`${result.total} pengguna ditemukan`"></p>
       </div>
-      <button @click="load()" class="btn-secondary text-sm">↻ Refresh</button>
+      <button @click="load()" class="btn-secondary gap-2 text-sm"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button>
     </div>
 
     <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat pengguna...</div>
     <div x-show="!loading && !result.items.length" class="p-10 text-center">
-      <div class="text-4xl">👥</div>
+      <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><?= masterIconSvg('users-round', 'h-6 w-6') ?></div>
       <h3 class="mt-3 font-semibold text-slate-900">Pengguna tidak ditemukan</h3>
       <p class="mt-1 text-sm text-slate-500">Coba ubah pencarian atau filter.</p>
     </div>
@@ -167,7 +167,7 @@
     <div class="relative bg-white w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
       <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
         <div><h2 class="font-bold text-slate-900">Tambah Pengguna</h2><p class="text-xs text-slate-500 mt-1">Akun yang dibuat Admin langsung terverifikasi.</p></div>
-        <button @click="closeCreate()" class="w-9 h-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button @click="closeCreate()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
       <form @submit.prevent="createUser" class="p-5 sm:p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

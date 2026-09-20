@@ -1,4 +1,4 @@
-<div x-data="accountProfilePage()" x-init="init()" class="mx-auto max-w-5xl space-y-6">
+<div x-data="accountProfilePage()" x-init="init()" class="admin-page">
   <div>
     <p class="text-sm font-medium text-primary">Akun</p>
     <h1 class="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">Profil & Pengaturan Akun</h1>

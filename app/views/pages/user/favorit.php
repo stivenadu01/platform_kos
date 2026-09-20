@@ -1,5 +1,5 @@
-<div x-data="favoritePage()" x-init="init()" class="min-h-[calc(100vh-4rem)] bg-slate-50">
-  <section class="border-b border-slate-200 bg-white">
+<div x-data="favoritePage()" x-init="init()" class="public-page">
+  <section class="public-page-header">
     <div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <a href="<?= BASE_URL ?>/cari-kos" class="text-sm font-semibold text-slate-500 hover:text-primary">← Kembali ke pencarian</a>
       <div class="mt-4 flex flex-wrap items-end justify-between gap-3">
@@ -20,7 +20,7 @@
 
     <div x-show="!loading && items.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <template x-for="item in items" :key="item.id_kos">
-        <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <article class="public-card public-card-hover">
           <a :href="'<?= BASE_URL ?>/kos/' + item.id_kos" class="group block">
             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
               <img :src="item.foto ? '<?= BASE_URL ?>/uploads' + item.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'" :alt="item.nama_kos" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" @error="$event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'">
@@ -42,7 +42,7 @@
     </div>
 
     <div x-show="!loading && !items.length" class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-      <div class="text-5xl">♡</div>
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-500"><?= masterIconSvg('heart', 'h-7 w-7') ?></div>
       <h2 class="mt-3 font-semibold text-slate-900">Belum ada kos favorit</h2>
       <p class="mt-1 text-sm text-slate-500">Saat menemukan kos yang menarik, tekan ikon hati untuk menyimpannya.</p>
       <a href="<?= BASE_URL ?>/cari-kos" class="mt-5 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Mulai cari kos</a>

@@ -164,7 +164,7 @@
       class="py-14 text-center">
 
       <div class="text-4xl mb-4">
-        👤
+        <?= masterIconSvg('user-round', 'h-8 w-8') ?>
       </div>
 
       <h3 class="font-semibold text-slate-900">

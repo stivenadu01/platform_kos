@@ -1,6 +1,6 @@
 <header
   x-data="{ open: false }"
-  class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
+  class="public-navbar sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
   <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
     <a href="<?= BASE_URL ?>/" class="flex items-center gap-3 shrink-0">
       <img
@@ -44,7 +44,7 @@
         hidden
         class="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary-soft px-4 py-2 text-sm font-semibold text-primary hover:bg-blue-100"
         title="Pasang BetaKos di perangkat">
-        <span aria-hidden="true">📱</span>
+        <?= masterIconSvg('smartphone', 'h-4 w-4') ?>
         Unduh Aplikasi
       </button>
       <template x-if="!$store.auth.isLoggedIn">
@@ -83,8 +83,8 @@
       @click="open = !open"
       :aria-expanded="open"
       aria-label="Buka menu">
-      <span x-show="!open" class="text-xl">☰</span>
-      <span x-show="open" x-cloak class="text-xl">✕</span>
+      <span x-show="!open"><?= masterIconSvg('menu', 'h-5 w-5') ?></span>
+      <span x-show="open" x-cloak><?= masterIconSvg('x', 'h-5 w-5') ?></span>
     </button>
   </div>
 
@@ -124,7 +124,7 @@
         @click="open = false"
         class="flex w-full items-center gap-3 rounded-xl bg-primary-soft px-4 py-3 text-left text-sm font-semibold text-primary hover:bg-blue-100"
         title="Pasang BetaKos di perangkat">
-        <span aria-hidden="true">📱</span>
+        <?= masterIconSvg('smartphone', 'h-5 w-5') ?>
         Unduh Aplikasi
       </button>
 
@@ -156,3 +156,19 @@
     </nav>
   </div>
 </header>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const current = window.location.pathname.replace(/\/$/, '') || '/';
+  const links = Array.from(document.querySelectorAll('.public-navbar nav a[href]'));
+  let active = null;
+  links.forEach((link) => {
+    const path = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '') || '/';
+    const matches = path === '/' ? current === path : (current === path || current.startsWith(path + '/'));
+    if (matches && (!active || path.length > active.path.length)) active = { link, path };
+  });
+  if (active) {
+    active.link.classList.add('public-nav-active');
+    active.link.setAttribute('aria-current', 'page');
+  }
+});
+</script>

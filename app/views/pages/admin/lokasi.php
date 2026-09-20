@@ -1,11 +1,11 @@
-<div x-data="adminLokasiPage()" x-init="init()" class="space-y-6">
+<div x-data="adminLokasiPage()" x-init="init()" class="admin-page">
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Manajemen Referensi</p>
       <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">Kelola Lokasi</h1>
       <p class="mt-1 text-sm text-slate-500">Atur lokasi referensi yang tampil pada pencarian publik dan informasi lingkungan sekitar kos.</p>
     </div>
-    <button type="button" @click="openCreate()" class="btn-primary">+ Tambah Lokasi</button>
+    <button type="button" @click="openCreate()" class="btn-primary"><?= masterIconSvg('plus', 'h-4 w-4') ?> Tambah Lokasi</button>
   </div>
 
   <div class="card border border-slate-200 p-4 sm:p-5">
@@ -45,7 +45,7 @@
         <h2 class="font-bold text-slate-900">Daftar Lokasi</h2>
         <p class="text-xs text-slate-500 mt-1" x-text="`${items.length} lokasi ditemukan`"></p>
       </div>
-      <button type="button" @click="load()" class="btn-secondary text-sm">↻ Refresh</button>
+      <button type="button" @click="load()" class="btn-secondary gap-2 text-sm"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button>
     </div>
 
     <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat lokasi...</div>
@@ -76,8 +76,8 @@
               <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : 'Nonaktif'"></span></td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
-                  <button type="button" @click="openEdit(item)" class="btn-secondary text-xs">Edit</button>
-                  <button type="button" @click="remove(item)" class="btn-secondary text-xs text-red-600">Hapus</button>
+                  <button type="button" @click="openEdit(item)" class="btn-secondary text-xs"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</button>
+                  <button type="button" @click="remove(item)" class="btn-secondary text-xs text-red-600"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button>
                 </div>
               </td>
             </tr>
@@ -100,8 +100,8 @@
           <div class="mt-3 text-xs text-slate-500" x-text="item.alamat || 'Alamat belum diisi'"></div>
           <div class="mt-2 text-xs text-slate-500" x-text="Number(item.latitude).toFixed(7) + ', ' + Number(item.longitude).toFixed(7) + ' · urutan ' + item.urutan"></div>
           <div class="mt-3 flex gap-2">
-            <button type="button" @click="openEdit(item)" class="btn-secondary text-xs flex-1">Edit</button>
-            <button type="button" @click="remove(item)" class="btn-secondary text-xs text-red-600 flex-1">Hapus</button>
+            <button type="button" @click="openEdit(item)" class="btn-secondary text-xs flex-1"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</button>
+            <button type="button" @click="remove(item)" class="btn-secondary text-xs text-red-600 flex-1"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button>
           </div>
         </article>
       </template>
@@ -116,7 +116,7 @@
           <h2 class="font-bold text-slate-900" x-text="editing ? 'Edit Lokasi' : 'Tambah Lokasi'"></h2>
           <p class="text-xs text-slate-500 mt-1">Data ini langsung menjadi pilihan lokasi pada pencarian publik.</p>
         </div>
-        <button type="button" @click="closeModal()" class="w-9 h-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button type="button" @click="closeModal()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
       <form @submit.prevent="save()" class="p-5 sm:p-6 space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -34,7 +34,7 @@
             <div class="relative mt-2" @click.outside="packageOpen = false">
               <button type="button" @click="packageOpen = !packageOpen" class="input w-full flex items-center justify-between gap-3 text-left !text-slate-800">
                 <span class="min-w-0 flex items-center gap-2 !text-slate-800">
-                  <span x-show="selectedPackage?.durasi_bulan === 12" class="shrink-0">⭐</span>
+                  <span x-show="selectedPackage?.durasi_bulan === 12" class="shrink-0 text-amber-600"><?= masterIconSvg('star', 'h-4 w-4') ?></span>
                   <span class="truncate !text-slate-800" x-text="selectedPackage ? selectedPackage.durasi_bulan + ' bulan — ' + formatRupiah(isRenewal ? selectedPackage.harga_perpanjangan : selectedPackage.harga_bulanan) : 'Pilih durasi'"></span>
                 </span>
                 <span class="text-slate-400">⌄</span>
@@ -43,7 +43,7 @@
                 <template x-for="item in packages" :key="item.id_paket_langganan">
                   <button type="button" @click="packageCode = item.kode; selectPackage(); packageOpen = false" class="w-full px-4 py-3 text-left transition hover:bg-slate-50" :class="{'bg-amber-50 text-amber-900': item.durasi_bulan === 12}">
                     <div class="flex items-center justify-between gap-3">
-                      <span class="font-medium" x-text="(item.durasi_bulan === 12 ? '⭐ ' : '') + item.durasi_bulan + ' bulan'"></span>
+                      <span class="font-medium" x-text="item.durasi_bulan + ' bulan' + (item.durasi_bulan === 12 ? ' · Terbaik' : '')"></span>
                       <span class="font-bold" x-text="formatRupiah(isRenewal ? item.harga_perpanjangan : item.harga_bulanan)"></span>
                     </div>
                     <div x-show="item.durasi_bulan === 12" class="mt-1 text-xs font-semibold text-amber-700">Penawaran Terbaik</div>
@@ -54,7 +54,7 @@
           </div>
 
           <div x-show="selectedPackage?.durasi_bulan === 12" class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-            <div class="font-bold">⭐ Penawaran Terbaik: Pro 12 Bulan</div>
+            <div class="flex items-center gap-1.5 font-bold"><?= masterIconSvg('star', 'h-4 w-4') ?> Penawaran Terbaik: Pro 12 Bulan</div>
             <div class="mt-1">
               <span x-show="!isRenewal">Dapatkan BetaKos Pro selama 12 bulan dengan harga <strong x-text="formatRupiah(displayPrice)"></strong>.</span>
               <span x-show="isRenewal">Perpanjang BetaKos Pro selama 12 bulan dengan harga <strong x-text="formatRupiah(displayPrice)"></strong> (setara <span x-text="formatRupiah(Math.round(displayPrice / (selectedPackage?.durasi_bulan || 1)))"></span>/bulan).</span>

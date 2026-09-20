@@ -1019,6 +1019,174 @@ body.scroll-locked {
   @apply border-slate-200/80 bg-white/90 shadow-sm shadow-slate-900/[0.03] backdrop-blur-xl;
 }
 
+/* =========================================================
+   ADMIN UI — shared administration panel layer
+   ========================================================= */
+
+@utility admin-page {
+  @apply w-full space-y-5 sm:space-y-6;
+}
+
+@utility admin-page-header {
+  @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+}
+
+@utility admin-eyebrow {
+  @apply text-xs font-bold uppercase tracking-[0.16em] text-primary;
+}
+
+@utility admin-title {
+  @apply mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl;
+}
+
+@utility admin-subtitle {
+  @apply mt-1.5 max-w-3xl text-sm leading-6 text-slate-500;
+}
+
+@utility admin-stat-grid {
+  @apply grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4;
+}
+
+@utility admin-stat-card {
+  @apply relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg sm:p-5;
+}
+
+@utility admin-panel {
+  @apply overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5;
+}
+
+.admin-ui .card {
+  @apply rounded-2xl border-slate-200/80 p-4 shadow-sm sm:p-5;
+}
+
+.admin-ui .btn-primary,
+.admin-ui .btn-secondary,
+.admin-ui .btn-outline,
+.admin-ui .btn-danger,
+.admin-ui .btn-success {
+  @apply min-h-10 rounded-xl px-4 font-semibold;
+}
+
+.admin-ui .input,
+.admin-ui .input-number,
+.admin-ui .input-date,
+.admin-ui .input-datetime,
+.admin-ui .select,
+.admin-ui .textarea {
+  @apply min-h-11 rounded-xl border-slate-200 bg-slate-50/50 px-3.5 focus:bg-white;
+}
+
+.admin-ui table thead {
+  @apply bg-slate-50/80;
+}
+
+.admin-ui table th {
+  @apply text-[11px] font-bold uppercase tracking-wider text-slate-500;
+}
+
+.admin-ui table tbody tr {
+  @apply transition-colors hover:bg-slate-50/70;
+}
+
+.admin-ui > [x-data] {
+  @apply w-full;
+}
+
+.admin-sidebar {
+  @apply border-slate-200/80 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur-xl;
+}
+
+.admin-sidebar nav a,
+.admin-sidebar nav button {
+  @apply transition-all duration-200;
+}
+
+.admin-sidebar nav a:hover {
+  @apply translate-x-0.5 bg-primary-soft text-primary;
+}
+
+.admin-sidebar .admin-nav-active {
+  @apply bg-primary-soft font-semibold text-primary shadow-sm ring-1 ring-primary/10;
+}
+
+.admin-topbar {
+  @apply border-slate-200/80 bg-white/90 shadow-sm shadow-slate-900/[0.03] backdrop-blur-xl;
+}
+
+/* =========================================================
+   PUBLIC UI — shared visitor and customer layer
+   ========================================================= */
+
+@utility public-container {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility public-page {
+  @apply min-h-[calc(100vh-4rem)] bg-slate-50;
+}
+
+@utility public-page-header {
+  @apply border-b border-slate-200/80 bg-white;
+}
+
+@utility public-eyebrow {
+  @apply text-xs font-bold uppercase tracking-[0.16em] text-primary;
+}
+
+@utility public-title {
+  @apply mt-1 font-[Poppins] text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl;
+}
+
+@utility public-subtitle {
+  @apply mt-1.5 max-w-3xl text-sm leading-6 text-slate-500;
+}
+
+@utility public-card {
+  @apply overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-200;
+}
+
+@utility public-card-hover {
+  @apply hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-lg;
+}
+
+.public-ui .card {
+  @apply rounded-2xl border-slate-200/80 shadow-sm;
+}
+
+.public-ui .btn-primary,
+.public-ui .btn-secondary,
+.public-ui .btn-outline,
+.public-ui .btn-danger,
+.public-ui .btn-success {
+  @apply min-h-10 rounded-xl px-4 font-semibold;
+}
+
+.public-ui .input,
+.public-ui .input-number,
+.public-ui .input-date,
+.public-ui .input-datetime,
+.public-ui .select,
+.public-ui .textarea {
+  @apply min-h-11 rounded-xl border-slate-200 bg-slate-50/50 px-3.5 focus:bg-white;
+}
+
+.public-navbar {
+  @apply border-slate-200/80 bg-white/90 shadow-sm shadow-slate-900/[0.03] backdrop-blur-xl;
+}
+
+.public-navbar a,
+.public-mobile-nav a {
+  @apply transition-all duration-200;
+}
+
+.public-navbar .public-nav-active {
+  @apply bg-primary-soft font-semibold text-primary ring-1 ring-primary/10;
+}
+
+.public-mobile-nav .public-nav-active {
+  @apply text-primary;
+}
+
 
 /* Desktop sidebar collapse: label visibility and icon alignment are centralized here. */
 @media (min-width: 1024px) {

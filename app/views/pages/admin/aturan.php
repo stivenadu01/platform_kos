@@ -1,10 +1,10 @@
-<div x-data="adminAturanPage()" x-init="init()" class="space-y-6">
+<div x-data="adminAturanPage()" x-init="init()" class="admin-page">
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Data Master · Aturan Kos</p>
       <h2 class="mt-1 text-2xl font-bold text-slate-900">Aturan Kos</h2>
       <p class="mt-1 text-sm text-slate-500">Aturan yang dapat dipilih pemilik dan ditampilkan pada detail kos.</p>
-    </div><button class="btn-primary" @click="openCreate()">+ Tambah Aturan</button>
+    </div><button class="btn-primary" @click="openCreate()"><?= masterIconSvg('plus', 'h-4 w-4') ?> Tambah Aturan</button>
   </div>
   <div class="card p-4 border border-slate-200">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3"><input class="input" x-model="filters.search" @input.debounce.300ms="load()" placeholder="Cari nama aturan..."><select class="select" x-model="filters.status" @change="load()">
@@ -18,7 +18,7 @@
       <div>
         <h3 class="font-bold">Daftar Aturan Kos</h3>
         <p class="text-xs text-slate-500 mt-1" x-text="items.length + ' data'"></p>
-      </div><button class="btn-secondary text-sm" @click="load()">↻ Refresh</button>
+      </div><button class="btn-secondary gap-2 text-sm" @click="load()"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button>
     </div>
     <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat...</div>
     <div x-show="!loading && items.length===0" class="p-10 text-center text-sm text-slate-500">Belum ada data yang sesuai.</div>
@@ -32,7 +32,7 @@
             </div>
             <p class="mt-1 text-xs text-slate-500" x-text="iconLabels[item.icon] || item.icon"></p>
           </div>
-          <div class="flex shrink-0 gap-2"><button class="btn-secondary text-xs" @click="openEdit(item)">Edit</button><button class="btn-secondary text-xs text-red-600" @click="remove(item)">Hapus</button></div>
+          <div class="flex shrink-0 gap-2"><button class="btn-secondary text-xs" @click="openEdit(item)"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</button><button class="btn-secondary text-xs text-red-600" @click="remove(item)"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button></div>
         </article>
       </template>
     </div>
@@ -44,7 +44,7 @@
         <div>
           <h3 class="font-bold" x-text="editing?'Edit Aturan Kos':'Tambah Aturan Kos'"></h3>
           <p class="mt-1 text-xs text-slate-500">Gunakan katalog icon resmi BetaKos agar tampilan konsisten di seluruh platform.</p>
-        </div><button @click="close()">✕</button>
+        </div><button @click="close()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
       <form class="mt-5 space-y-4" @submit.prevent="save()">
         <div><label class="label">Nama aturan *</label><input class="input mt-1" x-model="form.nama_aturan" required maxlength="200"></div>

@@ -20,9 +20,9 @@
         </div>
 
         <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
-          <span class="flex items-center gap-2"><span class="text-success">✓</span> Cari berdasarkan lokasi</span>
-          <span class="flex items-center gap-2"><span class="text-success">✓</span> Sesuaikan budget</span>
-          <span class="flex items-center gap-2"><span class="text-success">✓</span> Lihat kamar tersedia</span>
+          <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Cari berdasarkan lokasi</span>
+          <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Sesuaikan budget</span>
+          <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Lihat kamar tersedia</span>
         </div>
       </div>
 
@@ -30,7 +30,7 @@
         <div class="relative mx-auto max-w-md rounded-[2rem] bg-primary-soft p-5">
           <div class="rounded-[1.5rem] bg-white p-6 shadow-xl shadow-blue-100">
             <div class="flex items-center gap-3">
-              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-2xl">⌖</div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('map-pin', 'h-6 w-6') ?></div>
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-primary">Contoh pencarian lokasi</p>
                 <p class="mt-1 font-[Poppins] text-xl font-bold text-slate-900">Kos di sekitar lokasi pilihan</p>
@@ -77,21 +77,21 @@
 
     <div class="mt-8 grid gap-5 md:grid-cols-3">
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">⌕</div>
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('search', 'h-5 w-5') ?></div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 1</p>
         <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Cari lokasi tujuan</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Ketik nama tempat, jalan, kawasan, atau lokasi yang ingin kamu jadikan patokan.</p>
       </a>
 
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">⚙</div>
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('settings', 'h-5 w-5') ?></div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 2</p>
         <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Pilih yang kamu butuhkan</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Atur jenis kos, kapasitas, fasilitas, jarak, dan kisaran harga.</p>
       </a>
 
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary">✓</div>
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('check-circle-2', 'h-5 w-5') ?></div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 3</p>
         <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Bandingkan pilihan</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Lihat foto, harga, lokasi, fasilitas, dan ketersediaan sebelum memilih.</p>
@@ -115,7 +115,7 @@
       <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <?php foreach ($kosUnggulan as $kos): ?>
           <?php $foto = !empty($kos['foto']) ? BASE_URL . '/uploads' . $kos['foto'] : ''; ?>
-          <article class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
+          <article class="public-card public-card-hover">
             <a href="<?= BASE_URL ?>/kos/<?= (int) $kos['id_kos'] ?>" class="block">
               <div class="aspect-[16/10] bg-slate-100">
                 <?php if ($foto): ?>
@@ -148,7 +148,7 @@
       </div>
     <?php else: ?>
       <div class="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-xl shadow-sm">⌂</div>
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-slate-500 shadow-sm"><?= masterIconSvg('home', 'h-6 w-6') ?></div>
         <h3 class="mt-4 font-semibold text-slate-800">Belum ada kos yang tersedia</h3>
         <p class="mt-1 text-sm text-slate-500">Kos yang sudah aktif dan memiliki kamar tersedia akan muncul di sini.</p>
       </div>

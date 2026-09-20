@@ -1,4 +1,4 @@
-<div x-data="adminVerifikasiPage()" x-init="init()" class="space-y-6">
+<div x-data="adminVerifikasiPage()" x-init="init()" class="admin-page">
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div><h1 class="text-xl sm:text-2xl font-bold text-slate-900">Verifikasi Kos</h1><p class="mt-1 text-sm text-slate-500">Periksa data kos sebelum dipublikasikan kepada pengguna.</p></div>
     <div class="flex gap-2">
@@ -11,7 +11,7 @@
   <div x-show="loading" class="card border border-slate-200 p-8 text-center text-sm text-slate-500">Memuat pengajuan...</div>
 
   <div x-show="!loading && items.length === 0" class="card border border-slate-200 p-10 text-center">
-    <div class="text-4xl">✓</div><h3 class="mt-3 font-semibold text-slate-900">Tidak ada pengajuan</h3><p class="mt-1 text-sm text-slate-500">Belum ada data pada kategori ini.</p>
+    <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600"><?= masterIconSvg('user-check', 'h-6 w-6') ?></div><h3 class="mt-3 font-semibold text-slate-900">Tidak ada pengajuan</h3><p class="mt-1 text-sm text-slate-500">Belum ada data pada kategori ini.</p>
   </div>
 
   <div x-show="!loading && items.length" class="grid grid-cols-1 xl:grid-cols-2 gap-5">
@@ -38,7 +38,7 @@
   <div x-show="detail" x-cloak class="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="close()"></div>
     <div class="relative bg-white w-full sm:max-w-4xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
-      <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10"><div><h2 class="font-bold text-slate-900" x-text="detail?.nama_kos || 'Detail Kos'"></h2><p class="text-xs text-slate-500">Pemeriksaan pengajuan</p></div><button @click="close()" class="w-9 h-9 rounded-lg hover:bg-slate-100">✕</button></div>
+      <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10"><div><h2 class="font-bold text-slate-900" x-text="detail?.nama_kos || 'Detail Kos'"></h2><p class="text-xs text-slate-500">Pemeriksaan pengajuan</p></div><button @click="close()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button></div>
       <div class="p-5 sm:p-6 space-y-6" x-show="detail">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div><h3 class="font-semibold">Informasi Kos</h3><dl class="mt-3 space-y-2 text-sm"><div><dt class="text-slate-500">Alamat</dt><dd x-text="detail?.alamat"></dd></div><div><dt class="text-slate-500">Jenis</dt><dd class="capitalize" x-text="detail?.jenis"></dd></div><div><dt class="text-slate-500">Koordinat</dt><dd x-text="`${detail?.latitude}, ${detail?.longitude}`"></dd></div><div><dt class="text-slate-500">Deskripsi</dt><dd class="whitespace-pre-line" x-text="detail?.deskripsi || '-'"></dd></div></dl></div>

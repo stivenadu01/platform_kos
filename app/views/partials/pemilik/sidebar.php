@@ -63,9 +63,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         hover:text-primary
       ">
 
-      <span class="text-lg">
-        🏠
-      </span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('home', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
         Dashboard
@@ -88,9 +86,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         hover:text-primary
       ">
 
-      <span class="text-lg">
-        👤
-      </span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
         Profil Saya
@@ -121,9 +117,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         hover:text-primary
       ">
 
-      <span class="text-lg">
-        🏢
-      </span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
         Kos Saya
@@ -146,9 +140,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         hover:text-primary
       ">
 
-      <span class="text-lg">
-        🚪
-      </span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('bed', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
         Kelola Kamar
@@ -170,9 +162,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         hover:text-primary
       ">
 
-      <span class="text-lg">
-        👥
-      </span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
         Penghuni
@@ -197,9 +187,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         hover:text-primary
       ">
 
-      <span class="text-lg">
-        💳
-      </span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('wallet', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
         Tagihan & Pembayaran
@@ -221,7 +209,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     <a
       :href="window.BASE_URL + '/pemilik/claim'"
       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">✓</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span>
       <span class="sidebar-label">Klaim Riwayat</span>
     </a>
 
@@ -230,7 +218,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     <a
       :href="window.BASE_URL + '/pemilik/langganan'"
       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="text-lg">⭐</span>
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('star', 'h-5 w-5') ?></span>
       <span class="sidebar-label">Langganan</span>
     </a>
 
@@ -242,7 +230,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         type="button"
         @click="$store.auth.logout()"
         class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50">
-        <span class="text-lg">⇥</span>
+        <?= masterIconSvg('log-out', 'h-5 w-5') ?>
         <span class="sidebar-label">Keluar</span>
       </button>
     </div>
@@ -256,7 +244,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       type="button"
       @click="$store.auth.logout()"
       class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50">
-      <span class="text-lg">⇥</span>
+      <?= masterIconSvg('log-out', 'h-5 w-5') ?>
       <span class="sidebar-label">Keluar</span>
     </button>
   </div>

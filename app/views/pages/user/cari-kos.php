@@ -22,8 +22,8 @@ $initialState = [
 <div
   x-data="kosSearchPage(<?= htmlspecialchars(json_encode_safe($initialState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
   x-init="init()"
-  class="min-h-[calc(100vh-4rem)] bg-slate-50">
-  <section class="border-b border-slate-200 bg-white">
+  class="public-page">
+  <section class="public-page-header">
     <div class="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
       <div class="max-w-3xl">
         <p class="text-sm font-semibold text-primary">Cari Kos</p>
@@ -77,7 +77,7 @@ $initialState = [
         </div>
         <div class="flex items-center gap-3">
           <button type="button" @click="resetFilters()" class="text-xs font-semibold text-primary">Reset</button>
-          <button type="button" @click="filterOpen = false" class="rounded-lg px-2 py-1 text-slate-500 hover:bg-slate-100 lg:hidden">✕</button>
+          <button type="button" @click="filterOpen = false" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 lg:hidden" aria-label="Tutup filter"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
         </div>
       </div>
 
@@ -170,8 +170,8 @@ $initialState = [
           <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Kos tersedia</h2>
           <p class="mt-1 text-xs text-slate-500" x-text="resultText"></p>
         </div>
-        <button @click="search(pagination.page)" type="button" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:border-primary hover:text-primary">
-          Perbarui
+        <button @click="search(pagination.page)" type="button" class="btn-secondary gap-2 text-xs">
+          <?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Perbarui
         </button>
       </div>
 
@@ -183,7 +183,7 @@ $initialState = [
 
       <div x-show="!loading && kosList.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <template x-for="kos in kosList" :key="kos.id_kos">
-          <article class="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <article class="public-card public-card-hover group">
             <a :href="detailUrl(kos)" class="block">
             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
               <img
@@ -218,7 +218,7 @@ $initialState = [
                 class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold transition hover:bg-primary-soft"
                 :class="kos.is_favorited ? 'text-primary' : 'text-slate-500'"
                 :aria-label="kos.is_favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'">
-                <span class="text-base" x-text="kos.is_favorited ? '♥' : '♡'"></span>
+                <span :class="kos.is_favorited ? 'fill-current' : ''"><?= masterIconSvg('heart', 'h-4 w-4') ?></span>
                 <span x-text="kos.is_favorited ? 'Tersimpan' : 'Favorit'"></span>
               </button>
             </div>
@@ -227,7 +227,7 @@ $initialState = [
       </div>
 
       <div x-show="!loading && !kosList.length" class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
-        <div class="text-4xl">⌂</div>
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><?= masterIconSvg('home', 'h-6 w-6') ?></div>
         <h3 class="mt-3 font-semibold text-slate-900">Kos tidak ditemukan</h3>
         <p class="mt-1 text-sm text-slate-500">Coba ganti kata pencarian, radius, atau filter lainnya.</p>
       </div>

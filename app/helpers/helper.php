@@ -112,6 +112,10 @@ function masterIconCatalog()
     // Kebersihan
     'sparkles' => ['label' => 'Kebersihan', 'path' => '<path d="m12 3-1.5 5.5L5 10l5.5 1.5L12 17l1.5-5.5L19 10l-5.5-1.5L12 3Z"/><path d="m19 16-.7 2.3L16 19l2.3.7L19 22l.7-2.3L22 19l-2.3-.7L19 16Z"/>'],
     'trash-2' => ['label' => 'Tempat sampah', 'path' => '<path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v6M14 11v6"/>'],
+    'pencil' => ['label' => 'Edit', 'path' => '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/>'],
+    'plus' => ['label' => 'Tambah', 'path' => '<path d="M12 5v14M5 12h14"/>'],
+    'x' => ['label' => 'Tutup', 'path' => '<path d="m18 6-12 12M6 6l12 12"/>'],
+    'eye' => ['label' => 'Lihat detail', 'path' => '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'],
     'recycle' => ['label' => 'Daur ulang', 'path' => '<path d="m7 19-4-4 4-4M3 15h10a4 4 0 0 0 3.5-2M17 5l4 4-4 4M21 9H11a4 4 0 0 0-3.5 2M9 3l-4 4 4 4M5 7l5 0a4 4 0 0 1 3.5 2"/>'],
 
     // Aturan / ketentuan
@@ -150,6 +154,24 @@ function masterIconCatalog()
     // Aktivitas & pendukung
     'briefcase' => ['label' => 'Area kerja', 'path' => '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/>'],
     'book-open' => ['label' => 'Belajar', 'path' => '<path d="M2 4.5A2.5 2.5 0 0 1 4.5 2H11v18H4.5A2.5 2.5 0 0 1 2 17.5v-13ZM22 4.5A2.5 2.5 0 0 0 19.5 2H13v18h6.5a2.5 2.5 0 0 0 2.5-2.5v-13Z"/>'],
+
+    // Navigasi & antarmuka aplikasi
+    'home' => ['label' => 'Beranda', 'path' => '<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/>'],
+    'search' => ['label' => 'Cari', 'path' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'],
+    'heart' => ['label' => 'Favorit', 'path' => '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>'],
+    'history' => ['label' => 'Riwayat', 'path' => '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>'],
+    'star' => ['label' => 'Langganan', 'path' => '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'],
+    'log-out' => ['label' => 'Keluar', 'path' => '<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/>'],
+    'menu' => ['label' => 'Menu', 'path' => '<path d="M4 6h16M4 12h16M4 18h16"/>'],
+    'smartphone' => ['label' => 'Aplikasi', 'path' => '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/>'],
+    'image' => ['label' => 'Foto', 'path' => '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="2"/><path d="m21 15-4.5-4.5L5 21"/>'],
+    'wallet' => ['label' => 'Pembayaran', 'path' => '<path d="M4 6h14a2 2 0 0 1 2 2v10H4a2 2 0 0 1-2-2V6a3 3 0 0 1 3-3h12"/><path d="M16 12h4"/>'],
+    'plus-circle' => ['label' => 'Tambah', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'],
+    'chart-column' => ['label' => 'Dashboard', 'path' => '<path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7M2 20h20"/>'],
+    'flag' => ['label' => 'Laporan', 'path' => '<path d="M5 21V4"/><path d="M5 5h11l-1 4 3 3H5"/>'],
+    'folder-cog' => ['label' => 'Data master', 'path' => '<path d="M3 7h7l2 2h9v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/><circle cx="15" cy="14" r="2"/><path d="M15 10v1M15 17v1M11 14h1M18 14h1"/>'],
+    'settings' => ['label' => 'Pengaturan', 'path' => '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/>'],
+    'refresh-cw' => ['label' => 'Perbarui', 'path' => '<path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M6.1 8A7 7 0 0 1 18 6l2 6M18 16a7 7 0 0 1-12 2l-2-6"/>'],
   ];
 }
 

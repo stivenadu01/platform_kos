@@ -10,7 +10,7 @@
   <div x-show="loading" class="card p-10 text-center text-sm text-slate-500">Memuat tipe kamar...</div>
 
   <div x-show="!loading && !items.length" x-cloak class="card px-6 py-12 text-center">
-    <div class="mb-4 text-4xl">🛏️</div>
+    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('bed', 'h-7 w-7') ?></div>
     <h3 class="font-semibold text-slate-900">Belum ada tipe kamar</h3>
     <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">Buat tipe kamar terlebih dahulu. Setelah itu Anda dapat menambahkan dan mengelola unit kamar pada tipe tersebut.</p>
     <a href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary mt-5">+ Tambah Tipe Kamar</a>
@@ -26,14 +26,7 @@
           <div class="relative flex items-start gap-3.5">
             <div class="owner-card-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 21h18"></path>
-                <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
-                <path d="M9 7h1"></path>
-                <path d="M14 7h1"></path>
-                <path d="M9 11h1"></path>
-                <path d="M14 11h1"></path>
-                <path d="M9 15h1"></path>
-                <path d="M14 15h1"></path>
+                <path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path>
               </svg>
             </div>
             <div class="min-w-0 flex-1">
@@ -62,41 +55,22 @@
 
           <div data-help="help-tipe-action" data-onboarding="kamar-select-type" class="mt-4 space-y-2.5">
             <a :href="BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + item.id_tipe_kamar" class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 21h18"></path>
-                <path d="M6 21V7l6-4 6 4v14"></path>
-                <path d="M9 21v-6h6v6"></path>
-              </svg>
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M6 21V7l6-4 6 4v14"></path><path d="M9 21v-6h6v6"></path></svg>
               Kelola Kamar
-              <svg class="ml-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="m9 18 6-6-6-6"></path>
-              </svg>
+              <svg class="ml-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
             </a>
 
-            <div class="owner-card-actions py-1.5">
+            <div class="owner-card-actions">
               <a :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar + '&from=kamar'" class="owner-action-secondary">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M12 20h9"></path>
-                  <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
-                </svg>
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
                 Edit
               </a>
               <a :href="BASE_URL + '/pemilik/tipe-kamar/foto?id_tipe_kamar=' + item.id_tipe_kamar + '&from=kamar'" class="owner-action-secondary">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                  <circle cx="9" cy="9" r="2"></circle>
-                  <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path>
-                </svg>
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>
                 Foto
               </a>
               <button type="button" @click="remove(item)" class="owner-action-danger">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M3 6h18"></path>
-                  <path d="M8 6V4h8v2"></path>
-                  <path d="M19 6l-1 14H6L5 6"></path>
-                  <path d="M10 11v5"></path>
-                  <path d="M14 11v5"></path>
-                </svg>
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
                 Hapus
               </button>
             </div>
@@ -112,9 +86,7 @@
     return {
       items: [],
       loading: false,
-      async init() {
-        await this.load();
-      },
+      async init() { await this.load(); },
       async load() {
         this.loading = true;
         try {
@@ -135,9 +107,7 @@
         }
         if (!await Alpine.store('ui').confirm(`Hapus tipe kamar ${item.nama_tipe}?`)) return;
         try {
-          await API.delete('/pemilik/tipe-kamar', {
-            id_tipe_kamar: item.id_tipe_kamar
-          });
+          await API.delete('/pemilik/tipe-kamar', { id_tipe_kamar: item.id_tipe_kamar });
           await this.load();
         } catch (error) {
           console.error(error);

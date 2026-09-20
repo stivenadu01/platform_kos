@@ -696,6 +696,42 @@ function getDetailKosPublik($id_kos)
       k.jenis,
       k.deskripsi,
       k.updated_at,
+      GREATEST(
+        k.updated_at,
+        COALESCE((
+          SELECT MAX(tk_update.updated_at)
+          FROM tipe_kamar tk_update
+          WHERE tk_update.id_kos = k.id_kos
+        ), k.updated_at),
+        COALESCE((
+          SELECT MAX(km_update.updated_at)
+          FROM kamar km_update
+          WHERE km_update.id_kos = k.id_kos
+        ), k.updated_at),
+        COALESCE((
+          SELECT MAX(p_update.updated_at)
+          FROM penghuni p_update
+          INNER JOIN kamar km_penghuni ON km_penghuni.id_kamar = p_update.id_kamar
+          WHERE km_penghuni.id_kos = k.id_kos
+        ), k.updated_at),
+        COALESCE((
+          SELECT MAX(hk_update.updated_at)
+          FROM harga_kamar hk_update
+          INNER JOIN tipe_kamar tk_harga ON tk_harga.id_tipe_kamar = hk_update.id_tipe_kamar
+          WHERE tk_harga.id_kos = k.id_kos
+        ), k.updated_at),
+        COALESCE((
+          SELECT MAX(kf_update.created_at)
+          FROM kos_foto kf_update
+          WHERE kf_update.id_kos = k.id_kos
+        ), k.updated_at),
+        COALESCE((
+          SELECT MAX(tf_update.created_at)
+          FROM tipe_kamar_foto tf_update
+          INNER JOIN tipe_kamar tk_foto ON tk_foto.id_tipe_kamar = tf_update.id_tipe_kamar
+          WHERE tk_foto.id_kos = k.id_kos
+        ), k.updated_at)
+      ) AS listing_updated_at,
       u.nama AS nama_pemilik,
       u.no_hp AS no_hp_pemilik,
       u.foto AS foto_pemilik,

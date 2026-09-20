@@ -1,11 +1,11 @@
-<div x-data="adminMetodePembayaranPage()" x-init="init()" class="space-y-6">
+<div x-data="adminMetodePembayaranPage()" x-init="init()" class="admin-page">
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Konfigurasi Langganan</p>
       <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">Metode Pembayaran</h1>
       <p class="mt-1 text-sm text-slate-500">Kelola rekening bank dan e-wallet yang digunakan untuk pembayaran BetaKos Pro.</p>
     </div>
-    <button type="button" @click="openCreate()" class="btn-primary">+ Tambah Metode</button>
+    <button type="button" @click="openCreate()" class="btn-primary"><?= masterIconSvg('plus', 'h-4 w-4') ?> Tambah Metode</button>
   </div>
 
   <div class="card border border-blue-100 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
@@ -23,7 +23,7 @@
   <section class="card border border-slate-200 overflow-hidden">
     <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
       <div><h2 class="font-bold text-slate-900">Daftar Rekening & E-Wallet</h2><p class="text-xs text-slate-500 mt-1">Metode aktif tersedia saat pemilik melakukan pembayaran Pro. Riwayat transaksi tetap menggunakan data tujuan saat pembayaran dibuat.</p></div>
-      <button type="button" @click="load()" class="btn-secondary text-sm">↻ Refresh</button>
+      <button type="button" @click="load()" class="btn-secondary gap-2 text-sm"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button>
     </div>
     <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat konfigurasi...</div>
     <div x-show="!loading && methods.length === 0" class="p-10 text-center text-sm text-slate-500">Belum ada metode pembayaran. Tambahkan minimal satu metode.</div>
@@ -43,7 +43,7 @@
               <td class="px-5 py-4 whitespace-nowrap"><div class="font-semibold" x-text="`${item.total_transaksi || 0} transaksi`"></div><div class="text-[11px] text-slate-400" x-text="`${item.transaksi_diverifikasi || 0} terverifikasi`"></div></td>
               <td class="px-5 py-4 whitespace-nowrap text-slate-500" x-text="formatDateTime(item.terakhir_digunakan)"></td>
               <td class="px-5 py-4 text-right whitespace-nowrap">
-                <button type="button" @click="openEdit(item)" class="btn-secondary text-xs">Edit</button>
+                <button type="button" @click="openEdit(item)" class="btn-secondary text-xs"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</button>
                 <button type="button" @click="toggle(item)" class="btn-secondary text-xs ml-1" :class="item.is_aktif ? 'text-red-600' : 'text-emerald-700'" x-text="item.is_aktif ? 'Nonaktifkan' : 'Aktifkan'"></button>
               </td>
             </tr>
@@ -72,7 +72,7 @@
           </div>
           <div x-show="item.keterangan" class="rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800" x-text="item.keterangan"></div>
           <div class="grid grid-cols-2 gap-2">
-            <button type="button" @click="openEdit(item)" class="btn-secondary text-xs w-full">Edit</button>
+            <button type="button" @click="openEdit(item)" class="btn-secondary text-xs w-full"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</button>
             <button type="button" @click="toggle(item)" class="btn-secondary text-xs w-full" :class="item.is_aktif ? 'text-red-600' : 'text-emerald-700'" x-text="item.is_aktif ? 'Nonaktifkan' : 'Aktifkan'"></button>
           </div>
         </article>
@@ -85,7 +85,7 @@
     <div class="relative bg-white w-full sm:max-w-xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
       <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
         <div><h2 class="font-bold text-slate-900" x-text="form.id_metode_pembayaran ? 'Edit Metode Pembayaran' : 'Tambah Metode Pembayaran'"></h2><p class="text-xs text-slate-500 mt-1">Data ini akan digunakan pada checkout Pro.</p></div>
-        <button type="button" @click="closeForm()" class="w-9 h-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button type="button" @click="closeForm()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
       <form @submit.prevent="save()" class="p-5 sm:p-6 space-y-4">
         <div>

@@ -1,7 +1,7 @@
-<div x-data="adminFasilitasPage()" x-init="init()" class="space-y-6">
-  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"><div><p class="text-sm font-semibold text-primary">Data Master · Fasilitas</p><h2 class="mt-1 text-2xl font-bold text-slate-900">Fasilitas</h2><p class="mt-1 text-sm text-slate-500">Fasilitas kos dan fasilitas kamar yang dapat dipilih pemilik.</p></div><button class="btn-primary" @click="openCreate()">+ Tambah Fasilitas</button></div>
+<div x-data="adminFasilitasPage()" x-init="init()" class="admin-page">
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"><div><p class="text-sm font-semibold text-primary">Data Master · Fasilitas</p><h2 class="mt-1 text-2xl font-bold text-slate-900">Fasilitas</h2><p class="mt-1 text-sm text-slate-500">Fasilitas kos dan fasilitas kamar yang dapat dipilih pemilik.</p></div><button class="btn-primary" @click="openCreate()"><?= masterIconSvg('plus', 'h-4 w-4') ?> Tambah Fasilitas</button></div>
   <div class="card p-4 border border-slate-200"><div class="grid grid-cols-1 md:grid-cols-3 gap-3"><input class="input" x-model="filters.search" @input.debounce.300ms="load()" placeholder="Cari..."><select class="select" x-model="filters.kategori" @change="load()"><option value="">Semua kategori</option><option value="kos">Fasilitas Kos</option><option value="kamar">Fasilitas Kamar</option></select><select class="select" x-model="filters.status" @change="load()"><option value="">Semua status</option><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div></div>
-  <section class="card border border-slate-200 overflow-hidden"><div class="px-5 py-4 border-b border-slate-200 flex justify-between"><div><h3 class="font-bold">Daftar Fasilitas</h3><p class="text-xs text-slate-500 mt-1" x-text="items.length + ' data'"></p></div><button class="btn-secondary text-sm" @click="load()">↻ Refresh</button></div>
+  <section class="card border border-slate-200 overflow-hidden"><div class="px-5 py-4 border-b border-slate-200 flex justify-between"><div><h3 class="font-bold">Daftar Fasilitas</h3><p class="text-xs text-slate-500 mt-1" x-text="items.length + ' data'"></p></div><button class="btn-secondary gap-2 text-sm" @click="load()"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button></div>
     <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat...</div>
     <div x-show="!loading && items.length===0" class="p-10 text-center text-sm text-slate-500">Belum ada data yang sesuai.</div>
     <div x-show="!loading && items.length" class="divide-y divide-slate-100">
@@ -12,7 +12,7 @@
             <div class="flex flex-wrap items-center gap-2"><h4 class="font-semibold text-slate-900" x-text="item.nama_fasilitas"></h4><span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600" x-text="categoryLabel(item.kategori)"></span><span class="rounded-full px-2.5 py-1 text-[11px] font-medium" :class="item.status==='aktif'?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'" x-text="item.status==='aktif'?'Aktif':'Nonaktif'"></span></div>
             <p class="mt-1 text-xs text-slate-500" x-text="iconLabels[item.icon] || item.icon"></p>
           </div>
-          <div class="flex shrink-0 gap-2"><button class="btn-secondary text-xs" @click="openEdit(item)">Edit</button><button class="btn-secondary text-xs text-red-600" @click="remove(item)">Hapus</button></div>
+          <div class="flex shrink-0 gap-2"><button class="btn-secondary text-xs" @click="openEdit(item)"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</button><button class="btn-secondary text-xs text-red-600" @click="remove(item)"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button></div>
         </article>
       </template>
     </div>
@@ -20,7 +20,7 @@
   <div x-show="modalOpen" x-cloak class="fixed inset-0 z-[90] flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="close()"></div>
     <div class="relative bg-white w-full sm:max-w-xl max-h-[94vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl">
-      <div class="flex justify-between gap-3"><div><h3 class="font-bold" x-text="editing?'Edit Fasilitas':'Tambah Fasilitas'"></h3><p class="mt-1 text-xs text-slate-500">Gunakan katalog icon resmi BetaKos agar tampilan konsisten di seluruh platform.</p></div><button @click="close()">✕</button></div>
+      <div class="flex justify-between gap-3"><div><h3 class="font-bold" x-text="editing?'Edit Fasilitas':'Tambah Fasilitas'"></h3><p class="mt-1 text-xs text-slate-500">Gunakan katalog icon resmi BetaKos agar tampilan konsisten di seluruh platform.</p></div><button @click="close()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button></div>
       <form class="mt-5 space-y-4" @submit.prevent="save()">
         <div><label class="label">Nama fasilitas *</label><input class="input mt-1" x-model="form.nama_fasilitas" required maxlength="150"></div>
         <div><label class="label">Kategori *</label><select class="select mt-1" x-model="form.kategori"><option value="kos">Fasilitas Kos</option><option value="kamar">Fasilitas Kamar</option></select></div>

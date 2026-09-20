@@ -16,7 +16,7 @@
   <div class="card overflow-hidden border border-slate-200 shadow-sm">
     <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat claim...</div>
     <div x-show="!loading && !items.length" class="p-10 text-center">
-      <div class="text-4xl">✓</div>
+      <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('user-check', 'h-7 w-7') ?></div>
       <h2 class="mt-3 font-semibold text-slate-900">Belum ada claim</h2>
       <p class="mt-1 text-sm text-slate-500">Permintaan penghuni akan muncul di halaman ini.</p>
     </div>

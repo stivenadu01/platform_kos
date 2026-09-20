@@ -1,19 +1,19 @@
 <?php $dashboard = $dashboard ?? []; ?>
-<div x-data="adminDashboardPage()" x-init="init()" class="space-y-6">
-  <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+<div x-data="adminDashboardPage()" x-init="init()" class="admin-page">
+  <div class="admin-page-header">
     <div>
-      <p class="text-sm font-semibold text-primary">Ringkasan Platform</p>
-      <h1 class="mt-1 text-xl sm:text-2xl font-bold text-slate-900">Dashboard Admin</h1>
-      <p class="mt-1 text-sm text-slate-500">Pantau pengguna, kos, verifikasi, laporan, langganan, dan aktivitas pembayaran BetaKos dari satu halaman.</p>
+      <p class="admin-eyebrow">Ringkasan Platform</p>
+      <h1 class="admin-title">Dashboard Admin</h1>
+      <p class="admin-subtitle">Pantau pengguna, kos, verifikasi, laporan, langganan, dan aktivitas pembayaran BetaKos dari satu halaman.</p>
     </div>
-    <button type="button" @click="load()" class="btn-secondary">↻ Perbarui Data</button>
+    <button type="button" @click="load()" class="btn-secondary gap-2" :disabled="loading"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> <span x-text="loading ? 'Memuat...' : 'Perbarui Data'"></span></button>
   </div>
 
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-    <a href="<?= BASE_URL ?>/admin/pengguna" class="card p-4 sm:p-5 border border-slate-200 hover:border-primary/30 transition"><div class="text-xs text-slate-500">Pengguna Aktif</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-slate-900" x-text="d.pengguna?.aktif ?? 0"></div><div class="mt-1 text-xs text-slate-500" x-text="`${d.pengguna?.total ?? 0} total pengguna`"></div></a>
-    <a href="<?= BASE_URL ?>/admin/verifikasi" class="card p-4 sm:p-5 border border-amber-200 bg-amber-50/30 hover:border-amber-300 transition"><div class="text-xs text-slate-500">Kos Menunggu Verifikasi</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-amber-600" x-text="d.kos?.menunggu_verifikasi ?? 0"></div><div class="mt-1 text-xs text-slate-500">Perlu pemeriksaan</div></a>
-    <div class="card p-4 sm:p-5 border border-emerald-200"><div class="text-xs text-slate-500">Kos Aktif</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-emerald-600" x-text="d.kos?.aktif ?? 0"></div><div class="mt-1 text-xs text-slate-500" x-text="`${d.kos?.total ?? 0} total kos`"></div></div>
-    <div class="card p-4 sm:p-5 border border-blue-200"><div class="text-xs text-slate-500">Pemilik Pro Aktif</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-blue-600" x-text="d.langganan?.aktif ?? 0"></div><div class="mt-1 text-xs text-slate-500" x-text="`${d.langganan?.akan_berakhir_7_hari ?? 0} berakhir ≤ 7 hari`"></div></div>
+  <div class="admin-stat-grid">
+    <a href="<?= BASE_URL ?>/admin/pengguna" class="admin-stat-card"><span class="absolute right-4 top-4 text-blue-500"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span><div class="pr-8 text-xs text-slate-500">Pengguna Aktif</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-slate-900" x-text="d.pengguna?.aktif ?? 0"></div><div class="mt-1 text-xs text-slate-500" x-text="`${d.pengguna?.total ?? 0} total pengguna`"></div></a>
+    <a href="<?= BASE_URL ?>/admin/verifikasi" class="admin-stat-card bg-amber-50/30"><span class="absolute right-4 top-4 text-amber-500"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span><div class="pr-8 text-xs text-slate-500">Kos Menunggu Verifikasi</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-amber-600" x-text="d.kos?.menunggu_verifikasi ?? 0"></div><div class="mt-1 text-xs text-slate-500">Perlu pemeriksaan</div></a>
+    <div class="admin-stat-card"><span class="absolute right-4 top-4 text-emerald-500"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span><div class="pr-8 text-xs text-slate-500">Kos Aktif</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-emerald-600" x-text="d.kos?.aktif ?? 0"></div><div class="mt-1 text-xs text-slate-500" x-text="`${d.kos?.total ?? 0} total kos`"></div></div>
+    <div class="admin-stat-card"><span class="absolute right-4 top-4 text-blue-500"><?= masterIconSvg('star', 'h-5 w-5') ?></span><div class="pr-8 text-xs text-slate-500">Pemilik Pro Aktif</div><div class="mt-2 text-2xl sm:text-3xl font-bold text-blue-600" x-text="d.langganan?.aktif ?? 0"></div><div class="mt-1 text-xs text-slate-500" x-text="`${d.langganan?.akan_berakhir_7_hari ?? 0} berakhir ≤ 7 hari`"></div></div>
   </div>
 
   <section class="grid grid-cols-1 xl:grid-cols-3 gap-4">

@@ -8,7 +8,7 @@ $masterCards = [
   ['key'=>'aturan','title'=>'Aturan','desc'=>'Ketentuan kos yang dapat dipilih pemilik dan ditampilkan secara terstruktur kepada pencari kos.','icon'=>'clipboard-check'],
 ];
 ?>
-<div class="space-y-6">
+<div class="admin-page">
   <div>
     <p class="text-sm font-semibold text-primary">Pengaturan Platform</p>
     <h1 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">Data Master</h1>

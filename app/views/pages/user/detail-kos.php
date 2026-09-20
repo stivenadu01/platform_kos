@@ -41,7 +41,7 @@ if ($selectedLat !== null && $selectedLng !== null) {
 $aboutText = trim((string)($kos['deskripsi'] ?? '')) ?: 'Pemilik belum menambahkan deskripsi kos.';
 $aboutIsLong = mb_strlen($aboutText) > 420;
 
-$updatedAt = $kos['updated_at'] ?? null;
+$updatedAt = $kos['listing_updated_at'] ?? $kos['updated_at'] ?? null;
 $updatedLabel = 'Informasi diperbarui';
 if ($updatedAt) {
   try {
@@ -102,7 +102,7 @@ if (!empty($lastLoginAt)) {
   }
 </style>
 
-<div x-data="kosDetailPage()" class="bg-slate-50">
+<div x-data="kosDetailPage()" class="public-page">
   <section class="border-b border-slate-200 bg-white">
     <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
       <div class="flex flex-wrap items-center justify-between gap-3">
@@ -115,7 +115,7 @@ if (!empty($lastLoginAt)) {
               Riwayat Laporan
             </a>
             <button @click="reportOpen = true" type="button" class="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">
-              ⚑ Laporkan Kos
+              <?= masterIconSvg('flag', 'h-4 w-4') ?> Laporkan Kos
             </button>
           <?php else: ?>
             <a href="<?= BASE_URL ?>/login" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:border-primary hover:text-primary">
@@ -124,7 +124,7 @@ if (!empty($lastLoginAt)) {
           <?php endif; ?>
           <?php if ($isPelanggan): ?>
             <button @click="toggleFavorite()" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary" :aria-pressed="favorited">
-              <span class="text-lg leading-none" x-text="favorited ? '♥' : '♡'"></span>
+              <span :class="favorited ? 'fill-current text-red-500' : ''"><?= masterIconSvg('heart', 'h-4 w-4') ?></span>
               <span x-text="favorited ? 'Favorit tersimpan' : 'Simpan favorit'"></span>
             </button>
           <?php endif; ?>
@@ -187,7 +187,7 @@ if (!empty($lastLoginAt)) {
           <div class="flex flex-wrap items-center gap-2">
             <span class="rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold capitalize text-primary"><?= htmlspecialchars($kos['jenis']) ?></span>
             <?php if ($pemilikPro): ?>
-              <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700">★ Pemilik Pro</span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-700"><?= masterIconSvg('star', 'h-3.5 w-3.5') ?> Pemilik Pro</span>
             <?php endif; ?>
             <?php if ((int)$kos['kamar_tersedia'] > 0): ?>
               <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700"><?= (int)$kos['kamar_tersedia'] ?> kamar tersedia</span>
@@ -196,7 +196,7 @@ if (!empty($lastLoginAt)) {
             <?php endif; ?>
           </div>
           <h1 class="mt-3 font-[Poppins] text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"><?= htmlspecialchars($kos['nama_kos']) ?></h1>
-          <p class="mt-2 flex items-start gap-2 text-sm leading-6 text-slate-500"><span>⌖</span><span><?= nl2br(htmlspecialchars($kos['alamat'])) ?></span></p>
+          <p class="mt-2 flex items-start gap-2 text-sm leading-6 text-slate-500"><span class="mt-1 text-primary"><?= masterIconSvg('map-pin', 'h-4 w-4') ?></span><span><?= nl2br(htmlspecialchars($kos['alamat'])) ?></span></p>
           <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span class="rounded-full bg-slate-100 px-3 py-1.5 font-medium"><?= htmlspecialchars($updatedLabel) ?></span>
             <?php if ($selectedDistance !== null): ?>
@@ -300,7 +300,7 @@ if (!empty($lastLoginAt)) {
                         <img src="<?= BASE_URL ?>/uploads<?= htmlspecialchars($typePhotos[0]['nama_file']) ?>" alt="<?= htmlspecialchars($type['nama_tipe']) ?>" loading="lazy" class="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]">
                         <span class="absolute inset-x-0 bottom-0 flex items-end justify-between bg-gradient-to-t from-black/65 to-transparent px-4 pb-3 pt-10 text-xs font-semibold text-white">
                           <span>Lihat <?= count($typePhotos) ?> foto</span>
-                          <span class="rounded-full bg-black/45 px-2.5 py-1 backdrop-blur-sm">⌕</span>
+                          <span class="rounded-full bg-black/45 p-2 backdrop-blur-sm"><?= masterIconSvg('search', 'h-4 w-4') ?></span>
                         </span>
                       </button>
                     <?php else: ?>
@@ -387,7 +387,7 @@ if (!empty($lastLoginAt)) {
             <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-lg text-blue-600">📍</span>
+                  <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><?= masterIconSvg('map-pin', 'h-5 w-5') ?></span>
                   <div>
                     <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi dan lingkungan sekitar</h2>
                   </div>
@@ -505,7 +505,7 @@ if (!empty($lastLoginAt)) {
   <div class="fixed inset-x-0 bottom-0 z-[1000] border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] backdrop-blur lg:hidden">
     <div class="mx-auto flex max-w-7xl items-center gap-2">
       <?php if ($isPelanggan): ?>
-        <button @click="toggleFavorite()" type="button" class="inline-flex min-h-12 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-2xl text-slate-700" :aria-label="favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'" x-text="favorited ? '♥' : '♡'"></button>
+        <button @click="toggleFavorite()" type="button" class="inline-flex min-h-12 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700" :class="favorited ? 'fill-current text-red-500' : ''" :aria-label="favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'"><?= masterIconSvg('heart', 'h-5 w-5') ?></button>
       <?php endif; ?>
       <?php if ($waUrl): ?>
         <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Hubungi Pemilik</a>
@@ -524,7 +524,7 @@ if (!empty($lastLoginAt)) {
             <h2 class="font-bold text-slate-900">Laporkan Kos</h2>
             <p class="mt-1 text-xs text-slate-500">Bantu kami menjaga informasi BetaKos tetap akurat.</p>
           </div>
-          <button type="button" @click="reportOpen = false" class="h-9 w-9 rounded-lg hover:bg-slate-100">✕</button>
+          <button type="button" @click="reportOpen = false" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
         </div>
         <form @submit.prevent="submitReport" class="space-y-4 p-5 sm:p-6">
           <div class="rounded-xl bg-slate-50 p-4">
@@ -558,7 +558,7 @@ if (!empty($lastLoginAt)) {
   <?php endif; ?>
 
   <div x-show="typeGalleryOpen" x-cloak @click.self="typeGalleryOpen = false" @keydown.escape.window="typeGalleryOpen = false" class="fixed inset-0 z-[2050] flex items-center justify-center bg-black/90 p-4">
-    <button @click="typeGalleryOpen = false" type="button" class="absolute right-4 top-4 rounded-full bg-white/10 px-4 py-2 text-white hover:bg-white/20">✕</button>
+    <button @click="typeGalleryOpen = false" type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Tutup galeri"><?= masterIconSvg('x', 'h-6 w-6') ?></button>
     <button @click="previousTypePhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="flex max-h-[90vh] max-w-6xl flex-col items-center">
       <div class="mb-3 rounded-full bg-black/45 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm" x-text="typeGalleryName"></div>
@@ -569,7 +569,7 @@ if (!empty($lastLoginAt)) {
   </div>
 
   <div x-show="galleryOpen" x-cloak @click.self="galleryOpen = false" @keydown.escape.window="galleryOpen = false" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4">
-    <button @click="galleryOpen = false" type="button" class="absolute right-4 top-4 rounded-full bg-white/10 px-4 py-2 text-white hover:bg-white/20">✕</button>
+    <button @click="galleryOpen = false" type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Tutup galeri"><?= masterIconSvg('x', 'h-6 w-6') ?></button>
     <button @click="previousPhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="max-h-[90vh] max-w-6xl">
       <img :src="galleryPhotos[galleryIndex]" alt="" class="max-h-[85vh] max-w-full rounded-xl object-contain">

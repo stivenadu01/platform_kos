@@ -232,7 +232,7 @@
           target="_blank"
           rel="noopener noreferrer"
           class="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 sm:w-auto">
-          🗺️ Buka Google Maps
+          <?= masterIconSvg('map', 'h-4 w-4') ?> Buka Google Maps
         </a>
         <div x-show="form.google_maps_url" x-cloak class="mt-3 rounded-xl bg-white px-3 py-2 text-xs text-slate-600">
           <span class="font-semibold text-slate-800">Link Google Maps tersimpan.</span>

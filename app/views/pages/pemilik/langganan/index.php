@@ -13,7 +13,7 @@
 
   <div x-show="upgradeRequested" x-cloak class="card border border-amber-200 bg-amber-50 shadow-sm">
     <div class="flex items-start gap-3">
-      <span class="text-xl">🔒</span>
+      <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><?= masterIconSvg('lock', 'h-5 w-5') ?></span>
       <div>
         <p class="font-semibold text-amber-900">Fitur tersebut membutuhkan BetaKos Pro</p>
         <p class="mt-1 text-sm leading-6 text-amber-800">Data dan kos Anda tetap aman. Aktifkan Pro untuk membuka kembali fitur manajemen penghuni dan keuangan.</p>
@@ -56,7 +56,7 @@
 
       <div x-show="status.reminder" x-cloak class="card border border-amber-200 bg-amber-50 shadow-sm">
         <div class="flex items-start gap-3">
-          <span class="text-xl" x-text="status.status === 'berakhir' ? '🔒' : '⚠️'"></span>
+          <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><?= masterIconSvg('alert-circle', 'h-5 w-5') ?></span>
           <div>
             <p class="font-semibold text-amber-900" x-text="status.reminder"></p>
             <p class="mt-1 text-sm leading-6 text-amber-800" x-show="status.status === 'berakhir'">Data kos, kamar, penghuni, tagihan, pembayaran, dan riwayat langganan tetap tersimpan.</p>
@@ -100,12 +100,12 @@
             <div class="mt-5">
               <div class="flex items-center justify-between gap-3">
                 <label class="text-sm font-semibold text-slate-700">Pilih durasi</label>
-                <span x-show="paket.some(item => item.durasi_bulan === 12)" class="inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">⭐ Penawaran Terbaik: 12 Bulan</span>
+                <span x-show="paket.some(item => item.durasi_bulan === 12)" class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800"><?= masterIconSvg('star', 'h-3.5 w-3.5') ?> Penawaran Terbaik: 12 Bulan</span>
               </div>
               <div class="relative mt-2" @click.outside="packageOpen = false">
                 <button type="button" @click="packageOpen = !packageOpen" class="input w-full flex items-center justify-between gap-3 text-left !text-slate-800">
                   <span class="min-w-0 flex items-center gap-2 !text-slate-800">
-                    <span x-show="selectedPackage?.durasi_bulan === 12" class="shrink-0">⭐</span>
+                    <span x-show="selectedPackage?.durasi_bulan === 12" class="shrink-0 text-amber-600"><?= masterIconSvg('star', 'h-4 w-4') ?></span>
                     <span class="truncate !text-slate-800" x-text="selectedPackage ? selectedPackage.durasi_bulan + ' Bulan — ' + formatRupiah(priceFor(selectedPackage)) : 'Pilih durasi'"></span>
                   </span>
                   <span class="text-slate-400">⌄</span>
@@ -114,7 +114,7 @@
                   <template x-for="item in paket" :key="item.id_paket_langganan">
                     <button type="button" @click="selectedPackageCode = item.kode; packageOpen = false" class="w-full px-4 py-3 text-left transition hover:bg-slate-50" :class="{'bg-amber-50 text-amber-900': item.durasi_bulan === 12}">
                       <div class="flex items-center justify-between gap-3">
-                        <span class="font-medium" x-text="(item.durasi_bulan === 12 ? '⭐ ' : '') + item.durasi_bulan + ' Bulan'"></span>
+                        <span class="font-medium" x-text="item.durasi_bulan + ' Bulan' + (item.durasi_bulan === 12 ? ' · Terbaik' : '')"></span>
                         <span class="font-bold" x-text="formatRupiah(priceFor(item))"></span>
                       </div>
                       <div x-show="item.durasi_bulan === 12" class="mt-1 text-xs font-semibold text-amber-700">Penawaran Terbaik</div>
@@ -136,7 +136,7 @@
             </div>
 
             <div x-show="selectedPackage?.durasi_bulan === 12" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-              <strong>⭐ Penawaran Terbaik</strong><br>
+              <strong class="inline-flex items-center gap-1.5"><?= masterIconSvg('star', 'h-4 w-4') ?> Penawaran Terbaik</strong><br>
               <span x-show="!status.is_pro && status.status !== 'berakhir'">Pro 12 bulan hanya <strong x-text="formatRupiah(selectedPrice)"></strong>. Cocok untuk mendapatkan akses Pro lebih lama dengan satu kali pembayaran.</span>
               <span x-show="status.is_pro || status.status === 'berakhir'">Perpanjangan Pro 12 bulan hanya <strong x-text="formatRupiah(selectedPrice)"></strong> (setara <span x-text="formatRupiah(Math.round(selectedPrice / (selectedPackage?.durasi_bulan || 1)))"></span>/bulan).</span>
             </div>

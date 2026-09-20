@@ -44,7 +44,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         flex items-center justify-center
       ">
 
-      ☰
+      <?= masterIconSvg('menu', 'h-5 w-5') ?>
 
     </button>
 
@@ -70,7 +70,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       class="inline-flex sm:hidden w-10 h-10 items-center justify-center rounded-lg border border-primary/20 bg-primary-soft text-primary hover:bg-blue-100"
       title="Pasang BetaKos di perangkat"
       aria-label="Pasang BetaKos di perangkat">
-      <span aria-hidden="true">📱</span>
+      <?= masterIconSvg('smartphone', 'h-5 w-5') ?>
     </button>
     <button
       type="button"
@@ -78,7 +78,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       hidden
       class="hidden sm:inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary-soft px-3 py-2 text-sm font-semibold text-primary hover:bg-blue-100"
       title="Pasang BetaKos di perangkat">
-      <span aria-hidden="true">📱</span>
+      <?= masterIconSvg('smartphone', 'h-5 w-5') ?>
       Unduh Aplikasi
     </button>
 

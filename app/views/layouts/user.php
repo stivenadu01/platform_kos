@@ -29,7 +29,7 @@
   <script defer src="https://unpkg.com/alpinejs"></script>
 </head>
 
-<body class="min-h-screen bg-background text-body antialiased">
+<body class="public-ui min-h-screen bg-slate-50 text-slate-800 antialiased">
   <div class="min-h-screen">
     <?php include ROOT_PATH . '/app/views/partials/user/navbar.php'; ?>
 

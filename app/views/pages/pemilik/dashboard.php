@@ -20,7 +20,7 @@
   <div x-show="!loading && subscription.reminder" x-cloak class="card border border-amber-200 bg-amber-50 shadow-sm">
     <div class="flex items-start justify-between gap-4">
       <div class="flex items-start gap-3">
-        <span class="text-xl" x-text="subscription.status === 'berakhir' ? '🔒' : '⚠️'"></span>
+        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><?= masterIconSvg('alert-circle', 'h-5 w-5') ?></span>
         <div>
           <p class="font-semibold text-amber-900" x-text="subscription.reminder"></p>
           <p class="mt-1 text-sm text-amber-800" x-show="subscription.status === 'berakhir'">Fitur Pro terkunci, tetapi data Anda tetap tersimpan.</p>
@@ -41,7 +41,7 @@
       <p class="text-sm text-slate-500">Total Kos</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.total_kos"></p>
-        <span class="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center text-xl">🏠</span>
+        <span class="owner-stat-icon bg-blue-50 text-blue-700"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span>
       </div>
       <a href="<?= BASE_URL ?>/pemilik/kos" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Lihat kos →</a>
     </div>
@@ -50,7 +50,7 @@
       <p class="text-sm text-slate-500">Kamar Terisi</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_terisi"></p>
-        <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl">👤</span>
+        <span class="owner-stat-icon bg-emerald-50 text-emerald-700"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span>
       </div>
       <p class="mt-3 text-xs text-slate-500"><span x-text="summary.total_kamar"></span> total kamar</p>
     </div>
@@ -59,7 +59,7 @@
       <p class="text-sm text-slate-500">Kamar Tersedia</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_tersedia"></p>
-        <span class="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center text-xl">✓</span>
+        <span class="owner-stat-icon bg-sky-50 text-sky-700"><?= masterIconSvg('check-circle-2', 'h-5 w-5') ?></span>
       </div>
       <a href="<?= BASE_URL ?>/pemilik/kamar" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Kelola kamar →</a>
     </div>
@@ -68,7 +68,7 @@
       <p class="text-sm text-slate-500">Kamar Tidak Tersedia</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_tidak_tersedia"></p>
-        <span class="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl">—</span>
+        <span class="owner-stat-icon bg-amber-50 text-amber-700"><?= masterIconSvg('circle-x', 'h-5 w-5') ?></span>
       </div>
       <a href="<?= BASE_URL ?>/pemilik/kamar" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Kelola kamar →</a>
     </div>
@@ -77,7 +77,7 @@
       <p class="text-sm text-slate-500">Penghuni Aktif</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.penghuni_aktif"></p>
-        <span class="w-10 h-10 rounded-xl bg-violet-50 text-violet-700 flex items-center justify-center text-xl">👥</span>
+        <span class="owner-stat-icon bg-violet-50 text-violet-700"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
       </div>
       <a href="<?= BASE_URL ?>/pemilik/penghuni" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Lihat penghuni →</a>
     </div>
@@ -111,7 +111,7 @@
 
     <div x-show="!isPro" x-cloak class="lg:col-span-2 card border border-amber-200 bg-amber-50/60 shadow-sm">
       <div class="flex items-start gap-4">
-        <div class="w-11 h-11 shrink-0 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl">🔒</div>
+        <div class="w-11 h-11 shrink-0 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center"><?= masterIconSvg('lock', 'h-5 w-5') ?></div>
         <div>
           <h3 class="font-semibold text-slate-900">Ringkasan Keuangan adalah fitur Pro</h3>
           <p class="mt-1 text-sm leading-6 text-slate-600">Pantau tagihan, piutang, dan pembayaran dari dashboard setelah mengaktifkan BetaKos Pro.</p>
@@ -124,16 +124,16 @@
       <h3 class="font-semibold text-slate-900">Aksi Cepat</h3>
       <div class="mt-4 space-y-2">
         <a href="<?= BASE_URL ?>/pemilik/kos/tambah" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
-          <span>🏠</span><span class="text-sm font-medium">Tambah Kos</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-700"><?= masterIconSvg('building-2', 'h-4 w-4') ?></span><span class="text-sm font-medium">Tambah Kos</span>
         </a>
         <a href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
-          <span>🚪</span><span class="text-sm font-medium">Tambah Kamar</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700"><?= masterIconSvg('bed', 'h-4 w-4') ?></span><span class="text-sm font-medium">Tambah Kamar</span>
         </a>
         <a href="<?= BASE_URL ?>/pemilik/penghuni/tambah" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
-          <span>👤</span><span class="text-sm font-medium">Tambah Penghuni</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-700"><?= masterIconSvg('user-round', 'h-4 w-4') ?></span><span class="text-sm font-medium">Tambah Penghuni</span>
         </a>
         <a href="<?= BASE_URL ?>/pemilik/pembayaran" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
-          <span>💳</span><span class="text-sm font-medium">Catat Pembayaran</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700"><?= masterIconSvg('wallet', 'h-4 w-4') ?></span><span class="text-sm font-medium">Catat Pembayaran</span>
         </a>
       </div>
     </div>
@@ -179,7 +179,7 @@
 
   <div x-show="!isPro" x-cloak class="card border border-slate-200 shadow-sm">
     <div class="flex items-center gap-4">
-      <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">🔒</div>
+      <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center"><?= masterIconSvg('lock', 'h-5 w-5') ?></div>
       <div>
         <h3 class="font-semibold text-slate-900">Tagihan Terdekat</h3>
         <p class="mt-1 text-sm text-slate-500">Kelola tagihan dan pembayaran dengan BetaKos Pro.</p>

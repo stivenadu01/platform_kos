@@ -65,7 +65,7 @@
 
     <div x-show="loadingData" x-cloak class="py-14 text-center text-sm text-slate-500">Memuat foto...</div>
     <div x-show="!loadingData && foto.length === 0" x-cloak class="py-14 text-center">
-      <div class="mb-4 text-4xl">🖼️</div>
+      <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('image', 'h-7 w-7') ?></div>
       <h3 class="font-semibold text-slate-900">Belum ada foto</h3>
       <p class="mt-1 text-sm text-slate-500">Upload foto pertama untuk tipe kamar ini.</p>
     </div>
