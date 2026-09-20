@@ -329,7 +329,7 @@
       detailUrl(id, action = '') {
         const params = new URLSearchParams({ id_tagihan: id });
         if (action) params.set('action', action);
-        return window.BASE_URL + '/pemilik/pembayaran/detail?' + params.toString() + (action === 'payment' ? '#help-tagihan-payment' : '');
+        return window.BASE_URL + '/pemilik/pembayaran/detail?' + params.toString();
       },
 
       format(value) {

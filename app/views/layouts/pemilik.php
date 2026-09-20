@@ -49,13 +49,15 @@
   <script src="<?= BASE_URL ?>/assets/js/operational-help.js"></script>
 </head>
 
-<body class="bg-slate-50 text-slate-800 owner-ui">
+<body class="bg-slate-100 text-slate-800 owner-ui">
 
   <script>
     // Set the shell state before the first paint. Alpine will bind the same value afterwards.
     (() => {
       let collapsed = false;
-      try { collapsed = localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1'; } catch (_) {}
+      try {
+        collapsed = localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1';
+      } catch (_) {}
       document.body.setAttribute('data-betakos-pemilik-sidebar-collapsed', collapsed ? 'true' : 'false');
       window.__BETAKOS_PEMILIK_SIDEBAR_COLLAPSED__ = collapsed;
     })();

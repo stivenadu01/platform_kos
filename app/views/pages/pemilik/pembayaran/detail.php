@@ -48,25 +48,10 @@ $backUrl = BASE_URL . '/pemilik/pembayaran';
             <div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><p class="text-xs text-slate-400">Periode</p><p class="mt-1 text-xs font-semibold leading-5 text-slate-700" x-text="formatDate(detail.tanggal_mulai) + ' – ' + formatDate(detail.tanggal_selesai)"></p></div>
           </div>
 
-          <button data-help="help-tagihan-payment" x-show="canPay" type="button" @click="togglePaymentForm()" class="btn-primary mt-4 w-full justify-center sm:w-auto" x-text="showPaymentForm ? 'Tutup Form Pembayaran' : 'Catat Pembayaran'"></button>
+          <button data-help="help-tagihan-payment" x-show="canPay" type="button" @click="openPaymentModal()" class="btn-primary mt-4 w-full justify-center sm:w-auto">Catat Pembayaran</button>
           <div x-show="detail.status === 'lunas'" class="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-medium text-emerald-700">Tagihan ini sudah lunas. Tidak ada pembayaran yang perlu dicatat.</div>
           <div x-show="detail.status === 'dibatalkan'" class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">Tagihan telah dibatalkan dan tidak dapat menerima pembayaran.</div>
         </div>
-      </section>
-
-      <section id="help-tagihan-payment" x-show="showPaymentForm" x-cloak class="rounded-2xl border border-primary/20 bg-white p-4 shadow-sm sm:p-5">
-        <div class="mb-4"><h3 class="font-bold text-slate-900">Catat Pembayaran</h3><p class="mt-1 text-xs text-slate-500">Masukkan uang yang benar-benar sudah diterima dari penghuni.</p></div>
-        <form @submit.prevent="submitPayment" class="space-y-4">
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="form-group"><label class="label">Dibayar oleh</label><select x-model="payment.id_penghuni" class="select" required><option value="">Pilih penghuni</option><template x-for="item in detail.penghuni" :key="item.id_penghuni"><option :value="item.id_penghuni" x-text="item.nama"></option></template></select></div>
-            <div class="form-group"><div class="flex items-center justify-between gap-2"><label class="label">Jumlah yang diterima</label><button type="button" @click="payment.jumlah = Number(detail.sisa_tagihan || 0)" class="text-xs font-semibold text-primary hover:underline">Isi seluruh sisa</button></div><input type="number" min="1" step="1" :max="detail.sisa_tagihan" x-model.number="payment.jumlah" class="input-number" required></div>
-            <div class="form-group"><label class="label">Metode pembayaran</label><select x-model="payment.metode" class="select" required><option value="tunai">Tunai</option><option value="transfer">Transfer</option><option value="qris">QRIS</option><option value="lainnya">Lainnya</option></select></div>
-            <div class="form-group"><label class="label">Tanggal diterima</label><input type="datetime-local" x-model="payment.tanggal_bayar" class="input-datetime" required></div>
-          </div>
-          <div class="form-group"><label class="label">Catatan <span class="font-normal text-slate-400">(opsional)</span></label><textarea x-model="payment.catatan" rows="2" class="input resize-none" placeholder="Contoh: Transfer BCA"></textarea></div>
-          <div class="rounded-xl bg-slate-50 p-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-500">Sisa setelah pembayaran</span><strong class="text-slate-900" x-text="format(paymentRemaining)"></strong></div></div>
-          <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" @click="showPaymentForm = false" class="btn-secondary justify-center">Batal</button><button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Konfirmasi Pembayaran'"></button></div>
-        </form>
       </section>
 
       <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -103,24 +88,58 @@ $backUrl = BASE_URL . '/pemilik/pembayaran';
           <span class="text-lg text-slate-400" x-text="showAdjustments ? '−' : '+'"></span>
         </button>
         <div x-show="showAdjustments" x-cloak class="space-y-4 border-t border-slate-100 p-4 sm:p-5">
-          <div class="flex justify-end"><button type="button" x-show="canPay" @click="showAdjustmentForm = !showAdjustmentForm" class="btn-secondary" x-text="showAdjustmentForm ? 'Tutup Form' : '+ Tambah atau Potong'"></button></div>
-          <div x-show="showAdjustmentForm" x-cloak class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <form @submit.prevent="submitAdjustment" class="space-y-4">
-              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="form-group"><label class="label">Perubahan</label><select x-model="adjustment.jenis" class="select" required><option value="tambah">Tambah biaya</option><option value="kurang">Berikan potongan</option></select></div>
-                <div class="form-group"><label class="label">Jumlah</label><input type="number" min="1" step="1" x-model.number="adjustment.jumlah" class="input-number" required></div>
-                <div class="form-group"><label class="label">Tanggal berlaku</label><input type="date" x-model="adjustment.tanggal_efektif" class="input-date" :min="detail.tanggal_mulai" :max="detail.tanggal_selesai" required></div>
-                <div class="form-group"><label class="label">Alasan</label><input type="text" x-model="adjustment.alasan" maxlength="255" class="input" placeholder="Contoh: Denda keterlambatan" required></div>
-              </div>
-              <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" @click="showAdjustmentForm = false" class="btn-secondary justify-center">Batal</button><button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
-            </form>
-          </div>
+          <div class="flex justify-end"><button type="button" x-show="canPay" @click="openAdjustmentModal()" class="btn-secondary">+ Tambah atau Potong</button></div>
           <div class="divide-y overflow-hidden rounded-xl border border-slate-200">
             <template x-if="detail.penyesuaian.length === 0"><p class="p-4 text-sm text-slate-500">Belum ada biaya tambahan atau potongan.</p></template>
             <template x-for="item in detail.penyesuaian" :key="item.id_penyesuaian"><div class="flex items-center justify-between gap-3 p-3.5"><div><p class="font-semibold text-slate-900" x-text="item.alasan"></p><p class="mt-1 text-xs text-slate-500" x-text="formatDate(item.tanggal_efektif) + (item.nama_penghuni ? ' · ' + item.nama_penghuni : '')"></p></div><span class="shrink-0 font-bold" :class="item.jenis === 'tambah' ? 'text-rose-600' : 'text-emerald-600'" x-text="(item.jenis === 'tambah' ? '+ ' : '− ') + format(item.jumlah)"></span></div></template>
           </div>
         </div>
       </section>
+
+      <div x-show="showPaymentForm" x-cloak x-transition.opacity @keydown.escape.window="closePaymentModal()" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+        <div class="absolute inset-0 bg-slate-900/50" @click="closePaymentModal()"></div>
+        <div x-show="showPaymentForm" x-transition class="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl" style="max-height: 92vh;">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-5">
+            <div><p class="text-xs font-semibold uppercase tracking-wider text-primary">Kamar <span x-text="detail.nomor_kamar"></span></p><h3 class="mt-1 text-lg font-bold text-slate-900">Catat Pembayaran</h3><p class="mt-1 text-xs text-slate-500">Masukkan uang yang benar-benar sudah diterima.</p></div>
+            <button type="button" @click="closePaymentModal()" class="owner-icon-button" aria-label="Tutup modal"><?= masterIconSvg('x', 'h-4 w-4') ?></button>
+          </div>
+          <form @submit.prevent="submitPayment" class="flex min-h-0 flex-1 flex-col">
+            <div class="space-y-4 overflow-y-auto p-4 sm:p-5">
+              <div class="rounded-xl bg-primary-soft p-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-600">Belum dibayar</span><strong class="text-primary" x-text="format(detail.sisa_tagihan)"></strong></div></div>
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="form-group"><label class="label">Dibayar oleh</label><select x-model="payment.id_penghuni" class="select" required><option value="">Pilih penghuni</option><template x-for="item in detail.penghuni" :key="item.id_penghuni"><option :value="item.id_penghuni" x-text="item.nama"></option></template></select></div>
+                <div class="form-group"><div class="flex items-center justify-between gap-2"><label class="label">Jumlah yang diterima</label><button type="button" @click="payment.jumlah = Number(detail.sisa_tagihan || 0)" class="text-xs font-semibold text-primary hover:underline">Isi seluruh sisa</button></div><input type="number" min="1" step="1" :max="detail.sisa_tagihan" x-model.number="payment.jumlah" class="input-number" required></div>
+                <div class="form-group"><label class="label">Metode pembayaran</label><select x-model="payment.metode" class="select" required><option value="tunai">Tunai</option><option value="transfer">Transfer</option><option value="qris">QRIS</option><option value="lainnya">Lainnya</option></select></div>
+                <div class="form-group"><label class="label">Tanggal diterima</label><input type="datetime-local" x-model="payment.tanggal_bayar" class="input-datetime" required></div>
+              </div>
+              <div class="form-group"><label class="label">Catatan <span class="font-normal text-slate-400">(opsional)</span></label><textarea x-model="payment.catatan" rows="2" class="input resize-none" placeholder="Contoh: Transfer BCA"></textarea></div>
+              <div class="rounded-xl bg-slate-50 p-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-500">Sisa setelah pembayaran</span><strong class="text-slate-900" x-text="format(paymentRemaining)"></strong></div></div>
+            </div>
+            <div class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-white p-4 sm:flex-row sm:justify-end sm:px-5"><button type="button" @click="closePaymentModal()" class="btn-secondary justify-center">Batal</button><button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Konfirmasi Pembayaran'"></button></div>
+          </form>
+        </div>
+      </div>
+
+      <div x-show="showAdjustmentForm" x-cloak x-transition.opacity @keydown.escape.window="closeAdjustmentModal()" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+        <div class="absolute inset-0 bg-slate-900/50" @click="closeAdjustmentModal()"></div>
+        <div x-show="showAdjustmentForm" x-transition class="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl" style="max-height: 92vh;">
+          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-5">
+            <div><p class="text-xs font-semibold uppercase tracking-wider text-primary">Kamar <span x-text="detail.nomor_kamar"></span></p><h3 class="mt-1 text-lg font-bold text-slate-900">Tambah Biaya atau Potongan</h3><p class="mt-1 text-xs text-slate-500">Gunakan hanya jika nilai tagihan perlu disesuaikan.</p></div>
+            <button type="button" @click="closeAdjustmentModal()" class="owner-icon-button" aria-label="Tutup modal"><?= masterIconSvg('x', 'h-4 w-4') ?></button>
+          </div>
+          <form @submit.prevent="submitAdjustment" class="flex min-h-0 flex-1 flex-col">
+            <div class="space-y-4 overflow-y-auto p-4 sm:p-5">
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="form-group"><label class="label">Perubahan</label><select x-model="adjustment.jenis" class="select" required><option value="tambah">Tambah biaya</option><option value="kurang">Berikan potongan</option></select></div>
+                <div class="form-group"><label class="label">Jumlah</label><input type="number" min="1" step="1" x-model.number="adjustment.jumlah" class="input-number" required></div>
+                <div class="form-group"><label class="label">Tanggal berlaku</label><input type="date" x-model="adjustment.tanggal_efektif" class="input-date" :min="detail.tanggal_mulai" :max="detail.tanggal_selesai" required></div>
+                <div class="form-group"><label class="label">Alasan</label><input type="text" x-model="adjustment.alasan" maxlength="255" class="input" placeholder="Contoh: Denda keterlambatan" required></div>
+              </div>
+            </div>
+            <div class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-white p-4 sm:flex-row sm:justify-end sm:px-5"><button type="button" @click="closeAdjustmentModal()" class="btn-secondary justify-center">Batal</button><button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
+          </form>
+        </div>
+      </div>
     </div>
   </template>
 </div>
@@ -166,13 +185,7 @@ $backUrl = BASE_URL . '/pemilik/pembayaran';
         await this.load();
         const action = new URLSearchParams(window.location.search).get('action');
         if (action === 'payment' && this.detail?.status !== 'lunas' && this.detail?.status !== 'dibatalkan') {
-          this.showPaymentForm = true;
-          this.$nextTick(() => {
-            this.setPaymentDefaults();
-            requestAnimationFrame(() => {
-              document.getElementById('help-tagihan-payment')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            });
-          });
+          this.openPaymentModal();
         }
       },
 
@@ -210,11 +223,26 @@ $backUrl = BASE_URL . '/pemilik/pembayaran';
         }
       },
 
-      togglePaymentForm() {
-        this.showPaymentForm = !this.showPaymentForm;
-        if (this.showPaymentForm) {
-          this.$nextTick(() => this.setPaymentDefaults());
-        }
+      openPaymentModal() {
+        this.setPaymentDefaults();
+        this.showPaymentForm = true;
+      },
+
+      closePaymentModal() {
+        if (!this.saving) this.showPaymentForm = false;
+      },
+
+      openAdjustmentModal() {
+        const today = new Date().toISOString().slice(0, 10);
+        const start = this.detail?.tanggal_mulai || today;
+        const end = this.detail?.tanggal_selesai || today;
+        const effectiveDate = today < start ? start : today > end ? end : today;
+        this.adjustment = { jenis: 'tambah', jumlah: 0, tanggal_efektif: effectiveDate, alasan: '' };
+        this.showAdjustmentForm = true;
+      },
+
+      closeAdjustmentModal() {
+        if (!this.saving) this.showAdjustmentForm = false;
       },
 
       setPaymentDefaults() {
