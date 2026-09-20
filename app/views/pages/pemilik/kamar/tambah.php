@@ -8,7 +8,7 @@
   <!-- HEADER -->
   <div>
     <a
-      href="<?= BASE_URL ?>/pemilik/kamar"
+      :href="returnUrl"
       class="text-sm text-primary hover:underline">
       ← Kembali ke kelola kamar
     </a>
@@ -40,7 +40,8 @@
         x-model="form.id_kos"
         @change="loadTipe()"
         class="select"
-        required>
+        required
+        :disabled="contextLocked">
         <option value="">Pilih kos</option>
 
         <template x-for="kos in kosList" :key="kos.id_kos">
@@ -70,7 +71,7 @@
         @change="loadTypeFacilities()"
         class="select"
         required
-        :disabled="!form.id_kos">
+        :disabled="contextLocked || !form.id_kos">
         <option value="">Pilih tipe kamar</option>
 
         <template x-for="item in tipeList" :key="item.id_tipe_kamar">
@@ -214,7 +215,7 @@
     <!-- ACTION -->
     <div class="flex justify-end gap-3 border-t border-slate-200 pt-5">
       <a
-        href="<?= BASE_URL ?>/pemilik/kamar"
+        :href="returnUrl"
         class="btn-secondary">
         Batal
       </a>
@@ -244,6 +245,8 @@
       typeFacilities: [],
       facilityLoading: false,
       loading: false,
+      contextLocked: false,
+      contextTypeId: new URLSearchParams(window.location.search).get('id_tipe_kamar') || '',
 
       form: {
         id_kos: '',
@@ -262,16 +265,34 @@
 
       async init() {
         try {
-          const res = await API.get('/pemilik/kamar/kos', false);
-          this.kosList = res.data || [];
+          const kosRes = await API.get('/pemilik/kamar/kos', false);
+          this.kosList = kosRes.data || [];
+
+          if (this.contextTypeId) {
+            const typeRes = await API.get('/pemilik/tipe-kamar/show?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId), false);
+            const type = typeRes.data;
+            if (!type) throw new Error('Tipe kamar tidak ditemukan.');
+            this.form.id_kos = String(type.id_kos);
+            await this.loadTipe(false);
+            this.form.id_tipe_kamar = String(type.id_tipe_kamar);
+            this.contextLocked = true;
+            await this.loadTypeFacilities();
+          }
         } catch (error) {
           console.error('Gagal memuat kos:', error);
-          this.kosList = [];
+          Alpine.store('ui').toast('Tipe kamar tidak ditemukan atau bukan milik Anda.', 'error');
+          if (this.contextTypeId) window.location.replace(BASE_URL + '/pemilik/kamar');
         }
       },
 
-      async loadTipe() {
-        this.form.id_tipe_kamar = '';
+      get returnUrl() {
+        return this.contextTypeId
+          ? BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
+          : BASE_URL + '/pemilik/kamar';
+      },
+
+      async loadTipe(resetSelection = true) {
+        if (resetSelection) this.form.id_tipe_kamar = '';
         this.typeFacilities = [];
         this.tipeList = [];
 
@@ -344,11 +365,9 @@
             });
           }
 
-          if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
-            window.location.href = BASE_URL + '/pemilik/kamar';
-          } else {
-            window.location.href = BASE_URL + '/pemilik/kamar';
-          }
+          window.location.href = this.contextTypeId
+            ? BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
+            : BASE_URL + '/pemilik/kamar';
         } catch (error) {
           console.error('Gagal menyimpan kamar:', error);
         } finally {

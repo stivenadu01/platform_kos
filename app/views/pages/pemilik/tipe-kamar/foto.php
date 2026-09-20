@@ -1,6 +1,6 @@
 <div x-data="tipeKamarFotoPage()" x-init="init()" class="mx-auto max-w-6xl space-y-6">
   <div>
-    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="text-sm text-primary hover:underline">← Kembali ke tipe kamar</a>
+    <a :href="backUrl" class="text-sm text-primary hover:underline">← Kembali ke tipe kamar</a>
     <div class="mt-3">
       <h2 class="text-2xl font-bold text-slate-900">Foto Tipe Kamar</h2>
       <p class="mt-1 text-sm text-slate-500">Kelola foto yang akan ditampilkan pada tipe kamar ini.</p>
@@ -90,13 +90,15 @@
   </div>
   <div x-show="wizard" x-cloak class="flex flex-col gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 sm:flex-row sm:items-center sm:justify-between">
     <p class="text-sm text-emerald-800">Tipe kamar sudah tersimpan. Foto dapat ditambahkan sekarang atau nanti.</p>
-    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-primary text-center">Selesai</a>
+    <a :href="backUrl" class="btn-primary text-center">Selesai</a>
   </div>
 </div>
 
 <script>
   function tipeKamarFotoPage() {
     return {
+      fromKamar: new URLSearchParams(window.location.search).get('from') === 'kamar',
+      get backUrl() { return this.fromKamar ? BASE_URL + '/pemilik/kamar' : BASE_URL + '/pemilik/tipe-kamar'; },
       wizard: utils.getQuery('wizard') === '1',
       id: utils.getQuery('id_tipe_kamar') || '',
       loading: false,
@@ -112,7 +114,7 @@
 
       async init() {
         if (!this.id) {
-          window.location.href = BASE_URL + '/pemilik/tipe-kamar';
+          window.location.href = this.backUrl;
           return;
         }
         try {

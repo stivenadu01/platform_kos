@@ -203,6 +203,14 @@ class PemilikController
     ]);
   }
 
+  public function kelolaKamar()
+  {
+    view('pemilik/kamar/kelola', [
+      'title' => 'Kelola Unit Kamar',
+      'layout' => 'pemilik'
+    ]);
+  }
+
   public function tambahKamar()
   {
     $mode = query('mode') === 'bulk' ? 'bulk' : 'single';

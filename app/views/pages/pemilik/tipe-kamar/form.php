@@ -1,6 +1,6 @@
 <div x-data="tipeKamarForm()" x-init="init()" class="mx-auto max-w-4xl space-y-6">
   <div>
-    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="text-sm text-slate-500 hover:text-primary">← Kembali ke tipe kamar</a>
+    <a :href="backUrl" class="text-sm text-slate-500 hover:text-primary">← Kembali ke tipe kamar</a>
     <h2 class="mt-3 text-xl font-bold text-slate-900 sm:text-2xl" x-text="id ? 'Kelola Tipe Kamar' : 'Tambah Tipe Kamar'"></h2>
   </div>
 
@@ -41,7 +41,7 @@
       </div>
       <div class="mt-4 grid gap-2 sm:grid-cols-2"><template x-for="item in fasilitas" :key="item.id_fasilitas"><label class="flex items-center gap-3 rounded-xl border border-slate-200 p-3 text-sm cursor-pointer hover:bg-slate-50"><input type="checkbox" :value="Number(item.id_fasilitas)" x-model="fasilitasTerpilih" class="rounded border-slate-300 text-primary focus:ring-primary"><span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-primary" x-html="iconSvg(item.icon, 'h-4 w-4')"></span><span x-text="item.nama_fasilitas"></span></label></template></div>
     </div>
-    <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between"><a x-show="step === 1" href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary text-center">Batal</a><button x-show="step > 1" x-cloak type="button" @click="previousStep()" class="btn-secondary">← Sebelumnya</button><button x-show="step < 3" type="button" @click="nextStep()" class="btn-primary sm:ml-auto">Selanjutnya →</button><button x-show="step === 3" x-cloak type="submit" data-help="help-tipe-form-save" data-onboarding="tipe-save" class="btn-primary" :disabled="saving" x-text="saving ? 'Menyimpan...' : (id ? 'Simpan Tipe' : 'Simpan & Lanjut ke Foto')"></button></div>
+    <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between"><a x-show="step === 1" :href="backUrl" class="btn-secondary text-center">Batal</a><button x-show="step > 1" x-cloak type="button" @click="previousStep()" class="btn-secondary">← Sebelumnya</button><button x-show="step < 3" type="button" @click="nextStep()" class="btn-primary sm:ml-auto">Selanjutnya →</button><button x-show="step === 3" x-cloak type="submit" data-help="help-tipe-form-save" data-onboarding="tipe-save" class="btn-primary" :disabled="saving" x-text="saving ? 'Menyimpan...' : (id ? 'Simpan Tipe' : 'Simpan & Lanjut ke Foto')"></button></div>
   </form>
 
 
@@ -49,6 +49,8 @@
 <script>
   function tipeKamarForm() {
     return {
+      fromKamar: new URLSearchParams(window.location.search).get('from') === 'kamar',
+      get backUrl() { return this.fromKamar ? BASE_URL + '/pemilik/kamar' : BASE_URL + '/pemilik/tipe-kamar'; },
       iconPaths: <?= json_encode_safe(array_map(fn($v)=>$v['path'], masterIconCatalog()), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>,
       iconSvg(i,c='h-4 w-4') { const p=this.iconPaths[i]||this.iconPaths['map-pin']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="${c}" aria-hidden="true">${p}</svg>`; },
       id: utils.getQuery('id_tipe_kamar') || '',
@@ -151,7 +153,7 @@
           } else if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
             window.location.href = BASE_URL + '/pemilik/tipe-kamar?onboarding=1';
           } else {
-            window.location.href = BASE_URL + '/pemilik/tipe-kamar';
+            window.location.href = this.backUrl;
           }
         } catch (error) {
           console.error(error);

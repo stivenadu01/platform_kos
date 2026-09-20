@@ -1,537 +1,130 @@
-<div
-  x-data="kamarPage()"
-  x-init="init()"
-  class="space-y-6">
+<style>
+  .room-type-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .room-type-card:hover { transform: translateY(-2px); border-color: rgba(37, 99, 235, .28); box-shadow: 0 14px 30px rgba(15, 23, 42, .10); }
+  .room-type-card-header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 62%, #2563eb 145%); }
+  .room-type-muted { color: rgba(255, 255, 255, .62); }
+  .room-type-ring { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+  .room-type-secondary { transition: background-color .15s ease, border-color .15s ease, color .15s ease; }
+  .room-type-secondary:hover { border-color: rgba(37, 99, 235, .28); background: #eff6ff; color: #2563eb; }
+  .room-type-danger { border-color: #fee2e2; background: #fef2f2; color: #dc2626; transition: background-color .15s ease; }
+  .room-type-danger:hover { background: #fee2e2; }
+</style>
 
-  <!-- HEADER -->
-  <div class="space-y-4">
+<div x-data="tipeKamarPage()" x-init="init()" class="space-y-6">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-900">Kelola Kamar</h2>
-      <p class="mt-1 text-sm text-slate-500">Kelola unit kamar dari seluruh kos yang Anda miliki.</p>
+      <h2 class="text-xl font-bold text-slate-900 sm:text-2xl">Kelola Kamar</h2>
+      <p class="mt-1 text-sm text-slate-500">Pilih tipe kamar terlebih dahulu, lalu kelola unit kamar di dalamnya.</p>
     </div>
-
-    <div class="flex flex-wrap gap-3 items-center">
-      <a data-onboarding="fast-kelola-tipe-kamar" data-help="help-kamar-type" href="<?= BASE_URL ?>/pemilik/tipe-kamar" class="btn-secondary justify-center">
-        Kelola Tipe Kamar
-      </a>
-      <a data-onboarding="fast-tambah-tipe-kamar" href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-secondary justify-center">
-        + Tambah Tipe Kamar
-      </a>
-
-      <div data-help="help-kamar-add" data-onboarding="kamar-add-choice" class="flex flex-wrap gap-3">
-        <a data-onboarding="fast-tambah-kamar-bulk" href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary justify-center">
-          + Tambah Banyak Kamar
-        </a>
-        <a data-onboarding="fast-tambah-kamar" href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary justify-center">
-          + Tambah Satu Kamar
-        </a>
-      </div>
-    </div>
+    <a data-onboarding="fast-tambah-tipe-kamar" data-help="help-tipe-add" href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary">+ Tambah Tipe Kamar</a>
   </div>
 
+  <div x-show="loading" class="card p-10 text-center text-sm text-slate-500">Memuat tipe kamar...</div>
 
-  <!-- FILTER -->
-  <div data-help="help-kamar-filter" class="card border border-slate-200 shadow-sm">
-
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-
-      <div class="form-group">
-        <label class="label">
-          Cari kamar
-        </label>
-
-        <input
-          type="search"
-          x-model="search"
-          @input.debounce.400ms="load()"
-          class="input"
-          placeholder="Cari nomor kamar...">
-      </div>
-
-
-      <div class="form-group">
-        <label class="label">
-          Kos
-        </label>
-
-        <select
-          x-model="idKos"
-          @change="loadTipe().then(() => load())"
-          class="select">
-
-          <option value="">
-            Semua kos
-          </option>
-
-          <template x-for="kos in kosList" :key="kos.id_kos">
-            <option
-              :value="kos.id_kos"
-              x-text="kos.nama_kos">
-            </option>
-          </template>
-
-        </select>
-      </div>
-
-
-      <div class="form-group">
-        <label class="label">
-          Tipe kamar
-        </label>
-
-        <select
-          x-model="idTipeKamar"
-          @change="load()"
-          class="select">
-          <option value="">Semua tipe</option>
-          <template x-for="tipe in tipeList" :key="tipe.id_tipe_kamar">
-            <option :value="tipe.id_tipe_kamar" x-text="tipe.nama_tipe"></option>
-          </template>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label class="label">
-          Status
-        </label>
-
-        <select
-          x-model="status"
-          @change="load()"
-          class="select">
-
-          <option value="">
-            Semua status
-          </option>
-
-          <option value="tersedia">
-            Tersedia
-          </option>
-
-          <option value="terisi">
-            Terisi
-          </option>
-
-          <option value="tidak_tersedia">
-            Tidak tersedia
-          </option>
-
-          <option value="perbaikan">
-            Perbaikan
-          </option>
-
-          <option value="nonaktif">
-            Nonaktif
-          </option>
-
-        </select>
-      </div>
-
-    </div>
-
+  <div x-show="!loading && !items.length" x-cloak class="card px-6 py-12 text-center">
+    <div class="mb-4 text-4xl">🛏️</div>
+    <h3 class="font-semibold text-slate-900">Belum ada tipe kamar</h3>
+    <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">Buat tipe kamar terlebih dahulu. Setelah itu Anda dapat menambahkan dan mengelola unit kamar pada tipe tersebut.</p>
+    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary mt-5">+ Tambah Tipe Kamar</a>
   </div>
 
-
-  <!-- DATA -->
-  <div data-help="help-kamar-summary" class="card border border-slate-200 shadow-sm overflow-hidden">
-
-    <div
-      x-show="loading"
-      class="py-12 text-center text-sm text-slate-500">
-      Memuat data kamar...
-    </div>
-
-
-    <div
-      x-show="!loading && kamar.length === 0"
-      x-cloak
-      class="py-14 text-center">
-
-      <div class="text-4xl mb-4">
-        🛏️
-      </div>
-
-      <h3 class="font-semibold text-slate-900">
-        Belum ada kamar
-      </h3>
-
-      <p class="mt-1 text-sm text-slate-500">
-        Tambahkan kamar untuk mulai mengelola ketersediaan kos.
-      </p>
-
-      <div class="mt-5 flex flex-wrap justify-center gap-3">
-        <a data-onboarding="fast-tambah-kamar-single" href="<?= BASE_URL ?>/pemilik/kamar/tambah" class="btn-primary">+ Tambah Satu Kamar</a>
-        <a data-onboarding="fast-tambah-kamar-bulk-empty" href="<?= BASE_URL ?>/pemilik/kamar/tambah?mode=bulk" class="btn-secondary">+ Tambah Banyak Kamar</a>
-      </div>
-
-    </div>
-
-
-    <div
-      x-show="!loading && kamar.length > 0"
-      x-cloak
-      class="!hidden md:!block overflow-x-auto">
-
-      <table class="w-full text-sm">
-
-        <thead class="bg-slate-50 border-b border-slate-200">
-
-          <tr>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Kos
-            </th>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Kamar
-            </th>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Tipe
-            </th>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Kapasitas
-            </th>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Harga
-            </th>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Status
-            </th>
-
-            <th class="text-right px-5 py-3 font-semibold">
-              Aksi
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <tbody class="divide-y divide-slate-100">
-
-          <template x-for="item in kamar" :key="item.id_kamar">
-
-            <tr class="hover:bg-slate-50">
-
-              <td
-                class="px-5 py-4 font-medium text-slate-900"
-                x-text="item.nama_kos">
-              </td>
-
-              <td
-                class="px-5 py-4"
-                x-text="item.nomor_kamar">
-              </td>
-
-              <td
-                class="px-5 py-4 text-slate-500"
-                x-text="item.tipe_kamar || '-'">
-              </td>
-
-              <td
-                class="px-5 py-4"
-                x-text="item.kapasitas + ' orang'">
-              </td>
-
-              <td class="px-5 py-4">
-
-                <template x-if="item.harga_min !== null">
-
-                  <div>
-
-                    <template x-if="Number(item.harga_min) === Number(item.harga_max)">
-
-                      <span
-                        class="font-medium text-slate-900"
-                        x-text="$store.utils.formatRupiah(item.harga_min)">
-                      </span>
-
-                    </template>
-
-
-                    <template x-if="Number(item.harga_min) !== Number(item.harga_max)">
-
-                      <span
-                        class="font-medium text-slate-900"
-                        x-text="
-            $store.utils.formatRupiah(item.harga_min)
-            + ' - ' +
-            $store.utils.formatRupiah(item.harga_max)
-          ">
-                      </span>
-
-                    </template>
-
-                  </div>
-
-                </template>
-
-
-                <template x-if="item.harga_min === null">
-
-                  <span class="text-slate-400">
-                    Belum diatur
-                  </span>
-
-                </template>
-
-              </td>
-
-              <td class="px-5 py-4">
-
-                <template x-if="item.status === 'terisi'">
-
-                  <span
-                    class="inline-flex items-center rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-700">
-                    Terisi
-                  </span>
-
-                </template>
-
-                <template x-if="item.status !== 'terisi'">
-
-                  <select
-                    class="select py-1.5 text-xs w-auto"
-                    :value="item.status"
-                    @change="changeStatus(item, $event.target.value)">
-
-                    <option value="tersedia">
-                      Tersedia
-                    </option>
-
-                    <option value="tidak_tersedia">
-                      Tidak tersedia
-                    </option>
-
-                    <option value="perbaikan">
-                      Perbaikan
-                    </option>
-
-                    <option value="nonaktif">
-                      Nonaktif
-                    </option>
-
-                  </select>
-
-                </template>
-
-              </td>
-
-              <td class="px-5 py-4">
-
-                <div class="flex justify-end gap-2">
-
-                  <a
-                    :href="BASE_URL + '/pemilik/kamar/edit?id_kamar=' + item.id_kamar"
-                    class="btn-secondary">
-                    Edit
-                  </a>
-
-                  <a
-                    :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar"
-                    class="btn-secondary">
-                    Kelola Tipe
-                  </a>
-
-                  <button
-                    type="button"
-                    @click="remove(item)"
-                    class="btn-danger">
-                    Hapus
-                  </button>
-
-                </div>
-
-              </td>
-
-            </tr>
-
-          </template>
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-    <div x-show="!loading && kamar.length > 0" class="!block md:!hidden divide-y divide-slate-200">
-      <template x-for="item in kamar" :key="'m-' + item.id_kamar">
-        <article class="p-4">
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0"><div class="font-semibold text-slate-900" x-text="item.nama_kos"></div><div class="mt-1 text-sm text-slate-700" x-text="'Kamar ' + item.nomor_kamar"></div><div class="mt-1 text-xs text-slate-500" x-text="item.tipe_kamar || 'Tipe belum diatur'"></div></div>
-            <template x-if="item.status === 'terisi'"><span class="shrink-0 rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">Terisi</span></template>
-            <template x-if="item.status !== 'terisi'"><span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700" x-text="item.status === 'tersedia' ? 'Tersedia' : item.status === 'tidak_tersedia' ? 'Tidak tersedia' : item.status === 'perbaikan' ? 'Perbaikan' : 'Nonaktif'"></span></template>
+  <div data-help="help-tipe-list" x-show="!loading && items.length" x-cloak class="grid gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <template x-for="item in items" :key="item.id_tipe_kamar">
+      <article class="room-type-card group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="room-type-card-header relative overflow-hidden px-4 py-5 sm:px-5">
+          <div class="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/10"></div>
+          <div class="absolute -bottom-10 right-10 h-20 w-20 rounded-full bg-primary-300/10"></div>
+
+          <div class="relative flex items-start gap-3.5">
+            <div class="room-type-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path>
+              </svg>
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="room-type-muted truncate text-xs font-medium uppercase tracking-wide" x-text="item.nama_kos"></p>
+              <h3 class="mt-1 truncate text-lg font-bold text-white" x-text="item.nama_tipe"></h3>
+            </div>
+            <span class="room-type-ring shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white" x-text="item.kapasitas + ' orang'"></span>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
-            <div><div class="text-slate-400">Kapasitas</div><div class="mt-1 font-medium text-slate-700" x-text="item.kapasitas + ' orang'"></div></div>
-            <div><div class="text-slate-400">Harga</div><div class="mt-1 font-medium text-slate-700" x-text="item.harga_min === null ? 'Belum diatur' : Number(item.harga_min) === Number(item.harga_max) ? $store.utils.formatRupiah(item.harga_min) : $store.utils.formatRupiah(item.harga_min) + ' - ' + $store.utils.formatRupiah(item.harga_max)"></div></div>
-          </div>
-          <div class="mt-3 flex flex-wrap gap-2">
-            <a :href="BASE_URL + '/pemilik/kamar/edit?id_kamar=' + item.id_kamar" class="btn-secondary text-xs">Edit</a>
-            <a :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar" class="btn-secondary text-xs">Kelola Tipe</a>
-            <button type="button" @click="remove(item)" class="btn-danger text-xs">Hapus</button>
-          </div>
-        </article>
-      </template>
-    </div>
+        </div>
 
+        <div class="p-4 sm:p-5">
+          <div class="grid grid-cols-3 divide-x divide-slate-100 rounded-xl border border-slate-100 bg-slate-50/70 py-3 text-center">
+            <div class="px-2">
+              <div class="text-lg font-bold leading-none text-slate-900" x-text="item.jumlah_kamar"></div>
+              <div class="mt-1.5 text-[11px] font-medium text-slate-500">Total unit</div>
+            </div>
+            <div class="px-2">
+              <div class="text-lg font-bold leading-none text-emerald-600" x-text="item.kamar_tersedia"></div>
+              <div class="mt-1.5 text-[11px] font-medium text-slate-500">Tersedia</div>
+            </div>
+            <div class="px-2">
+              <div class="text-lg font-bold leading-none text-rose-600" x-text="item.kamar_terisi"></div>
+              <div class="mt-1.5 text-[11px] font-medium text-slate-500">Terisi</div>
+            </div>
+          </div>
+
+          <div data-help="help-tipe-action" class="mt-4 space-y-2.5">
+            <a :href="BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + item.id_tipe_kamar" class="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M6 21V7l6-4 6 4v14"></path><path d="M9 21v-6h6v6"></path></svg>
+              Kelola Kamar
+              <svg class="ml-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+            </a>
+
+            <div class="grid grid-cols-3 gap-2">
+              <a :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar + '&from=kamar'" class="room-type-secondary inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-600">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                Edit
+              </a>
+              <a :href="BASE_URL + '/pemilik/tipe-kamar/foto?id_tipe_kamar=' + item.id_tipe_kamar + '&from=kamar'" class="room-type-secondary inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-600">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>
+                Foto
+              </a>
+              <button type="button" @click="remove(item)" class="room-type-danger inline-flex h-10 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-xs font-semibold">
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </template>
   </div>
-
 </div>
 
-
 <script>
-  function kamarPage() {
+  function tipeKamarPage() {
     return {
-
-      kamar: [],
-      kosList: [],
-
-      search: '',
-      idKos: '',
-      idTipeKamar: '',
-      status: '',
-      tipeList: [],
-
+      items: [],
       loading: false,
-
-      async init() {
-        await Promise.all([
-          this.loadKos(),
-          this.load()
-        ]);
-      },
-
-      async loadKos() {
+      async init() { await this.load(); },
+      async load() {
+        this.loading = true;
         try {
-          const res = await API.get(
-            '/pemilik/kamar/kos',
-            false
-          );
-
-          this.kosList = res.data || [];
-          await this.loadTipe();
-
-        } catch (error) {
-          console.error(error);
-        }
-      },
-
-      async loadTipe() {
-        try {
-          const query = this.idKos ? '?id_kos=' + encodeURIComponent(this.idKos) : '';
-          const res = await API.get('/pemilik/tipe-kamar' + query, false);
-          this.tipeList = res.data || [];
-          if (this.idTipeKamar && !this.tipeList.some((item) => String(item.id_tipe_kamar) === String(this.idTipeKamar))) {
-            this.idTipeKamar = '';
-          }
+          const res = await API.get('/pemilik/tipe-kamar', false);
+          this.items = res.data || [];
         } catch (error) {
           console.error('Gagal memuat tipe kamar:', error);
-          this.tipeList = [];
-        }
-      },
-
-      async load() {
-
-        this.loading = true;
-
-        try {
-
-          const params = new URLSearchParams();
-
-          if (this.search.trim()) {
-            utils.setQuery('search', this.search.trim())
-            params.set('search', this.search.trim());
-          }
-
-          if (this.idKos) {
-            utils.setQuery('id_kos', this.idKos);
-            params.set('id_kos', this.idKos);
-          }
-
-          if (this.idTipeKamar) {
-            utils.setQuery('id_tipe_kamar', this.idTipeKamar);
-            params.set('id_tipe_kamar', this.idTipeKamar);
-          }
-
-          if (this.status) {
-            utils.setQuery('status', this.status);
-            params.set('status', this.status);
-          }
-
-          const query = params.toString();
-
-          const res = await API.get(
-            '/pemilik/kamar' + (query ? '?' + query : ''),
-            false
-          );
-
-          this.kamar = res.data || [];
-
-        } catch (error) {
-
-          console.error('Gagal memuat kamar:', error);
-
-          this.kamar = [];
-
+          this.items = [];
         } finally {
-
           this.loading = false;
-
         }
       },
-
-      async changeStatus(item, status) {
-
-        try {
-
-          await API.put(
-            '/pemilik/kamar/status', {
-              id_kamar: item.id_kamar,
-              status: status
-            }
-          );
-
-          item.status = status;
-
-        } catch (error) {
-
-          await this.load();
-
-        }
-
-      },
-
-
       async remove(item) {
-
-        const ok = await Alpine.store('ui').confirm(
-          `Hapus kamar ${item.nomor_kamar}?`
-        );
-
-        if (!ok) {
+        const unitCount = Number(item.jumlah_kamar || 0);
+        if (unitCount > 0) {
+          Alpine.store('ui').toast(`Tipe ${item.nama_tipe} masih memiliki ${unitCount} kamar dan tidak dapat dihapus.`, 'warning');
           return;
         }
-
+        if (!await Alpine.store('ui').confirm(`Hapus tipe kamar ${item.nama_tipe}?`)) return;
         try {
-
-          await API.delete(
-            '/pemilik/kamar', {
-              id_kamar: item.id_kamar
-            }
-          );
-
+          await API.delete('/pemilik/tipe-kamar', { id_tipe_kamar: item.id_tipe_kamar });
           await this.load();
-
         } catch (error) {
           console.error(error);
         }
-
       }
-
     };
   }
 </script>

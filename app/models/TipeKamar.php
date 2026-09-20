@@ -24,7 +24,8 @@ function getTipeKamarListByPemilik($id_pemilik, $id_kos = '')
       t.updated_at,
       k.nama_kos,
       COUNT(km.id_kamar) AS jumlah_kamar,
-      SUM(CASE WHEN km.status = 'tersedia' THEN 1 ELSE 0 END) AS kamar_tersedia
+      SUM(CASE WHEN km.status = 'tersedia' THEN 1 ELSE 0 END) AS kamar_tersedia,
+      SUM(CASE WHEN km.status = 'terisi' THEN 1 ELSE 0 END) AS kamar_terisi
     FROM tipe_kamar t
     INNER JOIN kos k ON k.id_kos = t.id_kos
     LEFT JOIN kamar km ON km.id_tipe_kamar = t.id_tipe_kamar
@@ -41,6 +42,7 @@ function getTipeKamarListByPemilik($id_pemilik, $id_kos = '')
     $row['kapasitas'] = (int) $row['kapasitas'];
     $row['jumlah_kamar'] = (int) $row['jumlah_kamar'];
     $row['kamar_tersedia'] = (int) $row['kamar_tersedia'];
+    $row['kamar_terisi'] = (int) $row['kamar_terisi'];
     $data[] = $row;
   }
 
