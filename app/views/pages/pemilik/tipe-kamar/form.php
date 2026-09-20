@@ -1,6 +1,6 @@
 <div x-data="tipeKamarForm()" x-init="init()" class="mx-auto max-w-4xl space-y-6">
   <div>
-    <a :href="backUrl" class="text-sm text-slate-500 hover:text-primary">← Kembali ke tipe kamar</a>
+    <a :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
     <h2 class="mt-3 text-xl font-bold text-slate-900 sm:text-2xl" x-text="id ? 'Kelola Tipe Kamar' : 'Tambah Tipe Kamar'"></h2>
   </div>
 

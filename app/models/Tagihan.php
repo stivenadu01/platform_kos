@@ -8,7 +8,9 @@ function getTagihanListByPemilik(
   $search = '',
   $status = '',
   $id_kos = '',
-  $id_kamar = ''
+  $id_kamar = '',
+  $id_tipe_kamar = '',
+  $id_penghuni = ''
 ) {
   $conn = db();
 
@@ -17,12 +19,19 @@ function getTagihanListByPemilik(
   $types = 'i';
 
   if ($search !== '') {
-    $where[] = '(t.nomor_tagihan LIKE ? OR km.nomor_kamar LIKE ? OR k.nama_kos LIKE ?)';
+    $where[] = '(t.nomor_tagihan LIKE ? OR km.nomor_kamar LIKE ? OR k.nama_kos LIKE ? OR EXISTS (
+      SELECT 1
+      FROM tagihan_penghuni tp_search
+      INNER JOIN penghuni p_search ON p_search.id_penghuni = tp_search.id_penghuni
+      WHERE tp_search.id_tagihan = t.id_tagihan
+        AND p_search.nama LIKE ?
+    ))';
     $keyword = '%' . $search . '%';
     $params[] = $keyword;
     $params[] = $keyword;
     $params[] = $keyword;
-    $types .= 'sss';
+    $params[] = $keyword;
+    $types .= 'ssss';
   }
 
   if ($status !== '') {
@@ -40,6 +49,18 @@ function getTagihanListByPemilik(
   if ($id_kamar !== '') {
     $where[] = 'km.id_kamar = ?';
     $params[] = (int) $id_kamar;
+    $types .= 'i';
+  }
+
+  if ($id_tipe_kamar !== '') {
+    $where[] = 'tk.id_tipe_kamar = ?';
+    $params[] = (int) $id_tipe_kamar;
+    $types .= 'i';
+  }
+
+  if ($id_penghuni !== '') {
+    $where[] = 'EXISTS (SELECT 1 FROM tagihan_penghuni tp_filter WHERE tp_filter.id_tagihan = t.id_tagihan AND tp_filter.id_penghuni = ?)';
+    $params[] = (int) $id_penghuni;
     $types .= 'i';
   }
 
@@ -62,9 +83,16 @@ function getTagihanListByPemilik(
       GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan,
       t.status,
       km.nomor_kamar,
+      tk.id_tipe_kamar,
       tk.nama_tipe AS tipe_kamar,
       k.id_kos,
       k.nama_kos,
+      (
+        SELECT GROUP_CONCAT(DISTINCT p_names.nama ORDER BY p_names.nama SEPARATOR ', ')
+        FROM tagihan_penghuni tp_names
+        INNER JOIN penghuni p_names ON p_names.id_penghuni = tp_names.id_penghuni
+        WHERE tp_names.id_tagihan = t.id_tagihan
+      ) AS nama_penghuni,
       (
         SELECT COUNT(*)
         FROM tagihan_penghuni tp

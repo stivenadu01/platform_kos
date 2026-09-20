@@ -7,28 +7,34 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
     <div>
+      <a x-show="isTypeContext" x-cloak :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
         Kelola Penghuni
       </h2>
 
-      <p class="mt-1 text-sm text-slate-500">
-        Kelola data penghuni dari seluruh kamar yang Anda miliki.
-      </p>
+      <p class="mt-1 text-sm text-slate-500" x-text="isTypeContext ? 'Kelola penghuni pada kos dan tipe kamar yang telah dipilih.' : 'Kelola data penghuni dari seluruh kamar yang Anda miliki.'"></p>
     </div>
 
     <a
-      data-help="help-penghuni-add" href="<?= BASE_URL ?>/pemilik/penghuni/tambah"
+      data-help="help-penghuni-add" :href="addUrl"
       class="btn-primary">
-      + Tambah Penghuni
+      <?= masterIconSvg('user-plus', 'h-4 w-4') ?> Tambah Penghuni
     </a>
 
   </div>
 
+  <div x-show="isTypeContext" x-cloak class="owner-context-panel">
+    <div class="owner-context-header">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
+      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-primary">Konteks Penghuni</p><h3 class="mt-1 truncate font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat konteks...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Kapasitas ' + contextInfo.kapasitas + ' orang per kamar. Daftar hanya menampilkan penghuni pada tipe ini.' : ''"></p></div>
+    </div>
+  </div>
+
 
   <!-- FILTER -->
-  <div data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
+  <div x-show="!isTypeContext" data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
 
       <!-- SEARCH -->
       <div class="form-group">
@@ -56,7 +62,7 @@
 
         <select
           x-model="idKos"
-          @change="applyFilter()"
+          @change="changeKosFilter()"
           class="select">
 
           <option value="">
@@ -72,6 +78,27 @@
               x-text="kos.nama_kos">
             </option>
 
+          </template>
+
+        </select>
+
+      </div>
+
+
+      <!-- TIPE KAMAR -->
+      <div class="form-group">
+
+        <label class="label">Tipe kamar</label>
+
+        <select
+          x-model="idTipeKamar"
+          @change="changeTypeFilter()"
+          class="select">
+
+          <option value="">Semua tipe kamar</option>
+
+          <template x-for="tipeItem in filteredTipeList" :key="tipeItem.id_tipe_kamar">
+            <option :value="tipeItem.id_tipe_kamar" x-text="tipeItem.tipe_kamar"></option>
           </template>
 
         </select>
@@ -176,7 +203,7 @@
       </p>
 
       <a
-        href="<?= BASE_URL ?>/pemilik/penghuni/tambah"
+        :href="addUrl"
         class="btn-primary inline-flex mt-5">
 
         + Tambah Penghuni
@@ -202,7 +229,7 @@
               Penghuni
             </th>
 
-            <th class="text-left px-5 py-3 font-semibold">
+            <th x-show="!isTypeContext" class="text-left px-5 py-3 font-semibold">
               Kos
             </th>
 
@@ -256,7 +283,7 @@
 
 
               <!-- KOS -->
-              <td
+              <td x-show="!isTypeContext"
                 class="px-5 py-4 text-slate-700"
                 x-text="item.nama_kos">
               </td>
@@ -270,8 +297,7 @@
                   x-text="item.nomor_kamar">
                 </div>
 
-                <div
-                  x-show="item.tipe_kamar"
+                <div x-show="!isTypeContext && item.tipe_kamar"
                   class="mt-1 text-xs text-slate-500"
                   x-text="item.tipe_kamar">
                 </div>
@@ -351,15 +377,13 @@
 
                 <div data-help="help-penghuni-actions" class="flex justify-end gap-2">
 
+                  <a :href="tagihanUrl(item)" class="btn-secondary" title="Lihat tagihan yang terhubung dengan penghuni ini"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Tagihan</a>
+
                   <a
-                    :href="
-                      BASE_URL +
-                      '/pemilik/penghuni/edit?id_penghuni=' +
-                      item.id_penghuni
-                    "
+                    :href="editUrl(item)"
                     class="btn-secondary">
 
-                    Edit
+                    <?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit
 
                   </a>
 
@@ -371,7 +395,7 @@
                       @click="keluar(item)"
                       class="btn-secondary">
 
-                      Keluar
+                      <?= masterIconSvg('log-out', 'h-4 w-4') ?> Keluar
 
                     </button>
 
@@ -383,7 +407,7 @@
                     @click="remove(item)"
                     class="btn-danger">
 
-                    Hapus
+                    <?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus
 
                   </button>
 
@@ -409,17 +433,18 @@
             <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : item.status === 'keluar' ? 'Sudah Keluar' : item.status || '-' "></span>
           </div>
           <div class="mt-3 space-y-2 text-sm">
-            <div><span class="text-xs text-slate-400">Kos</span><div class="mt-0.5 text-slate-700" x-text="item.nama_kos"></div></div>
-            <div><span class="text-xs text-slate-400">Kamar</span><div class="mt-0.5 font-medium text-slate-700" x-text="item.nomor_kamar + (item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
+            <div x-show="!isTypeContext"><span class="text-xs text-slate-400">Kos</span><div class="mt-0.5 text-slate-700" x-text="item.nama_kos"></div></div>
+            <div><span class="text-xs text-slate-400">Kamar</span><div class="mt-0.5 font-medium text-slate-700" x-text="item.nomor_kamar + (!isTypeContext && item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
             <div><div class="text-slate-400">Tanggal masuk</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_masuk)"></div></div>
             <div><div class="text-slate-400">Tanggal keluar</div><div class="mt-1 text-slate-700" x-text="item.tanggal_keluar ? formatDate(item.tanggal_keluar) : '-' "></div></div>
           </div>
           <div class="mt-3 flex flex-wrap gap-2">
-            <a :href="BASE_URL + '/pemilik/penghuni/edit?id_penghuni=' + item.id_penghuni" class="btn-secondary text-xs">Edit</a>
-            <button x-show="item.status === 'aktif'" type="button" @click="keluar(item)" class="btn-secondary text-xs">Catat Keluar</button>
-            <button type="button" @click="remove(item)" class="btn-danger text-xs">Hapus</button>
+            <a :href="tagihanUrl(item)" class="btn-secondary text-xs"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Tagihan</a>
+            <a :href="editUrl(item)" class="btn-secondary text-xs"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</a>
+            <button x-show="item.status === 'aktif'" type="button" @click="keluar(item)" class="btn-secondary text-xs"><?= masterIconSvg('log-out', 'h-4 w-4') ?> Catat Keluar</button>
+            <button type="button" @click="remove(item)" class="btn-danger text-xs"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button>
           </div>
         </article>
       </template>
@@ -567,14 +592,38 @@
 
       filteredKamarList: [],
 
+      tipeList: [],
+
+      filteredTipeList: [],
+
 
       search: utils.getQuery('search') || '',
 
       idKos: utils.getQuery('id_kos') || '',
 
+      idTipeKamar: utils.getQuery('id_tipe_kamar') || '',
+
+      context: utils.getQuery('context') || '',
+
       idKamar: utils.getQuery('id_kamar') || '',
 
       status: utils.getQuery('status') || '',
+
+      contextInfo: null,
+
+      get isTypeContext() {
+        return this.context === 'tipe' && !!this.idKos && !!this.idTipeKamar;
+      },
+
+      get addUrl() {
+        if (!this.isTypeContext) return BASE_URL + '/pemilik/penghuni/tambah';
+        const params = new URLSearchParams({ id_kos: this.idKos, id_tipe_kamar: this.idTipeKamar, context: 'tipe' });
+        return BASE_URL + '/pemilik/penghuni/tambah?' + params.toString();
+      },
+
+      get backUrl() {
+        return BASE_URL + '/pemilik/kamar?id_kos=' + encodeURIComponent(this.idKos) + '&context=kos';
+      },
 
 
       loading: false,
@@ -592,6 +641,16 @@
 
         await this.loadKamar();
 
+        if (this.isTypeContext && !this.contextInfo) {
+          try {
+            const contextRes = await API.get('/pemilik/tipe-kamar/show?id_tipe_kamar=' + encodeURIComponent(this.idTipeKamar), false);
+            this.contextInfo = contextRes.data || null;
+          } catch (error) {
+            console.error('Gagal memuat konteks tipe kamar:', error);
+          }
+        }
+
+        this.filterTipe();
         this.filterKamar();
 
         await this.load();
@@ -641,6 +700,10 @@
               this.idKamar
             );
 
+          }
+
+          if (this.idTipeKamar) {
+            params.set('id_tipe_kamar', this.idTipeKamar);
           }
 
 
@@ -713,6 +776,10 @@
           this.kamarList =
             res.data || [];
 
+          if (this.isTypeContext) {
+            this.contextInfo = this.kamarList.find(item => String(item.id_kos) === String(this.idKos) && String(item.id_tipe_kamar) === String(this.idTipeKamar)) || null;
+          }
+
 
           /*
           |--------------------------------------------------------------------------
@@ -742,6 +809,21 @@
           this.kosList =
             Array.from(map.values());
 
+          const tipeMap = new Map();
+
+          this.kamarList.forEach(item => {
+            const key = String(item.id_tipe_kamar);
+            if (!tipeMap.has(key)) {
+              tipeMap.set(key, {
+                id_tipe_kamar: item.id_tipe_kamar,
+                id_kos: item.id_kos,
+                tipe_kamar: item.tipe_kamar
+              });
+            }
+          });
+
+          this.tipeList = Array.from(tipeMap.values());
+
 
         } catch (error) {
 
@@ -752,9 +834,26 @@
 
           this.kamarList = [];
           this.kosList = [];
+          this.tipeList = [];
+          this.filteredTipeList = [];
 
         }
 
+      },
+
+
+      filterTipe() {
+        this.filteredTipeList = this.idKos
+          ? this.tipeList.filter(item => String(item.id_kos) === String(this.idKos))
+          : this.tipeList;
+
+        const exists = this.filteredTipeList.some(
+          item => String(item.id_tipe_kamar) === String(this.idTipeKamar)
+        );
+
+        if (this.idTipeKamar && !exists) {
+          this.idTipeKamar = '';
+        }
       },
 
 
@@ -766,19 +865,15 @@
 
       filterKamar() {
 
-        if (!this.idKos) {
-
-          this.filteredKamarList =
-            this.kamarList;
-
+        if (this.isTypeContext) {
+          this.filteredKamarList = this.kamarList.filter(item => String(item.id_kos) === String(this.idKos) && String(item.id_tipe_kamar) === String(this.idTipeKamar));
         } else {
 
-          this.filteredKamarList =
-            this.kamarList.filter(
-              item =>
-              String(item.id_kos) ===
-              String(this.idKos)
-            );
+          this.filteredKamarList = this.kamarList.filter(item => {
+            const kosMatches = !this.idKos || String(item.id_kos) === String(this.idKos);
+            const typeMatches = !this.idTipeKamar || String(item.id_tipe_kamar) === String(this.idTipeKamar);
+            return kosMatches && typeMatches;
+          });
 
         }
 
@@ -868,6 +963,11 @@
         );
 
         utils.setQuery(
+          'id_tipe_kamar',
+          this.idTipeKamar
+        );
+
+        utils.setQuery(
           'status',
           this.status
         );
@@ -875,6 +975,17 @@
 
         this.load();
 
+      },
+
+      changeKosFilter() {
+        this.filterTipe();
+        this.idKamar = '';
+        this.applyFilter();
+      },
+
+      changeTypeFilter() {
+        this.idKamar = '';
+        this.applyFilter();
       },
 
 
@@ -892,6 +1003,21 @@
 
         return utils.formatDate(date);
 
+      },
+
+      tagihanUrl(item) {
+        const params = new URLSearchParams({ id_penghuni: item.id_penghuni, context: 'penghuni' });
+        return BASE_URL + '/pemilik/pembayaran?' + params.toString();
+      },
+
+      editUrl(item) {
+        const params = new URLSearchParams({ id_penghuni: item.id_penghuni });
+        if (this.isTypeContext) {
+          params.set('id_kos', this.idKos);
+          params.set('id_tipe_kamar', this.idTipeKamar);
+          params.set('context', 'tipe');
+        }
+        return BASE_URL + '/pemilik/penghuni/edit?' + params.toString();
       },
 
 

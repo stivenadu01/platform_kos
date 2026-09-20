@@ -5,6 +5,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
     <div>
+      <a href="<?= BASE_URL ?>/pemilik" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
         Kos Saya
       </h2>
@@ -60,16 +61,7 @@
             <div class="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/10"></div>
             <div class="relative flex items-start gap-3.5">
               <div class="owner-card-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M3 21h18"></path>
-                  <path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path>
-                  <path d="M9 7h1"></path>
-                  <path d="M14 7h1"></path>
-                  <path d="M9 11h1"></path>
-                  <path d="M14 11h1"></path>
-                  <path d="M9 15h1"></path>
-                  <path d="M14 15h1"></path>
-                </svg>
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path></svg>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="owner-card-muted text-xs font-medium uppercase tracking-wide">Properti Kos</p>
@@ -145,17 +137,21 @@
               <?php endif; ?>
             </div>
 
+            <?php if ($item['status'] === 'aktif'): ?>
+              <a href="<?= BASE_URL ?>/pemilik/kamar?id_kos=<?= (int)$item['id_kos'] ?>&context=kos" class="mt-3 flex w-full items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <?= masterIconSvg('bed', 'h-4 w-4') ?>
+                <span>Kelola Kamar</span>
+                <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
+              </a>
+            <?php endif; ?>
+
             <div data-help="help-kos-action" class="owner-card-actions mt-4">
 
               <a
                 data-onboarding="kos-photo"
                 href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>"
                 class="owner-action-secondary">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect width="18" height="18" x="3" y="3" rx="2"></rect>
-                  <circle cx="9" cy="9" r="2"></circle>
-                  <path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path>
-                </svg>
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>
                 Foto
               </a>
 
@@ -169,10 +165,7 @@
                 <a
                   href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>"
                   class="owner-action-secondary">
-                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M12 20h9"></path>
-                    <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path>
-                  </svg>
+                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
                   Edit
                 </a>
               <?php endif; ?>
@@ -181,13 +174,7 @@
                 type="button"
                 @click="hapus(<?= $item['id_kos'] ?>)"
                 class="owner-action-danger">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M3 6h18"></path>
-                  <path d="M8 6V4h8v2"></path>
-                  <path d="M19 6l-1 14H6L5 6"></path>
-                  <path d="M10 11v5"></path>
-                  <path d="M14 11v5"></path>
-                </svg>
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
                 Hapus
               </button>
 
@@ -213,9 +200,7 @@
         const ok = await Alpine.store('ui').confirm('Ajukan kos ini untuk diperiksa Admin?');
         if (!ok) return;
         try {
-          await API.post('/pemilik/kos/ajukan-verifikasi', {
-            id_kos: id
-          });
+          await API.post('/pemilik/kos/ajukan-verifikasi', { id_kos: id });
           if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
             localStorage.setItem('betakos_owner_onboarding_complete_v3', '1');
             localStorage.removeItem('betakos_owner_onboarding_active_v3');
@@ -225,9 +210,7 @@
           }
           window.dispatchEvent(new CustomEvent('betakos:onboarding-refresh'));
           window.location.reload();
-        } catch (error) {
-          console.error(error);
-        }
+        } catch (error) { console.error(error); }
       },
 
       async hapus(id) {

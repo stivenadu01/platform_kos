@@ -11,9 +11,13 @@
       </h2>
       <p class="owner-subtitle">Pantau kondisi kos, penghuni, dan pembayaran dari satu halaman.</p>
     </div>
-    <div class="flex gap-2">
-      <a href="<?= BASE_URL ?>/pemilik/kos" class="btn-secondary inline-flex w-auto">Kelola Kos</a>
-      <a href="<?= BASE_URL ?>/pemilik/penghuni/tambah" class="btn-primary inline-flex w-auto">+ Tambah Penghuni</a>
+    <div class="grid w-full gap-2 sm:flex sm:w-auto">
+      <a href="<?= BASE_URL ?>/pemilik/kos" class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 sm:min-w-40">
+        <?= masterIconSvg('building-2', 'h-4 w-4') ?>
+        <span>Kelola Kos</span>
+        <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
+      </a>
+      <a href="<?= BASE_URL ?>/pemilik/penghuni/tambah" class="btn-primary inline-flex w-full sm:w-auto"><?= masterIconSvg('user-plus', 'h-4 w-4') ?> Tambah Penghuni</a>
     </div>
   </div>
 

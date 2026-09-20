@@ -7,9 +7,10 @@
   <div>
 
     <a
-      href="<?= BASE_URL ?>/pemilik/kamar"
-      class="text-sm text-primary hover:underline">
-      ← Kembali ke kamar
+      :href="returnUrl"
+      @click.prevent="utils.goBack($el.href)"
+      class="owner-back-link">
+      <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
     <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900">
@@ -110,7 +111,7 @@
     <div class="flex justify-end gap-3 pt-2">
 
       <a
-        href="<?= BASE_URL ?>/pemilik/kamar"
+        :href="returnUrl"
         class="btn-secondary">
         Batal
       </a>
@@ -150,7 +151,7 @@
     </h3>
 
     <a
-      href="<?= BASE_URL ?>/pemilik/kamar"
+      :href="returnUrl"
       class="btn-primary inline-flex mt-5">
       Kembali
     </a>
@@ -184,6 +185,13 @@
 
         id_tipe_kamar: ''
 
+      },
+
+      get returnUrl() {
+        const fallback = this.form.id_tipe_kamar
+          ? '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.form.id_tipe_kamar)
+          : '/pemilik/kamar';
+        return BASE_URL + fallback;
       },
 
 
@@ -320,9 +328,7 @@
 
           setTimeout(() => {
 
-            window.location.href =
-              BASE_URL +
-              '/pemilik/kamar';
+            window.location.href = this.returnUrl;
 
           }, 500);
 

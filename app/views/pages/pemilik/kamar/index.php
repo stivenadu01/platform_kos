@@ -1,10 +1,22 @@
 <div x-data="tipeKamarPage()" x-init="init()" class="space-y-6">
   <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
+      <a x-show="idKos" x-cloak :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <h2 class="text-xl font-bold text-slate-900 sm:text-2xl">Kelola Kamar</h2>
-      <p class="mt-1 text-sm text-slate-500">Pilih tipe kamar terlebih dahulu, lalu kelola unit kamar di dalamnya.</p>
+      <p class="mt-1 text-sm text-slate-500" x-text="contextKos ? 'Pilih tipe kamar pada kos ini untuk melanjutkan pengelolaan.' : 'Pilih tipe kamar terlebih dahulu, lalu kelola unit kamar di dalamnya.'"></p>
     </div>
-    <a data-onboarding="fast-tambah-tipe-kamar" data-help="help-tipe-add" href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary">+ Tambah Tipe Kamar</a>
+    <a data-onboarding="fast-tambah-tipe-kamar" data-help="help-tipe-add" :href="BASE_URL + '/pemilik/tipe-kamar/tambah'" class="btn-primary">+ Tambah Tipe Kamar</a>
+  </div>
+
+  <div x-show="contextKos" x-cloak class="owner-context-panel">
+    <div class="owner-context-header">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span>
+      <div class="min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-wider text-primary">Konteks Kos</p>
+        <h3 class="mt-1 truncate font-bold text-slate-900" x-text="contextKos?.nama_kos || 'Memuat kos...'"></h3>
+        <p class="mt-1 text-xs text-slate-500">Semua tipe kamar di bawah merupakan bagian dari kos ini.</p>
+      </div>
+    </div>
   </div>
 
   <div x-show="loading" class="card p-10 text-center text-sm text-slate-500">Memuat tipe kamar...</div>
@@ -13,7 +25,7 @@
     <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('bed', 'h-7 w-7') ?></div>
     <h3 class="font-semibold text-slate-900">Belum ada tipe kamar</h3>
     <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">Buat tipe kamar terlebih dahulu. Setelah itu Anda dapat menambahkan dan mengelola unit kamar pada tipe tersebut.</p>
-    <a href="<?= BASE_URL ?>/pemilik/tipe-kamar/tambah" class="btn-primary mt-5">+ Tambah Tipe Kamar</a>
+    <a :href="BASE_URL + '/pemilik/tipe-kamar/tambah'" class="btn-primary mt-5">+ Tambah Tipe Kamar</a>
   </div>
 
   <div data-help="help-tipe-list" x-show="!loading && items.length" x-cloak class="owner-card-grid">
@@ -60,6 +72,18 @@
               <svg class="ml-auto h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
             </a>
 
+            <a :href="BASE_URL + '/pemilik/penghuni?id_kos=' + item.id_kos + '&id_tipe_kamar=' + item.id_tipe_kamar + '&context=tipe'" class="flex w-full items-center gap-2 rounded-xl border border-primary/20 bg-primary-soft px-4 py-3 text-sm font-semibold text-primary transition hover:bg-blue-100">
+              <?= masterIconSvg('users-round', 'h-4 w-4') ?>
+              <span>Kelola Penghuni</span>
+              <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
+            </a>
+
+            <a :href="BASE_URL + '/pemilik/pembayaran?id_kos=' + item.id_kos + '&id_tipe_kamar=' + item.id_tipe_kamar + '&context=tipe'" class="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-primary/30 hover:bg-slate-50 hover:text-primary">
+              <?= masterIconSvg('wallet', 'h-4 w-4') ?>
+              <span>Tagihan & Pembayaran</span>
+              <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
+            </a>
+
             <div class="owner-card-actions">
               <a :href="BASE_URL + '/pemilik/tipe-kamar/edit?id_tipe_kamar=' + item.id_tipe_kamar + '&from=kamar'" class="owner-action-secondary">
                 <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
@@ -85,13 +109,25 @@
   function tipeKamarPage() {
     return {
       items: [],
+      idKos: new URLSearchParams(window.location.search).get('id_kos') || '',
+      contextKos: null,
       loading: false,
+      get backUrl() { return BASE_URL + '/pemilik/kos'; },
       async init() { await this.load(); },
       async load() {
         this.loading = true;
         try {
-          const res = await API.get('/pemilik/tipe-kamar', false);
+          const query = this.idKos ? '?id_kos=' + encodeURIComponent(this.idKos) : '';
+          const res = await API.get('/pemilik/tipe-kamar' + query, false);
           this.items = res.data || [];
+          this.contextKos = this.idKos && this.items.length ? {
+            id_kos: this.items[0].id_kos,
+            nama_kos: this.items[0].nama_kos
+          } : null;
+          if (this.idKos && !this.contextKos) {
+            const kosRes = await API.get('/pemilik/kamar/kos', false);
+            this.contextKos = (kosRes.data || []).find(item => String(item.id_kos) === String(this.idKos)) || null;
+          }
         } catch (error) {
           console.error('Gagal memuat tipe kamar:', error);
           this.items = [];

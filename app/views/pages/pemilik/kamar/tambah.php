@@ -9,8 +9,9 @@
   <div>
     <a
       :href="returnUrl"
-      class="text-sm text-primary hover:underline">
-      ← Kembali ke kelola kamar
+      @click.prevent="utils.goBack($el.href)"
+      class="owner-back-link">
+      <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
     <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900">
@@ -312,9 +313,10 @@
       },
 
       get returnUrl() {
-        return this.contextTypeId
-          ? BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
-          : BASE_URL + '/pemilik/kamar';
+        const fallback = this.contextTypeId
+          ? '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
+          : '/pemilik/kamar';
+        return BASE_URL + fallback;
       },
 
       async loadTipe(resetSelection = true) {

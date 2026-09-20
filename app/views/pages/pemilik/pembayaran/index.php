@@ -5,12 +5,24 @@
 
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
+      <a x-show="isScoped" x-cloak :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
         Tagihan & Pembayaran
       </h2>
       <p class="mt-1 text-sm text-slate-500">
-        Kelola tagihan, penyesuaian, dan pembayaran penghuni.
+        Pantau pembayaran berdasarkan kamar dan penghuni.
       </p>
+    </div>
+  </div>
+
+  <div x-show="isScoped" x-cloak class="owner-context-panel">
+    <div class="owner-context-header">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('wallet', 'h-5 w-5') ?></span>
+      <div class="min-w-0">
+        <p class="text-xs font-semibold uppercase tracking-wider text-primary" x-text="isOccupantContext ? 'Tagihan Penghuni' : 'Tagihan Tipe Kamar'"></p>
+        <h3 class="mt-1 truncate font-bold text-slate-900" x-text="contextTitle"></h3>
+        <p class="mt-1 text-xs text-slate-500" x-text="isOccupantContext ? 'Menampilkan seluruh tagihan yang terhubung dengan penghuni ini.' : 'Menampilkan tagihan seluruh unit kamar pada tipe yang dipilih.'"></p>
+      </div>
     </div>
   </div>
 
@@ -28,7 +40,7 @@
       <p class="mt-2 text-xl font-bold text-slate-900" x-text="summary.lunas"></p>
     </div>
     <div class="card border border-slate-200 shadow-sm">
-      <p class="text-xs text-slate-500">Total sisa</p>
+      <p class="text-xs text-slate-500">Total belum dibayar</p>
       <p class="mt-2 text-xl font-bold text-slate-900" x-text="format(summary.sisa)"></p>
     </div>
   </div>
@@ -36,16 +48,16 @@
   <div data-help="help-tagihan-filter" class="card border border-slate-200 shadow-sm">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="form-group">
-        <label class="label">Cari tagihan</label>
+        <label class="label">Cari kamar atau penghuni</label>
         <input
           type="search"
           x-model="search"
           @input.debounce.400ms="load()"
           class="input"
-          placeholder="Nomor tagihan...">
+          placeholder="Kamar, penghuni, atau nomor tagihan...">
       </div>
 
-      <div class="form-group">
+      <div x-show="!isScoped" class="form-group">
         <label class="label">Kos</label>
         <select x-model="idKos" @change="applyFilter()" class="select">
           <option value="">Semua kos</option>
@@ -55,7 +67,7 @@
         </select>
       </div>
 
-      <div class="form-group">
+      <div x-show="!isOccupantContext" class="form-group">
         <label class="label">Kamar</label>
         <select x-model="idKamar" @change="applyFilter()" class="select">
           <option value="">Semua kamar</option>
@@ -93,11 +105,10 @@
       <table class="w-full text-sm">
         <thead class="bg-slate-50 border-b border-slate-200">
           <tr>
-            <th class="text-left px-5 py-3 font-semibold">Tagihan</th>
-            <th class="text-left px-5 py-3 font-semibold">Kamar</th>
+            <th class="text-left px-5 py-3 font-semibold">Kamar & Penghuni</th>
             <th class="text-left px-5 py-3 font-semibold">Periode</th>
             <th class="text-left px-5 py-3 font-semibold">Total</th>
-            <th class="text-left px-5 py-3 font-semibold">Sisa</th>
+            <th class="text-left px-5 py-3 font-semibold">Belum Dibayar</th>
             <th class="text-left px-5 py-3 font-semibold">Status</th>
             <th class="text-right px-5 py-3 font-semibold">Aksi</th>
           </tr>
@@ -106,19 +117,17 @@
           <template x-for="item in tagihan" :key="item.id_tagihan">
             <tr class="hover:bg-slate-50">
               <td class="px-5 py-4">
-                <div class="font-medium text-slate-900" x-text="item.nomor_tagihan"></div>
-                <div class="text-xs text-slate-500 mt-1" x-text="item.nama_kos"></div>
-              </td>
-              <td class="px-5 py-4">
-                <div class="font-medium" x-text="item.nomor_kamar"></div>
-                <div class="text-xs text-slate-500" x-text="item.penghuni_aktif + ' penghuni aktif'"></div>
+                <div class="font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div>
+                <div class="mt-1 font-medium text-slate-700" x-text="item.nama_penghuni || 'Belum ada penghuni'"></div>
+                <div class="mt-1 text-xs text-slate-500" x-text="isScoped ? item.tipe_kamar : item.nama_kos + ' · ' + item.tipe_kamar"></div>
+                <div class="mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div>
               </td>
               <td class="px-5 py-4">
                 <div x-text="formatDate(item.tanggal_mulai) + ' - ' + formatDate(item.tanggal_selesai)"></div>
                 <div class="text-xs text-slate-500 mt-1" x-text="'Jatuh tempo ' + formatDate(item.tanggal_jatuh_tempo)"></div>
               </td>
               <td class="px-5 py-4 font-semibold" x-text="format(item.total_tagihan)"></td>
-              <td class="px-5 py-4 font-semibold" x-text="format(item.sisa_tagihan)"></td>
+              <td class="px-5 py-4 font-bold" :class="Number(item.sisa_tagihan || 0) > 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="format(item.sisa_tagihan)"></td>
               <td class="px-5 py-4">
                 <span
                   class="inline-flex rounded-full px-3 py-1 text-xs font-medium"
@@ -127,11 +136,11 @@
               </td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
-                  <a data-help="help-tagihan-detail" :href="detailUrl(item.id_tagihan)" class="btn-secondary">Detail</a>
+                  <a data-help="help-tagihan-detail" :href="detailUrl(item.id_tagihan)" class="btn-secondary">Lihat Detail</a>
                   <a
                     x-show="item.status !== 'lunas' && item.status !== 'dibatalkan'"
                     :href="detailUrl(item.id_tagihan, 'payment')"
-                    class="btn-primary">Bayar</a>
+                    class="btn-primary">Catat Bayar</a>
                 </div>
               </td>
             </tr>
@@ -144,18 +153,18 @@
       <template x-for="item in tagihan" :key="'m-' + item.id_tagihan">
         <article class="p-4">
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nomor_tagihan"></div><div class="mt-1 text-xs text-slate-500" x-text="item.nama_kos + ' · Kamar ' + item.nomor_kamar"></div></div>
+            <div class="min-w-0"><div class="font-bold text-slate-900 truncate" x-text="'Kamar ' + item.nomor_kamar"></div><div class="mt-1 font-medium text-slate-700" x-text="item.nama_penghuni || 'Belum ada penghuni'"></div><div class="mt-1 text-xs text-slate-500" x-text="isScoped ? item.tipe_kamar : item.nama_kos + ' · ' + item.tipe_kamar"></div><div class="mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div></div>
             <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
             <div><div class="text-slate-400">Periode</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_mulai) + ' - ' + formatDate(item.tanggal_selesai)"></div></div>
             <div><div class="text-slate-400">Jatuh tempo</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_jatuh_tempo)"></div></div>
             <div><div class="text-slate-400">Total</div><div class="mt-1 font-semibold text-slate-800" x-text="format(item.total_tagihan)"></div></div>
-            <div><div class="text-slate-400">Sisa</div><div class="mt-1 font-semibold text-slate-800" x-text="format(item.sisa_tagihan)"></div></div>
+            <div><div class="text-slate-400">Belum dibayar</div><div class="mt-1 font-bold" :class="Number(item.sisa_tagihan || 0) > 0 ? 'text-rose-600' : 'text-emerald-600'" x-text="format(item.sisa_tagihan)"></div></div>
           </div>
           <div class="mt-3 flex gap-2">
-            <a data-help="help-tagihan-detail" :href="detailUrl(item.id_tagihan)" class="btn-secondary flex-1 text-center">Detail</a>
-            <a x-show="item.status !== 'lunas' && item.status !== 'dibatalkan'" :href="detailUrl(item.id_tagihan, 'payment')" class="btn-primary flex-1 text-center">Bayar</a>
+            <a data-help="help-tagihan-detail" :href="detailUrl(item.id_tagihan)" class="btn-secondary flex-1 text-center">Lihat Detail</a>
+            <a x-show="item.status !== 'lunas' && item.status !== 'dibatalkan'" :href="detailUrl(item.id_tagihan, 'payment')" class="btn-primary flex-1 text-center">Catat Bayar</a>
           </div>
         </article>
       </template>
@@ -171,6 +180,10 @@
       status: '',
       idKos: '',
       idKamar: '',
+      idTipeKamar: '',
+      idPenghuni: '',
+      context: '',
+      contextInfo: null,
       kosList: [],
       kamarList: [],
       filteredKamarList: [],
@@ -181,6 +194,21 @@
         sebagian: 0,
         lunas: 0,
         sisa: 0
+      },
+
+      get isTypeContext() { return this.context === 'tipe' && !!this.idTipeKamar; },
+      get isOccupantContext() { return this.context === 'penghuni' && !!this.idPenghuni; },
+      get isScoped() { return this.isTypeContext || this.isOccupantContext; },
+      get backUrl() {
+        if (this.isTypeContext) {
+          return BASE_URL + '/pemilik/kamar?id_kos=' + encodeURIComponent(this.idKos) + '&context=kos';
+        }
+        return BASE_URL + '/pemilik/penghuni';
+      },
+      get contextTitle() {
+        if (!this.contextInfo) return 'Memuat konteks...';
+        if (this.isOccupantContext) return `${this.contextInfo.nama} · ${this.contextInfo.nama_kos} · Kamar ${this.contextInfo.nomor_kamar}`;
+        return `${this.contextInfo.nama_kos} · ${this.contextInfo.nama_tipe || this.contextInfo.tipe_kamar}`;
       },
 
       async init() {
@@ -196,6 +224,9 @@
         this.status = params.get('status') || '';
         this.idKos = params.get('id_kos') || '';
         this.idKamar = params.get('id_kamar') || '';
+        this.idTipeKamar = params.get('id_tipe_kamar') || '';
+        this.idPenghuni = params.get('id_penghuni') || '';
+        this.context = params.get('context') || '';
       },
 
       async loadFilters() {
@@ -207,6 +238,18 @@
 
           this.kosList = kosRes.data || [];
           this.kamarList = kamarRes.data || [];
+
+          if (this.isTypeContext) {
+            const room = this.kamarList.find(item => String(item.id_tipe_kamar) === String(this.idTipeKamar));
+            if (room) this.contextInfo = room;
+            else {
+              const typeRes = await API.get('/pemilik/tipe-kamar/show?id_tipe_kamar=' + encodeURIComponent(this.idTipeKamar), false);
+              this.contextInfo = typeRes.data || null;
+            }
+          } else if (this.isOccupantContext) {
+            const occupantRes = await API.get('/pemilik/penghuni/show?id_penghuni=' + encodeURIComponent(this.idPenghuni), false);
+            this.contextInfo = occupantRes.data || null;
+          }
         } catch (error) {
           console.error('Gagal memuat filter kos/kamar:', error);
           this.kosList = [];
@@ -215,7 +258,9 @@
       },
 
       filterKamar() {
-        if (!this.idKos) {
+        if (this.isTypeContext) {
+          this.filteredKamarList = this.kamarList.filter(item => String(item.id_tipe_kamar) === String(this.idTipeKamar));
+        } else if (!this.idKos) {
           this.filteredKamarList = this.kamarList;
         } else {
           this.filteredKamarList = this.kamarList.filter(
@@ -240,6 +285,9 @@
         if (this.status) params.set('status', this.status);
         if (this.idKos) params.set('id_kos', this.idKos);
         if (this.idKamar) params.set('id_kamar', this.idKamar);
+        if (this.idTipeKamar) params.set('id_tipe_kamar', this.idTipeKamar);
+        if (this.idPenghuni) params.set('id_penghuni', this.idPenghuni);
+        if (this.context) params.set('context', this.context);
 
         const query = params.toString();
         const url = window.location.pathname + (query ? '?' + query : '');
@@ -256,6 +304,8 @@
           if (this.status) params.set('status', this.status);
           if (this.idKos) params.set('id_kos', this.idKos);
           if (this.idKamar) params.set('id_kamar', this.idKamar);
+          if (this.idTipeKamar) params.set('id_tipe_kamar', this.idTipeKamar);
+          if (this.idPenghuni) params.set('id_penghuni', this.idPenghuni);
           const query = params.toString();
           const res = await API.get('/pemilik/tagihan' + (query ? '?' + query : ''), false);
           this.tagihan = res.data || [];

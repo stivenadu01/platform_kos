@@ -844,8 +844,16 @@ body.scroll-locked {
   @apply grid w-full grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3;
 }
 
+@utility owner-unit-grid {
+  @apply grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5;
+}
+
 @utility owner-page-header {
   @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+}
+
+@utility owner-back-link {
+  @apply inline-flex w-fit items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-primary;
 }
 
 @utility owner-eyebrow {

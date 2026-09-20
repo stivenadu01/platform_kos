@@ -14,7 +14,8 @@ function getPenghuniListByPemilik(
   $search = '',
   $id_kos = '',
   $id_kamar = '',
-  $status = ''
+  $status = '',
+  $id_tipe_kamar = ''
 ) {
   $conn = db();
 
@@ -41,6 +42,12 @@ function getPenghuniListByPemilik(
     $types .= 'i';
   }
 
+  if ($id_tipe_kamar !== '') {
+    $where[] = 'tk.id_tipe_kamar = ?';
+    $params[] = (int) $id_tipe_kamar;
+    $types .= 'i';
+  }
+
   if ($status !== '') {
     $where[] = 'p.status = ?';
     $params[] = $status;
@@ -62,6 +69,7 @@ function getPenghuniListByPemilik(
       p.status,
       km.id_kos,
       km.nomor_kamar,
+      tk.id_tipe_kamar,
       tk.nama_tipe AS tipe_kamar,
       tk.kapasitas,
       k.nama_kos
@@ -100,6 +108,7 @@ function getKamarListForPenghuni($id_pemilik)
     SELECT
       km.id_kamar,
       km.id_kos,
+      km.id_tipe_kamar,
       km.nomor_kamar,
       tk.nama_tipe AS tipe_kamar,
       tk.kapasitas,

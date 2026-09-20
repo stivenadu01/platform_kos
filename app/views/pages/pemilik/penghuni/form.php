@@ -5,9 +5,10 @@
 
   <div>
     <a
-      href="<?= BASE_URL ?>/pemilik/penghuni"
-      class="text-sm text-slate-500 hover:text-slate-700">
-      ← Kembali ke Penghuni
+      :href="backUrl"
+      @click.prevent="utils.goBack($el.href)"
+      class="owner-back-link">
+      <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
     <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900"
@@ -21,6 +22,13 @@
         Perubahan pada halaman ini hanya untuk data identitas penghuni.
       </span>
     </p>
+  </div>
+
+  <div x-show="mode === 'tambah' && isTypeContext" x-cloak class="owner-context-panel">
+    <div class="owner-context-header">
+      <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('info', 'h-5 w-5') ?></span>
+      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-primary">Tujuan penambahan penghuni</p><h3 class="mt-1 truncate font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat kos dan tipe kamar...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Pilih salah satu unit pada tipe ini. Kapasitas maksimal ' + contextInfo.kapasitas + ' orang per kamar.' : ''"></p></div>
+    </div>
   </div>
 
   <form @submit.prevent="submit" class="card border border-slate-200 shadow-sm space-y-6">
@@ -87,11 +95,13 @@
           <template x-for="item in kamarList" :key="item.id_kamar">
             <option
               :value="item.id_kamar"
-              x-text="`${item.nama_kos} — ${item.nomor_kamar} (${item.jumlah_penghuni}/${item.kapasitas} orang)`">
+              x-text="isTypeContext ? `Kamar ${item.nomor_kamar} (${item.jumlah_penghuni}/${item.kapasitas} orang)` : `${item.nama_kos} — ${item.tipe_kamar} — Kamar ${item.nomor_kamar} (${item.jumlah_penghuni}/${item.kapasitas} orang)`">
             </option>
           </template>
 
         </select>
+
+        <div x-show="isTypeContext && kamarList.length === 0" x-cloak class="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">Tidak ada kamar dengan kapasitas tersisa pada tipe ini. Periksa unit kamar atau penghuni aktif terlebih dahulu.</div>
 
         <div
           x-show="selectedKamar"
@@ -144,7 +154,7 @@
           placeholder="08xxxxxxxxxx">
       </div>
 
-      <div class="form-group">
+      <div class="form-group" x-show="mode === 'edit'">
         <label class="label">NIK</label>
 
         <input
@@ -163,6 +173,12 @@
           class="mt-2 text-xs text-slate-500">
           Data nama, NIK, dan nomor HP berasal dari akun penghuni dan tidak dapat diubah oleh pemilik kos.
         </p>
+      </div>
+
+      <div x-show="mode === 'tambah'" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">NIK terverifikasi</p>
+        <div class="mt-2 flex items-center gap-2 font-semibold text-slate-900"><?= masterIconSvg('user-check', 'h-4 w-4 text-emerald-600') ?><span x-text="form.nik"></span></div>
+        <p class="mt-1 text-xs text-slate-500">Gunakan tombol “Ubah NIK” jika nomor ini tidak sesuai.</p>
       </div>
 
       <div data-help="help-penghuni-date" class="form-group" x-show="mode === 'tambah'">
@@ -198,7 +214,7 @@
       <button x-show="mode === 'tambah'" type="button" @click="backToNik()" class="btn-secondary">← Ubah NIK</button>
 
       <a
-        href="<?= BASE_URL ?>/pemilik/penghuni"
+        :href="backUrl"
         class="btn-secondary">
         Batal
       </a>
@@ -228,9 +244,23 @@
     return {
       mode: <?= json_encode_safe($mode ?? 'tambah') ?>,
       idPenghuni: utils.getQuery('id_penghuni') || '',
+      idKos: utils.getQuery('id_kos') || '',
+      idTipeKamar: utils.getQuery('id_tipe_kamar') || '',
+      context: utils.getQuery('context') || '',
 
       kamarList: [],
       selectedKamar: null,
+      contextInfo: null,
+
+      get isTypeContext() {
+        return this.context === 'tipe' && !!this.idKos && !!this.idTipeKamar;
+      },
+
+      get backUrl() {
+        if (!this.isTypeContext) return BASE_URL + '/pemilik/penghuni';
+        const params = new URLSearchParams({ id_kos: this.idKos, id_tipe_kamar: this.idTipeKamar, context: 'tipe' });
+        return BASE_URL + '/pemilik/penghuni?' + params.toString();
+      },
 
       saving: false,
       lookingUp: false,
@@ -268,7 +298,19 @@
       async loadKamar() {
         try {
           const res = await API.get('/pemilik/penghuni/kamar');
-          this.kamarList = res.data || [];
+          const allRooms = res.data || [];
+          this.kamarList = this.isTypeContext
+            ? allRooms.filter(item => String(item.id_kos) === String(this.idKos) && String(item.id_tipe_kamar) === String(this.idTipeKamar) && Number(item.jumlah_penghuni || 0) < Number(item.kapasitas || 0))
+            : allRooms;
+          this.contextInfo = this.isTypeContext && this.kamarList.length ? this.kamarList[0] : null;
+          if (this.isTypeContext && !this.contextInfo) {
+            const contextRes = await API.get('/pemilik/tipe-kamar/show?id_tipe_kamar=' + encodeURIComponent(this.idTipeKamar), false);
+            this.contextInfo = contextRes.data || null;
+          }
+          if (this.isTypeContext && this.kamarList.length === 1) {
+            this.form.id_kamar = String(this.kamarList[0].id_kamar);
+            this.updateSelectedKamar();
+          }
         } catch (error) {
           this.kamarList = [];
         }
@@ -288,8 +330,7 @@
             'error'
           );
 
-          window.location.href =
-            BASE_URL + '/pemilik/penghuni';
+          window.location.href = this.backUrl;
 
           return;
         }
@@ -307,8 +348,7 @@
           this.form.nik = item.nik || '';
           this.matchedUser = Boolean(item.id_user);
         } catch (error) {
-          window.location.href =
-            BASE_URL + '/pemilik/penghuni';
+          window.location.href = this.backUrl;
         }
       },
 
@@ -419,8 +459,7 @@
             );
           }
 
-          window.location.href =
-            BASE_URL + '/pemilik/penghuni';
+          window.location.href = this.backUrl;
 
         } catch (error) {
           // API sudah menampilkan toast.

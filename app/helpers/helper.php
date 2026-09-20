@@ -166,6 +166,8 @@ function masterIconCatalog()
     'smartphone' => ['label' => 'Aplikasi', 'path' => '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/>'],
     'image' => ['label' => 'Foto', 'path' => '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="2"/><path d="m21 15-4.5-4.5L5 21"/>'],
     'wallet' => ['label' => 'Pembayaran', 'path' => '<path d="M4 6h14a2 2 0 0 1 2 2v10H4a2 2 0 0 1-2-2V6a3 3 0 0 1 3-3h12"/><path d="M16 12h4"/>'],
+    'chevron-right' => ['label' => 'Lanjut', 'path' => '<path d="m9 18 6-6-6-6"/>'],
+    'arrow-left' => ['label' => 'Kembali', 'path' => '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'],
     'plus-circle' => ['label' => 'Tambah', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'],
     'chart-column' => ['label' => 'Dashboard', 'path' => '<path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7M2 20h20"/>'],
     'flag' => ['label' => 'Laporan', 'path' => '<path d="M5 21V4"/><path d="M5 5h11l-1 4 3 3H5"/>'],

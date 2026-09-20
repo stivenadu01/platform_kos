@@ -20,7 +20,8 @@ class ApiPenghuniController
         query('search') ?? '',
         query('id_kos') ?? '',
         query('id_kamar') ?? '',
-        query('status') ?? ''
+        query('status') ?? '',
+        query('id_tipe_kamar') ?? ''
       );
 
       response([

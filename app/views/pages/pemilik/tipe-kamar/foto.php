@@ -1,6 +1,6 @@
 <div x-data="tipeKamarFotoPage()" x-init="init()" class="mx-auto max-w-6xl space-y-6">
   <div>
-    <a :href="backUrl" class="text-sm text-primary hover:underline">← Kembali ke tipe kamar</a>
+    <a :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
     <div class="mt-3">
       <h2 class="text-2xl font-bold text-slate-900">Foto Tipe Kamar</h2>
       <p class="mt-1 text-sm text-slate-500">Kelola foto yang akan ditampilkan pada tipe kamar ini.</p>

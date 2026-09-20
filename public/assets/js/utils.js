@@ -84,6 +84,27 @@ const utils = {
   getQuery(key) {
     const url = new URL(window.location);
     return url.searchParams.get(key);
+  },
+
+  goBack(fallbackUrl) {
+    try {
+      const referrer = document.referrer ? new URL(document.referrer) : null;
+      const basePath = new URL(window.BASE_URL || window.location.origin, window.location.origin)
+        .pathname.replace(/\/$/, '');
+      const ownerRoot = (basePath || '') + '/pemilik';
+      const isInternalOwnerPage = referrer
+        && referrer.origin === window.location.origin
+        && (referrer.pathname === ownerRoot || referrer.pathname.startsWith(ownerRoot + '/'));
+
+      if (isInternalOwnerPage && window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+    } catch (error) {
+      console.warn('Riwayat sebelumnya tidak dapat digunakan:', error);
+    }
+
+    window.location.href = fallbackUrl;
   }
 };
 
