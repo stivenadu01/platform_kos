@@ -841,8 +841,7 @@ body.scroll-locked {
 }
 
 @utility owner-card-grid {
-  @apply grid w-full gap-4 sm:gap-5;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  @apply grid w-full grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 xl:grid-cols-3;
 }
 
 @utility owner-page-header {
@@ -932,6 +931,14 @@ body.scroll-locked {
 
 @utility owner-action-danger {
   @apply inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-danger-soft px-3 py-2 text-xs font-semibold text-danger transition hover:bg-red-100;
+}
+
+@utility owner-card-actions {
+  @apply grid w-full grid-cols-3 gap-2;
+}
+
+.owner-card-actions > * {
+  @apply w-full min-w-0;
 }
 
 @utility owner-icon-button {

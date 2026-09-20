@@ -138,7 +138,7 @@
               <?php endif; ?>
             </div>
 
-            <div data-help="help-kos-action" class="mt-4 grid grid-cols-3 gap-2">
+            <div data-help="help-kos-action" class="owner-card-actions mt-4">
 
               <a
                 data-onboarding="kos-photo"

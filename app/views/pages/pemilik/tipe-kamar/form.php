@@ -49,8 +49,7 @@
 <script>
   function tipeKamarForm() {
     return {
-      fromKamar: new URLSearchParams(window.location.search).get('from') === 'kamar',
-      get backUrl() { return this.fromKamar ? BASE_URL + '/pemilik/kamar' : BASE_URL + '/pemilik/tipe-kamar'; },
+      get backUrl() { return BASE_URL + '/pemilik/kamar'; },
       iconPaths: <?= json_encode_safe(array_map(fn($v)=>$v['path'], masterIconCatalog()), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES) ?>,
       iconSvg(i,c='h-4 w-4') { const p=this.iconPaths[i]||this.iconPaths['map-pin']; return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="${c}" aria-hidden="true">${p}</svg>`; },
       id: utils.getQuery('id_tipe_kamar') || '',
@@ -151,7 +150,7 @@
           if (isNew) {
             window.location.href = BASE_URL + '/pemilik/tipe-kamar/foto?id_tipe_kamar=' + encodeURIComponent(this.id) + '&wizard=1';
           } else if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
-            window.location.href = BASE_URL + '/pemilik/tipe-kamar?onboarding=1';
+            window.location.href = BASE_URL + '/pemilik/kamar?onboarding=1';
           } else {
             window.location.href = this.backUrl;
           }

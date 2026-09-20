@@ -97,8 +97,7 @@
 <script>
   function tipeKamarFotoPage() {
     return {
-      fromKamar: new URLSearchParams(window.location.search).get('from') === 'kamar',
-      get backUrl() { return this.fromKamar ? BASE_URL + '/pemilik/kamar' : BASE_URL + '/pemilik/tipe-kamar'; },
+      get backUrl() { return BASE_URL + '/pemilik/kamar'; },
       wizard: utils.getQuery('wizard') === '1',
       id: utils.getQuery('id_tipe_kamar') || '',
       loading: false,

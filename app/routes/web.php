@@ -38,7 +38,7 @@ get('/pemilik/kamar/kelola', 'PemilikController@kelolaKamar', ['auth', 'role:pem
 get('/pemilik/kamar/tambah', 'PemilikController@tambahKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/edit', 'PemilikController@editKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/harga', 'PemilikController@hargaKamar', ['auth', 'role:pemilik']);
-get('/pemilik/tipe-kamar', 'PemilikController@tipeKamar', ['auth', 'role:pemilik']);
+get('/pemilik/tipe-kamar', 'PemilikController@redirectTipeKamarLegacy', ['auth', 'role:pemilik']);
 get('/pemilik/tipe-kamar/tambah', 'PemilikController@tambahTipeKamar', ['auth', 'role:pemilik']);
 get('/pemilik/tipe-kamar/edit', 'PemilikController@editTipeKamar', ['auth', 'role:pemilik']);
 get('/pemilik/tipe-kamar/foto', 'PemilikController@fotoTipeKamar', ['auth', 'role:pemilik']);

@@ -240,16 +240,12 @@
 
         if (key === 'tipe_kamar') {
           if (current === '/pemilik/kamar') {
-            definitions = typeSetup.has_any
-              ? [['fast-kelola-tipe-kamar', 'Kelola Tipe Kamar', 'Tipe kamar sudah ada. Buka Kelola Tipe Kamar untuk melengkapi tipe yang masih diperlukan.']]
-              : [['fast-tambah-tipe-kamar', 'Tambah Tipe Kamar', 'Belum ada tipe kamar. Buat satu tipe kamar terlebih dahulu.']];
-          } else if (current === '/pemilik/tipe-kamar') {
             if (typeId && missing.includes('foto')) {
               definitions = [['tipe-photo-existing', 'Foto Tipe Kamar', 'Tipe kamar sudah tersimpan. Buka Foto pada tipe yang ditunjuk untuk menambahkan minimal satu foto.']];
             } else if (typeId && missing.includes('harga')) {
-              definitions = [['tipe-edit-existing', 'Lengkapi Tipe Kamar', 'Tipe kamar sudah ada, tetapi harga belum tersedia. Buka Kelola untuk melengkapinya.']];
+              definitions = [['tipe-edit-existing', 'Lengkapi Tipe Kamar', 'Tipe kamar sudah ada, tetapi harga belum tersedia. Buka Edit untuk melengkapinya.']];
             } else {
-              definitions = [['fast-tambah-tipe-kamar-list', 'Tambah Tipe Kamar', 'Buat tipe kamar yang akan digunakan oleh unit kamar Anda.']];
+              definitions = [['fast-tambah-tipe-kamar', 'Tambah Tipe Kamar', typeSetup.has_any ? 'Tambahkan tipe lain jika kos memiliki kategori kamar yang berbeda.' : 'Belum ada tipe kamar. Buat satu tipe kamar terlebih dahulu.']];
             }
           } else if (current === '/pemilik/tipe-kamar/tambah' || current === '/pemilik/tipe-kamar/edit') {
             definitions = [
@@ -271,10 +267,8 @@
         }
 
         if (key === 'kamar') {
-          if (current === '/pemilik/tipe-kamar') {
-            definitions = [['tipe-back-kamar', 'Kembali ke Kelola Kamar', 'Tipe kamar sudah lengkap. Kembali ke Kelola Kamar untuk menambahkan unit kamar.']];
-          } else if (current === '/pemilik/kamar') {
-            definitions = [['kamar-add-choice', 'Pilih Cara Menambah Kamar', 'Pilih Tambah Banyak Kamar atau Tambah Satu Kamar. Keduanya akan membuat unit kamar menggunakan tipe kamar yang sudah dibuat.']];
+          if (current === '/pemilik/kamar') {
+            definitions = [['kamar-select-type', 'Pilih Tipe Kamar', 'Tekan Kelola Kamar pada tipe yang ingin ditambahkan unit fisiknya.']];
           } else if (current === '/pemilik/kamar/tambah') {
             definitions = [
               ['kamar-field-kos', 'Pilih Kos', 'Pilih kos tempat kamar ini berada.'],
@@ -376,7 +370,7 @@
           }
         }
 
-        if (this.step.key === 'tipe_kamar' && route() === '/pemilik/tipe-kamar') {
+        if (this.step.key === 'tipe_kamar' && route() === '/pemilik/kamar') {
           const id = this.state.type_setup?.incomplete_id;
           const missing = this.state.type_setup?.missing || [];
           if (id && missing.includes('foto')) {

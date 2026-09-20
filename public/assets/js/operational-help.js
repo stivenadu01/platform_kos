@@ -34,23 +34,13 @@
         ['help-kos-add', 'Tambah kos', 'Jika Anda memiliki properti lain, buat kos baru dari tombol ini.']
       ]
     },
-    '/pemilik/tipe-kamar': {
-      title: 'Tipe Kamar',
-      intro: 'Tipe kamar adalah kategori harga dan karakteristik kamar, misalnya Standard atau Deluxe. Satu tipe dapat digunakan oleh beberapa unit kamar.',
-      steps: [
-        ['help-tipe-list', 'Daftar tipe kamar', 'Periksa nama tipe, kapasitas, dan harga yang berlaku.'],
-        ['help-tipe-action', 'Kelola tipe', 'Gunakan Kelola untuk mengubah data tipe dan Foto untuk mengatur foto khusus tipe tersebut.'],
-        ['help-tipe-add', 'Tambah tipe kamar', 'Buat tipe baru jika kos memiliki kategori kamar dengan kapasitas atau harga berbeda.']
-      ]
-    },
     '/pemilik/kamar': {
       title: 'Kelola Kamar',
-      intro: 'Kamar adalah unit fisik yang benar-benar ditempati penghuni. Tipe kamar menentukan karakteristik dan harga unit tersebut.',
+      intro: 'Pilih tipe kamar sebagai konteks, kemudian kelola unit fisik di dalam tipe tersebut.',
       steps: [
-        ['help-kamar-summary', 'Daftar kamar', 'Gunakan daftar ini untuk melihat kos, tipe kamar, nomor kamar, kapasitas, dan status ketersediaan.'],
-        ['help-kamar-filter', 'Filter kamar', 'Gunakan filter saat memiliki banyak unit agar pencarian kamar lebih cepat.'],
-        ['help-kamar-add', 'Tambah kamar', 'Gunakan Tambah Satu Kamar untuk satu unit atau Tambah Banyak Kamar jika ingin membuat beberapa nomor sekaligus.'],
-        ['help-kamar-type', 'Tipe kamar', 'Kelola Tipe Kamar digunakan untuk mengatur kategori, kapasitas, harga, fasilitas, dan foto tipe.']
+        ['help-tipe-list', 'Daftar tipe kamar', 'Setiap kartu menampilkan kos, tipe, kapasitas, dan ringkasan unit kamar.'],
+        ['help-tipe-action', 'Aksi tipe kamar', 'Kelola unit kamar, edit informasi tipe, atur foto, atau hapus tipe dari kartu yang dipilih.'],
+        ['help-tipe-add', 'Tambah tipe kamar', 'Buat tipe baru jika kos memiliki kategori kamar dengan kapasitas atau harga berbeda.']
       ]
     },
     '/pemilik/penghuni': {

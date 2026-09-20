@@ -238,12 +238,10 @@ class PemilikController
     ]);
   }
 
-  public function tipeKamar()
+  public function redirectTipeKamarLegacy()
   {
-    view('pemilik/tipe-kamar/index', [
-      'title' => 'Tipe Kamar',
-      'layout' => 'pemilik'
-    ]);
+    header('Location: ' . BASE_URL . '/pemilik/kamar', true, 302);
+    exit;
   }
 
   public function tambahTipeKamar()
