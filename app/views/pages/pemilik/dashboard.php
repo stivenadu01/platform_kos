@@ -1,15 +1,15 @@
 <div
   x-data="pemilikDashboard()"
   x-init="init()"
-  class="space-y-6"
+  class="owner-page"
 >
-  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+  <div class="owner-page-header">
     <div>
-      <p class="text-sm font-medium text-primary">Dashboard Pemilik</p>
-      <h2 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">
+      <p class="owner-eyebrow">Dashboard Pemilik</p>
+      <h2 class="owner-title">
         Selamat datang, <?= htmlspecialchars($_SESSION['user']['nama'] ?? 'Pemilik') ?> 👋
       </h2>
-      <p class="mt-1 text-sm text-slate-500">Pantau kondisi kos, penghuni, dan pembayaran dari satu halaman.</p>
+      <p class="owner-subtitle">Pantau kondisi kos, penghuni, dan pembayaran dari satu halaman.</p>
     </div>
     <div class="flex gap-2">
       <a href="<?= BASE_URL ?>/pemilik/kos" class="btn-secondary inline-flex w-auto">Kelola Kos</a>
@@ -36,8 +36,8 @@
     </template>
   </div>
 
-  <div x-show="!loading" x-cloak data-help="dashboard-ringkasan" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-    <div class="card border border-slate-200 shadow-sm">
+  <div x-show="!loading" x-cloak data-help="dashboard-ringkasan" class="owner-stat-grid">
+    <div class="owner-stat-card">
       <p class="text-sm text-slate-500">Total Kos</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.total_kos"></p>
@@ -46,7 +46,7 @@
       <a href="<?= BASE_URL ?>/pemilik/kos" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Lihat kos →</a>
     </div>
 
-    <div class="card border border-slate-200 shadow-sm">
+    <div class="owner-stat-card">
       <p class="text-sm text-slate-500">Kamar Terisi</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_terisi"></p>
@@ -55,7 +55,7 @@
       <p class="mt-3 text-xs text-slate-500"><span x-text="summary.total_kamar"></span> total kamar</p>
     </div>
 
-    <div class="card border border-slate-200 shadow-sm">
+    <div class="owner-stat-card">
       <p class="text-sm text-slate-500">Kamar Tersedia</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_tersedia"></p>
@@ -64,7 +64,7 @@
       <a href="<?= BASE_URL ?>/pemilik/kamar" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Kelola kamar →</a>
     </div>
 
-    <div class="card border border-slate-200 shadow-sm">
+    <div class="owner-stat-card">
       <p class="text-sm text-slate-500">Kamar Tidak Tersedia</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_tidak_tersedia"></p>
@@ -73,7 +73,7 @@
       <a href="<?= BASE_URL ?>/pemilik/kamar" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Kelola kamar →</a>
     </div>
 
-    <div class="card border border-slate-200 shadow-sm">
+    <div class="owner-stat-card">
       <p class="text-sm text-slate-500">Penghuni Aktif</p>
       <div class="mt-3 flex items-end justify-between">
         <p class="text-3xl font-bold text-slate-900" x-text="summary.penghuni_aktif"></p>

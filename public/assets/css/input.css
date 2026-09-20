@@ -832,6 +832,186 @@ body.scroll-locked {
   @apply w-full md:w-auto;
 }
 
+/* =========================================================
+   PEMILIK UI — reusable owner panel patterns
+   ========================================================= */
+
+@utility owner-page {
+  @apply w-full space-y-5 sm:space-y-6;
+}
+
+@utility owner-card-grid {
+  @apply grid w-full gap-4 sm:gap-5;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+}
+
+@utility owner-page-header {
+  @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between;
+}
+
+@utility owner-eyebrow {
+  @apply text-xs font-bold uppercase tracking-[0.16em] text-primary;
+}
+
+@utility owner-title {
+  @apply mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl;
+}
+
+@utility owner-subtitle {
+  @apply mt-1.5 max-w-2xl text-sm leading-6 text-slate-500;
+}
+
+@utility owner-panel {
+  @apply overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5;
+}
+
+@utility owner-panel-hover {
+  @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-lg;
+}
+
+@utility owner-stat-grid {
+  @apply grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4;
+}
+
+@utility owner-stat-card {
+  @apply relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5;
+}
+
+@utility owner-stat-icon {
+  @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg;
+}
+
+@utility owner-stat-number {
+  @apply text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl;
+}
+
+@utility owner-stat-caption {
+  @apply text-xs font-medium text-slate-500 sm:text-sm;
+}
+
+@utility owner-action-primary {
+  @apply inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30;
+}
+
+@utility owner-action-secondary {
+  @apply inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-primary/30 hover:bg-primary-soft hover:text-primary;
+}
+
+@utility owner-empty {
+  @apply rounded-2xl border border-dashed border-slate-300 bg-white px-5 py-12 text-center shadow-sm;
+}
+
+@utility owner-filter-bar {
+  @apply grid grid-cols-1 gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:grid-cols-2 lg:p-5;
+}
+
+@utility owner-mobile-list {
+  @apply divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm;
+}
+
+@utility owner-mobile-item {
+  @apply p-4 transition-colors active:bg-slate-50;
+}
+
+@utility owner-form-card {
+  @apply space-y-5 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:space-y-6 sm:p-6;
+}
+
+@utility owner-card-header {
+  @apply relative overflow-hidden bg-slate-900 px-4 py-5 text-white sm:px-5;
+  background-image: linear-gradient(135deg, #0f172a 0%, #1e293b 62%, #2563eb 145%);
+}
+
+@utility owner-card-muted {
+  color: rgba(255, 255, 255, 0.62);
+}
+
+@utility owner-card-ring {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+@utility owner-action-danger {
+  @apply inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-red-100 bg-danger-soft px-3 py-2 text-xs font-semibold text-danger transition hover:bg-red-100;
+}
+
+@utility owner-icon-button {
+  @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:border-primary/30 hover:bg-primary-soft hover:text-primary;
+}
+
+@utility owner-context-panel {
+  @apply overflow-hidden rounded-2xl border border-primary/15 bg-primary-soft/40;
+}
+
+@utility owner-context-header {
+  @apply flex items-start gap-3 border-b border-primary/10 bg-white/70 px-4 py-3.5;
+}
+
+@utility owner-context-grid {
+  @apply grid grid-cols-1 gap-3 p-4 sm:grid-cols-2;
+}
+
+@utility owner-context-item {
+  @apply rounded-xl bg-white px-3.5 py-3 ring-1 ring-slate-200/70;
+}
+
+.owner-ui .card {
+  @apply rounded-2xl border-slate-200/80 p-4 shadow-sm sm:p-5;
+}
+
+.owner-ui .btn-primary,
+.owner-ui .btn-secondary,
+.owner-ui .btn-outline,
+.owner-ui .btn-danger,
+.owner-ui .btn-success {
+  @apply min-h-10 rounded-xl px-4 font-semibold;
+}
+
+.owner-ui .input,
+.owner-ui .input-number,
+.owner-ui .input-date,
+.owner-ui .input-datetime,
+.owner-ui .select,
+.owner-ui .textarea {
+  @apply min-h-11 rounded-xl border-slate-200 bg-slate-50/50 px-3.5 focus:bg-white;
+}
+
+.owner-ui table thead {
+  @apply bg-slate-50/80;
+}
+
+.owner-ui table th {
+  @apply text-[11px] font-bold uppercase tracking-wider text-slate-500;
+}
+
+.owner-ui table tbody tr {
+  @apply transition-colors hover:bg-slate-50/70;
+}
+
+.owner-ui > [x-data] {
+  @apply w-full;
+}
+
+.pemilik-sidebar {
+  @apply border-slate-200/80 bg-white/95 shadow-xl shadow-slate-900/5 backdrop-blur-xl;
+}
+
+.pemilik-sidebar nav a,
+.pemilik-sidebar nav button {
+  @apply transition-all duration-200;
+}
+
+.pemilik-sidebar nav a:hover {
+  @apply translate-x-0.5 bg-primary-soft text-primary;
+}
+
+.pemilik-sidebar .pemilik-nav-active {
+  @apply bg-primary-soft font-semibold text-primary shadow-sm ring-1 ring-primary/10;
+}
+
+.pemilik-topbar {
+  @apply border-slate-200/80 bg-white/90 shadow-sm shadow-slate-900/[0.03] backdrop-blur-xl;
+}
+
 
 /* Desktop sidebar collapse: label visibility and icon alignment are centralized here. */
 @media (min-width: 1024px) {

@@ -29,8 +29,32 @@
     @submit.prevent="submit"
     class="card border border-slate-200 shadow-sm space-y-6">
 
-    <!-- KOS -->
-    <div class="form-group">
+    <!-- KONTEKS KOS & TIPE (otomatis dari kartu yang dipilih) -->
+    <div x-show="contextLocked" x-cloak class="owner-context-panel">
+      <div class="owner-context-header">
+        <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-sm">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path></svg>
+        </div>
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wide text-primary">Kamar akan ditambahkan ke</p>
+          <h3 class="mt-0.5 font-bold text-slate-900" x-text="contextType?.nama_tipe || '-'"></h3>
+        </div>
+      </div>
+      <div class="owner-context-grid">
+        <div class="owner-context-item">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Kos</p>
+          <p class="mt-1 text-sm font-semibold text-slate-800" x-text="contextType?.nama_kos || '-'"></p>
+        </div>
+        <div class="owner-context-item">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Tipe & kapasitas</p>
+          <p class="mt-1 text-sm font-semibold text-slate-800"><span x-text="contextType?.nama_tipe || '-'"></span><span class="font-normal text-slate-500" x-text="contextType ? ' · ' + contextType.kapasitas + ' orang' : ''"></span></p>
+        </div>
+      </div>
+      <p class="px-4 pb-4 text-xs leading-5 text-slate-500">Kos dan tipe kamar sudah ditentukan dari halaman sebelumnya sehingga tidak perlu dipilih kembali.</p>
+    </div>
+
+    <!-- PILIH KOS (fallback jika halaman dibuka langsung) -->
+    <div x-show="!contextLocked" x-cloak class="form-group">
       <label class="label">
         Kos <span class="text-red-500">*</span>
       </label>
@@ -59,8 +83,8 @@
       </p>
     </div>
 
-    <!-- TIPE KAMAR -->
-    <div class="form-group">
+    <!-- PILIH TIPE KAMAR (fallback jika halaman dibuka langsung) -->
+    <div x-show="!contextLocked" x-cloak class="form-group">
       <label class="label">
         Tipe Kamar <span class="text-red-500">*</span>
       </label>
@@ -247,6 +271,7 @@
       loading: false,
       contextLocked: false,
       contextTypeId: new URLSearchParams(window.location.search).get('id_tipe_kamar') || '',
+      contextType: null,
 
       form: {
         id_kos: '',
@@ -272,6 +297,7 @@
             const typeRes = await API.get('/pemilik/tipe-kamar/show?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId), false);
             const type = typeRes.data;
             if (!type) throw new Error('Tipe kamar tidak ditemukan.');
+            this.contextType = type;
             this.form.id_kos = String(type.id_kos);
             await this.loadTipe(false);
             this.form.id_tipe_kamar = String(type.id_tipe_kamar);

@@ -49,7 +49,7 @@
   <script src="<?= BASE_URL ?>/assets/js/operational-help.js"></script>
 </head>
 
-<body class="bg-slate-50 text-slate-800">
+<body class="bg-slate-50 text-slate-800 owner-ui">
 
   <script>
     // Set the shell state before the first paint. Alpine will bind the same value afterwards.
@@ -85,7 +85,7 @@
 
       <?php include __DIR__ . '/../partials/pemilik/topbar.php'; ?>
 
-      <main class="p-4 sm:p-6 lg:p-8">
+      <main class="px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <?= $content ?>
       </main>
 

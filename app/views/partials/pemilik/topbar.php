@@ -16,7 +16,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     border-b border-slate-200
     flex items-center justify-between
     px-4 sm:px-6
-    sticky top-0 z-30
+    sticky top-0 z-30 pemilik-topbar
   ">
 
   <!-- LEFT -->
@@ -95,7 +95,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
       title="Buka bantuan sesuai halaman yang sedang dibuka">
       <span class="flex h-5 w-5 items-center justify-center rounded-full border border-slate-400 text-xs font-bold">?</span>
-      Bantuan
+      <span class="hidden sm:inline">Bantuan</span>
     </button>
 
     <!-- USER -->

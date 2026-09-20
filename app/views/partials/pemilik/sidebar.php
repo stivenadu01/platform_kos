@@ -262,3 +262,25 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   </div>
 
 </aside>
+
+<script>
+  (() => {
+    const markActiveOwnerNavigation = () => {
+      const current = window.location.pathname.replace(/\/+$/, '');
+      const links = document.querySelectorAll('.pemilik-sidebar nav a[href]');
+      let best = null;
+      links.forEach((link) => {
+        const path = new URL(link.href, window.location.origin).pathname.replace(/\/+$/, '');
+        const matches = current === path || (path.endsWith('/pemilik') ? current === path : current.startsWith(path + '/'));
+        if (matches && (!best || path.length > best.path.length)) best = { link, path };
+      });
+      if (best) {
+        best.link.classList.add('pemilik-nav-active');
+        best.link.setAttribute('aria-current', 'page');
+      }
+    };
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', markActiveOwnerNavigation, { once: true })
+      : markActiveOwnerNavigation();
+  })();
+</script>
