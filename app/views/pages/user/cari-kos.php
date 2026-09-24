@@ -24,19 +24,19 @@ $initialState = [
   x-init="init()"
   class="public-page">
   <section class="public-page-header">
-    <div class="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div class="max-w-3xl">
         <p class="text-sm font-semibold text-primary">Cari Kos</p>
-        <h1 class="mt-1 font-[Poppins] text-3xl font-bold tracking-tight text-slate-900">
+        <h1 class="mt-1 font-[Poppins] text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Temukan kos di lokasi yang kamu inginkan
         </h1>
-        <p class="mt-2 text-sm leading-6 text-slate-500">
+        <p class="mt-2 hidden text-sm leading-6 text-slate-500 sm:block">
           Pilih kampus, area, lokasi populer, atau gunakan lokasi kamu untuk melihat kos di sekitarnya.
         </p>
       </div>
 
       <div
-        class="mt-6 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+        class="mt-4 rounded-2xl border border-slate-200 bg-white p-2.5 shadow-sm sm:mt-6 sm:p-4"
         @betakos-location-selected.window="selectLocation($event.detail)"
         @betakos-location-query.window="locationQuery = $event.detail.query; selectedLocation = null; search(1)">
         <?php $pickerMode = 'search'; ?>
@@ -57,18 +57,18 @@ $initialState = [
 
   <div class="mx-auto max-w-7xl px-4 pt-5 sm:px-6 lg:hidden">
     <button @click="filterOpen = true" type="button" class="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm">
-      <span>☷ Filter pencarian</span>
+      <span class="inline-flex items-center gap-2"><?= masterIconSvg('filter','h-4 w-4') ?> Filter pencarian</span>
       <span class="text-primary" x-text="activeFilterCount ? activeFilterCount + ' aktif' : 'Atur filter'"></span>
     </button>
   </div>
 
-  <div x-show="filterOpen" x-cloak @keydown.escape.window="filterOpen = false" class="fixed inset-0 z-[1500] lg:hidden">
+  <div x-show="filterOpen" x-cloak @keydown.escape.window="filterOpen = false" class="public-filter-backdrop fixed inset-0 lg:hidden">
     <div class="absolute inset-0 bg-slate-900/40" @click="filterOpen = false"></div>
   </div>
 
   <div class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[280px_1fr] lg:px-8">
     <aside
-      x-bind:class="filterOpen ? 'fixed inset-x-4 bottom-4 top-20 z-[1600] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl' : 'hidden lg:block lg:sticky lg:top-20'"
+      x-bind:class="filterOpen ? 'public-filter-layer fixed inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-2xl border border-slate-200 bg-white p-5 pb-24 shadow-2xl' : 'hidden lg:block lg:sticky lg:top-20'"
       class="h-fit">
       <div class="flex items-center justify-between">
         <div>
@@ -81,83 +81,63 @@ $initialState = [
         </div>
       </div>
 
-      <div class="mt-5 space-y-5">
-        <label class="block">
-          <span class="text-xs font-medium text-slate-600">Radius dari lokasi</span>
-          <select x-model="filters.jarak_max" @change="search(1)" :disabled="!selectedLocation" class="mt-1.5 disabled:cursor-not-allowed disabled:bg-slate-100 select">
-            <option value="">Semua jarak</option>
-            <option value="1">≤ 1 km</option>
-            <option value="3">≤ 3 km</option>
-            <option value="5">≤ 5 km</option>
-            <option value="10">≤ 10 km</option>
-          </select>
-          <span x-show="!selectedLocation" class="mt-1 block text-[11px] text-slate-400">
-            Pilih lokasi untuk mengaktifkan radius.
-          </span>
-        </label>
-
-        <label class="block">
-          <span class="text-xs font-medium text-slate-600">Jenis kos</span>
-          <select x-model="filters.jenis" @change="search(1)" class="mt-1.5 select">
-            <option value="">Semua jenis</option>
-            <option value="putra">Putra</option>
-            <option value="putri">Putri</option>
-            <option value="campur">Campur</option>
-          </select>
-        </label>
-
-        <label class="block">
-          <span class="text-xs font-medium text-slate-600">Kapasitas minimal</span>
-          <select x-model="filters.kapasitas" @change="search(1)" class="mt-1.5 select">
-            <option value="">Bebas</option>
-            <option value="1">1 orang</option>
-            <option value="2">2 orang</option>
-            <option value="3">3 orang</option>
-            <option value="4">4 orang</option>
-          </select>
-        </label>
-
-        <div>
-          <span class="text-xs font-medium text-slate-600">Harga per bulan</span>
-          <div class="mt-1.5 grid grid-cols-2 gap-2">
-            <input x-model="filters.harga_min" @change="search(1)" type="number" min="0" step="10000" placeholder="Min" class="input-number">
-            <input x-model="filters.harga_max" @change="search(1)" type="number" min="0" step="10000" placeholder="Max" class="input-number">
-          </div>
-        </div>
-
-        <div>
-          <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-medium text-slate-600">Fasilitas</span>
-            <button
-              x-show="filters.fasilitas.length"
-              x-cloak
-              @click="filters.fasilitas = []; search(1)"
-              type="button"
-              class="text-[11px] font-semibold text-primary hover:underline">Reset</button>
-          </div>
-
-          <div class="mt-1.5 max-h-44 space-y-2 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3">
-            <template x-if="fasilitasList.length === 0">
-              <p class="text-xs text-slate-400">Memuat fasilitas...</p>
-            </template>
-
-            <template x-for="item in fasilitasList" :key="item.id_fasilitas">
-              <label class="flex cursor-pointer items-center gap-2 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  :value="String(item.id_fasilitas)"
-                  x-model="filters.fasilitas"
-                  @change="search(1)"
-                  class="h-4 w-4 rounded text-primary focus:ring-primary input-number">
-                <span x-text="item.nama_fasilitas"></span>
-              </label>
+      <div class="mt-4 space-y-3">
+        <section class="public-search-filter-group" :class="!selectedLocation ? 'is-disabled' : ''">
+          <div class="public-search-filter-heading"><span>Radius</span><small x-text="selectedLocation ? (filters.jarak_max ? '≤ '+filters.jarak_max+' km' : 'Semua jarak') : 'Pilih lokasi dahulu'"></small></div>
+          <div class="public-search-segments public-search-segments-five">
+            <template x-for="option in [{v:'',l:'Semua'},{v:'1',l:'1 km'},{v:'3',l:'3 km'},{v:'5',l:'5 km'},{v:'10',l:'10 km'}]" :key="option.v">
+              <button type="button" :disabled="!selectedLocation" @click="filters.jarak_max=option.v; search(1)" :class="filters.jarak_max===option.v ? 'is-active' : ''" x-text="option.l"></button>
             </template>
           </div>
+        </section>
 
-          <p class="mt-1 text-[11px] text-slate-400">
-            Bisa memilih lebih dari satu fasilitas.
-          </p>
-        </div>
+        <section class="public-search-filter-group">
+          <div class="public-search-filter-heading"><span>Jenis kos</span><small x-text="filters.jenis ? filters.jenis : 'Semua'"></small></div>
+          <div class="public-search-segments public-search-segments-four">
+            <template x-for="option in [{v:'',l:'Semua'},{v:'putra',l:'Putra'},{v:'putri',l:'Putri'},{v:'campur',l:'Campur'}]" :key="option.v">
+              <button type="button" @click="filters.jenis=option.v; search(1)" :class="filters.jenis===option.v ? 'is-active' : ''" x-text="option.l"></button>
+            </template>
+          </div>
+        </section>
+
+        <section class="public-search-filter-group">
+          <div class="public-search-filter-heading"><span>Kapasitas minimal</span><small x-text="filters.kapasitas ? filters.kapasitas+' orang' : 'Bebas'"></small></div>
+          <div class="public-search-segments public-search-segments-five">
+            <template x-for="option in [{v:'',l:'Bebas'},{v:'1',l:'1'},{v:'2',l:'2'},{v:'3',l:'3'},{v:'4',l:'4+'}]" :key="option.v">
+              <button type="button" @click="filters.kapasitas=option.v; search(1)" :class="filters.kapasitas===option.v ? 'is-active' : ''" x-text="option.l"></button>
+            </template>
+          </div>
+        </section>
+
+        <section class="public-search-filter-group">
+          <div class="public-search-filter-heading"><span>Harga per bulan</span><small x-text="priceRangeLabel"></small></div>
+          <div class="public-price-presets">
+            <button type="button" @click="setPriceRange('', '')" :class="isPriceRange('', '') ? 'is-active' : ''">Semua</button>
+            <button type="button" @click="setPriceRange('', '750000')" :class="isPriceRange('', '750000') ? 'is-active' : ''">≤750 rb</button>
+            <button type="button" @click="setPriceRange('750000', '1000000')" :class="isPriceRange('750000', '1000000') ? 'is-active' : ''">750 rb–1 jt</button>
+            <button type="button" @click="setPriceRange('1000000', '1500000')" :class="isPriceRange('1000000', '1500000') ? 'is-active' : ''">1–1,5 jt</button>
+          </div>
+          <details class="public-search-filter-details mt-2">
+            <summary><span>Atur harga khusus</span><?= masterIconSvg('chevron-down','h-4 w-4') ?></summary>
+            <div class="public-custom-price grid grid-cols-2 gap-2 p-2.5 pt-2">
+              <label><span>Minimum</span><input x-model="filters.harga_min" @change="search(1)" type="number" min="0" step="10000" placeholder="Rp0" class="input-number"></label>
+              <label><span>Maksimum</span><input x-model="filters.harga_max" @change="search(1)" type="number" min="0" step="10000" placeholder="Tanpa batas" class="input-number"></label>
+            </div>
+          </details>
+        </section>
+
+        <details class="public-search-filter-details">
+          <summary><span>Fasilitas <b x-show="filters.fasilitas.length" x-cloak x-text="filters.fasilitas.length"></b></span><?= masterIconSvg('chevron-down','h-4 w-4') ?></summary>
+          <div class="border-t border-slate-100 p-2.5">
+            <div class="mb-2 flex items-center justify-between"><small>Pilih satu atau beberapa</small><button x-show="filters.fasilitas.length" x-cloak @click.prevent="filters.fasilitas=[]; search(1)" type="button" class="text-[11px] font-semibold text-primary">Hapus pilihan</button></div>
+            <div class="public-facility-options">
+              <template x-if="fasilitasList.length===0"><p class="text-xs text-slate-400">Memuat fasilitas...</p></template>
+              <template x-for="item in fasilitasList" :key="item.id_fasilitas">
+                <label><input type="checkbox" :value="String(item.id_fasilitas)" x-model="filters.fasilitas" @change="search(1)"><span x-text="item.nama_fasilitas"></span></label>
+              </template>
+            </div>
+          </div>
+        </details>
       </div>
 
       <button type="button" @click="filterOpen = false" class="mt-5 w-full rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white lg:hidden">Terapkan Filter</button>
@@ -215,10 +195,10 @@ $initialState = [
                 x-show="$store.auth.user?.role === 'pelanggan'"
                 type="button"
                 @click.stop.prevent="toggleFavorite(kos)"
-                class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold transition hover:bg-primary-soft"
-                :class="kos.is_favorited ? 'text-primary' : 'text-slate-500'"
+                class="public-favorite-toggle inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold transition hover:bg-primary-soft"
+                :class="kos.is_favorited ? 'is-favorite text-rose-500' : 'text-slate-500'"
                 :aria-label="kos.is_favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'">
-                <span :class="kos.is_favorited ? 'fill-current' : ''"><?= masterIconSvg('heart', 'h-4 w-4') ?></span>
+                <span><?= masterIconSvg('heart', 'h-4 w-4') ?></span>
                 <span x-text="kos.is_favorited ? 'Tersimpan' : 'Favorit'"></span>
               </button>
             </div>
@@ -287,6 +267,15 @@ $initialState = [
           `${this.pagination.total} kos ditemukan`;
       },
 
+      get priceRangeLabel() {
+        const min = Number(this.filters.harga_min || 0);
+        const max = Number(this.filters.harga_max || 0);
+        if (!min && !max) return 'Semua harga';
+        if (!min) return 'Maks. ' + this.compactMoney(max);
+        if (!max) return 'Mulai ' + this.compactMoney(min);
+        return this.compactMoney(min) + '–' + this.compactMoney(max);
+      },
+
       get activeFilterCount() {
         let count = 0;
         if (this.filters.jarak_max) count++;
@@ -338,8 +327,9 @@ $initialState = [
           this.locationQuery = name;
           this.filters.latitude = lat;
           this.filters.longitude = lng;
+          if (!this.filters.jarak_max) this.filters.jarak_max = '3';
 
-
+          this.syncUrl(false, 1);
           await this.search(1, false);
           return;
         }
@@ -400,8 +390,7 @@ $initialState = [
                   longitude: lng
                 }, false);
 
-                // No radius is imposed automatically.
-                this.filters.jarak_max = '';
+                this.filters.jarak_max = '3';
                 await this.search(1, false);
                 resolve(true);
               },
@@ -437,8 +426,27 @@ $initialState = [
         this.filters.q = '';
         this.filters.latitude = lat;
         this.filters.longitude = lng;
+        if (!this.filters.jarak_max) this.filters.jarak_max = '3';
         if (updateUrl) this.syncUrl(true, 1);
         this.search(1, false);
+      },
+
+      isPriceRange(min, max) {
+        return String(this.filters.harga_min || '') === String(min || '') &&
+          String(this.filters.harga_max || '') === String(max || '');
+      },
+
+      setPriceRange(min, max) {
+        this.filters.harga_min = String(min || '');
+        this.filters.harga_max = String(max || '');
+        this.search(1);
+      },
+
+      compactMoney(value) {
+        const amount = Number(value || 0);
+        if (amount >= 1000000) return (amount / 1000000).toLocaleString('id-ID', { maximumFractionDigits: 1 }) + ' jt';
+        if (amount >= 1000) return Math.round(amount / 1000).toLocaleString('id-ID') + ' rb';
+        return amount.toLocaleString('id-ID');
       },
 
       clearLocation() {
@@ -448,6 +456,7 @@ $initialState = [
         this.filters.q = '';
         this.filters.latitude = '';
         this.filters.longitude = '';
+        this.filters.jarak_max = '';
         this.kosList = [];
         this.pagination = { page: 1, per_page: 12, total: 0, total_pages: 0 };
         this.syncUrl(false, 1);

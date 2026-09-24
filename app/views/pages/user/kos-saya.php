@@ -1,0 +1,41 @@
+<div x-data="customerHomePage()" x-init="init()" class="public-page">
+  <section class="public-page-header"><div class="public-container py-6 sm:py-8"><p class="public-eyebrow">Tempat tinggal aktif</p><h1 class="public-title">Kos Saya</h1><p class="public-subtitle">Informasi kamar dan tagihan yang masih perlu diperhatikan.</p></div></section>
+  <main class="public-container space-y-6 py-5 sm:py-8">
+    <div x-show="loading" class="public-empty">Memuat informasi kos Anda...</div>
+
+    <template x-if="!loading && !activeHomes.length">
+      <section class="public-empty"><div class="public-empty-icon bg-blue-50 text-primary"><?= masterIconSvg('building-2','h-7 w-7') ?></div><h2>Belum ada kos aktif</h2><p>Hubungkan data penghuni lama melalui Riwayat &amp; Klaim atau mulai mencari kos.</p><div class="mt-5 flex flex-wrap justify-center gap-2"><a href="<?= BASE_URL ?>/cari-kos" class="btn-primary">Cari Kos</a><a href="<?= BASE_URL ?>/user/riwayat-kos" class="btn-secondary">Riwayat &amp; Klaim</a></div></section>
+    </template>
+
+    <section x-show="!loading && activeHomes.length" x-cloak class="space-y-3">
+      <div class="public-section-heading"><div><p class="public-eyebrow">Sedang ditempati</p><h2>Kamar aktif</h2></div><span class="public-count-badge" x-text="activeHomes.length"></span></div>
+      <div class="grid gap-3 md:grid-cols-2">
+        <template x-for="item in activeHomes" :key="item.id_penghuni">
+          <article class="public-operation-card public-residence-card">
+            <div class="relative h-40 overflow-hidden bg-slate-100">
+              <template x-if="item.foto_kos"><img :src="BASE_URL+'/uploads'+item.foto_kos" :alt="item.nama_kos" class="h-full w-full object-cover" loading="lazy" @error="item.foto_kos=null"></template>
+              <template x-if="!item.foto_kos"><div class="flex h-full items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 text-primary"><?= masterIconSvg('building-2','h-10 w-10') ?></div></template>
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/10 to-transparent"></div>
+              <div class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4"><div class="min-w-0 text-white"><h3 class="owner-copy-full font-bold" x-text="item.nama_kos"></h3><p class="mt-1 text-sm font-semibold text-blue-100" x-text="'Kamar '+item.nomor_kamar"></p></div><span class="shrink-0 rounded-full bg-emerald-500/90 px-2.5 py-1 text-[11px] font-semibold text-white">Aktif</span></div>
+            </div>
+            <div class="p-4"><p class="owner-copy-full text-xs text-slate-500" x-text="item.alamat"></p><div class="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-slate-50 p-3 text-xs"><div><span class="text-slate-400">Mulai tinggal</span><strong class="mt-1 block text-slate-700" x-text="date(item.tanggal_masuk)"></strong></div><div><span class="text-slate-400">Pemilik</span><strong class="owner-copy-full mt-1 block text-slate-700" x-text="item.nama_pemilik"></strong></div></div>
+            <a :href="BASE_URL+'/kos/'+item.id_kos" class="owner-action-secondary mt-3 w-full justify-center">Lihat Detail Kos <?= masterIconSvg('chevron-right','h-4 w-4') ?></a></div>
+          </article>
+        </template>
+      </div>
+    </section>
+
+    <section x-show="!loading && activeHomes.length" x-cloak class="space-y-3">
+      <div class="public-section-heading"><div><p class="public-eyebrow">Keuangan</p><h2>Tagihan aktif</h2><p>Tagihan yang belum lunas atau baru dibayar sebagian.</p></div><span class="public-count-badge" x-text="activeBills.length"></span></div>
+      <div x-show="!activeBills.length" class="public-empty !py-8"><div class="public-empty-icon bg-emerald-50 text-emerald-600"><?= masterIconSvg('check-circle-2','h-6 w-6') ?></div><h2>Tidak ada tagihan aktif</h2><p>Semua tagihan yang terhubung sudah selesai.</p></div>
+      <div x-show="activeBills.length" class="grid gap-3 md:grid-cols-2">
+        <template x-for="bill in activeBills" :key="bill.id_tagihan"><button type="button" @click="openBill(bill)" class="public-operation-card text-left"><div class="flex items-start justify-between gap-3"><div class="min-w-0"><h3 class="owner-copy-full font-bold text-slate-900" x-text="bill.nama_kos+' · Kamar '+bill.nomor_kamar"></h3><p class="mt-1 text-xs text-slate-500" x-text="date(bill.tanggal_mulai)+' – '+date(bill.tanggal_selesai)"></p></div><span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="bill.status==='sebagian'?'bg-amber-50 text-amber-700':'bg-rose-50 text-rose-700'" x-text="bill.status==='sebagian'?'Sebagian':'Perlu dibayar'"></span></div><div class="mt-4 flex items-end justify-between rounded-xl bg-rose-50 p-3"><div><p class="text-[11px] text-rose-500">Sisa pembayaran</p><strong class="mt-1 block text-lg text-rose-700" x-text="money(bill.sisa_tagihan)"></strong></div><span class="text-xs font-semibold text-primary">Detail →</span></div></button></template>
+      </div>
+    </section>
+  </main>
+
+  <div x-show="billOpen" x-cloak class="public-modal-layer fixed inset-0 flex items-end justify-center bg-slate-950/55 sm:items-center sm:p-5" @click.self="billOpen=false"><div class="flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-w-xl sm:rounded-2xl"><div class="shrink-0 flex items-center justify-between border-b border-slate-200 p-4"><div><p class="text-xs font-semibold uppercase tracking-wider text-primary">Detail tagihan</p><h2 class="mt-1 font-bold text-slate-900" x-text="selectedBill?.nama_kos+' · Kamar '+selectedBill?.nomor_kamar"></h2></div><button type="button" @click="billOpen=false" class="owner-icon-button"><?= masterIconSvg('x','h-4 w-4') ?></button></div><div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 pb-8"><div class="grid grid-cols-2 gap-2"><div class="rounded-xl bg-slate-50 p-3"><p class="text-xs text-slate-400">Total</p><strong class="mt-1 block" x-text="money(selectedBill?.total_tagihan)"></strong></div><div class="rounded-xl bg-rose-50 p-3"><p class="text-xs text-rose-500">Sisa</p><strong class="mt-1 block text-rose-700" x-text="money(selectedBill?.sisa_tagihan)"></strong></div></div><div><h3 class="font-semibold text-slate-900">Riwayat pembayaran</h3><p x-show="billLoading" class="mt-3 text-sm text-slate-500">Memuat pembayaran...</p><div x-show="!billLoading && !payments.length" class="mt-3 rounded-xl border border-dashed border-slate-200 p-4 text-sm text-slate-500">Belum ada pembayaran.</div><div x-show="payments.length" class="mt-3 divide-y rounded-xl border border-slate-200"><template x-for="pay in payments" :key="pay.id_pembayaran"><div class="flex items-center justify-between gap-3 p-3 text-sm"><div><strong x-text="date(pay.tanggal_bayar)"></strong><p class="mt-1 text-xs capitalize text-slate-500" x-text="pay.metode"></p></div><strong class="text-emerald-700" x-text="money(pay.jumlah)"></strong></div></template></div></div></div></div></div>
+</div>
+<script>
+function customerHomePage(){return{homes:[],bills:[],loading:true,billOpen:false,billLoading:false,selectedBill:null,payments:[],get activeHomes(){return this.homes.filter(i=>i.status==='aktif')},get activeBills(){return this.bills.filter(i=>i.status==='belum_lunas'||i.status==='sebagian')},async init(){try{const [h,b]=await Promise.all([API.get('/pelanggan/riwayat-kos',false),API.get('/pelanggan/tagihan',false)]);this.homes=h.data||[];this.bills=b.data||[]}finally{this.loading=false}},async openBill(bill){this.selectedBill=bill;this.payments=[];this.billOpen=true;this.billLoading=true;try{const r=await API.get('/pelanggan/tagihan/show?id_tagihan='+encodeURIComponent(bill.id_tagihan),false);this.selectedBill={...bill,...r.data};this.payments=r.data?.pembayaran||[]}finally{this.billLoading=false}},initials(v){return String(v||'P').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()},date(v){return v?new Date(v+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}):'-'},money(v){return utils.formatRupiah(v)}}}
+</script>

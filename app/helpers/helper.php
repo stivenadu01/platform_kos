@@ -35,6 +35,16 @@ function json_encode_safe($value, $flags = 0)
   );
 }
 
+function publicPrimaryNavigationPaths()
+{
+  return ['/', '/cari-kos', '/user/favorit', '/user/kos-saya'];
+}
+
+function isPublicPrimaryNavigationPath($path)
+{
+  return in_array((string)$path, publicPrimaryNavigationPaths(), true);
+}
+
 require_once __DIR__ . '/location_helper.php';
 
 function masterIconCatalog()
@@ -160,6 +170,7 @@ function masterIconCatalog()
     'search' => ['label' => 'Cari', 'path' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'],
     'filter' => ['label' => 'Filter', 'path' => '<path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/>'],
     'heart' => ['label' => 'Favorit', 'path' => '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>'],
+    'share-2' => ['label' => 'Bagikan', 'path' => '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/>'],
     'history' => ['label' => 'Riwayat', 'path' => '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>'],
     'star' => ['label' => 'Langganan', 'path' => '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'],
     'log-out' => ['label' => 'Keluar', 'path' => '<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/>'],
@@ -169,6 +180,7 @@ function masterIconCatalog()
     'wallet' => ['label' => 'Pembayaran', 'path' => '<path d="M4 6h14a2 2 0 0 1 2 2v10H4a2 2 0 0 1-2-2V6a3 3 0 0 1 3-3h12"/><path d="M16 12h4"/>'],
     'chevron-right' => ['label' => 'Lanjut', 'path' => '<path d="m9 18 6-6-6-6"/>'],
     'chevron-left' => ['label' => 'Kembali', 'path' => '<path d="m15 18-6-6 6-6"/>'],
+    'chevron-down' => ['label' => 'Buka', 'path' => '<path d="m6 9 6 6 6-6"/>'],
     'arrow-left' => ['label' => 'Kembali', 'path' => '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'],
     'plus-circle' => ['label' => 'Tambah', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'],
     'chart-column' => ['label' => 'Dashboard', 'path' => '<path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7M2 20h20"/>'],

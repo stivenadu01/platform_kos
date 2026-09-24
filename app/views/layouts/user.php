@@ -30,11 +30,17 @@
   <script defer src="https://unpkg.com/alpinejs"></script>
 </head>
 
+<?php
+$__layoutPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+$__layoutBase = rtrim(parse_url(BASE_URL, PHP_URL_PATH) ?: '', '/');
+if ($__layoutBase !== '' && str_starts_with($__layoutPath, $__layoutBase)) $__layoutPath = substr($__layoutPath, strlen($__layoutBase)) ?: '/';
+$__layoutHasBottomNav = isPublicPrimaryNavigationPath($__layoutPath);
+?>
 <body class="public-ui min-h-screen bg-slate-50 text-slate-800 antialiased">
   <div class="min-h-screen">
     <?php include ROOT_PATH . '/app/views/partials/user/navbar.php'; ?>
 
-    <main class="min-h-[calc(100vh-4rem)] pb-16 md:pb-0">
+    <main class="min-h-[calc(100vh-4rem)] <?= $__layoutHasBottomNav ? 'pb-24 md:pb-0' : '' ?>">
       <?= $content ?>
     </main>
 

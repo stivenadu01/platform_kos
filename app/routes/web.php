@@ -46,10 +46,11 @@ get('/pemilik/tipe-kamar/tambah', 'PemilikController@tambahTipeKamar', ['auth', 
 get('/pemilik/tipe-kamar/edit', 'PemilikController@editTipeKamar', ['auth', 'role:pemilik']);
 get('/pemilik/tipe-kamar/foto', 'PemilikController@fotoTipeKamar', ['auth', 'role:pemilik']);
 
-// USER FLOW (placeholder routes — implementation dilanjutkan pada fase berikutnya)
+// ALUR PUBLIK & PELANGGAN
 get('/cari-kos', 'UserController@search');
 get('/kos/{id}', 'UserController@detailKos');
 get('/user/favorit', 'UserController@favorit', ['auth', 'role:pelanggan']);
+get('/user/kos-saya', 'UserController@kosSaya', ['auth', 'role:pelanggan']);
 get('/user/profil', 'UserController@profil', ['auth', 'role:pelanggan']);
 get('/user/laporan', 'UserController@laporan', ['auth', 'role:pelanggan']);
 get('/user/riwayat-kos', 'UserController@riwayatKos', ['auth', 'role:pelanggan']);

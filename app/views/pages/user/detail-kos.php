@@ -102,40 +102,7 @@ if (!empty($lastLoginAt)) {
   }
 </style>
 
-<div x-data="kosDetailPage()" class="public-page">
-  <section class="border-b border-slate-200 bg-white">
-    <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <a href="<?= BASE_URL ?>/cari-kos" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary">
-          <span>←</span> Kembali ke pencarian
-        </a>
-        <div class="flex flex-wrap items-center gap-2">
-          <?php if ($isPelanggan): ?>
-            <a href="<?= BASE_URL ?>/user/laporan" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
-              Riwayat Laporan
-            </a>
-            <button @click="reportOpen = true" type="button" class="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50">
-              <?= masterIconSvg('flag', 'h-4 w-4') ?> Laporkan Kos
-            </button>
-          <?php else: ?>
-            <a href="<?= BASE_URL ?>/login" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:border-primary hover:text-primary">
-              Login untuk melapor
-            </a>
-          <?php endif; ?>
-          <?php if ($isPelanggan): ?>
-            <button @click="toggleFavorite()" type="button" class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary" :aria-pressed="favorited">
-              <span :class="favorited ? 'fill-current text-red-500' : ''"><?= masterIconSvg('heart', 'h-4 w-4') ?></span>
-              <span x-text="favorited ? 'Favorit tersimpan' : 'Simpan favorit'"></span>
-            </button>
-          <?php endif; ?>
-          <button @click="share()" type="button" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-primary hover:text-primary">
-            ↗ Bagikan
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
+<div x-data="kosDetailPage()" @detail-kos:report.window="reportOpen = true" @detail-kos:favorite.window="toggleFavorite()" @detail-kos:share.window="share()" class="public-page">
 <div data-swipe-page
     x-show="showSectionTabs"
     x-cloak
@@ -145,7 +112,7 @@ if (!empty($lastLoginAt)) {
     x-transition:leave="transition ease-in duration-150"
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
-    class="sticky top-16 z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur lg:hidden">
+    class="detail-sticky-tabs sticky z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur lg:hidden">
     <nav data-swipe-tabs class="mx-auto flex max-w-7xl overflow-x-auto px-2 scrollbar-none" aria-label="Navigasi detail kos">
       <template x-for="tab in sectionTabs" :key="tab.id">
         <button
@@ -380,7 +347,7 @@ if (!empty($lastLoginAt)) {
           $mapLng = (float)($kos['longitude'] ?? 0);
           $hasCoordinates = is_finite($mapLat) && is_finite($mapLng) && $mapLat >= -90 && $mapLat <= 90 && $mapLng >= -180 && $mapLng <= 180;
           $googleEmbedUrl = $hasCoordinates
-            ? 'https://www.google.com/maps?q=' . rawurlencode($mapLat . ',' . $mapLng) . '&z=17&output=embed'
+            ? 'https://www.google.com/maps?q=' . rawurlencode($mapLat . ',' . $mapLng) . '&z=14&output=embed'
             : '';
           ?>
           <section id="lokasi" class="detail-section mt-8">
@@ -388,9 +355,7 @@ if (!empty($lastLoginAt)) {
               <div>
                 <div class="flex items-center gap-2">
                   <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><?= masterIconSvg('map-pin', 'h-5 w-5') ?></span>
-                  <div>
-                    <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi dan lingkungan sekitar</h2>
-                  </div>
+                  <div><h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi dan lingkungan sekitar</h2><p class="mt-0.5 text-xs text-slate-500">Menampilkan area sekitar dalam radius 3 km.</p></div>
                 </div>
               </div>
               <a target="_blank" rel="noopener noreferrer" href="<?= htmlspecialchars($googleMapsUrl) ?>" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark">
@@ -401,11 +366,11 @@ if (!empty($lastLoginAt)) {
             <?php $lokasiPopulerSekitar = $lokasiPopulerSekitar ?? []; ?>
 
             <?php if ($hasCoordinates): ?>
-              <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+              <div class="public-detail-map mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
                 <iframe
                   src="<?= htmlspecialchars($googleEmbedUrl) ?>"
                   title="Peta lokasi <?= htmlspecialchars($kos['nama_kos'] ?? 'kos') ?>"
-                  class="block aspect-[16/8] w-full sm:h-[300px] sm:aspect-auto lg:h-[340px]"
+                  class="block h-full w-full"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
                   allowfullscreen>
@@ -502,11 +467,8 @@ if (!empty($lastLoginAt)) {
     </section>
   </main>
 
-  <div class="fixed inset-x-0 bottom-0 z-[1000] border-t border-slate-200 bg-white/95 p-3 shadow-[0_-8px_30px_rgba(15,23,42,0.10)] backdrop-blur lg:hidden">
+  <div class="fixed inset-x-3 bottom-3 z-[1000] rounded-2xl border border-slate-200 bg-white/95 p-2.5 shadow-[0_-8px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
     <div class="mx-auto flex max-w-7xl items-center gap-2">
-      <?php if ($isPelanggan): ?>
-        <button @click="toggleFavorite()" type="button" class="inline-flex min-h-12 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700" :class="favorited ? 'fill-current text-red-500' : ''" :aria-label="favorited ? 'Hapus dari favorit' : 'Simpan ke favorit'"><?= masterIconSvg('heart', 'h-5 w-5') ?></button>
-      <?php endif; ?>
       <?php if ($waUrl): ?>
         <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Hubungi Pemilik</a>
       <?php else: ?>
@@ -516,7 +478,7 @@ if (!empty($lastLoginAt)) {
   </div>
 
   <?php if ($isPelanggan): ?>
-    <div x-show="reportOpen" x-cloak @keydown.escape.window="reportOpen = false" class="fixed inset-0 z-[2100] flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-5">
+    <div x-show="reportOpen" x-cloak @keydown.escape.window="reportOpen = false" class="public-modal-layer fixed inset-0 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-5">
       <div class="absolute inset-0" @click="reportOpen = false"></div>
       <div class="relative w-full max-w-lg rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
         <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
@@ -557,7 +519,7 @@ if (!empty($lastLoginAt)) {
     </div>
   <?php endif; ?>
 
-  <div data-swipe-gallery x-show="typeGalleryOpen" x-cloak @click.self="typeGalleryOpen = false" @keydown.escape.window="typeGalleryOpen = false" class="fixed inset-0 z-[2050] flex items-center justify-center bg-black/90 p-4">
+  <div data-swipe-gallery x-show="typeGalleryOpen" x-cloak @click.self="typeGalleryOpen = false" @keydown.escape.window="typeGalleryOpen = false" class="public-gallery-layer fixed inset-0 flex items-center justify-center bg-black/90 p-4">
     <button @click="typeGalleryOpen = false" type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Tutup galeri"><?= masterIconSvg('x', 'h-6 w-6') ?></button>
     <button data-swipe-prev @click="previousTypePhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="flex max-h-[90vh] max-w-6xl flex-col items-center">
@@ -568,7 +530,7 @@ if (!empty($lastLoginAt)) {
     <button data-swipe-next @click="nextTypePhoto()" type="button" class="absolute right-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:right-8">›</button>
   </div>
 
-  <div data-swipe-gallery x-show="galleryOpen" x-cloak @click.self="galleryOpen = false" @keydown.escape.window="galleryOpen = false" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4">
+  <div data-swipe-gallery x-show="galleryOpen" x-cloak @click.self="galleryOpen = false" @keydown.escape.window="galleryOpen = false" class="public-gallery-layer fixed inset-0 flex items-center justify-center bg-black/90 p-4">
     <button @click="galleryOpen = false" type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Tutup galeri"><?= masterIconSvg('x', 'h-6 w-6') ?></button>
     <button data-swipe-prev @click="previousPhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="max-h-[90vh] max-w-6xl">
@@ -663,7 +625,7 @@ if (!empty($lastLoginAt)) {
         const target = document.getElementById(id);
         if (!target) return;
         this.activeSection = id;
-        const navbarOffset = 64;
+        const navbarOffset = window.innerWidth < 768 ? 48 : 64;
         const tabsOffset = window.innerWidth < 1024 ? 49 : 0;
         const top = target.getBoundingClientRect().top + window.scrollY - navbarOffset - tabsOffset - 8;
         window.scrollTo({
@@ -707,7 +669,10 @@ if (!empty($lastLoginAt)) {
           const res = await API.post('/pelanggan/favorit', {
             id_kos: <?= (int)$kos['id_kos'] ?>
           });
-          if (res?.data?.favorited !== undefined) this.favorited = !!res.data.favorited;
+          if (res?.data?.favorited !== undefined) {
+            this.favorited = !!res.data.favorited;
+            window.dispatchEvent(new CustomEvent('detail-kos:favorite-changed', { detail: { favorited: this.favorited } }));
+          }
         } catch (e) {
           console.error('Gagal memperbarui favorit:', e);
         } finally {

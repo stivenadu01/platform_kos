@@ -30,18 +30,14 @@ $reasonLabels = [
 <div x-data="{ openId: null }" class="public-page">
   <section class="public-page-header">
     <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
-      <a href="<?= BASE_URL ?>/cari-kos" class="text-sm font-semibold text-slate-500 hover:text-primary">← Kembali</a>
-      <div class="mt-4">
-        <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">Laporan Saya</h1>
-        <p class="mt-1 text-sm text-slate-500">Pantau laporan kos yang pernah kamu kirim kepada Admin BetaKos.</p>
-      </div>
+      <div><p class="public-eyebrow">Bantuan informasi</p><h1 class="public-title">Laporan Saya</h1><p class="public-subtitle">Pantau laporan kos yang pernah kamu kirim kepada Admin BetaKos.</p></div>
     </div>
   </section>
 
   <main class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
     <?php if (!$laporan): ?>
-      <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><?= masterIconSvg('flag', 'h-7 w-7') ?></div>
+      <div class="public-empty">
+        <div class="public-empty-icon bg-slate-100 text-slate-500"><?= masterIconSvg('flag', 'h-7 w-7') ?></div>
         <h2 class="mt-4 font-semibold text-slate-900">Belum ada laporan</h2>
         <p class="mx-auto mt-1 max-w-md text-sm text-slate-500">
           Kamu belum pernah mengirim laporan kos. Jika menemukan informasi yang bermasalah, kamu dapat melaporkannya dari halaman detail kos.

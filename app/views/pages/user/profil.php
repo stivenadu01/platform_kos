@@ -1,12 +1,14 @@
-<div x-data="accountProfilePage()" x-init="init()" class="mx-auto w-full max-w-6xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+<div data-swipe-page x-data="accountProfilePage()" x-init="init()" class="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
   <div>
     <p class="text-sm font-medium text-primary">Akun</p>
     <h1 class="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">Profil & Pengaturan Akun</h1>
     <p class="mt-1 text-sm text-slate-500">Kelola identitas, keamanan, dan sesi akun BetaKos Anda.</p>
   </div>
 
+  <nav class="owner-segmented lg:hidden" aria-label="Bagian profil"><button type="button" @click="activeSection='profil'" :class="activeSection==='profil'?'is-active':''">Profil</button><button type="button" @click="activeSection='keamanan'" :class="activeSection==='keamanan'?'is-active':''">Keamanan</button><button type="button" @click="activeSection='akun'" :class="activeSection==='akun'?'is-active':''">Akun</button></nav>
+
   <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
-    <section class="card border border-slate-200 shadow-sm">
+    <section x-show="desktop || activeSection==='profil'" x-cloak class="card border border-slate-200 shadow-sm">
       <div class="flex flex-col items-center text-center">
         <template x-if="user.foto"><img :src="window.BASE_URL + '/uploads' + user.foto" :alt="user.nama || 'Foto profil'" class="h-28 w-28 rounded-full object-cover ring-1 ring-slate-200"></template>
         <template x-if="!user.foto"><div class="flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-4xl font-bold text-primary ring-1 ring-blue-100" x-text="initial"></div></template>
@@ -23,7 +25,7 @@
     </section>
 
     <div class="space-y-6">
-      <section class="card border border-slate-200 shadow-sm">
+      <section x-show="desktop || activeSection==='profil'" x-cloak class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Informasi Pribadi</h2>
         <p class="mt-1 text-sm text-slate-500">Nama dan nomor HP dapat diperbarui. Email dan NIK merupakan identitas yang dilindungi.</p>
         <form class="mt-6 grid gap-5 md:grid-cols-2" @submit.prevent="saveProfile">
@@ -35,7 +37,7 @@
         </form>
       </section>
 
-      <section class="card border border-slate-200 shadow-sm">
+      <section x-show="desktop || activeSection==='keamanan'" x-cloak class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Keamanan Akun</h2>
         <p class="mt-1 text-sm text-slate-500">Ubah kata sandi dan kelola akses perangkat yang sedang login.</p>
         <form class="mt-6 space-y-5" @submit.prevent="changePassword">
@@ -50,7 +52,7 @@
         </div>
       </section>
 
-      <section class="card border border-slate-200 shadow-sm">
+      <section x-show="desktop || activeSection==='akun'" x-cloak class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Pengaturan Akun</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
           <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs font-medium uppercase tracking-wide text-slate-400">Status akun</p><p class="mt-1 font-semibold capitalize text-slate-800" x-text="user.status || '-'"></p></div>
@@ -69,8 +71,9 @@ function accountProfilePage() {
     form: { nama: '', no_hp: '' },
     password: { password_lama: '', password_baru: '', password_konfirmasi: '' },
     savingProfile: false, savingPassword: false, savingFoto: false, loggingOutAll: false,
+    activeSection: 'profil', desktop: window.innerWidth >= 1024,
     get initial() { return (this.user.nama || 'P').trim().charAt(0).toUpperCase(); },
-    init() { this.form = { nama: this.user.nama || '', no_hp: this.user.no_hp || '' }; },
+    init() { this.form = { nama: this.user.nama || '', no_hp: this.user.no_hp || '' }; window.addEventListener('resize', () => { this.desktop = window.innerWidth >= 1024; }); },
     async saveProfile() { this.savingProfile = true; try { const res = await API.post('/auth/profile', this.form); this.user = res.data; Alpine.store('auth').user = res.data; window.dispatchEvent(new CustomEvent('betakos:onboarding-refresh')); } finally { this.savingProfile = false; } },
     async uploadFoto() { const file = this.$refs.foto?.files?.[0]; if (!file) return; this.savingFoto = true; try { const fd = new FormData(); fd.append('foto', file); const res = await API.post('/auth/profile/foto', fd); this.user = res.data; Alpine.store('auth').user = res.data; this.$refs.foto.value = ''; } finally { this.savingFoto = false; } },
     async changePassword() { if (this.password.password_baru !== this.password.password_konfirmasi) { Alpine.store('ui').toast('Konfirmasi kata sandi tidak cocok', 'error'); return; } this.savingPassword = true; try { await API.post('/auth/password', this.password); this.password = { password_lama: '', password_baru: '', password_konfirmasi: '' }; } finally { this.savingPassword = false; } },

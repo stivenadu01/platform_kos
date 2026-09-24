@@ -52,7 +52,7 @@ class UserController
     $kosLat = is_numeric($kos['latitude'] ?? null) ? (float)$kos['latitude'] : null;
     $kosLng = is_numeric($kos['longitude'] ?? null) ? (float)$kos['longitude'] : null;
     if ($kosLat !== null && $kosLng !== null) {
-      $lokasiPopulerSekitar = getLokasiPopulerSekitar($kosLat, $kosLng, 6, 20);
+      $lokasiPopulerSekitar = getLokasiPopulerSekitar($kosLat, $kosLng, 6, 3);
     }
 
     view('user/detail-kos', [
@@ -109,6 +109,13 @@ class UserController
     view('user/profil', [
       'title' => 'Profil & Pengaturan Akun',
       'profile' => $user
+    ]);
+  }
+
+  public function kosSaya()
+  {
+    view('user/kos-saya', [
+      'title' => 'Kos Saya - BetaKos'
     ]);
   }
 

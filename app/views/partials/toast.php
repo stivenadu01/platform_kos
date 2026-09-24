@@ -4,7 +4,7 @@
   x-data
   x-show="$store.ui.toastMessage"
   x-transition
-  class="fixed top-15 left-1/2 -translate-x-1/2 w-full max-w-lg px-4 text-white z-100">
+  class="ui-toast-layer fixed top-15 left-1/2 -translate-x-1/2 w-full max-w-lg px-4 text-white">
 
   <span
     :class="{
@@ -30,7 +30,7 @@
   x-show="$store.ui.confirmShow"
   x-transition
   @click.self="$store.ui.confirmNo()"
-  class="modal-backdrop z-100 px-5">
+  class="ui-confirm-layer modal-backdrop px-5">
 
   <div class="modal-box">
 
@@ -75,7 +75,7 @@
   x-data
   x-show="$store.ui.loading"
   x-transition.opacity
-  class="fixed inset-0 z-[999] flex-center">
+  class="ui-loading-layer fixed inset-0 flex-center">
 
   <div class="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
 

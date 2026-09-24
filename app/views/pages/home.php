@@ -1,25 +1,25 @@
 <section class="relative overflow-hidden bg-white">
-  <div class="mx-auto max-w-7xl px-4 pb-14 pt-10 sm:px-6 sm:pt-16 lg:px-8 lg:pt-20">
+  <div class="mx-auto max-w-7xl px-4 pb-10 pt-7 sm:px-6 sm:pb-14 sm:pt-16 lg:px-8 lg:pt-20">
     <div class="grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
       <div>
         <span class="inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
           BetaKos Kupang
         </span>
 
-        <h1 class="mt-5 max-w-3xl font-[Poppins] text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+        <h1 class="mt-4 max-w-3xl font-[Poppins] text-3xl font-bold tracking-tight text-slate-900 sm:mt-5 sm:text-5xl lg:text-6xl">
           Cari kos sesuai lokasi, kebutuhan, dan budgetmu.
         </h1>
 
-        <p class="mt-5 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-5 sm:text-lg sm:leading-7">
           Masukkan nama tempat, jalan, kawasan, atau lokasi tujuan untuk menemukan kos di area yang kamu inginkan.
         </p>
 
-        <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/60">
+        <div class="mt-5 rounded-2xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/60 sm:mt-8">
           <?php $pickerMode = 'home'; ?>
           <?php include ROOT_PATH . '/app/views/partials/user/location-picker.php'; ?>
         </div>
 
-        <div class="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500">
+        <div class="mt-5 hidden flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500 sm:flex">
           <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Cari berdasarkan lokasi</span>
           <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Sesuaikan budget</span>
           <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Lihat kamar tersedia</span>
@@ -65,7 +65,7 @@
   </div>
 </section>
 
-<section class="border-y border-slate-100 bg-slate-50/70">
+<section class="hidden border-y border-slate-100 bg-slate-50/70 sm:block">
   <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="text-center">
       <p class="text-sm font-semibold text-primary">Mulai dari sini</p>

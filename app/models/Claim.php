@@ -101,7 +101,7 @@ function getClaimRiwayatByUser($id_user)
 function getRiwayatKosByUser($id_user)
 {
   $conn = db();
-  $stmt = $conn->prepare("SELECT p.id_penghuni, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, p.status, km.id_kamar, km.nomor_kamar, k.id_kos, k.nama_kos, k.alamat, u.nama AS nama_pemilik, u.foto AS foto_pemilik FROM penghuni p INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE p.id_user = ? ORDER BY p.tanggal_masuk DESC, p.id_penghuni DESC");
+  $stmt = $conn->prepare("SELECT p.id_penghuni, p.nama, p.nik, p.tanggal_masuk, p.tanggal_keluar, p.status, km.id_kamar, km.nomor_kamar, k.id_kos, k.nama_kos, k.alamat, u.nama AS nama_pemilik, u.foto AS foto_pemilik, (SELECT f.nama_file FROM kos_foto f WHERE f.id_kos = k.id_kos ORDER BY f.is_thumbnail DESC, f.urutan ASC, f.id_foto ASC LIMIT 1) AS foto_kos FROM penghuni p INNER JOIN kamar km ON km.id_kamar = p.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik WHERE p.id_user = ? ORDER BY p.tanggal_masuk DESC, p.id_penghuni DESC");
   $stmt->bind_param('i', $id_user);
   $stmt->execute();
   $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);

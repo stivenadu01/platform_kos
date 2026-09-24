@@ -1,4 +1,4 @@
-<footer class="mt-16 border-t border-slate-200 bg-white">
+<footer class="mt-16 hidden border-t border-slate-200 bg-white md:block">
   <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
     <div class="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
       <div class="max-w-md">

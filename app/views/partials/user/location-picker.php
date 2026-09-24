@@ -65,7 +65,7 @@ $pickerConfig = [
     x-show="open"
     x-cloak
     x-transition.origin.top
-    class="fixed inset-x-0 bottom-0 top-16 z-[120] flex flex-col overflow-hidden border-t border-slate-200 bg-white shadow-2xl">
+    class="public-filter-layer fixed inset-x-0 bottom-0 top-0 flex flex-col overflow-hidden border-t border-slate-200 bg-white shadow-2xl md:top-16">
 
     <div class="border-b border-slate-200 bg-white px-4 py-3 shadow-sm">
       <form @submit.prevent="submitQuery()" class="flex items-center gap-3">

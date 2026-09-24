@@ -1,22 +1,23 @@
 <div x-data="riwayatKosPage()" x-init="init()" class="public-page">
-  <section class="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+  <section class="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:space-y-8 sm:px-6 sm:py-8 lg:px-8">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900 sm:text-3xl">Riwayat Kos Saya</h1>
-      <p class="mt-1 text-sm text-slate-500">Lihat tempat tinggal yang sudah terhubung dan ajukan claim untuk riwayat yang belum tercatat.</p>
+      <p class="public-eyebrow">Arsip pelanggan</p>
+      <h1 class="public-title">Riwayat &amp; Klaim</h1>
+      <p class="public-subtitle">Tempat tinggal yang sudah selesai, tagihan lama, dan pengajuan penghubung data.</p>
     </div>
 
     <section>
       <div class="mb-3 flex items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold text-slate-900">Riwayat Terhubung</h2>
+        <h2 class="text-lg font-semibold text-slate-900">Riwayat tempat tinggal</h2>
         <button type="button" @click="load()" class="btn-secondary gap-2 text-xs"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?> Refresh</button>
       </div>
       <div x-show="loading" class="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">Memuat riwayat...</div>
-      <div x-show="!loading && !history.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
+      <div x-show="!loading && !pastHomes.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
         <h3 class="font-semibold text-slate-900">Belum ada riwayat terhubung</h3>
         <p class="mt-1 text-sm text-slate-500">Gunakan daftar kandidat di bawah untuk mengajukan claim.</p>
       </div>
-      <div x-show="!loading && history.length" class="grid gap-4 md:grid-cols-2">
-        <template x-for="item in history" :key="item.id_penghuni">
+      <div x-show="!loading && pastHomes.length" class="grid gap-4 md:grid-cols-2">
+        <template x-for="item in pastHomes" :key="item.id_penghuni">
           <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex items-start justify-between gap-3">
               <div class="flex min-w-0 items-center gap-3">
@@ -31,7 +32,7 @@
                   <p class="mt-1 text-sm text-slate-500" x-text="`Kamar ${item.nomor_kamar} · ${item.nama_pemilik}`"></p>
                 </div>
               </div>
-              <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-medium text-emerald-700" x-text="item.status === 'aktif' ? 'Sedang tinggal' : 'Selesai'"></span>
+              <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">Selesai</span>
             </div>
             <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
               <div>
@@ -50,12 +51,12 @@
 
     <section>
       <div class="mb-3">
-        <h2 class="text-lg font-semibold text-slate-900">Tagihan Saya</h2>
-        <p class="mt-1 text-sm text-slate-500">Tagihan dan pembayaran yang terkait dengan histori penghuni Anda.</p>
+        <h2 class="text-lg font-semibold text-slate-900">Riwayat tagihan</h2>
+        <p class="mt-1 text-sm text-slate-500">Tagihan yang sudah lunas atau dibatalkan.</p>
       </div>
-      <div x-show="!bills.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">Belum ada tagihan yang dapat ditampilkan.</div>
-      <div x-show="bills.length" class="grid gap-4 md:grid-cols-2">
-        <template x-for="bill in bills" :key="bill.id_tagihan">
+      <div x-show="!pastBills.length" class="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">Belum ada riwayat tagihan.</div>
+      <div x-show="pastBills.length" class="grid gap-4 md:grid-cols-2">
+        <template x-for="bill in pastBills" :key="bill.id_tagihan">
           <article class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div class="flex items-start justify-between gap-3">
               <div>
@@ -130,7 +131,7 @@
     </section>
   </section>
 
-  <div x-show="billOpen" x-cloak class="fixed inset-0 z-80 flex items-end justify-center p-0 sm:items-center sm:p-5">
+  <div x-show="billOpen" x-cloak class="public-modal-layer fixed inset-0 flex items-end justify-center p-0 sm:items-center sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeBill()"></div>
     <div class="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl sm:max-w-2xl sm:rounded-2xl sm:p-6" @click.stop>
       <div class="flex items-start justify-between gap-4">
@@ -183,7 +184,7 @@
     </div>
   </div>
 
-  <div x-show="claimOpen" x-cloak class="fixed inset-0 z-80 flex items-end justify-center p-0 sm:items-center sm:p-5">
+  <div x-show="claimOpen" x-cloak class="public-modal-layer fixed inset-0 flex items-end justify-center p-0 sm:items-center sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeClaim()"></div>
     <div class="relative w-full rounded-t-2xl bg-white p-5 shadow-2xl sm:max-w-lg sm:rounded-2xl sm:p-6">
       <div class="flex items-start justify-between gap-4">
@@ -230,6 +231,8 @@
       form: {
         catatan_mahasiswa: ''
       },
+      get pastHomes() { return this.history.filter(item => item.status !== 'aktif'); },
+      get pastBills() { return this.bills.filter(item => item.status === 'lunas' || item.status === 'dibatalkan'); },
       async init() {
         await this.load();
       },
