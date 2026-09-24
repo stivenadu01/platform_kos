@@ -1,8 +1,9 @@
-<div x-data="pemilikLanggananPembayaran()" x-init="init()" class="space-y-6">
-  <div>
-    <a :href="window.BASE_URL + '/pemilik/langganan'" class="text-sm font-medium text-primary hover:underline">← Kembali ke Langganan</a>
-    <h2 class="mt-4 text-2xl sm:text-3xl font-bold text-slate-900">Pembayaran Langganan</h2>
-    <p class="mt-2 text-sm leading-6 text-slate-500">Lihat status order Pro, tujuan pembayaran, dan catatan verifikasi admin.</p>
+<div x-data="pemilikLanggananPembayaran()" x-init="init()" class="owner-page">
+  <div class="owner-form-heading">
+    <a :href="window.BASE_URL + '/pemilik/langganan'" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
+    <p class="owner-eyebrow mt-3">BetaKos Pro</p>
+    <h2 class="owner-title">Pembayaran Langganan</h2>
+    <p class="owner-subtitle">Lihat status order Pro, tujuan pembayaran, dan catatan verifikasi admin.</p>
   </div>
 
   <div x-show="loading" class="card h-40 animate-pulse border border-slate-200"></div>
@@ -20,8 +21,8 @@
             <span class="inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold" :class="statusClass(selected.status)" x-text="statusLabel(selected.status)"></span>
           </div>
 
-          <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div class="rounded-xl bg-slate-50 p-4">
+          <div class="mt-4 grid grid-cols-2 gap-2.5 sm:mt-5 sm:grid-cols-3 sm:gap-3">
+            <div class="col-span-2 rounded-xl bg-slate-50 p-3 sm:col-span-1 sm:p-4">
               <p class="text-xs text-slate-500">Nominal</p>
               <p class="mt-1 font-bold text-slate-900" x-text="formatRupiah(selected.nominal)"></p>
             </div>

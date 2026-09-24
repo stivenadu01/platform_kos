@@ -1,10 +1,10 @@
 <div
   x-data="editKamarForm()"
   x-init="init()"
-  class="max-w-3xl mx-auto space-y-6">
+  class="owner-page mx-auto max-w-3xl">
 
   <!-- HEADER -->
-  <div>
+  <div class="owner-form-heading">
 
     <a
       :href="returnUrl"
@@ -13,11 +13,11 @@
       <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
-    <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900">
+    <h2 class="owner-title">
       Edit Kamar
     </h2>
 
-    <p class="mt-1 text-sm text-slate-500">
+    <p class="owner-subtitle">
       Perbarui informasi kamar.
     </p>
 
@@ -108,7 +108,7 @@
 
 
     <!-- ACTION -->
-    <div class="flex justify-end gap-3 pt-2">
+    <div class="owner-form-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
 
       <a
         :href="returnUrl"

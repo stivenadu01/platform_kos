@@ -9,6 +9,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
 
 <aside
   :data-sidebar-collapsed="sidebarCollapsed"
+  :data-mobile-sidebar-open="sidebarOpen ? 'true' : 'false'"
   class="
     fixed inset-y-0 left-0 z-50
     w-64
@@ -21,7 +22,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
 
   <!-- LOGO -->
-  <div class="h-16 shrink-0 px-5 flex items-center border-b border-slate-200">
+  <div class="h-16 shrink-0 px-5 flex items-center justify-between border-b border-slate-200">
 
     <a
       :href="window.BASE_URL + '/pemilik'"
@@ -44,11 +45,15 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
 
     </a>
 
+    <button type="button" @click="sidebarOpen = false" class="owner-mobile-sidebar-close h-10 w-10 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup menu">
+      <?= masterIconSvg('x', 'h-5 w-5') ?>
+    </button>
+
   </div>
 
 
   <!-- NAVIGATION -->
-  <nav class="min-h-0 flex-1 overflow-y-auto p-4 pb-6 space-y-1">
+  <nav class="owner-desktop-sidebar-nav min-h-0 flex-1 overflow-y-auto p-4 pb-6 space-y-1">
 
     <!-- DASHBOARD -->
     <a
@@ -120,30 +125,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
-        Kos Saya
-      </span>
-
-    </a>
-
-
-    <!-- KELOLA KAMAR -->
-    <a
-      :href="window.BASE_URL + '/pemilik/kamar'"
-      data-onboarding="sidebar-kamar"
-      class="
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-slate-700
-        hover:bg-slate-100
-        hover:text-primary
-      ">
-
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('bed', 'h-5 w-5') ?></span>
-
-      <span class="sidebar-label">
-        Kelola Kamar
+        Properti
       </span>
 
     </a>
@@ -190,7 +172,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('wallet', 'h-5 w-5') ?></span>
 
       <span class="sidebar-label">
-        Tagihan & Pembayaran
+        Keuangan
       </span>
       <?php if (!$__pemilikIsPro): ?>
         <span class="sidebar-label ml-auto text-[10px] font-bold text-primary">PRO</span>
@@ -222,6 +204,13 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       <span class="sidebar-label">Langganan</span>
     </a>
 
+    <a
+      :href="window.BASE_URL + '/pemilik/riwayat'"
+      class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('history', 'h-5 w-5') ?></span>
+      <span class="sidebar-label">Riwayat</span>
+    </a>
+
 
 
     <!-- KELUAR (MOBILE) -->
@@ -237,9 +226,52 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
 
   </nav>
 
+  <nav class="owner-mobile-more-menu" aria-label="Menu lainnya">
+    <div class="owner-mobile-more-intro mb-4">
+      <p class="text-xs font-bold uppercase tracking-wider text-primary">Menu lainnya</p>
+      <p class="mt-1 truncate font-bold text-slate-900"><?= htmlspecialchars($_SESSION['user']['nama'] ?? 'Pemilik Kos') ?></p>
+      <p class="mt-1 text-xs text-slate-500"><?= $__pemilikIsPro ? 'Paket PRO aktif' : 'Paket reguler' ?></p>
+    </div>
+
+    <div class="space-y-1">
+      <a :href="window.BASE_URL + '/pemilik/profil'" class="owner-mobile-more-link">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span>
+        <span>Profil &amp; Keamanan</span>
+        <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
+      </a>
+      <a :href="window.BASE_URL + '/pemilik/claim'" class="owner-mobile-more-link">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span>
+        <span>Klaim Riwayat</span>
+        <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
+      </a>
+      <a :href="window.BASE_URL + '/pemilik/langganan'" class="owner-mobile-more-link">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600"><?= masterIconSvg('star', 'h-5 w-5') ?></span>
+        <span>Langganan</span>
+        <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
+      </a>
+      <a :href="window.BASE_URL + '/pemilik/riwayat'" class="owner-mobile-more-link">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600"><?= masterIconSvg('history', 'h-5 w-5') ?></span>
+        <span>Riwayat</span>
+        <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
+      </a>
+      <button type="button" @click="sidebarOpen = false; window.dispatchEvent(new CustomEvent('betakos:operational-help'))" class="owner-mobile-more-link w-full text-left">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600"><?= masterIconSvg('info', 'h-5 w-5') ?></span>
+        <span>Panduan Halaman</span>
+        <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
+      </button>
+    </div>
+
+    <div class="mt-auto border-t border-slate-200 pt-4">
+      <button type="button" @click="$store.auth.logout()" class="owner-mobile-more-link w-full text-red-600 hover:!bg-red-50 hover:!text-red-700">
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600"><?= masterIconSvg('log-out', 'h-5 w-5') ?></span>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </nav>
+
 
   <!-- BOTTOM (DESKTOP) -->
-  <div class="hidden lg:block shrink-0 p-4 border-t border-slate-200 bg-white">
+  <div class="owner-desktop-sidebar-footer hidden lg:block shrink-0 p-4 border-t border-slate-200 bg-white">
     <button
       type="button"
       @click="$store.auth.logout()"
@@ -257,6 +289,14 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       const current = window.location.pathname.replace(/\/+$/, '');
       const links = document.querySelectorAll('.pemilik-sidebar nav a[href]');
       let best = null;
+      if (current.includes('/pemilik/kamar') || current.includes('/pemilik/tipe-kamar')) {
+        const propertyLink = document.querySelector('.pemilik-sidebar [data-onboarding="sidebar-kos"]');
+        if (propertyLink) {
+          propertyLink.classList.add('pemilik-nav-active');
+          propertyLink.setAttribute('aria-current', 'page');
+          return;
+        }
+      }
       links.forEach((link) => {
         const path = new URL(link.href, window.location.origin).pathname.replace(/\/+$/, '');
         const matches = current === path || (path.endsWith('/pemilik') ? current === path : current.startsWith(path + '/'));

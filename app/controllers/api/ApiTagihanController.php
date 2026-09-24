@@ -22,7 +22,8 @@ class ApiTagihanController
         trim(query('id_kos') ?? ''),
         trim(query('id_kamar') ?? ''),
         trim(query('id_tipe_kamar') ?? ''),
-        trim(query('id_penghuni') ?? '')
+        trim(query('id_penghuni') ?? ''),
+        trim(query('scope') ?? '')
       );
 
       response([

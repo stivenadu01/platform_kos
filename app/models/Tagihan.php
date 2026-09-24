@@ -10,7 +10,8 @@ function getTagihanListByPemilik(
   $id_kos = '',
   $id_kamar = '',
   $id_tipe_kamar = '',
-  $id_penghuni = ''
+  $id_penghuni = '',
+  $scope = ''
 ) {
   $conn = db();
 
@@ -62,6 +63,12 @@ function getTagihanListByPemilik(
     $where[] = 'EXISTS (SELECT 1 FROM tagihan_penghuni tp_filter WHERE tp_filter.id_tagihan = t.id_tagihan AND tp_filter.id_penghuni = ?)';
     $params[] = (int) $id_penghuni;
     $types .= 'i';
+  }
+
+  if ($scope === 'aktif') {
+    $where[] = "t.status IN ('belum_lunas', 'sebagian')";
+  } elseif ($scope === 'riwayat') {
+    $where[] = "t.status IN ('lunas', 'dibatalkan')";
   }
 
   $whereSql = 'WHERE ' . implode(' AND ', $where);

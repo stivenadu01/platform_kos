@@ -1,9 +1,9 @@
-<div x-data="pemilikLanggananCheckout()" x-init="init()" class="space-y-6">
-  <div>
-    <a :href="window.BASE_URL + '/pemilik/langganan'" class="text-sm font-medium text-primary hover:underline">← Kembali ke Langganan</a>
-    <p class="mt-4 text-sm font-semibold text-primary">Checkout Langganan</p>
-    <h2 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">BetaKos Pro</h2>
-    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+<div x-data="pemilikLanggananCheckout()" x-init="init()" class="owner-page">
+  <div class="owner-form-heading">
+    <a :href="window.BASE_URL + '/pemilik/langganan'" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
+    <p class="owner-eyebrow mt-3">Checkout Langganan</p>
+    <h2 class="owner-title">BetaKos Pro</h2>
+    <p class="owner-subtitle">
       <span x-text="isFreeFirst ? 'Pro 1 bulan pertama gratis dan langsung aktif tanpa pembayaran.' : (isRenewal ? 'Perpanjangan akan aktif kembali setelah pembayaran diverifikasi admin dan menggunakan harga perpanjangan.' : 'Langganan baru menggunakan harga awal dan perlu pembayaran manual.')"></span>
     </p>
   </div>
@@ -26,8 +26,8 @@
   </template>
 
   <template x-if="!loading && !pendingPayment && selectedPackage">
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-6">
-      <section class="space-y-6">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[1fr_420px]">
+      <section class="space-y-4 sm:space-y-6">
         <div class="card border-2 border-primary shadow-sm">
           <div>
             <label class="text-sm font-semibold text-slate-700">Durasi Pro</label>

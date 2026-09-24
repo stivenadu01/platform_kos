@@ -15,7 +15,8 @@ function getPenghuniListByPemilik(
   $id_kos = '',
   $id_kamar = '',
   $status = '',
-  $id_tipe_kamar = ''
+  $id_tipe_kamar = '',
+  $scope = ''
 ) {
   $conn = db();
 
@@ -52,6 +53,12 @@ function getPenghuniListByPemilik(
     $where[] = 'p.status = ?';
     $params[] = $status;
     $types .= 's';
+  }
+
+  if ($scope === 'aktif') {
+    $where[] = "p.status = 'aktif'";
+  } elseif ($scope === 'riwayat') {
+    $where[] = "p.status = 'keluar'";
   }
 
   $whereSql = 'WHERE ' . implode(' AND ', $where);

@@ -1,18 +1,19 @@
 <div
   x-data="penghuniPage()"
   x-init="init()"
-  class="space-y-6">
+  class="owner-page">
 
   <!-- HEADER -->
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="owner-page-header">
 
     <div>
       <a x-show="isTypeContext" x-cloak :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
-        Kelola Penghuni
+      <p class="owner-eyebrow">Operasional Kos</p>
+      <h2 class="owner-title">
+        Penghuni Aktif
       </h2>
 
-      <p class="mt-1 text-sm text-slate-500" x-text="isTypeContext ? 'Kelola penghuni pada kos dan tipe kamar yang telah dipilih.' : 'Kelola data penghuni dari seluruh kamar yang Anda miliki.'"></p>
+      <p class="owner-subtitle" x-text="isTypeContext ? 'Penghuni aktif pada kos dan tipe kamar yang dipilih.' : 'Kelola penghuni yang masih tinggal di seluruh properti Anda.'"></p>
     </div>
 
     <a
@@ -26,15 +27,20 @@
   <div x-show="isTypeContext" x-cloak class="owner-context-panel">
     <div class="owner-context-header">
       <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
-      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-primary">Konteks Penghuni</p><h3 class="mt-1 truncate font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat konteks...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Kapasitas ' + contextInfo.kapasitas + ' orang per kamar. Daftar hanya menampilkan penghuni pada tipe ini.' : ''"></p></div>
+      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-violet-600">Penghuni pada tipe</p><h3 class="owner-copy-full mt-1 font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat konteks...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Kapasitas ' + contextInfo.kapasitas + ' orang per kamar' : ''"></p></div>
     </div>
   </div>
 
 
   <!-- FILTER -->
-  <div x-show="!isTypeContext" data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
+  <div x-show="!isTypeContext" x-data="{ filterOpen: window.innerWidth >= 768 }" @resize.window="if (window.innerWidth >= 768) filterOpen = true" data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+    <button type="button" @click="filterOpen = !filterOpen" class="owner-mobile-filter-summary md:hidden">
+      <span class="inline-flex items-center gap-2"><?= masterIconSvg('filter', 'h-4 w-4') ?> Cari & Filter Penghuni</span>
+      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idTipeKamar || idKamar" class="owner-mobile-filter-count" x-text="[search,idKos,idTipeKamar,idKamar].filter(Boolean).length"></span><span x-text="filterOpen ? '−' : '+'"></span></span>
+    </button>
+
+    <div x-show="filterOpen" x-cloak class="mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid md:grid-cols-2 xl:grid-cols-4 xl:gap-4">
 
       <!-- SEARCH -->
       <div class="form-group">
@@ -138,41 +144,13 @@
       </div>
 
 
-      <!-- STATUS -->
-      <div class="form-group">
-
-        <label class="label">
-          Status
-        </label>
-
-        <select
-          x-model="status"
-          @change="applyFilter()"
-          class="select">
-
-          <option value="">
-            Semua status
-          </option>
-
-          <option value="aktif">
-            Aktif
-          </option>
-
-          <option value="keluar">
-            Sudah Keluar
-          </option>
-
-        </select>
-
-      </div>
-
     </div>
 
   </div>
 
 
   <!-- DATA -->
-  <div data-help="help-penghuni-table" class="card border border-slate-200 shadow-sm overflow-hidden">
+  <div data-help="help-penghuni-table" class="owner-data-container card border border-slate-200 shadow-sm overflow-hidden">
 
     <!-- LOADING -->
     <div
@@ -241,14 +219,6 @@
               Tanggal Masuk
             </th>
 
-            <th class="text-left px-5 py-3 font-semibold">
-              Tanggal Keluar
-            </th>
-
-            <th class="text-left px-5 py-3 font-semibold">
-              Status
-            </th>
-
             <th class="text-right px-5 py-3 font-semibold">
               Aksi
             </th>
@@ -311,67 +281,6 @@
                 x-text="formatDate(item.tanggal_masuk)">
               </td>
 
-              <!-- TANGGAL KELUAR -->
-              <td class="px-5 py-4">
-
-                <template x-if="item.tanggal_keluar">
-                  <span
-                    class="text-slate-600"
-                    x-text="formatDate(item.tanggal_keluar)">
-                  </span>
-                </template>
-
-                <template x-if="!item.tanggal_keluar">
-                  <span class="text-slate-400">
-                    -
-                  </span>
-                </template>
-
-              </td>
-
-
-              <!-- STATUS -->
-              <td class="px-5 py-4">
-
-                <template x-if="item.status === 'aktif'">
-
-                  <span
-                    class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-
-                    Aktif
-
-                  </span>
-
-                </template>
-
-
-                <template x-if="item.status === 'keluar'">
-
-                  <span
-                    class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-
-                    Sudah Keluar
-
-                  </span>
-
-                </template>
-
-
-                <template x-if="
-                  item.status !== 'aktif' &&
-                  item.status !== 'keluar'
-                ">
-
-                  <span
-                    class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
-                    x-text="item.status || '-'">
-                  </span>
-
-                </template>
-
-              </td>
-
-
               <!-- AKSI -->
               <td class="px-5 py-4">
 
@@ -425,26 +334,25 @@
 
     </div>
 
-    <div x-show="!loading && penghuni.length > 0" class="!block md:!hidden divide-y divide-slate-200">
+    <div x-show="!loading && penghuni.length > 0" class="owner-mobile-card-stack !block md:!hidden">
       <template x-for="item in penghuni" :key="'m-' + item.id_penghuni">
         <article class="p-4">
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama"></div><div class="mt-1 text-xs text-slate-500" x-show="item.no_hp" x-text="item.no_hp"></div></div>
+            <div class="min-w-0"><div class="owner-copy-full font-bold text-slate-900" x-text="item.nama"></div><div class="mt-1 text-xs text-slate-500" x-show="item.no_hp" x-text="item.no_hp"></div></div>
             <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : item.status === 'keluar' ? 'Sudah Keluar' : item.status || '-' "></span>
           </div>
-          <div class="mt-3 space-y-2 text-sm">
-            <div x-show="!isTypeContext"><span class="text-xs text-slate-400">Kos</span><div class="mt-0.5 text-slate-700" x-text="item.nama_kos"></div></div>
-            <div><span class="text-xs text-slate-400">Kamar</span><div class="mt-0.5 font-medium text-slate-700" x-text="item.nomor_kamar + (!isTypeContext && item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
+          <div class="mt-3 flex items-center gap-3 rounded-xl bg-violet-50 p-3">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-violet-600 shadow-sm"><?= masterIconSvg('bed', 'h-4 w-4') ?></span>
+            <div class="min-w-0"><div class="text-[11px] font-semibold uppercase tracking-wider text-violet-500" x-text="isTypeContext ? 'Unit kamar' : item.nama_kos"></div><div class="owner-copy-full mt-0.5 font-bold text-violet-950" x-text="'Kamar ' + item.nomor_kamar + (!isTypeContext && item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
           </div>
-          <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+          <div class="mt-3 text-xs">
             <div><div class="text-slate-400">Tanggal masuk</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_masuk)"></div></div>
-            <div><div class="text-slate-400">Tanggal keluar</div><div class="mt-1 text-slate-700" x-text="item.tanggal_keluar ? formatDate(item.tanggal_keluar) : '-' "></div></div>
           </div>
-          <div class="mt-3 flex flex-wrap gap-2">
-            <a :href="tagihanUrl(item)" class="btn-secondary text-xs"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Tagihan</a>
-            <a :href="editUrl(item)" class="btn-secondary text-xs"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</a>
-            <button x-show="item.status === 'aktif'" type="button" @click="keluar(item)" class="btn-secondary text-xs"><?= masterIconSvg('log-out', 'h-4 w-4') ?> Catat Keluar</button>
-            <button type="button" @click="remove(item)" class="btn-danger text-xs"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button>
+          <div class="mt-3 grid grid-cols-2 gap-2">
+            <a :href="tagihanUrl(item)" class="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Lihat Tagihan</a>
+            <a :href="editUrl(item)" class="owner-action-secondary text-xs"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</a>
+            <button x-show="item.status === 'aktif'" type="button" @click="keluar(item)" class="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700"><?= masterIconSvg('log-out', 'h-4 w-4') ?> Catat Keluar</button>
+            <button type="button" @click="remove(item)" class="owner-action-danger text-xs"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button>
           </div>
         </article>
       </template>
@@ -607,7 +515,7 @@
 
       idKamar: utils.getQuery('id_kamar') || '',
 
-      status: utils.getQuery('status') || '',
+      status: '',
 
       contextInfo: null,
 
@@ -716,6 +624,8 @@
 
           }
 
+          params.set('scope', 'aktif');
+
 
           const query = params.toString();
 
@@ -779,7 +689,6 @@
           if (this.isTypeContext) {
             this.contextInfo = this.kamarList.find(item => String(item.id_kos) === String(this.idKos) && String(item.id_tipe_kamar) === String(this.idTipeKamar)) || null;
           }
-
 
           /*
           |--------------------------------------------------------------------------
@@ -1006,8 +915,7 @@
       },
 
       tagihanUrl(item) {
-        const params = new URLSearchParams({ id_penghuni: item.id_penghuni, context: 'penghuni' });
-        return BASE_URL + '/pemilik/pembayaran?' + params.toString();
+        return BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + encodeURIComponent(item.id_kamar) + '&section=keuangan';
       },
 
       editUrl(item) {

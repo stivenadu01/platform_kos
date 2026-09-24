@@ -136,7 +136,7 @@ if (!empty($lastLoginAt)) {
     </div>
   </section>
 
-  <div
+<div data-swipe-page
     x-show="showSectionTabs"
     x-cloak
     x-transition:enter="transition ease-out duration-200"
@@ -146,7 +146,7 @@ if (!empty($lastLoginAt)) {
     x-transition:leave-start="opacity-100"
     x-transition:leave-end="opacity-0"
     class="sticky top-16 z-30 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur lg:hidden">
-    <nav class="mx-auto flex max-w-7xl overflow-x-auto px-2 scrollbar-none" aria-label="Navigasi detail kos">
+    <nav data-swipe-tabs class="mx-auto flex max-w-7xl overflow-x-auto px-2 scrollbar-none" aria-label="Navigasi detail kos">
       <template x-for="tab in sectionTabs" :key="tab.id">
         <button
           type="button"
@@ -557,25 +557,25 @@ if (!empty($lastLoginAt)) {
     </div>
   <?php endif; ?>
 
-  <div x-show="typeGalleryOpen" x-cloak @click.self="typeGalleryOpen = false" @keydown.escape.window="typeGalleryOpen = false" class="fixed inset-0 z-[2050] flex items-center justify-center bg-black/90 p-4">
+  <div data-swipe-gallery x-show="typeGalleryOpen" x-cloak @click.self="typeGalleryOpen = false" @keydown.escape.window="typeGalleryOpen = false" class="fixed inset-0 z-[2050] flex items-center justify-center bg-black/90 p-4">
     <button @click="typeGalleryOpen = false" type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Tutup galeri"><?= masterIconSvg('x', 'h-6 w-6') ?></button>
-    <button @click="previousTypePhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
+    <button data-swipe-prev @click="previousTypePhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="flex max-h-[90vh] max-w-6xl flex-col items-center">
       <div class="mb-3 rounded-full bg-black/45 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm" x-text="typeGalleryName"></div>
       <img :src="typeGalleryPhotos[typeGalleryIndex]" :alt="typeGalleryName" class="max-h-[78vh] max-w-full rounded-xl object-contain">
       <p class="mt-3 text-center text-xs text-white/70" x-text="(typeGalleryIndex + 1) + ' / ' + typeGalleryPhotos.length"></p>
     </div>
-    <button @click="nextTypePhoto()" type="button" class="absolute right-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:right-8">›</button>
+    <button data-swipe-next @click="nextTypePhoto()" type="button" class="absolute right-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:right-8">›</button>
   </div>
 
-  <div x-show="galleryOpen" x-cloak @click.self="galleryOpen = false" @keydown.escape.window="galleryOpen = false" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4">
+  <div data-swipe-gallery x-show="galleryOpen" x-cloak @click.self="galleryOpen = false" @keydown.escape.window="galleryOpen = false" class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/90 p-4">
     <button @click="galleryOpen = false" type="button" class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20" aria-label="Tutup galeri"><?= masterIconSvg('x', 'h-6 w-6') ?></button>
-    <button @click="previousPhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
+    <button data-swipe-prev @click="previousPhoto()" type="button" class="absolute left-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:left-8">‹</button>
     <div class="max-h-[90vh] max-w-6xl">
       <img :src="galleryPhotos[galleryIndex]" alt="" class="max-h-[85vh] max-w-full rounded-xl object-contain">
       <p class="mt-3 text-center text-xs text-white/70" x-text="(galleryIndex + 1) + ' / ' + galleryPhotos.length"></p>
     </div>
-    <button @click="nextPhoto()" type="button" class="absolute right-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:right-8">›</button>
+    <button data-swipe-next @click="nextPhoto()" type="button" class="absolute right-3 rounded-full bg-white/10 px-4 py-3 text-2xl text-white hover:bg-white/20 sm:right-8">›</button>
   </div>
 </div>
 

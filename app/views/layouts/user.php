@@ -25,6 +25,7 @@
   <script src="<?= BASE_URL ?>/assets/js/store.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/utils.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
+  <script src="<?= BASE_URL ?>/assets/js/owner-swipe.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/location-picker.js"></script>
   <script defer src="https://unpkg.com/alpinejs"></script>
 </head>

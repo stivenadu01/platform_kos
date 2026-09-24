@@ -1,16 +1,17 @@
 <div
   x-data="kosPage()"
-  class="space-y-6">
+  class="owner-page">
 
-  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="owner-page-header">
 
     <div>
       <a href="<?= BASE_URL ?>/pemilik" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
-      <h2 class="text-xl sm:text-2xl font-bold text-slate-900">
-        Kos Saya
+      <p class="owner-eyebrow">Properti</p>
+      <h2 class="owner-title">
+        Properti
       </h2>
 
-      <p class="mt-1 text-sm text-slate-500">
+      <p class="owner-subtitle">
         Kelola informasi dan data kos yang Anda miliki.
       </p>
     </div>
@@ -56,66 +57,78 @@
 
       <?php foreach ($kos as $item): ?>
 
+        <?php
+          $totalUnit = max(0, (int)($item['jumlah_kamar'] ?? 0));
+          $occupiedUnit = max(0, (int)($item['kamar_terisi'] ?? 0));
+          $occupancy = $totalUnit > 0 ? min(100, (int)round(($occupiedUnit / $totalUnit) * 100)) : 0;
+        ?>
+
         <article class="owner-panel owner-panel-hover !p-0">
-          <div class="owner-card-header">
-            <div class="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-white/10"></div>
+          <div class="relative overflow-hidden bg-slate-900 p-4 sm:p-5">
+            <?php if (!empty($item['foto'])): ?>
+              <img src="<?= BASE_URL . '/uploads' . htmlspecialchars($item['foto'], ENT_QUOTES, 'UTF-8') ?>" alt="Foto <?= htmlspecialchars($item['nama_kos'], ENT_QUOTES, 'UTF-8') ?>" class="absolute inset-0 h-full w-full object-cover" loading="lazy" onerror="this.style.display='none'">
+            <?php endif; ?>
+            <div class="owner-photo-overlay absolute inset-0"></div>
             <div class="relative flex items-start gap-3.5">
               <div class="owner-card-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path></svg>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="owner-card-muted text-xs font-medium uppercase tracking-wide">Properti Kos</p>
-                <h3 class="mt-1 truncate text-lg font-bold text-white"><?= htmlspecialchars($item['nama_kos']) ?></h3>
-                <p class="owner-card-muted mt-1 line-clamp-1 text-xs"><?= htmlspecialchars($item['alamat']) ?></p>
+                <h3 class="owner-copy-full mt-1 text-lg font-bold text-white"><?= htmlspecialchars($item['nama_kos']) ?></h3>
+                <p class="owner-card-muted owner-copy-full mt-1 text-xs"><?= htmlspecialchars($item['alamat']) ?></p>
               </div>
               <span class="owner-card-ring shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['status']))) ?></span>
             </div>
-          </div>
 
-          <div class="p-4 sm:p-5">
-
-            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-
-              <div class="rounded-xl bg-slate-50 p-3 text-center">
-                <div class="text-lg font-bold leading-none text-slate-900">
-                  <?= $item['jumlah_kamar'] ?>
-                </div>
-                <div class="text-xs text-slate-500">
-                  Kamar
-                </div>
+            <div class="owner-photo-stat relative mt-4 rounded-xl p-3">
+              <div class="flex items-center justify-between gap-3 text-xs">
+                <span class="owner-photo-stat-label">Keterisian kamar</span>
+                <strong class="text-white"><?= $occupiedUnit ?> dari <?= $totalUnit ?> terisi</strong>
               </div>
-
-              <div class="rounded-xl bg-emerald-50 p-3 text-center">
-                <div class="text-lg font-bold leading-none text-emerald-600">
-                  <?= $item['kamar_tersedia'] ?>
-                </div>
-                <div class="text-xs text-slate-500">
-                  Tersedia
-                </div>
+              <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full bg-emerald-400" style="width:<?= $occupancy ?>%"></div></div>
+              <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+                <span class="owner-stat-available font-semibold"><?= (int)$item['kamar_tersedia'] ?> tersedia</span>
+                <span class="owner-photo-stat-label"><?= (int)$item['kamar_tidak_tersedia'] ?> perlu diperiksa</span>
+                <span class="ml-auto font-semibold text-white"><?= $occupancy ?>%</span>
               </div>
-
-              <div class="rounded-xl bg-red-50 p-3 text-center">
-                <div class="text-lg font-bold leading-none text-red-600">
-                  <?= $item['kamar_terisi'] ?>
-                </div>
-                <div class="text-xs text-slate-500">
-                  Terisi
-                </div>
-              </div>
-
-              <div class="rounded-xl bg-amber-50 p-3 text-center">
-                <div class="text-lg font-bold leading-none text-amber-600">
-                  <?= $item['kamar_tidak_tersedia'] ?>
-                </div>
-                <div class="text-xs text-slate-500">
-                  Tidak tersedia
-                </div>
-              </div>
-
             </div>
 
+            <div class="owner-photo-actions space-y-2">
+              <?php if ($item['status'] === 'draft' || $item['status'] === 'ditolak'): ?>
+                <button type="button" data-onboarding="fast-ajukan-verifikasi" @click="ajukan(<?= $item['id_kos'] ?>)" class="owner-photo-action owner-photo-action-primary">
+                  <?= masterIconSvg('check-circle-2', 'h-4 w-4') ?>
+                  <span>Ajukan Verifikasi Admin</span>
+                  <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
+                </button>
+              <?php elseif ($item['status'] === 'menunggu_verifikasi'): ?>
+                <div class="owner-photo-waiting rounded-xl px-3 py-2.5 text-center text-xs font-semibold">Menunggu Verifikasi Admin</div>
+              <?php endif; ?>
 
-            <?php if ($item['status'] === 'ditolak' && !empty($item['catatan_verifikasi'])): ?>
+              <?php if ($item['status'] === 'aktif'): ?>
+                <a href="<?= BASE_URL ?>/pemilik/kamar?id_kos=<?= (int)$item['id_kos'] ?>&context=kos" class="owner-photo-action owner-photo-action-primary">
+                  <?= masterIconSvg('bed', 'h-4 w-4') ?>
+                  <span>Kelola Kamar</span>
+                  <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
+                </a>
+              <?php endif; ?>
+
+              <div data-help="help-kos-action" class="grid grid-cols-3 gap-2 pt-0.5">
+                <a data-onboarding="kos-photo" href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>" class="owner-photo-action owner-photo-action-neutral">
+                  <?= masterIconSvg('image', 'h-3.5 w-3.5') ?> Foto
+                </a>
+                <?php if ($item['status'] === 'menunggu_verifikasi'): ?>
+                  <span class="owner-photo-action owner-photo-action-neutral cursor-not-allowed opacity-50" title="Kos tidak dapat diedit selama menunggu verifikasi admin"><?= masterIconSvg('pencil', 'h-3.5 w-3.5') ?> Edit</span>
+                <?php else: ?>
+                  <a href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>" class="owner-photo-action owner-photo-action-neutral"><?= masterIconSvg('pencil', 'h-3.5 w-3.5') ?> Edit</a>
+                <?php endif; ?>
+                <button type="button" @click="hapus(<?= $item['id_kos'] ?>)" class="owner-photo-action owner-photo-action-danger"><?= masterIconSvg('trash-2', 'h-3.5 w-3.5') ?> Hapus</button>
+              </div>
+            </div>
+          </div>
+
+          <?php if ($item['status'] === 'ditolak' && !empty($item['catatan_verifikasi'])): ?>
+            <div class="p-3">
               <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-3.5">
                 <div class="flex items-center gap-2 text-sm font-semibold text-red-700">
                   <?= masterIconSvg('alert-circle', 'h-4 w-4') ?> Alasan penolakan Admin
@@ -123,64 +136,8 @@
                 <p class="mt-1.5 text-sm leading-6 text-red-700 whitespace-pre-line"><?= htmlspecialchars($item['catatan_verifikasi']) ?></p>
                 <p class="mt-2 text-xs text-red-500">Silakan perbaiki data kos kemudian ajukan kembali untuk verifikasi.</p>
               </div>
-            <?php endif; ?>
-
-            <div class="mt-4">
-              <?php if ($item['status'] === 'draft' || $item['status'] === 'ditolak'): ?>
-                <button type="button" data-onboarding="fast-ajukan-verifikasi" @click="ajukan(<?= $item['id_kos'] ?>)" class="w-full rounded-xl bg-primary-soft text-primary px-4 py-2.5 text-sm font-semibold hover:bg-blue-100">
-                  Ajukan Verifikasi Admin
-                </button>
-              <?php elseif ($item['status'] === 'menunggu_verifikasi'): ?>
-                <div class="w-full rounded-xl bg-amber-50 text-amber-700 px-4 py-2.5 text-sm font-semibold text-center">Menunggu Verifikasi Admin</div>
-              <?php elseif ($item['status'] === 'aktif'): ?>
-                <div class="w-full rounded-xl bg-emerald-50 text-emerald-700 px-4 py-2.5 text-sm font-semibold text-center">Kos Terverifikasi & Aktif</div>
-              <?php endif; ?>
             </div>
-
-            <?php if ($item['status'] === 'aktif'): ?>
-              <a href="<?= BASE_URL ?>/pemilik/kamar?id_kos=<?= (int)$item['id_kos'] ?>&context=kos" class="mt-3 flex w-full items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30">
-                <?= masterIconSvg('bed', 'h-4 w-4') ?>
-                <span>Kelola Kamar</span>
-                <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
-              </a>
-            <?php endif; ?>
-
-            <div data-help="help-kos-action" class="owner-card-actions mt-4">
-
-              <a
-                data-onboarding="kos-photo"
-                href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>"
-                class="owner-action-secondary">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"></path></svg>
-                Foto
-              </a>
-
-              <?php if ($item['status'] === 'menunggu_verifikasi'): ?>
-                <span
-                  class="owner-action-secondary cursor-not-allowed opacity-50"
-                  title="Kos tidak dapat diedit selama menunggu verifikasi admin">
-                  Edit
-                </span>
-              <?php else: ?>
-                <a
-                  href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>"
-                  class="owner-action-secondary">
-                  <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
-                  Edit
-                </a>
-              <?php endif; ?>
-
-              <button
-                type="button"
-                @click="hapus(<?= $item['id_kos'] ?>)"
-                class="owner-action-danger">
-                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5"></path><path d="M14 11v5"></path></svg>
-                Hapus
-              </button>
-
-            </div>
-
-          </div>
+          <?php endif; ?>
 
         </article>
 

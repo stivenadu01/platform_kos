@@ -47,17 +47,16 @@
   <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/onboarding.js"></script>
   <script src="<?= BASE_URL ?>/assets/js/operational-help.js"></script>
+  <script src="<?= BASE_URL ?>/assets/js/owner-swipe.js"></script>
 </head>
 
-<body class="bg-slate-100 text-slate-800 owner-ui">
+<body class="bg-slate-50 text-slate-800 owner-ui">
 
   <script>
     // Set the shell state before the first paint. Alpine will bind the same value afterwards.
     (() => {
       let collapsed = false;
-      try {
-        collapsed = localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1';
-      } catch (_) {}
+      try { collapsed = localStorage.getItem('betakos_pemilik_sidebar_collapsed') === '1'; } catch (_) {}
       document.body.setAttribute('data-betakos-pemilik-sidebar-collapsed', collapsed ? 'true' : 'false');
       window.__BETAKOS_PEMILIK_SIDEBAR_COLLAPSED__ = collapsed;
     })();
@@ -87,9 +86,11 @@
 
       <?php include __DIR__ . '/../partials/pemilik/topbar.php'; ?>
 
-      <main class="px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <main class="px-3 pb-24 pt-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <?= $content ?>
       </main>
+
+      <?php include __DIR__ . '/../partials/pemilik/bottom-nav.php'; ?>
 
     </div>
 

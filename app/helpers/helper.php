@@ -158,6 +158,7 @@ function masterIconCatalog()
     // Navigasi & antarmuka aplikasi
     'home' => ['label' => 'Beranda', 'path' => '<path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/>'],
     'search' => ['label' => 'Cari', 'path' => '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'],
+    'filter' => ['label' => 'Filter', 'path' => '<path d="M4 5h16l-6 7v5l-4 2v-7L4 5Z"/>'],
     'heart' => ['label' => 'Favorit', 'path' => '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>'],
     'history' => ['label' => 'Riwayat', 'path' => '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>'],
     'star' => ['label' => 'Langganan', 'path' => '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'],
@@ -167,6 +168,7 @@ function masterIconCatalog()
     'image' => ['label' => 'Foto', 'path' => '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="2"/><path d="m21 15-4.5-4.5L5 21"/>'],
     'wallet' => ['label' => 'Pembayaran', 'path' => '<path d="M4 6h14a2 2 0 0 1 2 2v10H4a2 2 0 0 1-2-2V6a3 3 0 0 1 3-3h12"/><path d="M16 12h4"/>'],
     'chevron-right' => ['label' => 'Lanjut', 'path' => '<path d="m9 18 6-6-6-6"/>'],
+    'chevron-left' => ['label' => 'Kembali', 'path' => '<path d="m15 18-6-6 6-6"/>'],
     'arrow-left' => ['label' => 'Kembali', 'path' => '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>'],
     'plus-circle' => ['label' => 'Tambah', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>'],
     'chart-column' => ['label' => 'Dashboard', 'path' => '<path d="M4 20V10h4v10M10 20V4h4v16M16 20v-7h4v7M2 20h20"/>'],

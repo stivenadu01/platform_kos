@@ -44,12 +44,12 @@
       ]
     },
     '/pemilik/penghuni': {
-      title: 'Kelola Penghuni',
-      intro: 'Gunakan halaman ini untuk mencatat siapa yang sedang menempati kamar dan menjaga riwayat penghuni tetap rapi.',
+      title: 'Penghuni Aktif',
+      intro: 'Halaman ini hanya menampilkan penghuni yang masih tinggal. Penghuni yang sudah keluar tersedia pada menu Riwayat.',
       steps: [
         ['help-penghuni-add', 'Tambah penghuni', 'Saat penghuni baru masuk, gunakan Tambah Penghuni. Sistem akan mencari akun berdasarkan NIK dan menghubungkannya dengan kamar.'],
-        ['help-penghuni-filter', 'Cari dan filter', 'Gunakan pencarian, kos, kamar, dan status untuk menemukan penghuni tertentu.'],
-        ['help-penghuni-table', 'Data penghuni', 'Periksa kamar, tanggal masuk, dan status penghuni dari tabel.'],
+        ['help-penghuni-filter', 'Cari dan filter', 'Gunakan pencarian, kos, tipe, dan kamar untuk menemukan penghuni aktif tertentu.'],
+        ['help-penghuni-table', 'Penghuni aktif', 'Periksa kamar dan tanggal masuk penghuni yang masih tinggal.'],
         ['help-penghuni-actions', 'Keluar atau edit', 'Edit digunakan untuk perubahan identitas. Jika penghuni berhenti tinggal, gunakan Catat Penghuni Keluar agar riwayat dan tagihan tetap konsisten.']
       ]
     },
@@ -72,13 +72,29 @@
       ]
     },
     '/pemilik/pembayaran': {
-      title: 'Tagihan & Pembayaran',
-      intro: 'Ini adalah pusat keuangan operasional penghuni. Gunakan Detail untuk melihat satu tagihan pada halaman khusus dan kelola pembayarannya dari sana.',
+      title: 'Keuangan Aktif',
+      intro: 'Halaman ini hanya berisi tagihan belum lunas dan sebagian. Tagihan selesai tersedia pada menu Riwayat.',
       steps: [
-        ['help-tagihan-summary', 'Ringkasan tagihan', 'Lihat jumlah tagihan belum lunas, sebagian, lunas, dan total sisa pembayaran.'],
-        ['help-tagihan-filter', 'Cari dan filter', 'Gunakan nomor tagihan, kos, kamar, atau status untuk menemukan tagihan tertentu.'],
+        ['help-tagihan-filter', 'Cari dan filter', 'Gunakan nama penghuni, kos, atau kamar untuk menemukan tagihan aktif.'],
         ['help-tagihan-list', 'Daftar tagihan', 'Periksa periode, total, sisa, jatuh tempo, dan status sebelum melakukan tindakan.'],
         ['help-tagihan-detail', 'Buka detail tagihan', 'Klik Detail untuk berpindah ke halaman khusus yang berisi informasi penghuni, penyesuaian, dan riwayat pembayaran.']
+      ]
+    },
+    '/pemilik/kamar/operasional': {
+      title: 'Operasional Kamar',
+      intro: 'Penghuni dan tagihan aktif untuk satu kamar dikelola dari halaman ini.',
+      steps: [
+        ['help-room-operation-tabs', 'Pilih bagian', 'Berpindah antara penghuni aktif dan tagihan aktif tanpa kehilangan konteks kamar.'],
+        ['help-room-operation-occupants', 'Penghuni aktif', 'Lihat siapa yang masih tinggal atau tambahkan penghuni ketika kapasitas tersedia.'],
+        ['help-room-operation-finance', 'Tagihan aktif', 'Lihat sisa pembayaran, buka detail, atau catat pembayaran yang diterima.']
+      ]
+    },
+    '/pemilik/riwayat': {
+      title: 'Riwayat Operasional',
+      intro: 'Data selesai dipisahkan dari pekerjaan aktif agar operasional harian tetap ringkas.',
+      steps: [
+        ['help-history-tabs', 'Jenis riwayat', 'Pilih riwayat penghuni yang sudah keluar atau keuangan yang sudah selesai.'],
+        ['help-history-list', 'Buka riwayat penghuni', 'Pada tab Riwayat Penghuni, klik kartu penghuni untuk melihat seluruh tagihan dan pembayaran yang terhubung dengannya.']
       ]
     },
     '/pemilik/pembayaran/detail': {

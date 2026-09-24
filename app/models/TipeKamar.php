@@ -23,6 +23,7 @@ function getTipeKamarListByPemilik($id_pemilik, $id_kos = '')
       t.created_at,
       t.updated_at,
       k.nama_kos,
+      (SELECT f.nama_file FROM tipe_kamar_foto f WHERE f.id_tipe_kamar = t.id_tipe_kamar ORDER BY f.is_thumbnail DESC, f.urutan ASC, f.id_foto ASC LIMIT 1) AS foto,
       COUNT(km.id_kamar) AS jumlah_kamar,
       SUM(CASE WHEN km.status = 'tersedia' THEN 1 ELSE 0 END) AS kamar_tersedia,
       SUM(CASE WHEN km.status = 'terisi' THEN 1 ELSE 0 END) AS kamar_terisi

@@ -40,54 +40,39 @@
     </template>
   </div>
 
-  <div x-show="!loading" x-cloak data-help="dashboard-ringkasan" class="owner-stat-grid">
-    <div class="owner-stat-card">
-      <p class="text-sm text-slate-500">Total Kos</p>
-      <div class="mt-3 flex items-end justify-between">
-        <p class="text-3xl font-bold text-slate-900" x-text="summary.total_kos"></p>
-        <span class="owner-stat-icon bg-blue-50 text-blue-700"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span>
-      </div>
-      <a href="<?= BASE_URL ?>/pemilik/kos" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Lihat kos →</a>
+  <section x-show="!loading && attentionItems.length" x-cloak class="owner-attention-panel">
+    <div class="owner-attention-heading">
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700"><?= masterIconSvg('alert-circle', 'h-5 w-5') ?></span>
+      <div><h3>Perlu diperhatikan</h3><p>Tindakan yang sebaiknya Anda selesaikan lebih dahulu.</p></div>
     </div>
-
-    <div class="owner-stat-card">
-      <p class="text-sm text-slate-500">Kamar Terisi</p>
-      <div class="mt-3 flex items-end justify-between">
-        <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_terisi"></p>
-        <span class="owner-stat-icon bg-emerald-50 text-emerald-700"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span>
-      </div>
-      <p class="mt-3 text-xs text-slate-500"><span x-text="summary.total_kamar"></span> total kamar</p>
+    <div class="owner-attention-list">
+      <template x-for="item in attentionItems" :key="item.label">
+        <a :href="item.url" class="owner-attention-item">
+          <span><strong x-text="item.value"></strong><span x-text="item.label"></span></span>
+          <?= masterIconSvg('chevron-right', 'h-4 w-4') ?>
+        </a>
+      </template>
     </div>
+  </section>
 
-    <div class="owner-stat-card">
-      <p class="text-sm text-slate-500">Kamar Tersedia</p>
-      <div class="mt-3 flex items-end justify-between">
-        <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_tersedia"></p>
-        <span class="owner-stat-icon bg-sky-50 text-sky-700"><?= masterIconSvg('check-circle-2', 'h-5 w-5') ?></span>
+  <div x-show="!loading" x-cloak data-help="dashboard-ringkasan" class="owner-overview-card">
+    <div class="owner-overview-primary">
+      <div class="flex items-start justify-between gap-3">
+        <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Keterisian kamar</p><p class="mt-1 text-3xl font-bold tracking-tight text-slate-950"><span x-text="summary.kamar_terisi"></span><span class="text-lg font-semibold text-slate-400"> / <span x-text="summary.total_kamar"></span></span></p></div>
+        <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><?= masterIconSvg('bed', 'h-5 w-5') ?></span>
       </div>
-      <a href="<?= BASE_URL ?>/pemilik/kamar" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Kelola kamar →</a>
+      <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-emerald-500 transition-all duration-500" :style="'width:' + occupancyPercent + '%'" role="progressbar" :aria-valuenow="occupancyPercent" aria-valuemin="0" aria-valuemax="100"></div></div>
+      <div class="mt-2 flex items-center justify-between text-xs"><span class="text-slate-500" x-text="occupancyPercent + '% terisi'"></span><a href="<?= BASE_URL ?>/pemilik/kamar" class="font-semibold text-primary">Lihat kamar →</a></div>
     </div>
-
-    <div class="owner-stat-card">
-      <p class="text-sm text-slate-500">Kamar Tidak Tersedia</p>
-      <div class="mt-3 flex items-end justify-between">
-        <p class="text-3xl font-bold text-slate-900" x-text="summary.kamar_tidak_tersedia"></p>
-        <span class="owner-stat-icon bg-amber-50 text-amber-700"><?= masterIconSvg('circle-x', 'h-5 w-5') ?></span>
-      </div>
-      <a href="<?= BASE_URL ?>/pemilik/kamar" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Kelola kamar →</a>
-    </div>
-
-    <div class="owner-stat-card">
-      <p class="text-sm text-slate-500">Penghuni Aktif</p>
-      <div class="mt-3 flex items-end justify-between">
-        <p class="text-3xl font-bold text-slate-900" x-text="summary.penghuni_aktif"></p>
-        <span class="owner-stat-icon bg-violet-50 text-violet-700"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
-      </div>
-      <a href="<?= BASE_URL ?>/pemilik/penghuni" class="mt-3 inline-block text-xs font-semibold text-primary hover:underline">Lihat penghuni →</a>
+    <div class="owner-overview-metrics">
+      <a href="<?= BASE_URL ?>/pemilik/kos"><span class="text-blue-600"><?= masterIconSvg('building-2', 'h-4 w-4') ?></span><span><strong x-text="summary.total_kos"></strong><small>Properti</small></span></a>
+      <a href="<?= BASE_URL ?>/pemilik/kos"><span class="text-emerald-600"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span><span><strong x-text="summary.kamar_tersedia"></strong><small>Kamar tersedia</small></span></a>
+      <a href="<?= BASE_URL ?>/pemilik/kos"><span class="text-amber-600"><?= masterIconSvg('circle-x', 'h-4 w-4') ?></span><span><strong x-text="summary.kamar_tidak_tersedia"></strong><small>Perlu diperiksa</small></span></a>
+      <a href="<?= BASE_URL ?>/pemilik/penghuni"><span class="text-violet-600"><?= masterIconSvg('users-round', 'h-4 w-4') ?></span><span><strong x-text="summary.penghuni_aktif"></strong><small>Penghuni aktif</small></span></a>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
     <div x-show="isPro" data-help="dashboard-keuangan" class="lg:col-span-2 card border border-slate-200 shadow-sm">
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -124,7 +109,7 @@
       </div>
     </div>
 
-    <div data-help="dashboard-aksi" class="card border border-slate-200 shadow-sm">
+    <div data-help="dashboard-aksi" class="card hidden border border-slate-200 shadow-sm sm:block">
       <h3 class="font-semibold text-slate-900">Aksi Cepat</h3>
       <div class="mt-4 space-y-2">
         <a href="<?= BASE_URL ?>/pemilik/kos/tambah" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
@@ -156,8 +141,8 @@
       <table class="w-full min-w-[680px] text-sm">
         <thead>
           <tr class="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-400">
-            <th class="pb-3 pr-4">Tagihan</th>
-            <th class="pb-3 pr-4">Kos / Kamar</th>
+            <th class="pb-3 pr-4">Kamar</th>
+            <th class="pb-3 pr-4">Kos</th>
             <th class="pb-3 pr-4">Jatuh Tempo</th>
             <th class="pb-3 pr-4">Sisa</th>
             <th class="pb-3">Status</th>
@@ -169,8 +154,8 @@
           </template>
           <template x-for="item in tagihan" :key="item.id_tagihan">
             <tr class="border-b border-slate-100 last:border-0">
-              <td class="py-4 pr-4 font-semibold text-slate-800" x-text="item.nomor_tagihan"></td>
-              <td class="py-4 pr-4"><span x-text="item.nama_kos"></span><span class="text-slate-400"> · </span><span x-text="item.nomor_kamar"></span></td>
+              <td class="py-4 pr-4"><div class="font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div><div class="mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div></td>
+              <td class="py-4 pr-4" x-text="item.nama_kos"></td>
               <td class="py-4 pr-4" x-text="tanggal(item.tanggal_jatuh_tempo)"></td>
               <td class="py-4 pr-4 font-semibold" x-text="rupiah(item.sisa_tagihan)"></td>
               <td class="py-4"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold" :class="item.status === 'sebagian' ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-700'" x-text="item.status === 'sebagian' ? 'Sebagian' : 'Belum lunas'"></span></td>
@@ -178,6 +163,25 @@
           </template>
         </tbody>
       </table>
+    </div>
+
+    <div class="owner-mobile-card-stack mt-4 md:hidden">
+      <div x-show="tagihan.length === 0" class="p-5 text-center text-sm text-slate-500">Tidak ada tagihan yang perlu ditindaklanjuti.</div>
+      <template x-for="item in tagihan" :key="'mobile-' + item.id_tagihan">
+        <a :href="BASE_URL + '/pemilik/pembayaran/detail?id_tagihan=' + item.id_tagihan" class="block p-3.5 active:bg-slate-50">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <p class="owner-copy-full font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></p>
+              <p class="owner-copy-full mt-1 text-xs text-slate-500" x-text="item.nama_kos"></p>
+            </div>
+            <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="item.status === 'sebagian' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'" x-text="item.status === 'sebagian' ? 'Sebagian' : 'Belum lunas'"></span>
+          </div>
+          <div class="mt-3 flex items-end justify-between gap-3">
+            <div><p class="text-[11px] text-slate-400">Jatuh tempo</p><p class="mt-0.5 text-xs font-medium text-slate-700" x-text="tanggal(item.tanggal_jatuh_tempo)"></p></div>
+            <div class="text-right"><p class="text-[11px] text-slate-400">Sisa pembayaran</p><p class="mt-0.5 font-bold text-rose-600" x-text="rupiah(item.sisa_tagihan)"></p></div>
+          </div>
+        </a>
+      </template>
     </div>
   </div>
 
@@ -203,6 +207,26 @@ function pemilikDashboard() {
       penghuni_aktif: 0, tagihan_belum_lunas: 0, total_piutang: 0, pendapatan_bulan: 0
     },
     tagihan: [],
+
+    get occupancyPercent() {
+      const total = Number(this.summary.total_kamar || 0);
+      return total ? Math.min(100, Math.round((Number(this.summary.kamar_terisi || 0) / total) * 100)) : 0;
+    },
+
+    get attentionItems() {
+      const items = [];
+      if (!Number(this.summary.total_kos || 0)) {
+        items.push({ value: 'Mulai', label: 'Tambahkan kos pertama Anda', url: BASE_URL + '/pemilik/kos/tambah' });
+        return items;
+      }
+      if (this.isPro && Number(this.summary.tagihan_belum_lunas || 0) > 0) {
+        items.push({ value: this.summary.tagihan_belum_lunas, label: 'tagihan perlu ditindaklanjuti', url: BASE_URL + '/pemilik/pembayaran?status=belum_lunas' });
+      }
+      if (Number(this.summary.kamar_tidak_tersedia || 0) > 0) {
+        items.push({ value: this.summary.kamar_tidak_tersedia, label: 'kamar tidak tersedia atau bermasalah', url: BASE_URL + '/pemilik/kos' });
+      }
+      return items;
+    },
 
     async init() {
       try {

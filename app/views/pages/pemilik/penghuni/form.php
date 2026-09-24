@@ -1,9 +1,9 @@
 <div
   x-data="penghuniFormPage()"
   x-init="init()"
-  class="space-y-6">
+  class="owner-page mx-auto max-w-5xl">
 
-  <div>
+  <div class="owner-form-heading">
     <a
       :href="backUrl"
       @click.prevent="utils.goBack($el.href)"
@@ -11,10 +11,10 @@
       <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
-    <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900"
+    <h2 class="owner-title"
       x-text="mode === 'edit' ? 'Edit Penghuni' : 'Tambah Penghuni'"></h2>
 
-    <p class="mt-1 text-sm text-slate-500">
+    <p class="owner-subtitle">
       <span x-show="mode === 'tambah'">
         Tambahkan penghuni baru. Sistem akan otomatis membuat atau menyesuaikan tagihan kamar.
       </span>
@@ -24,16 +24,16 @@
     </p>
   </div>
 
-  <div x-show="mode === 'tambah' && isTypeContext" x-cloak class="owner-context-panel">
+  <div x-show="mode === 'tambah' && (isTypeContext || isRoomContext)" x-cloak class="owner-context-panel">
     <div class="owner-context-header">
       <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('info', 'h-5 w-5') ?></span>
-      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-primary">Tujuan penambahan penghuni</p><h3 class="mt-1 truncate font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat kos dan tipe kamar...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Pilih salah satu unit pada tipe ini. Kapasitas maksimal ' + contextInfo.kapasitas + ' orang per kamar.' : ''"></p></div>
+      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-violet-600">Tujuan penambahan penghuni</p><h3 class="owner-copy-full mt-1 font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) + (isRoomContext ? ' · Kamar ' + contextInfo.nomor_kamar : '') : 'Memuat kos dan kamar...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? (isRoomContext ? 'Penghuni akan ditempatkan otomatis pada kamar ini.' : 'Pilih unit pada tipe ini · Maksimal ' + contextInfo.kapasitas + ' orang per kamar') : ''"></p></div>
     </div>
   </div>
 
   <form @submit.prevent="submit" class="card border border-slate-200 shadow-sm space-y-6">
 
-    <nav x-show="mode === 'tambah'" class="grid grid-cols-2 gap-2 border-b border-slate-200 pb-5" aria-label="Tahapan tambah penghuni">
+    <nav x-show="mode === 'tambah'" class="owner-stepper grid grid-cols-2 gap-2 border-b border-slate-200 pb-5" aria-label="Tahapan tambah penghuni">
       <template x-for="(label, index) in ['Verifikasi NIK', 'Data & Kamar']" :key="label"><div class="flex items-center gap-2 rounded-xl px-3 py-2" :class="step === index + 1 ? 'bg-primary-soft text-primary' : step > index + 1 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400'"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold" :class="step === index + 1 ? 'bg-primary text-white' : step > index + 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'" x-text="step > index + 1 ? '✓' : index + 1"></span><span class="text-xs font-semibold sm:text-sm" x-text="label"></span></div></template>
     </nav>
 
@@ -62,7 +62,7 @@
         </p>
       </div>
 
-      <div class="flex justify-end border-t border-slate-200 pt-5">
+      <div class="owner-form-actions flex justify-end border-t border-slate-200 pt-5">
         <button
           type="button"
           @click="nextStep()"
@@ -80,7 +80,7 @@
       data-help="help-penghuni-edit-data"
       class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-      <div data-help="help-penghuni-room" class="form-group md:col-span-2" x-show="mode === 'tambah'">
+      <div data-help="help-penghuni-room" class="form-group md:col-span-2" x-show="mode === 'tambah' && !isRoomContext">
         <label class="label">Kamar <span class="text-red-500">*</span></label>
 
         <select
@@ -175,6 +175,12 @@
         </p>
       </div>
 
+      <div x-show="mode === 'tambah' && isRoomContext && selectedKamar" x-cloak class="md:col-span-2 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-900">
+        <p class="text-xs font-semibold uppercase tracking-wider text-violet-500">Kamar terpilih otomatis</p>
+        <p class="mt-1 font-bold" x-text="'Kamar ' + selectedKamar?.nomor_kamar"></p>
+        <p class="mt-1 text-xs text-violet-700" x-text="(selectedKamar?.jumlah_penghuni || 0) + ' dari ' + (selectedKamar?.kapasitas || 0) + ' kapasitas terisi'"></p>
+      </div>
+
       <div x-show="mode === 'tambah'" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
         <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">NIK terverifikasi</p>
         <div class="mt-2 flex items-center gap-2 font-semibold text-slate-900"><?= masterIconSvg('user-check', 'h-4 w-4 text-emerald-600') ?><span x-text="form.nik"></span></div>
@@ -209,7 +215,7 @@
     <div
       x-show="mode === 'edit' || step === 2"
       x-cloak
-      class="flex justify-end gap-3 border-t border-slate-200 pt-5">
+      class="owner-form-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
 
       <button x-show="mode === 'tambah'" type="button" @click="backToNik()" class="btn-secondary">← Ubah NIK</button>
 
@@ -246,6 +252,7 @@
       idPenghuni: utils.getQuery('id_penghuni') || '',
       idKos: utils.getQuery('id_kos') || '',
       idTipeKamar: utils.getQuery('id_tipe_kamar') || '',
+      idKamar: utils.getQuery('id_kamar') || '',
       context: utils.getQuery('context') || '',
 
       kamarList: [],
@@ -256,7 +263,12 @@
         return this.context === 'tipe' && !!this.idKos && !!this.idTipeKamar;
       },
 
+      get isRoomContext() {
+        return this.context === 'kamar' && !!this.idKamar;
+      },
+
       get backUrl() {
+        if (this.isRoomContext) return BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + encodeURIComponent(this.idKamar);
         if (!this.isTypeContext) return BASE_URL + '/pemilik/penghuni';
         const params = new URLSearchParams({ id_kos: this.idKos, id_tipe_kamar: this.idTipeKamar, context: 'tipe' });
         return BASE_URL + '/pemilik/penghuni?' + params.toString();
@@ -299,15 +311,22 @@
         try {
           const res = await API.get('/pemilik/penghuni/kamar');
           const allRooms = res.data || [];
-          this.kamarList = this.isTypeContext
+          this.kamarList = this.isRoomContext
+            ? allRooms.filter(item => String(item.id_kamar) === String(this.idKamar) && Number(item.jumlah_penghuni || 0) < Number(item.kapasitas || 0))
+            : this.isTypeContext
             ? allRooms.filter(item => String(item.id_kos) === String(this.idKos) && String(item.id_tipe_kamar) === String(this.idTipeKamar) && Number(item.jumlah_penghuni || 0) < Number(item.kapasitas || 0))
             : allRooms;
-          this.contextInfo = this.isTypeContext && this.kamarList.length ? this.kamarList[0] : null;
+          this.contextInfo = (this.isTypeContext || this.isRoomContext) && this.kamarList.length ? this.kamarList[0] : null;
           if (this.isTypeContext && !this.contextInfo) {
             const contextRes = await API.get('/pemilik/tipe-kamar/show?id_tipe_kamar=' + encodeURIComponent(this.idTipeKamar), false);
             this.contextInfo = contextRes.data || null;
           }
-          if (this.isTypeContext && this.kamarList.length === 1) {
+          if (this.isRoomContext && !this.contextInfo) {
+            const roomRes = await API.get('/pemilik/kamar/show?id_kamar=' + encodeURIComponent(this.idKamar), false);
+            this.contextInfo = roomRes.data || null;
+            Alpine.store('ui').toast('Kamar ini tidak memiliki kapasitas tersisa.', 'warning');
+          }
+          if ((this.isTypeContext || this.isRoomContext) && this.kamarList.length === 1) {
             this.form.id_kamar = String(this.kamarList[0].id_kamar);
             this.updateSelectedKamar();
           }

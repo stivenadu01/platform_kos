@@ -1,21 +1,21 @@
 <div
   x-data="kosEditForm()"
-  class="max-w-5xl mx-auto">
+  class="owner-page mx-auto max-w-5xl">
 
   <!-- HEADER -->
-  <div class="mb-6">
+  <div class="owner-form-heading">
 
     <a
       href="<?= BASE_URL ?>/pemilik/kos"
-      class="text-sm text-primary hover:underline">
-      ← Kembali ke Kos Saya
+      class="owner-back-link">
+      <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
-    <h2 class="mt-3 text-2xl font-bold text-slate-900">
+    <h2 class="owner-title">
       Edit Kos
     </h2>
 
-    <p class="mt-1 text-sm text-slate-500">
+    <p class="owner-subtitle">
       Perbarui informasi dan lokasi kos Anda.
     </p>
 
@@ -24,9 +24,9 @@
 
   <form
     @submit.prevent="submit"
-    class="card border border-slate-200 shadow-sm p-6 space-y-6">
+    class="card border border-slate-200 shadow-sm p-4 sm:p-6 space-y-6">
 
-    <nav class="grid grid-cols-1 gap-2 border-b border-slate-200 pb-5 sm:grid-cols-3" aria-label="Tahapan edit kos">
+    <nav class="owner-stepper grid grid-cols-1 gap-2 border-b border-slate-200 pb-5 sm:grid-cols-3" aria-label="Tahapan edit kos">
       <template x-for="(label, index) in steps" :key="label"><div class="flex items-center gap-2 rounded-xl px-3 py-2" :class="step === index + 1 ? 'bg-primary-soft text-primary' : step > index + 1 ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400'"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold" :class="step === index + 1 ? 'bg-primary text-white' : step > index + 1 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-500'" x-text="step > index + 1 ? '✓' : index + 1"></span><span class="text-sm font-semibold" x-text="label"></span></div></template>
     </nav>
 
@@ -267,7 +267,7 @@
     </div>
 
     <!-- ACTION -->
-    <div class="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between">
+    <div class="owner-form-actions flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between">
 
       <a
         x-show="step === 1"

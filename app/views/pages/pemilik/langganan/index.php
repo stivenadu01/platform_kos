@@ -1,14 +1,16 @@
 <div
   x-data="pemilikLanggananPage()"
   x-init="init()"
-  class="space-y-6">
+  class="owner-page">
 
-  <div>
-    <p class="text-sm font-semibold text-primary">Monetisasi BetaKos</p>
-    <h2 class="mt-1 text-2xl sm:text-3xl font-bold text-slate-900">Langganan BetaKos</h2>
-    <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+  <div class="owner-page-header">
+    <div>
+    <p class="owner-eyebrow">Paket Akun</p>
+    <h2 class="owner-title">Langganan BetaKos</h2>
+    <p class="owner-subtitle">
       Gunakan fitur dasar BetaKos secara gratis. BetaKos Pro membuka fitur manajemen penghuni dan keuangan.
     </p>
+    </div>
   </div>
 
   <div x-show="upgradeRequested" x-cloak class="card border border-amber-200 bg-amber-50 shadow-sm">
@@ -70,8 +72,8 @@
           <p class="mt-1 text-sm text-slate-500">Pilih durasi Pro. Harga awal berlaku saat pertama berlangganan, sedangkan harga perpanjangan berlaku untuk pembelian berikutnya.</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <div class="card border border-slate-200 bg-white shadow-sm">
+        <div class="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(240px_.72fr)_minmax(0_1.28fr)]">
+          <div class="card self-start border border-dashed border-slate-300 bg-slate-50/60 shadow-none">
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Gratis</p>
@@ -80,7 +82,8 @@
               <span class="rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700">Rp0</span>
             </div>
             <p class="mt-4 text-sm leading-6 text-slate-500">Untuk membangun profil dan mempublikasikan kos tanpa biaya.</p>
-            <ul class="mt-5 space-y-3 text-sm text-slate-700">
+            <button type="button" @click="showFreeFeatures=!showFreeFeatures" class="mt-4 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 sm:hidden" x-text="showFreeFeatures ? 'Sembunyikan fitur' : 'Lihat fitur paket gratis'"></button>
+            <ul class="mt-4 space-y-3 text-sm text-slate-700" :class="showFreeFeatures ? 'block' : 'hidden sm:block'">
               <li>✓ Profil pemilik</li>
               <li>✓ Kelola kos</li>
               <li>✓ Tipe dan kamar</li>
@@ -151,7 +154,8 @@
               </div>
             </div>
 
-            <ul class="mt-5 space-y-3 text-sm text-slate-700">
+            <button type="button" @click="showProFeatures=!showProFeatures" class="mt-4 w-full rounded-xl border border-primary/20 bg-primary-soft px-3 py-2 text-xs font-semibold text-primary sm:hidden" x-text="showProFeatures ? 'Sembunyikan fitur Pro' : 'Lihat semua fitur Pro'"></button>
+            <ul class="mt-4 space-y-3 text-sm text-slate-700" :class="showProFeatures ? 'block' : 'hidden sm:block'">
               <template x-if="selectedPackage">
                 <template x-for="fitur in selectedPackage.fitur" :key="fitur">
                   <li class="flex items-start gap-2"><span class="text-primary font-bold">✓</span><span x-text="fitur"></span></li>
@@ -247,6 +251,7 @@
           </div>
         </div>
       </div>
+    </div>
   </template>
 </div>
 
@@ -268,6 +273,8 @@
       pendingPayment: null,
       selectedPackageCode: 'pro',
       packageOpen: false,
+      showFreeFeatures: false,
+      showProFeatures: false,
 
       get selectedPackage() {
         return this.paket.find(item => item.kode === this.selectedPackageCode) || this.paket[0] || null;

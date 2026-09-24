@@ -262,7 +262,7 @@
               ['tipe-foto-upload', 'Upload Foto', 'Upload foto. Minimal satu foto diperlukan agar tipe kamar lengkap.']
             ];
           } else {
-            definitions = [['sidebar-kamar', 'Kelola Kamar', 'Buka Kelola Kamar untuk mengatur tipe kamar.']];
+            definitions = [['sidebar-kos', 'Properti', 'Buka Properti, pilih kos, lalu atur tipe kamar.']];
           }
         }
 
@@ -277,7 +277,7 @@
               ['kamar-save', 'Buat Kamar', 'Simpan untuk membuat unit kamar.']
             ];
           } else {
-            definitions = [['sidebar-kamar', 'Kelola Kamar', 'Buka Kelola Kamar untuk menambahkan unit kamar.']];
+            definitions = [['sidebar-kos', 'Properti', 'Buka Properti, pilih kos, lalu tambahkan unit kamar.']];
           }
         }
 

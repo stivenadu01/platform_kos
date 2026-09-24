@@ -21,7 +21,8 @@ class ApiPenghuniController
         query('id_kos') ?? '',
         query('id_kamar') ?? '',
         query('status') ?? '',
-        query('id_tipe_kamar') ?? ''
+        query('id_tipe_kamar') ?? '',
+        query('scope') ?? ''
       );
 
       response([

@@ -1,23 +1,23 @@
 <div
   x-data="kosFotoPage()"
-  class="max-w-6xl mx-auto space-y-6">
+  class="owner-page mx-auto max-w-6xl">
 
   <!-- HEADER -->
-  <div>
+  <div class="owner-form-heading">
 
     <a
       href="<?= BASE_URL ?>/pemilik/kos"
-      class="text-sm text-primary hover:underline">
-      ← Kembali ke Kos Saya
+      class="owner-back-link">
+      <?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali
     </a>
 
     <div class="mt-3">
 
-      <h2 class="text-2xl font-bold text-slate-900">
+      <h2 class="owner-title">
         Foto Kos
       </h2>
 
-      <p class="mt-1 text-sm text-slate-500">
+      <p class="owner-subtitle">
         Kelola foto yang akan ditampilkan pada kos Anda.
       </p>
 
@@ -26,14 +26,14 @@
   </div>
 
 
-  <nav x-show="wizard" x-cloak class="grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:grid-cols-4" aria-label="Tahapan tambah kos">
+  <nav x-show="wizard" x-cloak class="owner-stepper grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-4 sm:p-5" aria-label="Tahapan tambah kos">
     <template x-for="(label, index) in ['Informasi', 'Aturan & Fasilitas', 'Lokasi', 'Foto']" :key="label"><div class="flex items-center gap-2 rounded-xl px-3 py-2" :class="index === 3 ? 'bg-primary-soft text-primary' : 'bg-emerald-50 text-emerald-700'"><span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white" :class="index === 3 ? 'bg-primary' : 'bg-emerald-600'" x-text="index === 3 ? 4 : '✓'"></span><span class="text-xs font-semibold sm:text-sm" x-text="label"></span></div></template>
   </nav>
 
 
   <!-- INFORMASI KOS -->
   <div
-    class="card border border-slate-200 shadow-sm p-5">
+    class="owner-photo-context-kos card shadow-sm p-4 sm:p-5">
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
@@ -64,7 +64,7 @@
 
   <!-- UPLOAD -->
   <div
-    class="card border border-slate-200 shadow-sm p-6">
+    class="card border border-slate-200 shadow-sm p-4 sm:p-6">
 
     <div>
 
@@ -84,7 +84,7 @@
       class="mt-5">
 
       <div
-        class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary transition">
+        class="border-2 border-dashed border-slate-300 rounded-xl p-4 text-center hover:border-primary transition sm:p-6">
 
         <input
           data-help="help-kos-photo-picker"
@@ -174,7 +174,7 @@
 
   <!-- DAFTAR FOTO -->
   <div
-    class="card border border-slate-200 shadow-sm p-6">
+    class="card border border-slate-200 shadow-sm p-4 sm:p-6">
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
@@ -240,14 +240,15 @@
     <div
       x-show="!loadingData && foto.length > 0"
       x-cloak
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
+      class="owner-photo-grid mt-4 sm:mt-6">
 
       <template
         x-for="item in foto"
         :key="item.id_foto">
 
         <div
-          class="border border-slate-200 rounded-xl overflow-hidden bg-white">
+          class="owner-photo-tile border border-slate-200 rounded-xl overflow-hidden bg-white"
+          :class="isUtama(item) ? 'owner-photo-tile-primary' : ''">
 
           <!-- IMAGE -->
           <div class="relative aspect-[4/3] bg-slate-100">
@@ -276,26 +277,23 @@
 
 
           <!-- ACTION -->
-          <div class="p-4">
-
-            <div
-              class="flex flex-col gap-2">
+          <div class="owner-photo-tile-actions">
 
               <!-- FOTO UTAMA -->
               <button
                 type="button"
                 x-show="!isUtama(item)"
                 @click="setUtama(item.id_foto)"
-                class="btn-secondary w-full">
+                class="owner-action-secondary">
 
-                Jadikan Foto Utama
+                Jadikan Utama
 
               </button>
 
 
               <div
                 x-show="isUtama(item)"
-                class="w-full text-center text-sm font-medium text-primary py-2">
+                class="flex min-h-10 items-center justify-center text-xs font-semibold text-primary">
 
                 ✓ Foto utama
 
@@ -306,13 +304,11 @@
               <button
                 type="button"
                 @click="hapus(item.id_foto)"
-                class="btn-secondary w-full text-red-600">
+                class="owner-action-danger !px-2.5" title="Hapus foto" aria-label="Hapus foto">
 
-                Hapus Foto
+                <?= masterIconSvg('trash-2', 'h-4 w-4') ?>
 
               </button>
-
-            </div>
 
           </div>
 

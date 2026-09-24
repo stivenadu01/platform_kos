@@ -50,7 +50,7 @@ class PemilikController
     $data = getKosByPemilik($user['id_user']);
 
     view('pemilik/kos/index', [
-      'title' => 'Kos Saya',
+      'title' => 'Properti',
       'layout' => 'pemilik',
       'kos' => $data
     ]);
@@ -136,7 +136,7 @@ class PemilikController
   public function pembayaran()
   {
     view('pemilik/pembayaran/index', [
-      'title' => 'Tagihan & Pembayaran',
+      'title' => 'Keuangan Aktif',
       'layout' => 'pemilik'
     ]);
   }
@@ -203,10 +203,26 @@ class PemilikController
     ]);
   }
 
+  public function riwayat()
+  {
+    view('pemilik/riwayat/index', [
+      'title' => 'Riwayat Operasional',
+      'layout' => 'pemilik'
+    ]);
+  }
+
   public function kelolaKamar()
   {
     view('pemilik/kamar/kelola', [
       'title' => 'Kelola Unit Kamar',
+      'layout' => 'pemilik'
+    ]);
+  }
+
+  public function operasionalKamar()
+  {
+    view('pemilik/kamar/operasional', [
+      'title' => 'Operasional Kamar',
       'layout' => 'pemilik'
     ]);
   }
@@ -224,10 +240,8 @@ class PemilikController
 
   public function editKamar()
   {
-    view('pemilik/kamar/edit', [
-      'title' => 'Edit Kamar',
-      'layout' => 'pemilik'
-    ]);
+    header('Location: ' . BASE_URL . '/pemilik/kos', true, 302);
+    exit;
   }
 
   public function hargaKamar()
@@ -284,7 +298,7 @@ class PemilikController
   public function penghuni()
   {
     view('pemilik/penghuni/index', [
-      'title' => 'Kelola Penghuni',
+      'title' => 'Penghuni Aktif',
       'layout' => 'pemilik'
     ]);
   }

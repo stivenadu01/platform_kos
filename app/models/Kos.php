@@ -170,6 +170,7 @@ function getKosByPemilik($id_pemilik)
       k.status,
       k.created_at,
       k.updated_at,
+      (SELECT f.nama_file FROM kos_foto f WHERE f.id_kos = k.id_kos ORDER BY f.is_thumbnail DESC, f.urutan ASC, f.id_foto ASC LIMIT 1) AS foto,
       vk.status AS status_verifikasi,
       vk.catatan AS catatan_verifikasi,
       vk.tanggal_verifikasi,

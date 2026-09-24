@@ -21,6 +21,8 @@ get('/pemilik/kos/foto', 'PemilikController@fotoKos', ['auth', 'role:pemilik']);
 
 get('/pemilik/pembayaran', 'PemilikController@pembayaran', ['auth', 'role:pemilik', 'pro']);
 get('/pemilik/pembayaran/detail', 'PemilikController@detailPembayaran', ['auth', 'role:pemilik', 'pro']);
+get('/pemilik/riwayat', 'PemilikController@riwayat', ['auth', 'role:pemilik', 'pro']);
+get('/pemilik/riwayat/tagihan', 'PemilikController@detailPembayaran', ['auth', 'role:pemilik', 'pro']);
 get('/pemilik/langganan', 'PemilikController@langganan', ['auth', 'role:pemilik']);
 get('/pemilik/langganan/checkout', 'PemilikController@langgananCheckout', ['auth', 'role:pemilik']);
 get('/pemilik/langganan/pembayaran', 'PemilikController@langgananPembayaran', ['auth', 'role:pemilik']);
@@ -35,6 +37,7 @@ get('/pemilik/penghuni/edit', 'PemilikController@editPenghuni', ['auth', 'role:p
 // Kelola kamar
 get('/pemilik/kamar', 'PemilikController@kamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/kelola', 'PemilikController@kelolaKamar', ['auth', 'role:pemilik']);
+get('/pemilik/kamar/operasional', 'PemilikController@operasionalKamar', ['auth', 'role:pemilik', 'pro']);
 get('/pemilik/kamar/tambah', 'PemilikController@tambahKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/edit', 'PemilikController@editKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/harga', 'PemilikController@hargaKamar', ['auth', 'role:pemilik']);

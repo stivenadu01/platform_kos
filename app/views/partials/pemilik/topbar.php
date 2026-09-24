@@ -1,6 +1,25 @@
 <?php
 $__topbarIsPro = false;
 $__topbarSubscriptionLabel = 'Gratis';
+$__topbarPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+$__topbarPageLabel = 'Dashboard';
+$__topbarPageMap = [
+  '/pemilik/pembayaran' => 'Keuangan',
+  '/pemilik/riwayat' => 'Riwayat',
+  '/pemilik/penghuni' => 'Penghuni',
+  '/pemilik/kamar' => 'Kamar',
+  '/pemilik/tipe-kamar' => 'Tipe Kamar',
+  '/pemilik/kos' => 'Properti',
+  '/pemilik/claim' => 'Klaim Riwayat',
+  '/pemilik/langganan' => 'Langganan',
+  '/pemilik/profil' => 'Profil',
+];
+foreach ($__topbarPageMap as $__topbarPrefix => $__topbarLabel) {
+  if (strpos($__topbarPath, $__topbarPrefix) !== false) {
+    $__topbarPageLabel = $__topbarLabel;
+    break;
+  }
+}
 if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik') {
   model('Langganan');
   $__topbarStatusLangganan = getStatusLanggananPemilik((int)$_SESSION['user']['id_user']);
@@ -32,29 +51,38 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       <span x-text="sidebarCollapsed ? '»' : '«'"></span>
     </button>
 
-    <!-- MOBILE MENU -->
+    <!-- MOBILE BACK: sumber tujuan mengikuti tombol kembali milik halaman -->
     <button
+      id="owner-mobile-back"
       type="button"
-      @click="sidebarOpen = true"
+      hidden
       class="
-        lg:hidden
+        owner-mobile-navbar-back md:hidden
         w-10 h-10
         rounded-lg
         hover:bg-slate-100
         flex items-center justify-center
-      ">
+      "
+      aria-label="Kembali"
+      title="Kembali">
 
-      <?= masterIconSvg('menu', 'h-5 w-5') ?>
+      <?= masterIconSvg('chevron-left', 'h-6 w-6') ?>
 
     </button>
 
+    <!-- TABLET MENU: bottom navigation hanya aktif di layar mobile -->
+    <button
+      type="button"
+      @click="sidebarOpen = true"
+      class="hidden h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 md:inline-flex lg:hidden"
+      aria-label="Buka menu">
+      <?= masterIconSvg('menu', 'h-5 w-5') ?>
+    </button>
 
-    <div class="lg:hidden">
 
-      <div class="font-bold text-slate-900">
-        BetaKos
-      </div>
-
+    <div class="lg:hidden leading-tight">
+      <div class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Panel Pemilik</div>
+      <div class="text-sm font-bold text-slate-900"><?= htmlspecialchars($__topbarPageLabel) ?></div>
     </div>
 
   </div>
@@ -147,3 +175,33 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   </div>
 
 </header>
+
+<script>
+  (() => {
+    const button = document.getElementById('owner-mobile-back');
+    if (!button) return;
+
+    const getBackSource = () => Array.from(document.querySelectorAll('main .owner-back-link'))
+      .find((link) => link.style.display !== 'none');
+
+    const sync = () => {
+      button.hidden = !getBackSource();
+    };
+
+    button.addEventListener('click', () => {
+      const source = getBackSource();
+      if (source) source.click();
+    });
+
+    const start = () => {
+      sync();
+      const main = document.querySelector('main');
+      if (main) new MutationObserver(sync).observe(main, { subtree: true, attributes: true, attributeFilter: ['style'] });
+      window.setTimeout(sync, 100);
+    };
+
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', start, { once: true })
+      : start();
+  })();
+</script>

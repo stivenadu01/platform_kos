@@ -21,7 +21,7 @@
   <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
   <script defer src="https://unpkg.com/alpinejs"></script>
 </head>
-<body class="admin-ui bg-slate-100 text-slate-800">
+<body class="admin-ui bg-slate-50 text-slate-800">
   <script>
     // Set the shell state before the first paint. Alpine will bind the same value afterwards.
     (() => {

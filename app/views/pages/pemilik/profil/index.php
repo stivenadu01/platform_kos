@@ -1,12 +1,20 @@
-<div x-data="accountProfilePage()" x-init="init()" class="mx-auto max-w-5xl space-y-6">
-  <div>
-    <p class="text-sm font-medium text-primary">Akun</p>
-    <h1 class="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">Profil & Pengaturan Akun</h1>
-    <p class="mt-1 text-sm text-slate-500">Kelola identitas, keamanan, dan sesi akun BetaKos Anda.</p>
+<div x-data="accountProfilePage()" x-init="init()" class="owner-page">
+  <div class="owner-page-header">
+    <div>
+    <p class="owner-eyebrow">Akun</p>
+    <h1 class="owner-title">Profil & Pengaturan Akun</h1>
+    <p class="owner-subtitle">Kelola identitas, keamanan, dan sesi akun BetaKos Anda.</p>
+    </div>
   </div>
 
-  <div class="grid gap-6 lg:grid-cols-[280px_1fr]">
-    <section data-help="help-profil-foto" class="card border border-slate-200 shadow-sm">
+  <nav class="owner-profile-tabs grid grid-cols-3 gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm" aria-label="Bagian profil">
+    <button type="button" @click="activeSection='profile'" class="rounded-lg px-2 py-2.5 text-xs font-semibold transition sm:text-sm" :class="activeSection==='profile' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'">Profil</button>
+    <button type="button" @click="activeSection='security'" class="rounded-lg px-2 py-2.5 text-xs font-semibold transition sm:text-sm" :class="activeSection==='security' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'">Keamanan</button>
+    <button type="button" @click="activeSection='account'" class="rounded-lg px-2 py-2.5 text-xs font-semibold transition sm:text-sm" :class="activeSection==='account' ? 'bg-primary text-white shadow-sm' : 'text-slate-500 hover:bg-slate-50'">Status Akun</button>
+  </nav>
+
+  <div class="grid gap-4 sm:gap-6 lg:grid-cols-[280px_1fr]">
+    <section x-show="activeSection==='profile'" x-cloak data-help="help-profil-foto" class="card border border-slate-200 shadow-sm lg:block">
       <div class="flex flex-col items-center text-center">
         <template x-if="user.foto"><img :src="window.BASE_URL + '/uploads' + user.foto" :alt="user.nama || 'Foto profil'" class="h-28 w-28 rounded-full object-cover ring-1 ring-slate-200"></template>
         <template x-if="!user.foto"><div class="flex h-28 w-28 items-center justify-center rounded-full bg-primary-soft text-4xl font-bold text-primary ring-1 ring-blue-100" x-text="initial"></div></template>
@@ -22,8 +30,8 @@
       </div>
     </section>
 
-    <div class="space-y-6">
-      <section data-help="help-profil-data" class="card border border-slate-200 shadow-sm">
+    <div class="space-y-4 sm:space-y-6" :class="activeSection==='profile' ? '' : 'lg:col-span-2'">
+      <section x-show="activeSection==='profile'" x-cloak data-help="help-profil-data" class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Informasi Pribadi</h2>
         <p class="mt-1 text-sm text-slate-500">Nama dan nomor HP dapat diperbarui. Email dan NIK merupakan identitas yang dilindungi.</p>
         <form class="mt-6 grid gap-5 md:grid-cols-2" @submit.prevent="saveProfile">
@@ -35,7 +43,7 @@
         </form>
       </section>
 
-      <section data-help="help-profil-password" class="card border border-slate-200 shadow-sm">
+      <section x-show="activeSection==='security'" x-cloak data-help="help-profil-password" class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Keamanan Akun</h2>
         <p class="mt-1 text-sm text-slate-500">Ubah kata sandi dan kelola akses perangkat yang sedang login.</p>
         <form class="mt-6 space-y-5" @submit.prevent="changePassword">
@@ -50,13 +58,13 @@
         </div>
       </section>
 
-      <section class="card border border-slate-200 shadow-sm">
+      <section x-show="activeSection==='account'" x-cloak class="card border border-slate-200 shadow-sm">
         <h2 class="font-semibold text-slate-900">Pengaturan Akun</h2>
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
           <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs font-medium uppercase tracking-wide text-slate-400">Status akun</p><p class="mt-1 font-semibold capitalize text-slate-800" x-text="user.status || '-'"></p></div>
           <div class="rounded-xl bg-slate-50 p-4"><p class="text-xs font-medium uppercase tracking-wide text-slate-400">Email terverifikasi</p><p class="mt-1 font-semibold text-slate-800" x-text="user.email_verified_at ? 'Ya' : 'Belum'"></p></div>
         </div>
-        <p class="mt-4 text-xs text-slate-400">Pengaturan notifikasi akan ditambahkan pada phase berikutnya.</p>
+        <p class="mt-4 text-xs text-slate-400">Status verifikasi email ditampilkan untuk membantu menjaga keamanan akun Anda.</p>
       </section>
     </div>
   </div>
@@ -68,6 +76,7 @@ function accountProfilePage() {
     user: <?= json_encode_safe($profile ?? []) ?>,
     form: { nama: '', no_hp: '' },
     password: { password_lama: '', password_baru: '', password_konfirmasi: '' },
+    activeSection: 'profile',
     savingProfile: false, savingPassword: false, savingFoto: false, loggingOutAll: false,
     get initial() { return (this.user.nama || 'P').trim().charAt(0).toUpperCase(); },
     init() { this.form = { nama: this.user.nama || '', no_hp: this.user.no_hp || '' }; },

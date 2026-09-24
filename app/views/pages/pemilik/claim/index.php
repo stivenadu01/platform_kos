@@ -1,23 +1,24 @@
-<div x-data="claimPage()" x-init="init()" class="space-y-6">
-  <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+<div x-data="claimPage()" x-init="init()" class="owner-page">
+  <div class="owner-page-header">
     <div>
-      <h1 class="text-xl font-bold text-slate-900 sm:text-2xl">Klaim Riwayat Kos</h1>
-      <p class="mt-1 text-sm text-slate-500">Periksa permintaan penghuni yang mengaku pernah tinggal di kos Anda.</p>
+      <p class="owner-eyebrow">Verifikasi Riwayat</p>
+      <h1 class="owner-title">Klaim Riwayat Kos</h1>
+      <p class="owner-subtitle">Periksa permintaan penghuni yang mengaku pernah tinggal di kos Anda.</p>
     </div>
-    <button type="button" @click="load()" class="btn-secondary">↻ Refresh</button>
+    <button type="button" @click="load()" class="owner-icon-button" title="Perbarui daftar" aria-label="Perbarui daftar"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?></button>
   </div>
 
-  <div class="flex flex-wrap gap-2">
+  <div class="owner-segmented w-fit max-w-full" role="tablist" aria-label="Status klaim">
     <template x-for="tab in tabs" :key="tab.value">
-      <button type="button" @click="changeStatus(tab.value)" class="rounded-lg px-4 py-2 text-sm font-medium" :class="status === tab.value ? 'bg-primary text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50'" x-text="tab.label"></button>
+      <button type="button" role="tab" @click="changeStatus(tab.value)" :class="status === tab.value ? 'is-active' : ''" x-text="tab.label"></button>
     </template>
   </div>
 
   <div class="card overflow-hidden border border-slate-200 shadow-sm">
-    <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat claim...</div>
+    <div x-show="loading" class="p-10 text-center text-sm text-slate-500">Memuat klaim...</div>
     <div x-show="!loading && !items.length" class="p-10 text-center">
       <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('user-check', 'h-7 w-7') ?></div>
-      <h2 class="mt-3 font-semibold text-slate-900">Belum ada claim</h2>
+      <h2 class="mt-3 font-semibold text-slate-900">Belum ada klaim</h2>
       <p class="mt-1 text-sm text-slate-500">Permintaan penghuni akan muncul di halaman ini.</p>
     </div>
 
@@ -55,11 +56,11 @@
       </table>
     </div>
 
-    <div x-show="!loading && items.length" class="!block md:!hidden divide-y divide-slate-200">
+    <div x-show="!loading && items.length" class="owner-mobile-card-stack !block md:!hidden">
       <template x-for="item in items" :key="'m-' + item.id_claim">
         <article class="p-4">
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama_mahasiswa"></div><div class="mt-1 text-xs text-slate-500 truncate" x-text="item.nama_kos + ' · Kamar ' + item.nomor_kamar"></div></div>
+            <div class="min-w-0"><div class="owner-copy-full font-semibold text-slate-900" x-text="item.nama_mahasiswa"></div><div class="owner-copy-full mt-1 text-xs text-slate-500" x-text="item.nama_kos + ' · Kamar ' + item.nomor_kamar"></div></div>
             <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
@@ -67,7 +68,7 @@
             <div><div class="text-slate-400">Diajukan</div><div class="mt-1 font-medium text-slate-700" x-text="formatDate(item.tanggal_pengajuan)"></div></div>
             <div class="col-span-2"><div class="text-slate-400">Riwayat tinggal</div><div class="mt-1 text-slate-700" x-text="`Kamar ${item.nomor_kamar} · ${item.tanggal_masuk} - ${item.tanggal_keluar || 'masih tinggal'}`"></div></div>
           </div>
-          <button type="button" @click="openDetail(item)" class="mt-3 btn-secondary text-xs w-full sm:w-auto">Periksa Klaim</button>
+          <button type="button" @click="openDetail(item)" class="mt-3 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-3 py-2 text-xs font-semibold text-white shadow-sm sm:w-auto"><?= masterIconSvg('eye', 'h-4 w-4') ?> Periksa Klaim</button>
         </article>
       </template>
     </div>
@@ -81,7 +82,7 @@
           <h2 class="font-bold text-slate-900">Periksa Klaim</h2>
           <p class="mt-1 text-xs text-slate-500" x-text="detail?.nama_kos || ''"></p>
         </div>
-        <button type="button" @click="closeDetail()" class="h-9 w-9 rounded-lg hover:bg-slate-100">✕</button>
+        <button type="button" @click="closeDetail()" class="owner-icon-button !h-9 !w-9" aria-label="Tutup detail"><?= masterIconSvg('x', 'h-4 w-4') ?></button>
       </div>
 
       <div class="space-y-5 p-5 sm:p-6" x-show="detail">
@@ -110,16 +111,16 @@
             <div>
               <label class="label">Keputusan</label>
               <select x-model="form.keputusan" class="select mt-1">
-                <option value="disetujui">Setujui claim</option>
-                <option value="ditolak">Tolak claim</option>
+                <option value="disetujui">Setujui klaim</option>
+                <option value="ditolak">Tolak klaim</option>
               </select>
             </div>
             <div>
               <label class="label">Catatan <span class="font-normal text-slate-400">(wajib jika ditolak)</span></label>
               <textarea x-model="form.catatan_pemilik" rows="4" class="input mt-1 w-full" placeholder="Tambahkan catatan verifikasi..."></textarea>
             </div>
-            <div class="flex flex-col gap-2 sm:flex-row-reverse">
-              <button type="submit" class="btn-primary" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Keputusan'"></button>
+            <div class="owner-form-actions flex flex-col gap-2 sm:flex-row-reverse">
+              <button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold text-white" :class="form.keputusan === 'disetujui' ? 'bg-emerald-600' : 'bg-red-600'" :disabled="saving" x-text="saving ? 'Menyimpan...' : (form.keputusan === 'disetujui' ? 'Setujui Klaim' : 'Tolak Klaim')"></button>
               <button type="button" @click="closeDetail()" class="btn-secondary">Batal</button>
             </div>
           </form>
@@ -195,7 +196,7 @@
       async decision() {
         if (!this.detail) return;
         if (this.form.keputusan === 'ditolak' && !this.form.catatan_pemilik.trim()) {
-          Alpine.store('ui').toast('Catatan wajib diisi ketika claim ditolak.', 'error');
+          Alpine.store('ui').toast('Catatan wajib diisi ketika klaim ditolak.', 'error');
           return;
         }
         this.saving = true;

@@ -1,18 +1,19 @@
 <div
   x-data="kamarPage()"
   x-init="init()"
-  class="space-y-4 sm:space-y-5">
+  class="owner-page">
 
   <!-- HEADER -->
-  <div class="space-y-4">
+  <div class="owner-page-header">
     <div>
       <a :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
-      <h2 class="mt-3 text-xl sm:text-2xl font-bold text-slate-900">Kelola Kamar</h2>
-      <p class="mt-1 text-sm text-slate-500">Kelola nomor unit dan status operasional kamar.</p>
+      <p class="owner-eyebrow mt-3">Unit Kamar</p>
+      <h2 class="owner-title" x-text="tipe?.nama_tipe || 'Kelola Kamar'"></h2>
+      <p class="owner-subtitle" x-text="tipe ? tipe.nama_kos + ' · Ubah nomor dan status operasional unit.' : 'Kelola nomor unit dan status operasional kamar.'"></p>
     </div>
 
-    <div class="flex flex-wrap gap-3 items-center">
-      <div data-help="help-kamar-add" data-onboarding="kamar-add-choice" class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap items-center gap-2">
+      <div data-help="help-kamar-add" data-onboarding="kamar-add-choice" class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
         <a data-onboarding="fast-tambah-kamar-bulk" :href="BASE_URL + '/pemilik/kamar/tambah?mode=bulk&id_tipe_kamar=' + idTipeKamar" class="btn-secondary justify-center">
           + Tambah Banyak Kamar
         </a>
@@ -35,66 +36,20 @@
   </div>
 
 
-  <!-- FILTER -->
-  <div data-help="help-kamar-filter" class="card border border-slate-200 shadow-sm">
-
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-      <div class="form-group">
-        <label class="label">
-          Cari kamar
-        </label>
-
-        <input
-          type="search"
-          x-model="search"
-          @input.debounce.400ms="load()"
-          class="input"
-          placeholder="Cari nomor kamar...">
-      </div>
-
-
-      <div class="form-group">
-        <label class="label">
-          Status
-        </label>
-
-        <select
-          x-model="status"
-          @change="load()"
-          class="select">
-
-          <option value="">
-            Semua status
-          </option>
-
-          <option value="tersedia">
-            Tersedia
-          </option>
-
-          <option value="terisi">
-            Terisi
-          </option>
-
-          <option value="tidak_tersedia">
-            Tidak tersedia
-          </option>
-
-          <option value="perbaikan">
-            Perbaikan
-          </option>
-
-          <option value="nonaktif">
-            Nonaktif
-          </option>
-
-        </select>
-      </div>
-
-    </div>
-
+  <!-- PENCARIAN & STATUS -->
+  <div class="card border border-slate-200 shadow-sm">
+    <label class="label" for="room-search">Cari nomor kamar</label>
+    <div class="relative"><span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400"><?= masterIconSvg('search', 'h-4 w-4') ?></span><input id="room-search" type="search" x-model="search" @input.debounce.400ms="searchRooms()" class="input !pl-10" placeholder="Contoh: 01 atau A-12"></div>
   </div>
 
+  <div class="owner-segmented" aria-label="Filter status unit">
+    <button type="button" @click="setStatus('')" :class="!status ? 'is-active' : ''">Semua</button>
+    <button type="button" @click="setStatus('tersedia')" :class="status === 'tersedia' ? 'is-active' : ''"><span class="owner-segment-dot bg-emerald-400"></span>Tersedia</button>
+    <button type="button" @click="setStatus('terisi')" :class="status === 'terisi' ? 'is-active' : ''"><span class="owner-segment-dot bg-rose-400"></span>Terisi</button>
+    <button type="button" @click="setStatus('tidak_tersedia')" :class="status === 'tidak_tersedia' ? 'is-active' : ''"><span class="owner-segment-dot bg-amber-400"></span>Tidak tersedia</button>
+    <button type="button" @click="setStatus('perbaikan')" :class="status === 'perbaikan' ? 'is-active' : ''"><span class="owner-segment-dot bg-blue-400"></span>Perbaikan</button>
+    <button type="button" @click="setStatus('nonaktif')" :class="status === 'nonaktif' ? 'is-active' : ''"><span class="owner-segment-dot bg-slate-400"></span>Nonaktif</button>
+  </div>
 
   <!-- DATA -->
   <section data-help="help-kamar-summary" class="space-y-4">
@@ -159,9 +114,12 @@
               </template>
             </div>
 
-            <div class="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
-              <a :href="BASE_URL + '/pemilik/kamar/edit?id_kamar=' + item.id_kamar" class="owner-action-secondary justify-center"><?= masterIconSvg('pencil', 'h-4 w-4') ?> Edit</a>
-              <button type="button" @click="remove(item)" class="owner-action-danger justify-center"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus</button>
+            <div class="space-y-2 border-t border-slate-100 pt-3">
+              <div class="grid grid-cols-2 gap-2">
+                <a :href="BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + item.id_kamar" class="owner-action-secondary justify-center"><?= masterIconSvg('users-round', 'h-4 w-4') ?> Penghuni</a>
+                <a :href="BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + item.id_kamar + '&section=keuangan'" class="owner-action-secondary justify-center"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Tagihan</a>
+              </div>
+              <button type="button" @click="remove(item)" class="owner-action-danger w-full justify-center"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus Kamar</button>
             </div>
           </div>
         </article>
@@ -180,9 +138,9 @@
       kamar: [],
       tipe: null,
 
-      search: '',
+      search: new URLSearchParams(window.location.search).get('search') || '',
       idTipeKamar: new URLSearchParams(window.location.search).get('id_tipe_kamar') || '',
-      status: '',
+      status: new URLSearchParams(window.location.search).get('status') || '',
 
       get tipePriceLabel() {
         const prices = Array.isArray(this.tipe?.harga) ? this.tipe.harga.map(item => Number(item.harga_total || 0)).filter(value => value >= 0) : [];
@@ -275,6 +233,17 @@
 
         }
 
+      },
+
+      setStatus(status) {
+        this.status = status;
+        utils.setQuery('status', status || null);
+        this.load();
+      },
+
+      searchRooms() {
+        utils.setQuery('search', this.search.trim() || null);
+        this.load();
       },
 
       statusLabel(status) {
