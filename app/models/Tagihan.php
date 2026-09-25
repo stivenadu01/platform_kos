@@ -3,6 +3,53 @@
 /* Fungsi tanggal, harga kamar, dan nomor tagihan dipakai bersama Phase Penghuni/Cron. */
 require_once ROOT_PATH . '/app/models/Penghuni.php';
 
+/* Status tabel menjelaskan pembayaran; urgensi dihitung dari tanggal agar tidak basi. */
+function tambahStatusWaktuTagihan($tagihan)
+{
+  if (!$tagihan || empty($tagihan['tanggal_jatuh_tempo'])) return $tagihan;
+
+  $statusPembayaran = $tagihan['status'] ?? '';
+  $belumSelesai = in_array($statusPembayaran, ['belum_lunas', 'sebagian'], true);
+  $hariKeJatuhTempo = (int) (new DateTimeImmutable('today'))
+    ->diff(new DateTimeImmutable($tagihan['tanggal_jatuh_tempo']))
+    ->format('%r%a');
+  $statusWaktu = $statusPembayaran;
+  $labelWaktu = $statusPembayaran === 'lunas' ? 'Lunas' : 'Dibatalkan';
+  $perluTindakan = false;
+
+  if ($belumSelesai) {
+    $hariKeMulai = (int) (new DateTimeImmutable('today'))
+      ->diff(new DateTimeImmutable($tagihan['tanggal_mulai']))
+      ->format('%r%a');
+
+    if ($hariKeMulai > 0) {
+      $statusWaktu = 'mendatang';
+      $labelWaktu = 'Tagihan mendatang';
+    } elseif ($hariKeJatuhTempo > 3) {
+      $statusWaktu = 'berjalan';
+      $labelWaktu = 'Periode berjalan';
+    } elseif ($hariKeJatuhTempo > 0) {
+      $statusWaktu = 'perlu_tindakan';
+      $labelWaktu = 'Jatuh tempo dalam ' . $hariKeJatuhTempo . ' hari';
+      $perluTindakan = true;
+    } elseif ($hariKeJatuhTempo === 0) {
+      $statusWaktu = 'jatuh_tempo';
+      $labelWaktu = 'Jatuh tempo hari ini';
+      $perluTindakan = true;
+    } else {
+      $statusWaktu = 'terlambat';
+      $labelWaktu = 'Terlambat ' . abs($hariKeJatuhTempo) . ' hari';
+      $perluTindakan = true;
+    }
+  }
+
+  $tagihan['status_waktu'] = $statusWaktu;
+  $tagihan['label_waktu'] = $labelWaktu;
+  $tagihan['hari_ke_jatuh_tempo'] = $hariKeJatuhTempo;
+  $tagihan['perlu_tindakan'] = $perluTindakan;
+  return $tagihan;
+}
+
 function getTagihanListByPemilik(
   $id_pemilik,
   $search = '',
@@ -67,6 +114,12 @@ function getTagihanListByPemilik(
 
   if ($scope === 'aktif') {
     $where[] = "t.status IN ('belum_lunas', 'sebagian')";
+    $where[] = 't.tanggal_jatuh_tempo <= DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)';
+  } elseif ($scope === 'terjadwal') {
+    $where[] = "t.status IN ('belum_lunas', 'sebagian')";
+    $where[] = 't.tanggal_jatuh_tempo > DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)';
+  } elseif ($scope === 'belum_selesai') {
+    $where[] = "t.status IN ('belum_lunas', 'sebagian')";
   } elseif ($scope === 'riwayat') {
     $where[] = "t.status IN ('lunas', 'dibatalkan')";
   }
@@ -125,7 +178,7 @@ function getTagihanListByPemilik(
 
   $data = [];
   while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
+    $data[] = tambahStatusWaktuTagihan($row);
   }
 
   $stmt->close();
@@ -138,7 +191,7 @@ function getTagihanListByUser($id_user)
   $stmt = $conn->prepare("SELECT DISTINCT t.id_tagihan, t.id_kamar, t.nomor_tagihan, t.tanggal_terbit, t.tanggal_mulai, t.tanggal_selesai, t.tanggal_jatuh_tempo, t.jumlah_orang, t.total_tagihan, t.total_dibayar, GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan, t.status, km.nomor_kamar, k.id_kos, k.nama_kos, u.nama AS nama_pemilik, u.foto AS foto_pemilik FROM tagihan t INNER JOIN tagihan_penghuni tp ON tp.id_tagihan = t.id_tagihan INNER JOIN penghuni p ON p.id_penghuni = tp.id_penghuni AND p.id_user = ? INNER JOIN kamar km ON km.id_kamar = t.id_kamar INNER JOIN kos k ON k.id_kos = km.id_kos INNER JOIN users u ON u.id_user = k.id_pemilik ORDER BY t.tanggal_mulai DESC, t.tanggal_selesai DESC, t.id_tagihan DESC");
   $stmt->bind_param('i', $id_user);
   $stmt->execute();
-  $data = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $data = array_map('tambahStatusWaktuTagihan', $stmt->get_result()->fetch_all(MYSQLI_ASSOC));
   $stmt->close();
   return $data;
 }
@@ -155,6 +208,8 @@ function findTagihanByIdUser($id_tagihan, $id_user)
   if (!$tagihan) {
     return null;
   }
+
+  $tagihan = tambahStatusWaktuTagihan($tagihan);
 
   $stmt = $conn->prepare("SELECT pb.id_pembayaran, pb.id_tagihan, pb.id_penghuni, pb.nomor_pembayaran, pb.jumlah, pb.tanggal_bayar, pb.metode, pb.status, pb.catatan, p.nama AS nama_penghuni FROM pembayaran pb INNER JOIN penghuni p ON p.id_penghuni = pb.id_penghuni WHERE pb.id_tagihan = ? AND p.id_user = ? ORDER BY pb.tanggal_bayar DESC, pb.id_pembayaran DESC");
   $stmt->bind_param('ii', $id_tagihan, $id_user);
@@ -196,6 +251,8 @@ function findTagihanByIdPemilik($id_tagihan, $id_pemilik)
   if (!$tagihan) {
     return null;
   }
+
+  $tagihan = tambahStatusWaktuTagihan($tagihan);
 
   $tagihan['penyesuaian'] = getPenyesuaianByTagihan($id_tagihan);
   $tagihan['pembayaran'] = getPembayaranByTagihan($id_tagihan);

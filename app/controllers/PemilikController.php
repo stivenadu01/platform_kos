@@ -136,7 +136,7 @@ class PemilikController
   public function pembayaran()
   {
     view('pemilik/pembayaran/index', [
-      'title' => 'Keuangan Aktif',
+      'title' => 'Keuangan Kos',
       'layout' => 'pemilik'
     ]);
   }

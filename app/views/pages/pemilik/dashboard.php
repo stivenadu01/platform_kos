@@ -84,11 +84,11 @@
 
       <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div class="rounded-xl bg-slate-50 p-4">
-          <p class="text-xs text-slate-500">Tagihan belum lunas</p>
+          <p class="text-xs text-slate-500">Perlu ditagih</p>
           <p class="mt-2 text-xl font-bold text-slate-900" x-text="summary.tagihan_belum_lunas"></p>
         </div>
         <div class="rounded-xl bg-amber-50 p-4">
-          <p class="text-xs text-amber-700">Total piutang</p>
+          <p class="text-xs text-amber-700">Total perlu ditagih</p>
           <p class="mt-2 text-xl font-bold text-slate-900" x-text="rupiah(summary.total_piutang)"></p>
         </div>
         <div class="rounded-xl bg-emerald-50 p-4">
@@ -220,7 +220,7 @@ function pemilikDashboard() {
         return items;
       }
       if (this.isPro && Number(this.summary.tagihan_belum_lunas || 0) > 0) {
-        items.push({ value: this.summary.tagihan_belum_lunas, label: 'tagihan perlu ditindaklanjuti', url: BASE_URL + '/pemilik/pembayaran?status=belum_lunas' });
+        items.push({ value: this.summary.tagihan_belum_lunas, label: 'tagihan perlu ditindaklanjuti', url: BASE_URL + '/pemilik/pembayaran' });
       }
       if (Number(this.summary.kamar_tidak_tersedia || 0) > 0) {
         items.push({ value: this.summary.kamar_tidak_tersedia, label: 'kamar tidak tersedia atau bermasalah', url: BASE_URL + '/pemilik/kos' });

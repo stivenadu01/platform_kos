@@ -34,13 +34,13 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
               <p class="mt-1 text-sm text-slate-500" x-text="detail.nama_kos + (detail.tipe_kamar ? ' · ' + detail.tipe_kamar : '')"></p>
               <p class="mt-1 text-xs text-slate-400" x-text="'Nomor tagihan: ' + detail.nomor_tagihan"></p>
             </div>
-            <span class="inline-flex self-start rounded-full px-3 py-1.5 text-xs font-semibold" :class="statusClass(detail.status)" x-text="statusLabel(detail.status)"></span>
+            <span class="inline-flex self-start rounded-full px-3 py-1.5 text-xs font-semibold" :class="displayStatusClass" x-text="displayStatusLabel"></span>
           </div>
         </div>
 
         <div class="p-4 sm:p-5">
           <div class="rounded-2xl p-4 sm:p-5" :class="isOverdue ? 'bg-rose-50' : detail.status === 'lunas' ? 'bg-emerald-50' : 'bg-primary-soft'">
-            <p class="text-xs font-semibold uppercase tracking-wider" :class="isOverdue ? 'text-rose-600' : detail.status === 'lunas' ? 'text-emerald-600' : 'text-primary'" x-text="detail.status === 'lunas' ? 'Pembayaran selesai' : 'Belum dibayar'"></p>
+            <p class="text-xs font-semibold uppercase tracking-wider" :class="isOverdue ? 'text-rose-600' : detail.status === 'lunas' ? 'text-emerald-600' : 'text-primary'" x-text="amountHeading"></p>
             <p class="mt-1 text-3xl font-bold tracking-tight text-slate-950" x-text="format(detail.sisa_tagihan)"></p>
             <p class="mt-2 text-xs" :class="isOverdue ? 'text-rose-700' : 'text-slate-500'" x-text="statusMessage"></p>
           </div>
@@ -176,13 +176,35 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
         return Math.max(Number(this.detail?.sisa_tagihan || 0) - Number(this.payment.jumlah || 0), 0);
       },
 
+      get displayStatusLabel() {
+        if (!this.detail) return '';
+        if (this.detail.status === 'lunas' || this.detail.status === 'dibatalkan') return this.statusLabel(this.detail.status);
+        return this.detail.status === 'sebagian' ? 'Sebagian · ' + this.detail.label_waktu : this.detail.label_waktu;
+      },
+
+      get displayStatusClass() {
+        if (!this.detail) return 'bg-slate-100 text-slate-600';
+        if (this.detail.status === 'lunas' || this.detail.status === 'dibatalkan') return this.statusClass(this.detail.status);
+        if (!this.detail.perlu_tindakan) return 'bg-blue-50 text-blue-700';
+        return this.detail.status === 'sebagian' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700';
+      },
+
+      get amountHeading() {
+        if (!this.detail) return '';
+        if (this.detail.status === 'lunas') return 'Pembayaran selesai';
+        if (this.detail.status === 'dibatalkan') return 'Tagihan dibatalkan';
+        return this.detail.perlu_tindakan ? 'Sisa yang perlu dibayar' : 'Dapat dibayar lebih awal';
+      },
+
       get statusMessage() {
         if (!this.detail) return '';
         if (this.detail.status === 'lunas') return 'Seluruh pembayaran untuk tagihan ini sudah diterima.';
         if (this.detail.status === 'dibatalkan') return 'Tagihan ini telah dibatalkan.';
         if (this.isOverdue) return 'Jatuh tempo ' + this.formatDate(this.detail.tanggal_jatuh_tempo) + ' sudah lewat.';
         if (this.detail.status === 'sebagian') return 'Sebagian pembayaran sudah diterima. Catat pembayaran berikutnya saat uang diterima.';
-        return 'Belum ada pembayaran yang melunasi tagihan ini.';
+        if (this.detail.status_waktu === 'mendatang') return 'Periode dimulai ' + this.formatDate(this.detail.tanggal_mulai) + '. Pembayaran lebih awal tetap dapat dicatat.';
+        if (this.detail.status_waktu === 'berjalan') return 'Periode sedang berjalan dan pembayaran jatuh tempo pada ' + this.formatDate(this.detail.tanggal_jatuh_tempo) + '.';
+        return this.detail.label_waktu || 'Tagihan belum diselesaikan.';
       },
 
       async init() {

@@ -49,7 +49,7 @@
       </div>
     </section>
 
-    <section>
+    <section id="riwayat-tagihan" class="scroll-mt-20">
       <div class="mb-3">
         <h2 class="text-lg font-semibold text-slate-900">Riwayat tagihan</h2>
         <p class="mt-1 text-sm text-slate-500">Tagihan yang sudah lunas atau dibatalkan.</p>

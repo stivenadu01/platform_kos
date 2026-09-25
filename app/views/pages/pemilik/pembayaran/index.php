@@ -7,12 +7,8 @@
     <div>
       <a x-show="isScoped" x-cloak :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <p class="owner-eyebrow">Keuangan Kos</p>
-      <h2 class="owner-title">
-        Keuangan Aktif
-      </h2>
-      <p class="owner-subtitle">
-        Tindak lanjuti tagihan yang belum lunas atau baru dibayar sebagian.
-      </p>
+      <h2 class="owner-title" x-text="group === 'terjadwal' ? 'Tagihan Berjalan & Mendatang' : 'Perlu Ditagih'"></h2>
+      <p class="owner-subtitle" x-text="group === 'terjadwal' ? 'Lihat tagihan yang belum mendesak dan catat pembayaran lebih awal bila diperlukan.' : 'Tindak lanjuti tagihan mulai H-3, pada hari jatuh tempo, dan yang terlambat.'"></p>
     </div>
   </div>
 
@@ -27,16 +23,15 @@
     </div>
   </div>
 
-  <div class="owner-segmented" role="tablist" aria-label="Kelompok status tagihan">
-    <button type="button" role="tab" @click="setStatus('')" :class="status === '' ? 'is-active' : ''">Semua Aktif</button>
-    <button type="button" role="tab" @click="setStatus('belum_lunas')" :class="status === 'belum_lunas' ? 'is-active' : ''"><span class="owner-segment-dot bg-rose-500"></span>Perlu ditagih</button>
-    <button type="button" role="tab" @click="setStatus('sebagian')" :class="status === 'sebagian' ? 'is-active' : ''"><span class="owner-segment-dot bg-amber-500"></span>Sebagian</button>
+  <div class="owner-segmented" role="tablist" aria-label="Periode tagihan">
+    <button type="button" role="tab" @click="setGroup('aktif')" :class="group === 'aktif' ? 'is-active' : ''"><span class="owner-segment-dot bg-rose-500"></span>Perlu ditagih</button>
+    <button type="button" role="tab" @click="setGroup('terjadwal')" :class="group === 'terjadwal' ? 'is-active' : ''"><span class="owner-segment-dot bg-blue-500"></span>Berjalan &amp; Mendatang</button>
   </div>
 
   <div x-data="{ filterOpen: window.innerWidth >= 768 }" @resize.window="if (window.innerWidth >= 768) filterOpen = true" data-help="help-tagihan-filter" class="card border border-slate-200 shadow-sm">
     <button type="button" @click="filterOpen = !filterOpen" class="owner-mobile-filter-summary md:hidden">
       <span class="inline-flex items-center gap-2"><?= masterIconSvg('filter', 'h-4 w-4') ?> Cari & Filter Tagihan</span>
-      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idKamar || status" class="owner-mobile-filter-count" x-text="[search,idKos,idKamar,status].filter(Boolean).length"></span><span x-text="filterOpen ? '−' : '+'"></span></span>
+      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idKamar" class="owner-mobile-filter-count" x-text="[search,idKos,idKamar].filter(Boolean).length"></span><span x-text="filterOpen ? '−' : '+'"></span></span>
     </button>
     <div x-show="filterOpen" x-cloak class="mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid md:grid-cols-2 lg:grid-cols-4 lg:gap-4">
       <div class="form-group">
@@ -79,8 +74,8 @@
 
     <div x-show="!loading && tagihan.length === 0" x-cloak class="py-14 text-center">
       <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('wallet', 'h-7 w-7') ?></div>
-      <h3 class="font-semibold text-slate-900">Belum ada tagihan</h3>
-      <p class="mt-1 text-sm text-slate-500">Tagihan akan muncul otomatis setelah penghuni ditambahkan.</p>
+      <h3 class="font-semibold text-slate-900" x-text="group === 'terjadwal' ? 'Tidak ada tagihan berjalan atau mendatang' : 'Tidak ada tagihan yang perlu ditindaklanjuti'"></h3>
+      <p class="mt-1 text-sm text-slate-500" x-text="group === 'terjadwal' ? 'Tagihan periode berikutnya akan muncul di sini setelah dibuat.' : 'Buka Berjalan & Mendatang untuk mencatat pembayaran lebih awal.'"></p>
     </div>
 
     <div x-show="!loading && tagihan.length > 0" x-cloak class="!hidden md:!block overflow-x-auto">
@@ -113,8 +108,8 @@
               <td class="px-5 py-4">
                 <span
                   class="inline-flex rounded-full px-3 py-1 text-xs font-medium"
-                  :class="statusClass(item.status)"
-                  x-text="statusLabel(item.status)"></span>
+                  :class="displayStatusClass(item)"
+                  x-text="displayStatusLabel(item)"></span>
               </td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
@@ -136,10 +131,10 @@
         <article class="p-4">
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1"><div class="owner-copy-full font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div><div class="owner-copy-full mt-1 font-medium text-slate-700" x-text="item.nama_penghuni || 'Belum ada penghuni'"></div><div class="owner-copy-full mt-1 text-xs text-slate-500" x-text="isScoped ? item.tipe_kamar : item.nama_kos + ' · ' + item.tipe_kamar"></div><div class="owner-copy-full mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div></div>
-            <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
+            <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="displayStatusClass(item)" x-text="displayStatusLabel(item)"></span>
           </div>
-          <div class="mt-3 flex items-end justify-between gap-3 rounded-xl p-3" :class="Number(item.sisa_tagihan || 0) > 0 ? 'bg-rose-50' : 'bg-emerald-50'">
-            <div><div class="text-[11px] font-semibold uppercase tracking-wider" :class="Number(item.sisa_tagihan || 0) > 0 ? 'text-rose-500' : 'text-emerald-500'" x-text="Number(item.sisa_tagihan || 0) > 0 ? 'Sisa yang harus dibayar' : 'Pembayaran selesai'"></div><div class="mt-1 text-xl font-bold tracking-tight" :class="Number(item.sisa_tagihan || 0) > 0 ? 'text-rose-700' : 'text-emerald-700'" x-text="format(item.sisa_tagihan)"></div></div>
+          <div class="mt-3 flex items-end justify-between gap-3 rounded-xl p-3" :class="item.perlu_tindakan ? 'bg-rose-50' : 'bg-blue-50'">
+            <div><div class="text-[11px] font-semibold uppercase tracking-wider" :class="item.perlu_tindakan ? 'text-rose-500' : 'text-blue-500'" x-text="item.perlu_tindakan ? 'Sisa yang harus dibayar' : 'Dapat dibayar lebih awal'"></div><div class="mt-1 text-xl font-bold tracking-tight" :class="item.perlu_tindakan ? 'text-rose-700' : 'text-blue-700'" x-text="format(item.sisa_tagihan)"></div></div>
             <div class="text-right"><div class="text-[11px] text-slate-400">Jatuh tempo</div><div class="mt-1 text-xs font-semibold text-slate-700" x-text="formatDate(item.tanggal_jatuh_tempo)"></div></div>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
@@ -162,7 +157,7 @@
     return {
       tagihan: [],
       search: '',
-      status: '',
+      group: 'aktif',
       idKos: '',
       idKamar: '',
       idTipeKamar: '',
@@ -200,7 +195,7 @@
       restoreFilters() {
         const params = new URLSearchParams(window.location.search);
         this.search = params.get('search') || '';
-        this.status = ['belum_lunas', 'sebagian'].includes(params.get('status')) ? params.get('status') : '';
+        this.group = params.get('view') === 'terjadwal' ? 'terjadwal' : 'aktif';
         this.idKos = params.get('id_kos') || '';
         this.idKamar = params.get('id_kamar') || '';
         this.idTipeKamar = params.get('id_tipe_kamar') || '';
@@ -261,7 +256,7 @@
 
         const params = new URLSearchParams();
         if (this.search.trim()) params.set('search', this.search.trim());
-        if (this.status) params.set('status', this.status);
+        if (this.group === 'terjadwal') params.set('view', 'terjadwal');
         if (this.idKos) params.set('id_kos', this.idKos);
         if (this.idKamar) params.set('id_kamar', this.idKamar);
         if (this.idTipeKamar) params.set('id_tipe_kamar', this.idTipeKamar);
@@ -275,8 +270,8 @@
         this.load();
       },
 
-      setStatus(value) {
-        this.status = value;
+      setGroup(value) {
+        this.group = value === 'terjadwal' ? 'terjadwal' : 'aktif';
         this.applyFilter();
       },
 
@@ -285,12 +280,11 @@
         try {
           const params = new URLSearchParams();
           if (this.search.trim()) params.set('search', this.search.trim());
-          if (this.status) params.set('status', this.status);
           if (this.idKos) params.set('id_kos', this.idKos);
           if (this.idKamar) params.set('id_kamar', this.idKamar);
           if (this.idTipeKamar) params.set('id_tipe_kamar', this.idTipeKamar);
           if (this.idPenghuni) params.set('id_penghuni', this.idPenghuni);
-          params.set('scope', 'aktif');
+          params.set('scope', this.group === 'terjadwal' ? 'terjadwal' : 'aktif');
           const query = params.toString();
           const res = await API.get('/pemilik/tagihan' + (query ? '?' + query : ''), false);
           this.tagihan = res.data || [];
@@ -349,6 +343,16 @@
           lunas: 'bg-emerald-50 text-emerald-700',
           dibatalkan: 'bg-slate-100 text-slate-600'
         })[status] || 'bg-slate-100 text-slate-600';
+      },
+
+      displayStatusLabel(item) {
+        if (this.group === 'terjadwal') return item.label_waktu || 'Belum mendesak';
+        return this.statusLabel(item.status);
+      },
+
+      displayStatusClass(item) {
+        if (this.group === 'terjadwal') return 'bg-blue-50 text-blue-700';
+        return this.statusClass(item.status);
       }
     };
   }

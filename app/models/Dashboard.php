@@ -16,7 +16,7 @@ function getDashboardPemilik($id_pemilik, $includeFinance = false)
   $tagihan = [];
 
   if ($includeFinance) {
-    $stmt = $conn->prepare("\n      SELECT\n        COUNT(*) AS tagihan_belum_lunas,\n        COALESCE(SUM(GREATEST(t.total_tagihan - t.total_dibayar, 0)), 0) AS total_piutang\n      FROM tagihan t\n      INNER JOIN kamar km ON km.id_kamar = t.id_kamar\n      INNER JOIN kos k ON k.id_kos = km.id_kos\n      WHERE k.id_pemilik = ?\n        AND t.status IN ('belum_lunas', 'sebagian')\n    ");
+    $stmt = $conn->prepare("\n      SELECT\n        COUNT(*) AS tagihan_belum_lunas,\n        COALESCE(SUM(GREATEST(t.total_tagihan - t.total_dibayar, 0)), 0) AS total_piutang\n      FROM tagihan t\n      INNER JOIN kamar km ON km.id_kamar = t.id_kamar\n      INNER JOIN kos k ON k.id_kos = km.id_kos\n      WHERE k.id_pemilik = ?\n        AND t.status IN ('belum_lunas', 'sebagian')\n        AND t.tanggal_jatuh_tempo <= DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)\n    ");
     $stmt->bind_param('i', $id_pemilik);
     $stmt->execute();
     $finance = $stmt->get_result()->fetch_assoc() ?: $finance;
@@ -28,7 +28,7 @@ function getDashboardPemilik($id_pemilik, $includeFinance = false)
     $income = $stmt->get_result()->fetch_assoc() ?: $income;
     $stmt->close();
 
-    $stmt = $conn->prepare("\n      SELECT\n        t.id_tagihan,\n        t.nomor_tagihan,\n        t.tanggal_jatuh_tempo,\n        t.total_tagihan,\n        t.total_dibayar,\n        GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan,\n        t.status,\n        km.nomor_kamar,\n        k.nama_kos\n      FROM tagihan t\n      INNER JOIN kamar km ON km.id_kamar = t.id_kamar\n      INNER JOIN kos k ON k.id_kos = km.id_kos\n      WHERE k.id_pemilik = ?\n        AND t.status IN ('belum_lunas', 'sebagian')\n      ORDER BY t.tanggal_jatuh_tempo ASC, t.created_at DESC\n      LIMIT 5\n    ");
+    $stmt = $conn->prepare("\n      SELECT\n        t.id_tagihan,\n        t.nomor_tagihan,\n        t.tanggal_jatuh_tempo,\n        t.total_tagihan,\n        t.total_dibayar,\n        GREATEST(t.total_tagihan - t.total_dibayar, 0) AS sisa_tagihan,\n        t.status,\n        km.nomor_kamar,\n        k.nama_kos\n      FROM tagihan t\n      INNER JOIN kamar km ON km.id_kamar = t.id_kamar\n      INNER JOIN kos k ON k.id_kos = km.id_kos\n      WHERE k.id_pemilik = ?\n        AND t.status IN ('belum_lunas', 'sebagian')\n        AND t.tanggal_jatuh_tempo <= DATE_ADD(CURRENT_DATE, INTERVAL 3 DAY)\n      ORDER BY t.tanggal_jatuh_tempo ASC, t.created_at DESC\n      LIMIT 5\n    ");
     $stmt->bind_param('i', $id_pemilik);
     $stmt->execute();
     $result = $stmt->get_result();
