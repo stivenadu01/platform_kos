@@ -45,6 +45,16 @@ function isPublicPrimaryNavigationPath($path)
   return in_array((string)$path, publicPrimaryNavigationPaths(), true);
 }
 
+function ownerPrimaryNavigationPaths()
+{
+  return ['/pemilik', '/pemilik/kos', '/pemilik/penghuni', '/pemilik/pembayaran'];
+}
+
+function isOwnerPrimaryNavigationPath($path)
+{
+  return in_array((string)$path, ownerPrimaryNavigationPaths(), true);
+}
+
 require_once __DIR__ . '/location_helper.php';
 
 function masterIconCatalog()
@@ -139,6 +149,7 @@ function masterIconCatalog()
     'clipboard-check' => ['label' => 'Aturan / Ketentuan', 'path' => '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M9 13l2 2 4-4"/>'],
     'info' => ['label' => 'Informasi', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'],
     'alert-circle' => ['label' => 'Peringatan', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/>'],
+    'check' => ['label' => 'Centang / Dipilih', 'path' => '<path d="m5 12 4 4L19 6"/>'],
     'check-circle-2' => ['label' => 'Tersedia / Selesai', 'path' => '<path d="M21 12a9 9 0 1 1-3-6.7"/><path d="m9 12 2 2 4-4"/>'],
     'circle-x' => ['label' => 'Tidak tersedia', 'path' => '<circle cx="12" cy="12" r="9"/><path d="m15 9-6 6M9 9l6 6"/>'],
     'circle-help' => ['label' => 'Bantuan', 'path' => '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4 2c-1.2.8-1.5 1.2-1.5 2.5M12 17h.01"/>'],
@@ -173,6 +184,8 @@ function masterIconCatalog()
     'share-2' => ['label' => 'Bagikan', 'path' => '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/>'],
     'history' => ['label' => 'Riwayat', 'path' => '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>'],
     'star' => ['label' => 'Langganan', 'path' => '<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/>'],
+    'gift' => ['label' => 'Hadiah / Promo', 'path' => '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M7.5 8C5.6 8 4 6.8 4 5.2 4 3.9 5.1 3 6.5 3 9 3 12 8 12 8M16.5 8C18.4 8 20 6.8 20 5.2 20 3.9 18.9 3 17.5 3 15 3 12 8 12 8"/>'],
+    'badge-percent' => ['label' => 'Diskon', 'path' => '<path d="M12 3 15 5l3.5-.2.7 3.4L22 10l-1.5 3 1.5 3-2.8 1.8-.7 3.4L15 21l-3 2-3-2-3.5.2-.7-3.4L2 16l1.5-3L2 10l2.8-1.8.7-3.4L9 5l3-2Z"/><path d="m9 16 6-8M9.5 8.5h.01M14.5 15.5h.01"/>'],
     'log-out' => ['label' => 'Keluar', 'path' => '<path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M15 4h4a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/>'],
     'menu' => ['label' => 'Menu', 'path' => '<path d="M4 6h16M4 12h16M4 18h16"/>'],
     'smartphone' => ['label' => 'Aplikasi', 'path' => '<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/>'],
@@ -205,6 +218,8 @@ function masterIconLabel($icon)
 function masterIconSvg($icon, $class = 'h-5 w-5')
 {
   $catalog = masterIconCatalog();
-  $path = $catalog[$icon]['path'] ?? $catalog['map-pin']['path'];
+  // Ikon tak dikenal tidak boleh menyamar sebagai lokasi. Gunakan simbol bantuan
+  // yang netral agar salah key mudah dikenali saat audit antarmuka.
+  $path = $catalog[$icon]['path'] ?? $catalog['circle-help']['path'];
   return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="'.htmlspecialchars($class, ENT_QUOTES, 'UTF-8').'" aria-hidden="true">'.$path.'</svg>';
 }

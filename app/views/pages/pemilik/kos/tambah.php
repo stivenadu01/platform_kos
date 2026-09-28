@@ -59,7 +59,7 @@
 
       <input
         type="text"
-        data-onboarding="kos-field-nama" x-model="form.nama_kos"
+ x-model="form.nama_kos"
         class="input"
         placeholder="Contoh: Kos Melati"
         required>
@@ -74,7 +74,7 @@
       </label>
 
       <textarea
-        data-onboarding="kos-field-alamat" x-model="form.alamat"
+ x-model="form.alamat"
         class="input min-h-28"
         placeholder="Alamat lengkap kos"
         required></textarea>
@@ -91,7 +91,7 @@
         </label>
 
         <select
-          data-onboarding="kos-field-jenis" x-model="form.jenis"
+ x-model="form.jenis"
           class="select"
           required>
 
@@ -125,7 +125,7 @@
       </label>
 
       <textarea
-        data-onboarding="kos-field-deskripsi" x-model="form.deskripsi"
+ x-model="form.deskripsi"
         class="input min-h-32"
         placeholder="Jelaskan kondisi dan keunggulan kos..."></textarea>
 
@@ -136,7 +136,7 @@
     <div x-show="step === 2" x-cloak data-step-panel="2" class="space-y-6">
 
     <!-- ATURAN -->
-    <div data-help="help-kos-form-rules" data-onboarding="kos-field-aturan" class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-rules" class="pt-4 border-t border-slate-200">
       <div>
         <h3 class="font-semibold text-slate-900">Aturan / Ketentuan Kos</h3>
         <p class="text-sm text-slate-500 mt-1">Pilih aturan yang berlaku di kos. Data ini akan ditampilkan pada detail kos.</p>
@@ -157,7 +157,7 @@
     </div>
 
     <!-- FASILITAS -->
-    <div data-help="help-kos-form-facility" data-onboarding="kos-field-fasilitas" class="pt-4 border-t border-slate-200">
+    <div data-help="help-kos-form-facility" class="pt-4 border-t border-slate-200">
 
       <div>
         <h3 class="font-semibold text-slate-900">
@@ -219,7 +219,7 @@
     </div>
 
     <!-- LOKASI -->
-    <div x-show="step === 3" x-cloak data-step-panel="3" data-help="help-kos-form-location" data-onboarding="kos-field-lokasi" class="space-y-5">
+    <div x-show="step === 3" x-cloak data-step-panel="3" data-help="help-kos-form-location" class="space-y-5">
       <div>
         <h3 class="font-semibold text-slate-900">Lokasi Kos</h3>
         <p class="mt-1 text-sm text-slate-500">Tempel link Google Maps kos agar saat pengunjung membuka lokasi, Google Maps langsung menuju tempat yang Anda pilih.</p>
@@ -299,7 +299,7 @@
         x-show="step === 3"
         x-cloak
         type="submit"
-        data-help="help-kos-form-save" data-onboarding="kos-save"
+        data-help="help-kos-form-save"
         class="btn-primary"
         :disabled="loading || !form.latitude || !form.longitude">
 

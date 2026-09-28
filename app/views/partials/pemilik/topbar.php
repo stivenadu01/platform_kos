@@ -1,6 +1,7 @@
 <?php
 $__topbarIsPro = false;
 $__topbarSubscriptionLabel = 'Gratis';
+$__topbarPromoEligible = false;
 $__topbarPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
 $__topbarPageLabel = 'Dashboard';
 $__topbarPageMap = [
@@ -25,6 +26,8 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   $__topbarStatusLangganan = getStatusLanggananPemilik((int)$_SESSION['user']['id_user']);
   $__topbarIsPro = !empty($__topbarStatusLangganan['is_pro']);
   $__topbarSubscriptionLabel = $__topbarIsPro ? 'BetaKos Pro' : 'Akun Gratis';
+  $__topbarPromo = getKelayakanPromoLangganan((int)$_SESSION['user']['id_user']);
+  $__topbarPromoEligible = !empty($__topbarPromo['eligible']);
 }
 ?>
 
@@ -91,6 +94,17 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   <!-- RIGHT -->
   <div class="flex items-center gap-3">
 
+    <?php if ($__topbarPromoEligible): ?>
+      <a
+        href="<?= BASE_URL ?>/pemilik/langganan?paket=pro_6_bulan"
+        class="inline-flex h-9 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 text-xs font-bold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-100 sm:px-3"
+        title="Klaim gratis 6 bulan pertama BetaKos Pro">
+        <?= masterIconSvg('gift', 'h-4 w-4') ?>
+        <span class="hidden md:inline">Klaim gratis 6 bulan</span>
+        <span class="md:hidden">6 bulan gratis</span>
+      </a>
+    <?php endif; ?>
+
     <button
       type="button"
       data-pwa-install data-pwa-install-mobile
@@ -114,7 +128,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     <button
       type="button"
       @click="
-        if (localStorage.getItem('betakos_owner_onboarding_complete_v3') !== '1') {
+        if (localStorage.getItem('betakos_owner_onboarding_complete_v4') !== '1') {
           window.dispatchEvent(new CustomEvent('betakos:onboarding-help'));
         } else {
           window.dispatchEvent(new CustomEvent('betakos:operational-help'));

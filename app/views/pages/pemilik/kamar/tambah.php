@@ -61,7 +61,7 @@
       </label>
 
       <select
-        data-help="help-kamar-form-kos" data-onboarding="kamar-field-kos"
+        data-help="help-kamar-form-kos"
         x-model="form.id_kos"
         @change="loadTipe()"
         class="select"
@@ -91,7 +91,7 @@
       </label>
 
       <select
-        data-help="help-kamar-form-type" data-onboarding="kamar-field-tipe"
+        data-help="help-kamar-form-type"
         x-model="form.id_tipe_kamar"
         @change="loadTypeFacilities()"
         class="select"
@@ -116,7 +116,7 @@
 
     <!-- NOMOR SINGLE -->
     <div
-      data-help="help-kamar-form-number" data-onboarding="kamar-field-nomor-single"
+      data-help="help-kamar-form-number"
       x-show="mode === 'single'"
       x-cloak
       class="form-group">
@@ -135,7 +135,7 @@
 
     <!-- NOMOR BULK -->
     <div
-      data-help="help-kamar-form-number" data-onboarding="kamar-field-nomor-bulk"
+      data-help="help-kamar-form-number"
       x-show="mode === 'bulk'"
       x-cloak
       class="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -247,7 +247,7 @@
 
       <button data-help="help-kamar-form-save"
         type="submit"
-        data-onboarding="kamar-save"
+
         class="btn-primary"
         :disabled="loading">
         <span
@@ -393,9 +393,13 @@
             });
           }
 
-          window.location.href = this.contextTypeId
+          let target = this.contextTypeId
             ? BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
             : BASE_URL + '/pemilik/kamar';
+          if (localStorage.getItem('betakos_owner_onboarding_active_v4') === '1') {
+            target += (target.includes('?') ? '&' : '?') + 'onboarding=1';
+          }
+          window.location.href = target;
         } catch (error) {
           console.error('Gagal menyimpan kamar:', error);
         } finally {

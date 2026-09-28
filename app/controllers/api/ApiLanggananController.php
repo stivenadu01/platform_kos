@@ -23,7 +23,8 @@ class ApiLanggananController
         'success' => true,
         'data' => [
           'status' => $status,
-          'paket' => getPaketLanggananAktif(),
+          'paket' => getPaketLanggananAktif($idPemilik),
+          'promo' => getKelayakanPromoLangganan($idPemilik),
           'pending_payment' => getPendingPembayaranLanggananPemilik($idPemilik),
         ]
       ]);
@@ -59,7 +60,8 @@ class ApiLanggananController
         'data' => [
           'status' => $status,
           'is_renewal' => $isRenewal,
-          'paket' => getPaketLanggananAktif(),
+          'paket' => getPaketLanggananAktif($idPemilik),
+          'promo' => getKelayakanPromoLangganan($idPemilik),
           'active_subscription' => $active,
           'pending_payment' => $pending,
           'payment_methods' => $methods,
@@ -106,17 +108,17 @@ class ApiLanggananController
 
       $status = getStatusLanggananPemilik($idPemilik);
       $isRenewal = in_array($status['status'], ['aktif', 'berakhir'], true);
-      $paket = getPaketLanggananByKode($kodePaket);
+      $paket = getPaketLanggananByKode($kodePaket, $idPemilik);
       if (!$paket) {
         throw new Exception('Paket langganan tidak tersedia.', 404);
       }
 
-      // Pro 1 bulan pertama gratis: tidak membuat pembayaran dan langsung aktif.
-      if (!$isRenewal && (float)$paket['harga_bulanan'] <= 0 && (int)$paket['durasi_bulan'] === 1) {
+      // Paket 6 bulan gratis langsung aktif bagi pemilik kos terverifikasi yang belum pernah memakai promo.
+      if ((float)($paket['pricing']['harga_final'] ?? -1) === 0.0 && (int)$paket['durasi_bulan'] === 6) {
         $idLangganan = aktifkanLanggananGratisPertama($idPemilik, $kodePaket);
         response([
           'success' => true,
-          'message' => 'Pro 1 bulan gratis berhasil diaktifkan.',
+          'message' => 'Uji coba BetaKos Pro gratis 6 bulan berhasil diaktifkan.',
           'data' => [
             'id_langganan' => $idLangganan,
             'gratis' => true,

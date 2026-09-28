@@ -17,36 +17,53 @@ function addMonthsSafe(DateTimeImmutable $date, $months)
 }
 
 
-function getPaketLanggananAktif()
+function fiturBetaKosPro()
 {
-  $conn = db();
-
-  $result = $conn->query("\n    SELECT id_paket_langganan, kode, nama, harga_bulanan, harga_perpanjangan, durasi_bulan, deskripsi, fitur_json\n    FROM paket_langganan\n    WHERE status = 'aktif'\n    ORDER BY harga_bulanan ASC, id_paket_langganan ASC\n  ");
-
-  if (!$result) {
-    throw new RuntimeException('Gagal mengambil paket langganan.');
-  }
-
-  $rows = $result->fetch_all(MYSQLI_ASSOC);
-  foreach ($rows as &$row) {
-    $row['harga_bulanan'] = (float) $row['harga_bulanan'];
-    $row['harga_perpanjangan'] = (float) $row['harga_perpanjangan'];
-    $row['durasi_bulan'] = (int) $row['durasi_bulan'];
-    $decoded = json_decode((string) ($row['fitur_json'] ?? ''), true);
-    $row['fitur'] = is_array($decoded) ? $decoded : [];
-    unset($row['fitur_json']);
-  }
-  unset($row);
-
-  return $rows;
+  return ['Kelola penghuni', 'Tagihan & pembayaran', 'Riwayat operasional', 'Ringkasan keuangan', 'Pengingat otomatis'];
 }
 
-function getPaketLanggananByKode($kode)
+function getKelayakanPromoLangganan($id_pemilik)
+{
+  $conn = db();
+  $id_pemilik = (int)$id_pemilik;
+  $stmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM kos k WHERE k.id_pemilik = ? AND k.status = 'aktif' AND EXISTS (SELECT 1 FROM verifikasi_kos vk WHERE vk.id_kos = k.id_kos AND vk.status = 'disetujui')) AS verified");
+  $stmt->bind_param('i', $id_pemilik); $stmt->execute();
+  $verified = (int)($stmt->get_result()->fetch_assoc()['verified'] ?? 0) === 1; $stmt->close();
+  $stmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM langganan WHERE id_pemilik = ? AND promo_digunakan_at IS NOT NULL) AS used");
+  $stmt->bind_param('i', $id_pemilik); $stmt->execute();
+  $used = (int)($stmt->get_result()->fetch_assoc()['used'] ?? 0) === 1; $stmt->close();
+  return ['eligible' => $verified && !$used, 'punya_kos_terverifikasi' => $verified, 'pernah_menggunakan' => $used,
+    'alasan' => !$verified ? 'Verifikasi minimal satu kos untuk membuka promo.' : ($used ? 'Promo gratis 6 bulan sudah pernah digunakan.' : 'Klaim gratis 6 bulan pertama BetaKos Pro.')];
+}
+
+function hitungHargaPaketLangganan(array $paket, $id_pemilik)
+{
+  $promo = getKelayakanPromoLangganan($id_pemilik);
+  $durasi = (int)$paket['durasi_bulan']; $bulanan = (float)$paket['harga_bulanan'];
+  $normal = $bulanan * $durasi; $promoBulan = $promo['eligible'] ? min(6, $durasi) : 0;
+  return array_merge($promo, ['harga_normal' => $normal, 'promo_bulan' => $promoBulan,
+    'diskon_promo' => $bulanan * $promoBulan, 'harga_final' => max(0, $normal - ($bulanan * $promoBulan))]);
+}
+
+function getPaketLanggananAktif($id_pemilik = 0)
+{
+  $result = db()->query("SELECT id_paket_langganan, kode, nama, harga_bulanan, durasi_bulan, deskripsi FROM paket_langganan WHERE status = 'aktif' ORDER BY durasi_bulan ASC");
+  if (!$result) throw new RuntimeException('Gagal mengambil paket langganan.');
+  $rows = $result->fetch_all(MYSQLI_ASSOC);
+  foreach ($rows as &$row) {
+    $row['harga_bulanan'] = (float)$row['harga_bulanan']; $row['durasi_bulan'] = (int)$row['durasi_bulan'];
+    $row['fitur'] = fiturBetaKosPro();
+    if ((int)$id_pemilik > 0) $row['pricing'] = hitungHargaPaketLangganan($row, $id_pemilik);
+  }
+  unset($row); return $rows;
+}
+
+function getPaketLanggananByKode($kode, $id_pemilik = 0)
 {
   $conn = db();
   $kode = trim((string) $kode);
 
-  $stmt = $conn->prepare("\n    SELECT id_paket_langganan, kode, nama, harga_bulanan, harga_perpanjangan, durasi_bulan, deskripsi, fitur_json\n    FROM paket_langganan\n    WHERE kode = ? AND status = 'aktif'\n    LIMIT 1\n  ");
+  $stmt = $conn->prepare("SELECT id_paket_langganan, kode, nama, harga_bulanan, durasi_bulan, deskripsi FROM paket_langganan WHERE kode = ? AND status = 'aktif' LIMIT 1");
   $stmt->bind_param('s', $kode);
   $stmt->execute();
   $row = $stmt->get_result()->fetch_assoc();
@@ -57,11 +74,9 @@ function getPaketLanggananByKode($kode)
   }
 
   $row['harga_bulanan'] = (float) $row['harga_bulanan'];
-  $row['harga_perpanjangan'] = (float) $row['harga_perpanjangan'];
   $row['durasi_bulan'] = (int) $row['durasi_bulan'];
-  $decoded = json_decode((string) ($row['fitur_json'] ?? ''), true);
-  $row['fitur'] = is_array($decoded) ? $decoded : [];
-  unset($row['fitur_json']);
+  $row['fitur'] = fiturBetaKosPro();
+  if ((int)$id_pemilik > 0) $row['pricing'] = hitungHargaPaketLangganan($row, $id_pemilik);
 
   return $row;
 }
@@ -96,7 +111,7 @@ function getLatestLanggananPemilik($id_pemilik)
   $conn = db();
   $id_pemilik = (int)$id_pemilik;
 
-  $stmt = $conn->prepare("\n    SELECT\n      l.id_langganan,\n      l.id_pemilik,\n      l.id_paket_langganan,\n      l.tanggal_mulai,\n      l.tanggal_berakhir,\n      l.status,\n      p.kode AS kode_paket,\n      p.nama AS nama_paket,\n      p.harga_bulanan,\n      p.durasi_bulan,\n      p.deskripsi,\n      p.fitur_json\n    FROM langganan l\n    INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan\n    WHERE l.id_pemilik = ?\n      AND l.status IN ('aktif', 'berakhir')\n    ORDER BY l.id_langganan DESC\n    LIMIT 1\n  ");
+  $stmt = $conn->prepare("\n    SELECT\n      l.id_langganan,\n      l.id_pemilik,\n      l.id_paket_langganan,\n      l.tanggal_mulai,\n      l.tanggal_berakhir,\n      l.status,\n      p.kode AS kode_paket,\n      p.nama AS nama_paket,\n      p.harga_bulanan,\n      p.durasi_bulan,\n      p.deskripsi\n    FROM langganan l\n    INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan\n    WHERE l.id_pemilik = ?\n      AND l.status IN ('aktif', 'berakhir')\n    ORDER BY l.id_langganan DESC\n    LIMIT 1\n  ");
   $stmt->bind_param('i', $id_pemilik);
   $stmt->execute();
   $row = $stmt->get_result()->fetch_assoc();
@@ -106,9 +121,7 @@ function getLatestLanggananPemilik($id_pemilik)
 
   $row['harga_bulanan'] = (float)$row['harga_bulanan'];
   $row['durasi_bulan'] = (int)$row['durasi_bulan'];
-  $decoded = json_decode((string)($row['fitur_json'] ?? ''), true);
-  $row['fitur'] = is_array($decoded) ? $decoded : [];
-  unset($row['fitur_json']);
+  $row['fitur'] = fiturBetaKosPro();
 
   return $row;
 }
@@ -120,7 +133,7 @@ function getLanggananAktifPemilik($id_pemilik)
   $conn = db();
   $id_pemilik = (int)$id_pemilik;
 
-  $stmt = $conn->prepare("\n    SELECT\n      l.id_langganan,\n      l.id_pemilik,\n      l.tanggal_mulai,\n      l.tanggal_berakhir,\n      l.status,\n      p.id_paket_langganan,\n      p.kode AS kode_paket,\n      p.nama AS nama_paket,\n      p.harga_bulanan,\n      p.durasi_bulan,\n      p.deskripsi,\n      p.fitur_json\n    FROM langganan l\n    INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan\n    WHERE l.id_pemilik = ?\n      AND l.status = 'aktif'\n      AND l.tanggal_mulai <= CURDATE()\n      AND l.tanggal_berakhir >= CURDATE()\n    ORDER BY l.tanggal_berakhir DESC, l.id_langganan DESC\n    LIMIT 1\n  ");
+  $stmt = $conn->prepare("\n    SELECT\n      l.id_langganan,\n      l.id_pemilik,\n      l.tanggal_mulai,\n      l.tanggal_berakhir,\n      l.status,\n      p.id_paket_langganan,\n      p.kode AS kode_paket,\n      p.nama AS nama_paket,\n      p.harga_bulanan,\n      p.durasi_bulan,\n      p.deskripsi\n    FROM langganan l\n    INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan\n    WHERE l.id_pemilik = ?\n      AND l.status = 'aktif'\n      AND l.tanggal_mulai <= CURDATE()\n      AND l.tanggal_berakhir >= CURDATE()\n    ORDER BY l.tanggal_berakhir DESC, l.id_langganan DESC\n    LIMIT 1\n  ");
   $stmt->bind_param('i', $id_pemilik);
   $stmt->execute();
   $row = $stmt->get_result()->fetch_assoc();
@@ -130,9 +143,7 @@ function getLanggananAktifPemilik($id_pemilik)
 
   $row['harga_bulanan'] = (float)$row['harga_bulanan'];
   $row['durasi_bulan'] = (int)$row['durasi_bulan'];
-  $decoded = json_decode((string)($row['fitur_json'] ?? ''), true);
-  $row['fitur'] = is_array($decoded) ? $decoded : [];
-  unset($row['fitur_json']);
+  $row['fitur'] = fiturBetaKosPro();
 
   return $row;
 }
@@ -493,32 +504,33 @@ function aktifkanLanggananGratisPertama($id_pemilik, $kode_paket)
     $stmt->execute();
     $stmt->close();
 
-    $paket = getPaketLanggananByKode($kode_paket);
+    $paket = getPaketLanggananByKode($kode_paket, $id_pemilik);
     if (!$paket) throw new Exception('Paket langganan tidak tersedia.', 404);
-    if ((int)$paket['durasi_bulan'] !== 1 || (float)$paket['harga_bulanan'] > 0) {
-      throw new Exception('Paket ini bukan paket Pro gratis pertama.', 422);
+    if ((int)$paket['durasi_bulan'] !== 6 || (float)($paket['pricing']['harga_final'] ?? -1) !== 0.0) {
+      throw new Exception('Promo gratis 6 bulan tidak tersedia untuk akun ini.', 422);
     }
 
-    $stmt = $conn->prepare("SELECT id_langganan FROM langganan WHERE id_pemilik = ? AND status IN ('aktif', 'berakhir') ORDER BY id_langganan DESC LIMIT 1 FOR UPDATE");
+    $stmt = $conn->prepare("SELECT id_langganan, tanggal_mulai, tanggal_berakhir FROM langganan WHERE id_pemilik = ? AND status = 'aktif' AND tanggal_berakhir >= CURDATE() ORDER BY tanggal_berakhir DESC LIMIT 1 FOR UPDATE");
     $stmt->bind_param('i', $id_pemilik);
     $stmt->execute();
-    $latest = $stmt->get_result()->fetch_assoc();
+    $active = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    if ($latest) throw new Exception('Promo Pro gratis hanya berlaku untuk pemilik yang belum pernah memiliki Pro.', 409);
 
-    $start = new DateTimeImmutable('today');
-    $end = addMonthsSafe($start, 1);
+    $start = $active ? new DateTimeImmutable($active['tanggal_mulai']) : new DateTimeImmutable('today');
+    $end = addMonthsSafe($active ? new DateTimeImmutable($active['tanggal_berakhir']) : $start, 6);
     $startDate = $start->format('Y-m-d');
     $endDate = $end->format('Y-m-d');
 
-    $stmt = $conn->prepare("
-      INSERT INTO langganan
-        (id_pemilik, id_paket_langganan, tanggal_mulai, tanggal_berakhir, status, catatan)
-      VALUES (?, ?, ?, ?, 'aktif', 'Aktivasi Pro gratis pertama')
-    ");
-    $stmt->bind_param('iiss', $id_pemilik, $paket['id_paket_langganan'], $startDate, $endDate);
+    if ($active) {
+      $id_langganan = (int)$active['id_langganan'];
+      $stmt = $conn->prepare("UPDATE langganan SET tanggal_berakhir = ?, promo_digunakan_at = CURRENT_TIMESTAMP, catatan = 'Promo gratis 6 bulan' WHERE id_langganan = ? AND promo_digunakan_at IS NULL");
+      $stmt->bind_param('si', $endDate, $id_langganan);
+    } else {
+      $stmt = $conn->prepare("INSERT INTO langganan (id_pemilik, id_paket_langganan, tanggal_mulai, tanggal_berakhir, status, catatan, promo_digunakan_at) VALUES (?, ?, ?, ?, 'aktif', 'Promo gratis 6 bulan', CURRENT_TIMESTAMP)");
+      $stmt->bind_param('iiss', $id_pemilik, $paket['id_paket_langganan'], $startDate, $endDate);
+    }
     if (!$stmt->execute()) throw new Exception('Gagal mengaktifkan Pro gratis.', 500);
-    $id_langganan = (int)$conn->insert_id;
+    if (!$active) $id_langganan = (int)$conn->insert_id;
     $stmt->close();
 
     $conn->commit();
@@ -565,7 +577,7 @@ function createPembayaranLangganan($id_pemilik, $kode_paket, $metode, $buktiFile
     $stmt->execute();
     $stmt->close();
 
-    $paket = getPaketLanggananByKode($kode_paket);
+    $paket = getPaketLanggananByKode($kode_paket, $id_pemilik);
     if (!$paket) throw new Exception('Paket langganan tidak tersedia.', 404);
 
     $stmt = $conn->prepare("\n      SELECT l.id_langganan, l.status, l.tanggal_berakhir\n      FROM langganan l\n      WHERE l.id_pemilik = ? AND l.status = 'aktif'\n        AND l.tanggal_mulai <= CURDATE() AND l.tanggal_berakhir >= CURDATE()\n      ORDER BY l.tanggal_berakhir DESC, l.id_langganan DESC\n      LIMIT 1\n      FOR UPDATE\n    ");
@@ -580,7 +592,7 @@ function createPembayaranLangganan($id_pemilik, $kode_paket, $metode, $buktiFile
     $latestLangganan = getLatestLanggananPemilik($id_pemilik);
     $isRenewal = (bool)$active || ($latestLangganan && $latestLangganan['status'] === 'berakhir');
     $jenis = $isRenewal ? 'renewal' : 'baru';
-    $nominalPembayaran = $jenis === 'renewal' ? (float)$paket['harga_perpanjangan'] : (float)$paket['harga_bulanan'];
+    $nominalPembayaran = (float)$paket['pricing']['harga_final'];
     $id_langganan = null;
 
     if ($active) {
@@ -662,7 +674,7 @@ function createPembayaranLanggananQris($id_pemilik, $kode_paket)
     $stmt = $conn->prepare("UPDATE langganan SET status='berakhir', updated_at=CURRENT_TIMESTAMP WHERE id_pemilik=? AND status='aktif' AND tanggal_berakhir < CURDATE()");
     $stmt->bind_param('i', $id_pemilik); $stmt->execute(); $stmt->close();
 
-    $paket = getPaketLanggananByKode($kode_paket);
+    $paket = getPaketLanggananByKode($kode_paket, $id_pemilik);
     if (!$paket) throw new Exception('Paket langganan tidak tersedia.', 404);
 
     $stmt = $conn->prepare("SELECT id_langganan,status,tanggal_berakhir FROM langganan WHERE id_pemilik=? AND status='aktif' AND tanggal_mulai<=CURDATE() AND tanggal_berakhir>=CURDATE() ORDER BY tanggal_berakhir DESC,id_langganan DESC LIMIT 1 FOR UPDATE");
@@ -672,7 +684,7 @@ function createPembayaranLanggananQris($id_pemilik, $kode_paket)
     $latest = getLatestLanggananPemilik($id_pemilik);
     $isRenewal = (bool)$active || ($latest && $latest['status'] === 'berakhir');
     $jenis = $isRenewal ? 'renewal' : 'baru';
-    $nominal = $jenis === 'renewal' ? (float)$paket['harga_perpanjangan'] : (float)$paket['harga_bulanan'];
+    $nominal = (float)$paket['pricing']['harga_final'];
     if ($nominal <= 0) throw new Exception('Paket ini tidak memerlukan pembayaran QRIS.', 422);
     if ($nominal > 10000000) throw new Exception('Nominal QRIS melebihi batas transaksi.', 422);
 
@@ -773,7 +785,7 @@ function prosesNotifikasiMidtrans(array $notification)
       $conn->commit(); return ['processed'=>false,'status'=>'menunggu'];
     }
 
-    $stmt=$conn->prepare("SELECT l.*,p.durasi_bulan FROM langganan l INNER JOIN paket_langganan p ON p.id_paket_langganan=? WHERE l.id_langganan=? FOR UPDATE");
+    $stmt=$conn->prepare("SELECT l.*,p.durasi_bulan,p.harga_bulanan FROM langganan l INNER JOIN paket_langganan p ON p.id_paket_langganan=? WHERE l.id_langganan=? FOR UPDATE");
     $stmt->bind_param('ii',$payment['id_paket_langganan'],$payment['id_langganan']); $stmt->execute(); $sub=$stmt->get_result()->fetch_assoc(); $stmt->close();
     if(!$sub) throw new Exception('Subscription terkait tidak ditemukan.',404);
 
@@ -789,6 +801,10 @@ function prosesNotifikasiMidtrans(array $notification)
     if(!$stmt->execute() || $stmt->affected_rows!==1){$stmt->close();throw new Exception('Gagal mengaktifkan subscription.',409);} $stmt->close();
 
     $stmt=$conn->prepare("UPDATE pembayaran_langganan SET status='diverifikasi',paid_at=COALESCE(paid_at,CURRENT_TIMESTAMP),tanggal_verifikasi=COALESCE(tanggal_verifikasi,CURRENT_TIMESTAMP) WHERE id_pembayaran_langganan=? AND status='menunggu'"); $stmt->bind_param('i',$payment['id_pembayaran_langganan']); if(!$stmt->execute()||$stmt->affected_rows!==1){$stmt->close();throw new Exception('Gagal menandai pembayaran sebagai terverifikasi.',409);} $stmt->close();
+    if ((float)$payment['nominal'] < ((float)$sub['harga_bulanan'] * (int)$sub['durasi_bulan'])) {
+      $stmt=$conn->prepare("UPDATE langganan SET promo_digunakan_at=COALESCE(promo_digunakan_at,CURRENT_TIMESTAMP) WHERE id_langganan=?");
+      $stmt->bind_param('i',$sub['id_langganan']); $stmt->execute(); $stmt->close();
+    }
 
     $stmt=$conn->prepare("SELECT COUNT(*) total FROM langganan WHERE id_pemilik=? AND status='aktif' AND tanggal_mulai<=CURDATE() AND tanggal_berakhir>=CURDATE()"); $stmt->bind_param('i',$payment['id_pemilik']); $stmt->execute(); $count=(int)($stmt->get_result()->fetch_assoc()['total']??0); $stmt->close();
     if($count>1) throw new Exception('Terdeteksi lebih dari satu subscription aktif.',409);
@@ -898,7 +914,6 @@ function getAdminLanggananList($status = '')
       p.kode AS kode_paket,
       p.nama AS nama_paket,
       p.harga_bulanan,
-      p.harga_perpanjangan,
       p.durasi_bulan,
       u.nama AS nama_pemilik,
       u.email AS email_pemilik,
@@ -946,7 +961,6 @@ function getAdminLanggananList($status = '')
   $rows = $result->fetch_all(MYSQLI_ASSOC);
   foreach ($rows as &$row) {
     $row['harga_bulanan'] = (float)$row['harga_bulanan'];
-    $row['harga_perpanjangan'] = (float)$row['harga_perpanjangan'];
     $row['durasi_bulan'] = (int)$row['durasi_bulan'];
     $row['id_langganan'] = (int)$row['id_langganan'];
     $row['id_pemilik'] = (int)$row['id_pemilik'];
@@ -979,7 +993,6 @@ function getAdminLanggananDetail($id_langganan)
       p.kode AS kode_paket,
       p.nama AS nama_paket,
       p.harga_bulanan,
-      p.harga_perpanjangan,
       p.durasi_bulan,
       p.deskripsi AS deskripsi_paket,
       u.nama AS nama_pemilik,
@@ -998,7 +1011,6 @@ function getAdminLanggananDetail($id_langganan)
   if (!$subscription) return null;
 
   $subscription['harga_bulanan'] = (float)$subscription['harga_bulanan'];
-  $subscription['harga_perpanjangan'] = (float)$subscription['harga_perpanjangan'];
   $subscription['durasi_bulan'] = (int)$subscription['durasi_bulan'];
 
   $stmt = $conn->prepare("
@@ -1069,7 +1081,6 @@ function getAdminLanggananHistoryPemilik($id_pemilik)
       p.kode AS kode_paket,
       p.nama AS nama_paket,
       p.harga_bulanan,
-      p.harga_perpanjangan,
       p.durasi_bulan
     FROM langganan l
     INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan
@@ -1224,7 +1235,7 @@ function prosesVerifikasiPembayaranLangganan($id_pembayaran, $id_admin, $keputus
       throw new Exception('Pembayaran QRIS Midtrans diverifikasi otomatis oleh sistem.', 409);
     }
 
-    $stmt = $conn->prepare("\n      SELECT l.*, p.durasi_bulan AS durasi_langganan, pp.durasi_bulan AS durasi_pembayaran\n      FROM langganan l\n      INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan\n      INNER JOIN paket_langganan pp ON pp.id_paket_langganan = ?\n      WHERE l.id_langganan = ?\n      FOR UPDATE\n    ");
+    $stmt = $conn->prepare("\n      SELECT l.*, p.durasi_bulan AS durasi_langganan, pp.durasi_bulan AS durasi_pembayaran, pp.harga_bulanan AS harga_bulanan_pembayaran\n      FROM langganan l\n      INNER JOIN paket_langganan p ON p.id_paket_langganan = l.id_paket_langganan\n      INNER JOIN paket_langganan pp ON pp.id_paket_langganan = ?\n      WHERE l.id_langganan = ?\n      FOR UPDATE\n    ");
     $stmt->bind_param('ii', $payment['id_paket_langganan'], $payment['id_langganan']);
     $stmt->execute();
     $subscription = $stmt->get_result()->fetch_assoc();
@@ -1283,6 +1294,13 @@ function prosesVerifikasiPembayaranLangganan($id_pembayaran, $id_admin, $keputus
 
     if (!$stmt->execute() || $stmt->affected_rows !== 1) throw new Exception('Gagal mengaktifkan/perpanjang subscription.', 409);
     $stmt->close();
+
+    if ((float)$payment['nominal'] < ((float)$subscription['harga_bulanan_pembayaran'] * (int)$subscription['durasi_pembayaran'])) {
+      $stmt = $conn->prepare("UPDATE langganan SET promo_digunakan_at = COALESCE(promo_digunakan_at, CURRENT_TIMESTAMP) WHERE id_langganan = ?");
+      $stmt->bind_param('i', $subscription['id_langganan']);
+      $stmt->execute();
+      $stmt->close();
+    }
 
     // Safety check: satu owner tidak boleh memiliki dua subscription aktif.
     $stmt = $conn->prepare("\n      SELECT COUNT(*) AS total\n      FROM langganan\n      WHERE id_pemilik = ? AND status = 'aktif'\n        AND tanggal_mulai <= CURDATE() AND tanggal_berakhir >= CURDATE()\n    ");

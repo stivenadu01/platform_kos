@@ -96,7 +96,7 @@
 
 
         <button
-          data-onboarding="kos-foto-pilih"
+
           type="button"
           @click="$refs.file.click()"
           class="btn-secondary">
@@ -148,7 +148,7 @@
       <div class="flex justify-end mt-5">
 
         <button
-          data-help="help-kos-photo-upload" data-onboarding="kos-foto-upload"
+          data-help="help-kos-photo-upload"
           type="submit"
           class="btn-primary"
           :disabled="loading || !selectedFile">
@@ -529,7 +529,7 @@
              */
             await this.loadFoto();
 
-            if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
+            if (localStorage.getItem('betakos_owner_onboarding_active_v4') === '1') {
               window.location.href = BASE_URL + '/pemilik/kos?onboarding=1';
             }
 

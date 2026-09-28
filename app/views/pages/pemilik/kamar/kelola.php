@@ -13,11 +13,11 @@
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
-      <div data-help="help-kamar-add" data-onboarding="kamar-add-choice" class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-        <a data-onboarding="fast-tambah-kamar-bulk" :href="BASE_URL + '/pemilik/kamar/tambah?mode=bulk&id_tipe_kamar=' + idTipeKamar" class="btn-secondary justify-center">
+      <div data-help="help-kamar-add" class="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+        <a :href="BASE_URL + '/pemilik/kamar/tambah?mode=bulk&id_tipe_kamar=' + idTipeKamar" class="btn-secondary justify-center">
           + Tambah Banyak Kamar
         </a>
-        <a data-onboarding="fast-tambah-kamar" :href="BASE_URL + '/pemilik/kamar/tambah?id_tipe_kamar=' + idTipeKamar" class="btn-primary justify-center">
+        <a :href="BASE_URL + '/pemilik/kamar/tambah?id_tipe_kamar=' + idTipeKamar" class="btn-primary justify-center">
           + Tambah Satu Kamar
         </a>
       </div>
@@ -77,8 +77,8 @@
       </p>
 
       <div class="mt-5 flex flex-wrap justify-center gap-3">
-        <a data-onboarding="fast-tambah-kamar-single" :href="BASE_URL + '/pemilik/kamar/tambah?id_tipe_kamar=' + idTipeKamar" class="btn-primary">+ Tambah Satu Kamar</a>
-        <a data-onboarding="fast-tambah-kamar-bulk-empty" :href="BASE_URL + '/pemilik/kamar/tambah?mode=bulk&id_tipe_kamar=' + idTipeKamar" class="btn-secondary">+ Tambah Banyak Kamar</a>
+        <a :href="BASE_URL + '/pemilik/kamar/tambah?id_tipe_kamar=' + idTipeKamar" class="btn-primary">+ Tambah Satu Kamar</a>
+        <a :href="BASE_URL + '/pemilik/kamar/tambah?mode=bulk&id_tipe_kamar=' + idTipeKamar" class="btn-secondary">+ Tambah Banyak Kamar</a>
       </div>
 
     </div>

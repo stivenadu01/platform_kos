@@ -1,4 +1,5 @@
 <?php
+
 function getPemilikOnboardingStatus($id_pemilik)
 {
   $conn = db();
@@ -9,90 +10,90 @@ function getPemilikOnboardingStatus($id_pemilik)
   $stmt->execute();
   $user = $stmt->get_result()->fetch_assoc() ?: [];
   $stmt->close();
-  $profileComplete = trim((string)($user['nama'] ?? '')) !== '' && filter_var($user['email'] ?? '', FILTER_VALIDATE_EMAIL) && trim((string)($user['no_hp'] ?? '')) !== '';
+  $profileComplete = trim((string)($user['nama'] ?? '')) !== ''
+    && filter_var($user['email'] ?? '', FILTER_VALIDATE_EMAIL)
+    && trim((string)($user['no_hp'] ?? '')) !== '';
 
-  $stmt = $conn->prepare("SELECT id_kos, status FROM kos WHERE id_pemilik = ? ORDER BY id_kos ASC");
+  // Satu query menentukan kos fokus beserta kelengkapan utamanya. Semua tahap
+  // berikutnya selalu diperiksa pada kos yang sama agar progres tidak tercampur.
+  $stmt = $conn->prepare("SELECT k.id_kos, k.nama_kos, k.status,
+      EXISTS(SELECT 1 FROM kos_foto f WHERE f.id_kos = k.id_kos) AS has_photo,
+      EXISTS(SELECT 1 FROM verifikasi_kos v WHERE v.id_kos = k.id_kos AND v.status IN ('menunggu','disetujui')) AS has_submission
+    FROM kos k WHERE k.id_pemilik = ?
+    ORDER BY (k.status IN ('menunggu_verifikasi','aktif')) ASC, k.id_kos ASC
+    LIMIT 1");
   $stmt->bind_param('i', $id_pemilik);
   $stmt->execute();
-  $kosRows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+  $focusKos = $stmt->get_result()->fetch_assoc() ?: null;
   $stmt->close();
-  $kosComplete = false;
-  $kosSetup = ['has_any' => count($kosRows) > 0, 'incomplete_id' => null, 'missing' => []];
-  if (count($kosRows) > 0) {
-    foreach ($kosRows as $row) {
-      $kosId = (int)$row['id_kos'];
-      $stmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM kos_foto WHERE id_kos = ?) AS has_photo");
-      if (!$stmt) {
-        // Fallback hanya bila instalasi lama belum memiliki tabel foto_kos.
-        $hasPhoto = false;
-      } else {
-        $stmt->bind_param('i', $kosId);
-        $stmt->execute();
-        $checkPhoto = $stmt->get_result()->fetch_assoc() ?: [];
-        $stmt->close();
-        $hasPhoto = (int)($checkPhoto['has_photo'] ?? 0) === 1;
-      }
-      if ($hasPhoto) { $kosComplete = true; break; }
-      if ($kosSetup['incomplete_id'] === null) {
-        $kosSetup['incomplete_id'] = $kosId;
-        $kosSetup['missing'] = ['foto'];
-      }
-    }
-  }
 
-  $typeComplete = false;
-  $typeSetup = ['has_any' => false, 'incomplete_id' => null, 'missing' => []];
-  if ($kosComplete) {
-    $stmt = $conn->prepare("SELECT t.id_tipe_kamar FROM tipe_kamar t INNER JOIN kos k ON k.id_kos = t.id_kos WHERE k.id_pemilik = ?");
-    $stmt->bind_param('i', $id_pemilik);
-    $stmt->execute();
-    $typeRows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-    $typeSetup['has_any'] = count($typeRows) > 0;
-    foreach ($typeRows as $row) {
-      $typeId = (int)$row['id_tipe_kamar'];
-      $stmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM harga_kamar WHERE id_tipe_kamar = ?) AS has_price, EXISTS(SELECT 1 FROM tipe_kamar_fasilitas WHERE id_tipe_kamar = ?) AS has_facility, EXISTS(SELECT 1 FROM tipe_kamar_foto WHERE id_tipe_kamar = ?) AS has_photo");
-      $stmt->bind_param('iii', $typeId, $typeId, $typeId);
-      $stmt->execute();
-      $check = $stmt->get_result()->fetch_assoc() ?: [];
-      $stmt->close();
-      if ((int)($check['has_price'] ?? 0) && (int)($check['has_photo'] ?? 0)) { $typeComplete = true; break; }
-      if ($typeSetup['incomplete_id'] === null) {
-        $typeSetup['incomplete_id'] = $typeId;
-        $typeSetup['missing'] = [];
-        if (!(int)($check['has_price'] ?? 0)) $typeSetup['missing'][] = 'harga';
-        // Fasilitas bersifat opsional pada form tipe kamar, jadi tidak boleh membuat onboarding macet.
-        if (!(int)($check['has_photo'] ?? 0)) $typeSetup['missing'][] = 'foto';
-      }
-    }
-  }
+  $kosId = (int)($focusKos['id_kos'] ?? 0);
+  $kosComplete = $kosId > 0 && (int)($focusKos['has_photo'] ?? 0) === 1;
+  $verificationComplete = $kosId > 0 && (
+    in_array((string)($focusKos['status'] ?? ''), ['menunggu_verifikasi', 'aktif'], true)
+    || (int)($focusKos['has_submission'] ?? 0) === 1
+  );
 
-  $roomComplete = false;
-  if ($kosComplete) {
-    $stmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM kamar km INNER JOIN kos k ON k.id_kos = km.id_kos WHERE k.id_pemilik = ?) AS has_room");
-    $stmt->bind_param('i', $id_pemilik);
+  $focusType = null;
+  if ($kosId > 0) {
+    $stmt = $conn->prepare("SELECT t.id_tipe_kamar, t.nama_tipe,
+        EXISTS(SELECT 1 FROM harga_kamar h WHERE h.id_tipe_kamar = t.id_tipe_kamar) AS has_price,
+        EXISTS(SELECT 1 FROM tipe_kamar_foto f WHERE f.id_tipe_kamar = t.id_tipe_kamar) AS has_photo,
+        EXISTS(SELECT 1 FROM kamar km WHERE km.id_tipe_kamar = t.id_tipe_kamar) AS has_room
+      FROM tipe_kamar t WHERE t.id_kos = ?
+      ORDER BY (has_price = 1 AND has_photo = 1) DESC, t.id_tipe_kamar ASC
+      LIMIT 1");
+    $stmt->bind_param('i', $kosId);
     $stmt->execute();
-    $roomComplete = (int)($stmt->get_result()->fetch_assoc()['has_room'] ?? 0) === 1;
+    $focusType = $stmt->get_result()->fetch_assoc() ?: null;
     $stmt->close();
   }
 
-  $verificationComplete = false;
-  if ($kosComplete) {
-    $stmt = $conn->prepare("SELECT EXISTS(SELECT 1 FROM kos WHERE id_pemilik = ? AND status IN ('menunggu_verifikasi', 'aktif')) AS submitted");
-    $stmt->bind_param('i', $id_pemilik);
-    $stmt->execute();
-    $verificationComplete = (int)($stmt->get_result()->fetch_assoc()['submitted'] ?? 0) === 1;
-    $stmt->close();
+  $typeComplete = $focusType
+    && (int)$focusType['has_price'] === 1
+    && (int)$focusType['has_photo'] === 1;
+  $roomComplete = $focusType && (int)($focusType['has_room'] ?? 0) === 1;
+  $typeId = (int)($focusType['id_tipe_kamar'] ?? 0);
+
+  $kosAction = $kosId <= 0
+    ? ['/pemilik/kos/tambah', 'Tambah Kos']
+    : (!$kosComplete ? ['/pemilik/kos/foto?id=' . $kosId, 'Tambah Foto Kos'] : ['/pemilik/kos?id=' . $kosId, 'Lihat Kos']);
+
+  if ($typeId <= 0) {
+    $typeAction = ['/pemilik/tipe-kamar/tambah?id_kos=' . $kosId, 'Buat Tipe Kamar'];
+  } elseif (!(int)$focusType['has_price']) {
+    $typeAction = ['/pemilik/tipe-kamar/edit?id_tipe_kamar=' . $typeId, 'Lengkapi Harga'];
+  } elseif (!(int)$focusType['has_photo']) {
+    $typeAction = ['/pemilik/tipe-kamar/foto?id_tipe_kamar=' . $typeId, 'Tambah Foto Kamar'];
+  } else {
+    $typeAction = ['/pemilik/kamar?id_kos=' . $kosId . '&context=kos', 'Lihat Tipe Kamar'];
   }
+
+  $roomAction = $typeId > 0
+    ? ['/pemilik/kamar/kelola?id_tipe_kamar=' . $typeId, 'Tambah Unit Kamar']
+    : ['/pemilik/kamar?id_kos=' . $kosId . '&context=kos', 'Buka Tipe Kamar'];
 
   $steps = [
-    ['key'=>'profil','label'=>'Lengkapi Profil','description'=>'Lengkapi informasi pemilik.','complete'=>$profileComplete,'sidebar_route'=>'/pemilik/profil','sidebar_selector'=>'[data-onboarding="sidebar-profil"]','fast_selector'=>'[data-onboarding="fast-profil-save"]','form_selector'=>'[data-onboarding="profil-field-nama"]'],
-    ['key'=>'kos','label'=>'Tambahkan Kos','description'=>'Tambahkan kos dan minimal satu foto kos.','complete'=>$kosComplete,'sidebar_route'=>'/pemilik/kos','sidebar_selector'=>'[data-onboarding="sidebar-kos"]','fast_selector'=>'[data-onboarding="fast-tambah-kos"]','form_selector'=>'[data-onboarding="kos-field-nama"]'],
-    ['key'=>'tipe_kamar','label'=>'Tambahkan Tipe Kamar','description'=>'Buka Properti, pilih kos, lalu buat tipe kamar lengkap dengan harga, fasilitas, dan foto.','complete'=>$typeComplete,'sidebar_route'=>'/pemilik/kos','sidebar_selector'=>'[data-onboarding="sidebar-kos"]','fast_selector'=>'[data-onboarding="fast-tambah-tipe-kamar"]','form_selector'=>'[data-onboarding="tipe-field-nama"]'],
-    ['key'=>'kamar','label'=>'Tambahkan Kamar','description'=>'Buka Properti dan tambahkan minimal satu unit pada tipe kamar.','complete'=>$roomComplete,'sidebar_route'=>'/pemilik/kos','sidebar_selector'=>'[data-onboarding="sidebar-kos"]','fast_selector'=>'[data-onboarding="fast-tambah-kamar"]','form_selector'=>'[data-onboarding="kamar-field-kos"]'],
-    ['key'=>'verifikasi','label'=>'Ajukan Verifikasi','description'=>'Ajukan kos untuk diperiksa Admin.','complete'=>$verificationComplete,'sidebar_route'=>'/pemilik/kos','sidebar_selector'=>'[data-onboarding="sidebar-kos"]','fast_selector'=>'[data-onboarding="fast-ajukan-verifikasi"]','form_selector'=>null],
+    ['key'=>'profil','label'=>'Profil Pemilik','description'=>'Lengkapi nama dan nomor HP aktif.','complete'=>$profileComplete,'action_url'=>'/pemilik/profil','action_label'=>'Lengkapi Profil'],
+    ['key'=>'kos','label'=>'Informasi Kos','description'=>'Tambahkan data dan minimal satu foto kos.','complete'=>$kosComplete,'action_url'=>$kosAction[0],'action_label'=>$kosAction[1]],
+    ['key'=>'tipe_kamar','label'=>'Tipe Kamar','description'=>'Atur kapasitas, harga, dan foto kamar.','complete'=>$typeComplete,'action_url'=>$typeAction[0],'action_label'=>$typeAction[1]],
+    ['key'=>'kamar','label'=>'Unit Kamar','description'=>'Masukkan minimal satu nomor kamar.','complete'=>$roomComplete,'action_url'=>$roomAction[0],'action_label'=>$roomAction[1]],
+    ['key'=>'verifikasi','label'=>'Verifikasi Kos','description'=>'Kirim kos untuk diperiksa admin.','complete'=>$verificationComplete,'action_url'=>'/pemilik/kos','action_label'=>'Ajukan Verifikasi'],
   ];
-  $completed = count(array_filter($steps, static fn($s) => $s['complete']));
-  $next = null; foreach ($steps as $step) { if (!$step['complete']) { $next = $step; break; } }
-  return ['completed'=>$completed,'total'=>count($steps),'percent'=>(int)round($completed/count($steps)*100),'complete'=>$next===null,'steps'=>$steps,'next'=>$next,'type_setup'=>$typeSetup,'kos_setup'=>$kosSetup];
+
+  $completed = count(array_filter($steps, static fn($step) => $step['complete']));
+  $next = null;
+  foreach ($steps as $step) {
+    if (!$step['complete']) { $next = $step; break; }
+  }
+
+  return [
+    'completed'=>$completed,
+    'total'=>count($steps),
+    'percent'=>(int)round(($completed / count($steps)) * 100),
+    'complete'=>$next === null,
+    'steps'=>$steps,
+    'next'=>$next,
+    'focus'=>['id_kos'=>$kosId ?: null,'nama_kos'=>$focusKos['nama_kos'] ?? null,'id_tipe_kamar'=>$typeId ?: null],
+  ];
 }

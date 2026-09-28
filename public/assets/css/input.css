@@ -1163,6 +1163,21 @@ body.scroll-locked {
 .owner-workspace-nav a:hover { background:#f1f5f9; color:#2563eb; }
 .owner-workspace-nav a.is-active { background:#0f172a; color:#fff; }
 
+/* Subscription v2: compact and quickly scannable on wide screens. */
+.subscription-plan-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; }
+.subscription-checkout-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:1rem; }
+.owner-ui .subscription-free-card { padding:1rem; }
+.owner-ui .subscription-pro-card { padding:1rem; }
+.btn-subscription { display:inline-flex; min-height:2.5rem; align-items:center; justify-content:center; gap:.5rem; border-radius:.75rem; background:#059669; padding:.625rem 1rem; font-weight:700; color:#fff; transition:background-color .18s,transform .18s,box-shadow .18s; }
+.btn-subscription:hover { background:#047857; box-shadow:0 8px 20px rgba(5,150,105,.18); }
+.btn-subscription:active { transform:scale(.98); }
+.btn-subscription:disabled { cursor:not-allowed; opacity:.55; box-shadow:none; }
+@media (min-width:640px) { .owner-ui .subscription-pro-card { padding:1.25rem; } }
+@media (min-width:1024px) {
+  .subscription-plan-grid { grid-template-columns:210px minmax(0,720px); justify-content:center; align-items:start; }
+  .subscription-checkout-grid { grid-template-columns:minmax(0,1fr) 340px; }
+}
+
 @media (min-width: 768px) {
   .owner-bottom-nav,
   .owner-mobile-card-stack,

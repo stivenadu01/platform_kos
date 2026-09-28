@@ -6,7 +6,7 @@
       <h2 class="owner-title">Tipe & Unit Kamar</h2>
       <p class="owner-subtitle" x-text="contextKos ? 'Pilih tipe kamar pada kos ini untuk melanjutkan pengelolaan.' : 'Pilih tipe kamar terlebih dahulu, lalu kelola unit kamar di dalamnya.'"></p>
     </div>
-    <a data-onboarding="fast-tambah-tipe-kamar" data-help="help-tipe-add" :href="BASE_URL + '/pemilik/tipe-kamar/tambah'" class="btn-primary">+ Tambah Tipe Kamar</a>
+    <a data-help="help-tipe-add" :href="BASE_URL + '/pemilik/tipe-kamar/tambah'" class="btn-primary">+ Tambah Tipe Kamar</a>
   </div>
 
   <div x-show="contextKos" x-cloak class="owner-context-panel">
@@ -62,7 +62,7 @@
             <div class="mt-2.5 flex items-center justify-between text-[11px]"><span class="owner-stat-available font-semibold" x-text="item.kamar_tersedia + ' tersedia'"></span><span class="font-semibold text-white" x-text="occupancy(item) + '%'"></span></div>
           </div>
 
-          <div data-help="help-tipe-action" data-onboarding="kamar-select-type" class="owner-photo-actions space-y-2">
+          <div data-help="help-tipe-action" class="owner-photo-actions space-y-2">
             <a :href="BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + item.id_tipe_kamar" class="owner-photo-action owner-photo-action-primary">
               <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M6 21V7l6-4 6 4v14"></path><path d="M9 21v-6h6v6"></path></svg>
               Kelola Kamar

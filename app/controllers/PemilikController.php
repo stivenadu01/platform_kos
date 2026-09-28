@@ -187,6 +187,14 @@ class PemilikController
     ]);
   }
 
+  public function langgananRiwayat()
+  {
+    view('pemilik/langganan/riwayat', [
+      'title' => 'Riwayat Langganan',
+      'layout' => 'pemilik'
+    ]);
+  }
+
   public function langgananPembayaran()
   {
     view('pemilik/langganan/pembayaran', [

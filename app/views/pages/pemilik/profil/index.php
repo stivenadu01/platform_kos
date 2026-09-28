@@ -35,11 +35,11 @@
         <h2 class="font-semibold text-slate-900">Informasi Pribadi</h2>
         <p class="mt-1 text-sm text-slate-500">Nama dan nomor HP dapat diperbarui. Email dan NIK merupakan identitas yang dilindungi.</p>
         <form class="mt-6 grid gap-5 md:grid-cols-2" @submit.prevent="saveProfile">
-          <div><label class="label">Nama lengkap</label><input class="input" data-onboarding="profil-field-nama" type="text" x-model.trim="form.nama" maxlength="150" required></div>
+          <div><label class="label">Nama lengkap</label><input class="input" type="text" x-model.trim="form.nama" maxlength="150" required></div>
           <div><label class="label">Nomor HP</label><input class="input" type="tel" x-model.trim="form.no_hp" maxlength="20" placeholder="081234567890"><p class="mt-1 text-xs text-slate-400">Boleh 08..., 62..., atau +62...; akan dinormalisasi.</p></div>
           <div><label class="label">Email</label><input class="input bg-slate-50" type="email" :value="user.email || '-'" readonly></div>
           <div><label class="label">NIK</label><input class="input bg-slate-50" type="text" :value="user.nik || '-'" readonly></div>
-          <div class="md:col-span-2 flex justify-end"><button class="btn-primary w-auto" data-onboarding="profil-save fast-profil-save" :disabled="savingProfile" x-text="savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
+          <div class="md:col-span-2 flex justify-end"><button class="btn-primary w-auto" :disabled="savingProfile" x-text="savingProfile ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
         </form>
       </section>
 

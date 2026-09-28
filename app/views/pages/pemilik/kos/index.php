@@ -18,7 +18,7 @@
 
     <a
       href="<?= BASE_URL ?>/pemilik/kos/tambah"
-      data-onboarding="fast-tambah-kos"
+
       data-help="help-kos-add" class="btn-primary sm:w-auto">
       + Tambah Kos
     </a>
@@ -43,7 +43,7 @@
 
         <a
           href="<?= BASE_URL ?>/pemilik/kos/tambah"
-          data-onboarding="fast-tambah-kos"
+
           class="btn-primary inline-flex mt-5">
           + Tambah Kos
         </a>
@@ -96,7 +96,7 @@
 
             <div class="owner-photo-actions space-y-2">
               <?php if ($item['status'] === 'draft' || $item['status'] === 'ditolak'): ?>
-                <button type="button" data-onboarding="fast-ajukan-verifikasi" @click="ajukan(<?= $item['id_kos'] ?>)" class="owner-photo-action owner-photo-action-primary">
+                <button type="button" @click="ajukan(<?= $item['id_kos'] ?>)" class="owner-photo-action owner-photo-action-primary">
                   <?= masterIconSvg('check-circle-2', 'h-4 w-4') ?>
                   <span>Ajukan Verifikasi Admin</span>
                   <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
@@ -114,7 +114,7 @@
               <?php endif; ?>
 
               <div data-help="help-kos-action" class="grid grid-cols-3 gap-2 pt-0.5">
-                <a data-onboarding="kos-photo" href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>" class="owner-photo-action owner-photo-action-neutral">
+                <a href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>" class="owner-photo-action owner-photo-action-neutral">
                   <?= masterIconSvg('image', 'h-3.5 w-3.5') ?> Foto
                 </a>
                 <?php if ($item['status'] === 'menunggu_verifikasi'): ?>
@@ -158,15 +158,8 @@
         if (!ok) return;
         try {
           await API.post('/pemilik/kos/ajukan-verifikasi', { id_kos: id });
-          if (localStorage.getItem('betakos_owner_onboarding_active_v3') === '1') {
-            localStorage.setItem('betakos_owner_onboarding_complete_v3', '1');
-            localStorage.removeItem('betakos_owner_onboarding_active_v3');
-            localStorage.removeItem('betakos_owner_onboarding_skipped_v3');
-            localStorage.setItem('betakos_owner_onboarding_welcome_v3', '1');
-            window.dispatchEvent(new CustomEvent('betakos:onboarding-completed'));
-          }
           window.dispatchEvent(new CustomEvent('betakos:onboarding-refresh'));
-          window.location.reload();
+          window.location.href = BASE_URL + '/pemilik/kos?onboarding=1';
         } catch (error) { console.error(error); }
       },
 

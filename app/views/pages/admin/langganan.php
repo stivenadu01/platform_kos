@@ -73,7 +73,7 @@
               </td>
               <td class="px-5 py-4">
                 <div class="font-semibold text-slate-900" x-text="item.nama_paket"></div>
-                <div class="text-xs text-slate-500" x-text="formatRupiah(item.harga_bulanan) + ' awal • ' + formatRupiah(item.harga_perpanjangan) + ' harga perpanjangan / ' + item.durasi_bulan + ' bulan'"></div>
+                <div class="text-xs text-slate-500" x-text="formatRupiah(item.harga_bulanan) + '/bulan • ' + item.durasi_bulan + ' bulan'"></div>
               </td>
               <td class="px-5 py-4 whitespace-nowrap">
                 <div x-text="formatDate(item.tanggal_mulai)"></div>
@@ -113,7 +113,7 @@
               <div class="mt-1 text-slate-700" x-text="paymentStatusLabel(item.status_pembayaran_terakhir)"></div>
             </div>
           </div>
-          <div class="mt-3 text-xs text-slate-500" x-text="formatRupiah(item.harga_bulanan) + ' awal · ' + formatRupiah(item.harga_perpanjangan) + ' harga perpanjangan / ' + item.durasi_bulan + ' bulan'"></div>
+          <div class="mt-3 text-xs text-slate-500" x-text="formatRupiah(item.harga_bulanan) + '/bulan · ' + item.durasi_bulan + ' bulan'"></div>
           <button type="button" @click="showSubscription(item.id_langganan)" class="mt-3 btn-primary text-xs w-full justify-center inline-flex items-center gap-2">Lihat Detail Langganan <span aria-hidden="true">→</span></button>
         </article>
       </template>
@@ -211,7 +211,7 @@
               <div class="rounded-xl bg-slate-50 p-4">
                 <div class="text-xs text-slate-500">Paket terakhir</div>
                 <div class="mt-1 font-semibold" x-text="detail.nama_paket"></div>
-                <div class="text-xs text-slate-500 mt-1" x-text="formatRupiah(detail.harga_bulanan) + ' harga awal • ' + formatRupiah(detail.harga_perpanjangan) + ' harga perpanjangan / ' + detail.durasi_bulan + ' bulan'"></div>
+                <div class="text-xs text-slate-500 mt-1" x-text="formatRupiah(detail.harga_bulanan) + '/bulan • ' + detail.durasi_bulan + ' bulan'"></div>
               </div>
               <div class="rounded-xl bg-slate-50 p-4">
                 <div class="text-xs text-slate-500">Status</div>

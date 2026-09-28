@@ -80,7 +80,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     <!-- PROFIL -->
     <a
       :href="window.BASE_URL + '/pemilik/profil'"
-      data-onboarding="sidebar-profil"
+
       class="
         flex items-center gap-3
         px-4 py-3
@@ -111,7 +111,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
     <!-- KOS -->
     <a
       :href="window.BASE_URL + '/pemilik/kos'"
-      data-onboarding="sidebar-kos"
+      data-owner-nav="property"
       class="
         flex items-center gap-3
         px-4 py-3
@@ -290,7 +290,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
       const links = document.querySelectorAll('.pemilik-sidebar nav a[href]');
       let best = null;
       if (current.includes('/pemilik/kamar') || current.includes('/pemilik/tipe-kamar')) {
-        const propertyLink = document.querySelector('.pemilik-sidebar [data-onboarding="sidebar-kos"]');
+        const propertyLink = document.querySelector('.pemilik-sidebar [data-owner-nav="property"]');
         if (propertyLink) {
           propertyLink.classList.add('pemilik-nav-active');
           propertyLink.setAttribute('aria-current', 'page');

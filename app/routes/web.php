@@ -25,6 +25,7 @@ get('/pemilik/riwayat', 'PemilikController@riwayat', ['auth', 'role:pemilik', 'p
 get('/pemilik/riwayat/tagihan', 'PemilikController@detailPembayaran', ['auth', 'role:pemilik', 'pro']);
 get('/pemilik/langganan', 'PemilikController@langganan', ['auth', 'role:pemilik']);
 get('/pemilik/langganan/checkout', 'PemilikController@langgananCheckout', ['auth', 'role:pemilik']);
+get('/pemilik/langganan/riwayat', 'PemilikController@langgananRiwayat', ['auth', 'role:pemilik']);
 get('/pemilik/langganan/pembayaran', 'PemilikController@langgananPembayaran', ['auth', 'role:pemilik']);
 
 
