@@ -187,6 +187,27 @@ class PemilikController
     ]);
   }
 
+  public function akun()
+  {
+    view('account', ['title'=>'Akun Pemilik','layout'=>'pemilik','accountOwner'=>true]);
+  }
+
+  public function detailProperti()
+  {
+    model('Kos');
+    $kos = findKosById((int)query('id_kos'), (int)$this->owner()['id_user']);
+    if (!$kos) { response(['success'=>false,'message'=>'Kos tidak ditemukan.'],404); return; }
+    view('pemilik/kos/detail', ['title'=>$kos['nama_kos'],'layout'=>'pemilik','kos'=>$kos]);
+  }
+
+  public function detailPenghuni()
+  {
+    model('Penghuni');
+    $penghuni = findPenghuniByIdPemilik((int)query('id_penghuni'), (int)$this->owner()['id_user']);
+    if (!$penghuni) { response(['success'=>false,'message'=>'Penghuni tidak ditemukan.'],404); return; }
+    view('pemilik/penghuni/detail', ['title'=>'Detail Penghuni','layout'=>'pemilik','penghuni'=>$penghuni]);
+  }
+
   public function langgananRiwayat()
   {
     view('pemilik/langganan/riwayat', [
@@ -221,18 +242,34 @@ class PemilikController
 
   public function kelolaKamar()
   {
-    view('pemilik/kamar/kelola', [
-      'title' => 'Kelola Unit Kamar',
-      'layout' => 'pemilik'
-    ]);
+    model('TipeKamar');
+    $type = findTipeKamarByIdPemilik((int) query('id_tipe_kamar'), (int) $this->owner()['id_user']);
+    $target = $type
+      ? '/pemilik/kos/detail?id_kos=' . (int) $type['id_kos'] . '&id_tipe_kamar=' . (int) $type['id_tipe_kamar']
+      : '/pemilik/kos';
+    header('Location: ' . BASE_URL . $target, true, 302);
+    exit;
   }
 
   public function operasionalKamar()
   {
+    model('Kamar');
+    model('Langganan');
+    $room = findKamarByIdPemilik((int)query('id_kamar'), (int)$this->owner()['id_user']);
+    if (!$room) { response(['success'=>false,'message'=>'Kamar tidak ditemukan.'],404); return; }
+    $subscription = getStatusLanggananPemilik((int)$this->owner()['id_user']);
     view('pemilik/kamar/operasional', [
-      'title' => 'Operasional Kamar',
+      'title' => 'Detail Kamar',
+      'canManageOccupancy' => !empty($subscription['is_pro']),
       'layout' => 'pemilik'
     ]);
+  }
+
+  public function redirectOperasionalKamarLegacy()
+  {
+    $id_kamar = (int) query('id_kamar');
+    header('Location: ' . BASE_URL . '/pemilik/kamar/detail' . ($id_kamar > 0 ? '?id_kamar=' . $id_kamar : ''), true, 302);
+    exit;
   }
 
   public function tambahKamar()
@@ -248,16 +285,16 @@ class PemilikController
 
   public function editKamar()
   {
-    header('Location: ' . BASE_URL . '/pemilik/kos', true, 302);
+    $id_kamar = (int) query('id_kamar');
+    header('Location: ' . BASE_URL . '/pemilik/kamar/detail' . ($id_kamar > 0 ? '?id_kamar=' . $id_kamar : ''), true, 302);
     exit;
   }
 
   public function hargaKamar()
   {
-    view('pemilik/kamar/harga', [
-      'title' => 'Atur Harga Kamar',
-      'layout' => 'pemilik'
-    ]);
+    $id_kamar = (int) query('id_kamar');
+    header('Location: ' . BASE_URL . '/pemilik/kamar/detail' . ($id_kamar > 0 ? '?id_kamar=' . $id_kamar . '&section=data' : ''), true, 302);
+    exit;
   }
 
   public function redirectTipeKamarLegacy()

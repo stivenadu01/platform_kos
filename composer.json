@@ -1,7 +1,17 @@
 {
-    "require": {
-        "vlucas/phpdotenv": "^5.6",
-        "phpmailer/phpmailer": "^7.1",
-        "phpoffice/phpspreadsheet": "^5.7"
+  "require": {
+    "vlucas/phpdotenv": "^5.6",
+    "phpmailer/phpmailer": "^7.1",
+    "phpoffice/phpspreadsheet": "^5.7",
+    "php": "^8.2",
+    "google/auth": "^1.55",
+    "phpseclib/phpseclib": "^3.0"
+  },
+  "name": "betakos/betakos",
+  "description": "BetaKos - pengelolaan dan pencarian kos",
+  "config": {
+    "platform": {
+      "php": "8.2.12"
     }
+  }
 }

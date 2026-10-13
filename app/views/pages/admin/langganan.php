@@ -1,4 +1,4 @@
-<div x-data="adminLanggananPage()" x-init="init()" class="admin-page">
+<div x-data="adminLanggananPage()"  class="admin-page">
   <div class="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Manajemen Langganan</p>
@@ -10,7 +10,7 @@
         <button type="button" @click="loadSubscriptions(tabItem.key)"
           class="px-4 py-2 rounded-xl text-sm font-semibold border transition"
           :class="subscriptionTab === tabItem.key ? 'bg-primary text-white border-primary' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
-          x-text="tabItem.label"></button>
+          :aria-pressed="subscriptionTab===tabItem.key"><span x-text="tabItem.label"></span><span class="bk-tab-count ml-2" x-show="tabItem.key" x-text="summary[tabItem.key==='akan_berakhir'?'akan_berakhir_7_hari':tabItem.key] ?? 0"></span></button>
       </template>
     </div>
   </div>
@@ -120,9 +120,9 @@
     </div>
   </section>
 
-  <section class="card border border-slate-200 overflow-hidden">
+  <section id="pembayaran-manual" class="card border border-slate-200 overflow-hidden scroll-mt-24">
     <div class="px-5 py-4 border-b border-slate-200">
-      <h2 class="font-bold text-slate-900">Pembayaran Manual Menunggu Pemeriksaan</h2>
+      <h2 class="font-bold text-slate-900 flex items-center gap-3">Pembayaran Manual Menunggu Pemeriksaan <?= navigationBadge('payments','bukti perlu diperiksa') ?></h2>
       <p class="text-xs text-slate-500 mt-1">Hanya pembayaran transfer/e-wallet yang memerlukan pemeriksaan admin. QRIS diproses otomatis.</p>
     </div>
     <div x-show="paymentLoading" class="p-10 text-center text-sm text-slate-500">Memuat pembayaran...</div>
@@ -187,10 +187,10 @@
     </div>
   </section>
 
-  <div x-show="detail" x-cloak class="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="detail" x-cloak class="ui-dialog fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeDetail()"></div>
-    <div class="relative bg-white w-full sm:max-w-4xl max-h-[94vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
-      <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
+    <div class="ui-sheet-panel ui-sheet-wide relative">
+      <div class="ui-sheet-header flex items-center justify-between gap-3">
         <div>
           <h2 class="font-bold text-slate-900" x-text="detailTitle"></h2>
           <p class="text-xs text-slate-500">Detail langganan dan riwayat pembayaran</p>
@@ -198,7 +198,7 @@
         <button type="button" @click="closeDetail()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
 
-      <div class="p-5 sm:p-6 space-y-6">
+      <div class="ui-sheet-body space-y-6">
         <div x-show="detailLoading" class="py-8 text-center text-sm text-slate-500">Memuat detail...</div>
         <template x-if="detail && !detailLoading">
           <div class="space-y-6">
@@ -434,7 +434,7 @@
           label: 'Pembayaran Menunggu'
         }
       ],
-      subscriptionTab: '',
+      subscriptionTab: ['aktif','menunggu','berakhir','akan_berakhir','dibatalkan'].includes(new URLSearchParams(location.search).get('status')) ? new URLSearchParams(location.search).get('status') : '',
       subscriptions: [],
       pendingPayments: [],
       summary: {},
@@ -465,6 +465,7 @@
 
       async loadSubscriptions(status) {
         this.subscriptionTab = status;
+        const query=new URLSearchParams(location.search); if(status)query.set('status',status);else query.delete('status');history.replaceState({},'',location.pathname+(query.size?'?'+query:''));
         await this.refreshSubscriptions();
       },
 

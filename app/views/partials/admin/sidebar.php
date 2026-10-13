@@ -1,66 +1,25 @@
+<?php
+$adminPath=normalized_request_path();
+if(in_array($adminPath,['/admin/fasilitas','/admin/aturan','/admin/lokasi'],true)) $adminPath='/admin/data-master';
+$adminGroups=[
+ 'Utama'=>[['/admin','Ringkasan','chart-column',null]],
+ 'Perlu ditangani'=>[['/admin/verifikasi','Verifikasi kos','user-check','verification'],['/admin/laporan','Laporan pengguna','flag','reports'],['/admin/langganan','BetaKos Pro','credit-card','payments']],
+ 'Pengaturan'=>[['/admin/pengguna','Pengguna','users-round',null],['/admin/data-master','Data referensi','folder-cog',null],['/admin/langganan/metode-pembayaran','Metode pembayaran','settings',null],['/admin/profil','Profil & akun','user-round',null]]
+];
+?>
 <aside :data-sidebar-collapsed="sidebarCollapsed" :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="admin-sidebar fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 transform transition-[width,transform] duration-300 lg:translate-x-0">
-  <div class="h-16 px-5 flex items-center border-b border-slate-200">
-    <a href="<?= BASE_URL ?>/admin" title="Dashboard" class="flex items-center gap-3">
-      <img src="<?= BASE_URL ?>/assets/icon/logo.png" alt="BetaKos" class="w-9 h-9 object-contain">
-      <div class="sidebar-brand-label">
-        <div class="font-bold text-slate-900">BetaKos</div>
-        <div class="text-xs text-slate-500">Panel Admin</div>
-      </div>
-    </a>
+ <div class="bk-sidebar-brand"><a href="<?= BASE_URL ?>/admin"><img src="<?= BASE_URL ?>/assets/icon/logo.png" alt="BetaKos"><div class="sidebar-brand-label"><strong>BetaKos</strong><small>Ruang kerja admin</small></div></a></div>
+ <nav class="bk-workspace-nav" aria-label="Navigasi admin">
+  <div class="bk-nav-scroll">
+   <?php foreach($adminGroups as $group=>$items): ?>
+    <p class="sidebar-section-label bk-nav-group"><?= htmlspecialchars($group) ?></p>
+    <?php foreach($items as [$path,$label,$icon,$badge]): $active=$adminPath===$path || ($path!=='/admin' && str_starts_with($adminPath,$path.'/')); if($path==='/admin/langganan' && str_contains($adminPath,'metode-pembayaran')) $active=false; ?>
+     <a href="<?= BASE_URL.$path ?>" title="<?= htmlspecialchars($label) ?>" class="bk-workspace-link <?= $active?'admin-nav-active':'' ?>" <?= $active?'aria-current="page"':'' ?>>
+      <span class="bk-nav-icon"><?= masterIconSvg($icon,'h-5 w-5') ?></span><span class="sidebar-label"><?= htmlspecialchars($label) ?></span><?= $badge?navigationBadge($badge,'perlu ditangani'):'' ?>
+     </a>
+    <?php endforeach; ?>
+   <?php endforeach; ?>
   </div>
-  <nav class="flex h-[calc(100vh-4rem)] min-h-0 flex-col p-4">
-    <div class="min-h-0 flex-1 overflow-y-auto overscroll-contain pr-1 space-y-1 [scrollbar-width:thin]">
-    <a href="<?= BASE_URL ?>/admin" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('chart-column', 'h-5 w-5') ?></span><span class="sidebar-label">Dashboard</span>
-    </a>
-    <a href="<?= BASE_URL ?>/admin/verifikasi" title="Verifikasi Kos" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span><span class="sidebar-label">Verifikasi Kos</span>
-    </a>
-    <a href="<?= BASE_URL ?>/admin/profil" title="Profil & Pengaturan Akun" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span><span class="sidebar-label">Profil & Akun</span>
-    </a>
-    <div class="sidebar-section-label pt-4 pb-2 px-4 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Manajemen</div>
-    <a href="<?= BASE_URL ?>/admin/pengguna" title="Pengguna" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span><span class="sidebar-label">Pengguna</span>
-    </a>
-    <a href="<?= BASE_URL ?>/admin/laporan" title="Laporan Kos" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('flag', 'h-5 w-5') ?></span><span class="sidebar-label">Laporan Kos</span>
-    </a>
-    <a href="<?= BASE_URL ?>/admin/data-master" title="Data Master" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('folder-cog', 'h-5 w-5') ?></span><span class="sidebar-label">Data Master</span>
-    </a>
-    <a href="<?= BASE_URL ?>/admin/langganan" title="Langganan" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('credit-card', 'h-5 w-5') ?></span><span class="sidebar-label">Langganan</span>
-    </a>
-    <a href="<?= BASE_URL ?>/admin/langganan/metode-pembayaran" title="Metode Pembayaran" class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('settings', 'h-5 w-5') ?></span><span class="sidebar-label">Metode Pembayaran</span>
-    </a>
-    </div>
-
-    <div class="shrink-0 border-t border-slate-100 pt-4">
-      <button
-        type="button"
-        @click="$store.auth.logout()"
-        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
-      >
-        <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600"><?= masterIconSvg('log-out', 'h-5 w-5') ?></span><span class="sidebar-label">Logout</span>
-      </button>
-    </div>
-  </nav>
+  <div class="bk-nav-footer"><a href="<?= BASE_URL ?>/" class="bk-workspace-link" title="Lihat situs"><?= masterIconSvg('external-link','h-5 w-5') ?><span class="sidebar-label">Lihat situs</span></a><button type="button" @click="$store.auth.logout()" class="bk-workspace-link is-danger" title="Keluar"><?= masterIconSvg('log-out','h-5 w-5') ?><span class="sidebar-label">Keluar</span></button></div>
+ </nav>
 </aside>
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const current = window.location.pathname.replace(/\/$/, '') || '/';
-  const links = Array.from(document.querySelectorAll('.admin-sidebar nav a[href]'));
-  let active = null;
-  links.forEach((link) => {
-    const path = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '') || '/';
-    const matches = path.endsWith('/admin') ? current === path : (current === path || current.startsWith(path + '/'));
-    if (matches && (!active || path.length > active.path.length)) active = { link, path };
-  });
-  if (active) {
-    active.link.classList.add('admin-nav-active');
-    active.link.setAttribute('aria-current', 'page');
-  }
-});
-</script>

@@ -21,16 +21,16 @@ $initialState = [
 
 <div
   x-data="kosSearchPage(<?= htmlspecialchars(json_encode_safe($initialState, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
-  x-init="init()"
+  
   class="public-page">
-  <section class="public-page-header">
+  <section class="public-page-header bk-search-hero">
     <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <div class="max-w-3xl">
-        <p class="text-sm font-semibold text-primary">Cari Kos</p>
-        <h1 class="mt-1 font-[Poppins] text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-          Temukan kos di lokasi yang kamu inginkan
+        <p class="bk-eyebrow">Temukan tempat pulangmu</p>
+        <h1 class="mt-1 font-sans text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          Mau tinggal di mana?
         </h1>
-        <p class="mt-2 hidden text-sm leading-6 text-slate-500 sm:block">
+        <p class="mt-2 text-sm leading-6 text-slate-500">
           Pilih kampus, area, lokasi populer, atau gunakan lokasi kamu untuk melihat kos di sekitarnya.
         </p>
       </div>
@@ -73,7 +73,7 @@ $initialState = [
       <div class="flex items-center justify-between">
         <div>
           <h2 class="font-semibold text-slate-900">Filter</h2>
-          <p class="mt-0.5 text-[11px] text-slate-400">Sesuaikan hasil dengan kebutuhanmu.</p>
+          <p class="mt-0.5 text-xs text-slate-400">Sesuaikan hasil dengan kebutuhanmu.</p>
         </div>
         <div class="flex items-center gap-3">
           <button type="button" @click="resetFilters()" class="text-xs font-semibold text-primary">Reset</button>
@@ -129,7 +129,7 @@ $initialState = [
         <details class="public-search-filter-details">
           <summary><span>Fasilitas <b x-show="filters.fasilitas.length" x-cloak x-text="filters.fasilitas.length"></b></span><?= masterIconSvg('chevron-down','h-4 w-4') ?></summary>
           <div class="border-t border-slate-100 p-2.5">
-            <div class="mb-2 flex items-center justify-between"><small>Pilih satu atau beberapa</small><button x-show="filters.fasilitas.length" x-cloak @click.prevent="filters.fasilitas=[]; search(1)" type="button" class="text-[11px] font-semibold text-primary">Hapus pilihan</button></div>
+            <div class="mb-2 flex items-center justify-between"><small>Pilih satu atau beberapa</small><button x-show="filters.fasilitas.length" x-cloak @click.prevent="filters.fasilitas=[]; search(1)" type="button" class="text-xs font-semibold text-primary">Hapus pilihan</button></div>
             <div class="public-facility-options">
               <template x-if="fasilitasList.length===0"><p class="text-xs text-slate-400">Memuat fasilitas...</p></template>
               <template x-for="item in fasilitasList" :key="item.id_fasilitas">
@@ -147,7 +147,7 @@ $initialState = [
     <main>
       <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Kos tersedia</h2>
+          <h2 class="font-sans text-xl font-bold text-slate-900">Kos tersedia</h2>
           <p class="mt-1 text-xs text-slate-500" x-text="resultText"></p>
         </div>
         <button @click="search(pagination.page)" type="button" class="btn-secondary gap-2 text-xs">
@@ -155,42 +155,46 @@ $initialState = [
         </button>
       </div>
 
-      <div x-show="loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="bk-filter-chips" x-show="activeFilterChips.length" x-cloak aria-label="Filter aktif">
+        <template x-for="chip in activeFilterChips" :key="chip.key"><button type="button" @click="removeFilter(chip.key)" :aria-label="'Hapus filter '+chip.label"><span x-text="chip.label"></span><span aria-hidden="true">×</span></button></template>
+        <button type="button" @click="resetFilters()" class="bk-chip-reset">Hapus semua filter</button>
+      </div>
+      <div x-show="loading" class="market-grid" role="status" aria-label="Memuat hasil pencarian">
         <template x-for="i in 6" :key="i">
           <div class="h-80 animate-pulse rounded-2xl bg-slate-200"></div>
         </template>
       </div>
 
-      <div x-show="!loading && kosList.length" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div x-show="!loading && kosList.length" class="market-grid">
         <template x-for="kos in kosList" :key="kos.id_kos">
-          <article class="public-card public-card-hover group">
+          <article class="public-card public-card-hover group bk-listing-card">
             <a :href="detailUrl(kos)" class="block">
             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
               <img
-                :src="kos.foto ? '<?= BASE_URL ?>/uploads' + kos.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'"
-                :alt="kos.nama_kos"
+                :src="kos.foto ? '<?= BASE_URL ?>/uploads' + kos.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.svg'"
+                :alt="kos.nama_kos" loading="lazy" decoding="async"
                 class="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                @error="$event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'">
-              <span x-show="kos.jarak_km !== null" class="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm" x-text="formatDistance(kos.jarak_km)"></span>
+                @error="$event.target.onerror=null; $event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.svg'">
+              <span x-show="kos.jarak_km !== null" class="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm" x-text="formatDistance(kos.jarak_km)"></span>
             </div>
             <div class="p-4">
               <div class="flex items-start justify-between gap-3">
                 <h3 class="font-semibold text-slate-900" x-text="kos.nama_kos"></h3>
-                <span class="shrink-0 rounded-full bg-primary-soft px-2 py-1 text-[11px] font-medium capitalize text-primary" x-text="kos.jenis"></span>
+                <span class="shrink-0 rounded-full bg-primary-soft px-2 py-1 text-xs font-medium capitalize text-primary" x-text="kos.jenis"></span>
               </div>
               <p class="mt-1 line-clamp-2 text-xs text-slate-500" x-text="kos.alamat"></p>
               <p class="mt-2 text-xs font-medium text-slate-600" x-text="kos.tipe_kamar || 'Tipe kamar belum tersedia'"></p>
               <div class="mt-4 flex items-end justify-between gap-3">
                 <div>
-                  <span class="text-[11px] text-slate-500">Mulai dari</span>
+                  <span class="text-xs text-slate-500">Mulai dari</span>
                   <p class="font-bold text-primary" x-text="formatRupiah(kos.harga_mulai) + ' / bulan'"></p>
                 </div>
-                <span class="text-xs text-slate-500" x-text="kos.kamar_tersedia + ' kamar tersedia'"></span>
+                <span class="bk-availability" :class="Number(kos.kamar_tersedia)>0 ? '' : 'is-full'" x-text="Number(kos.kamar_tersedia)>0 ? kos.kamar_tersedia + ' kamar tersedia' : 'Belum tersedia'"></span>
               </div>
             </div>
             </a>
             <div class="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-              <span class="text-[11px] text-slate-400">Detail & lokasi tersedia</span>
+              <span class="text-xs text-slate-400">Detail & lokasi tersedia</span>
               <button
                 x-show="$store.auth.user?.role === 'pelanggan'"
                 type="button"
@@ -210,6 +214,7 @@ $initialState = [
         <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500"><?= masterIconSvg('home', 'h-6 w-6') ?></div>
         <h3 class="mt-3 font-semibold text-slate-900">Kos tidak ditemukan</h3>
         <p class="mt-1 text-sm text-slate-500">Coba ganti kata pencarian, radius, atau filter lainnya.</p>
+        <button type="button" @click="resetFilters()" class="btn-secondary mt-4">Reset filter pencarian</button>
       </div>
 
       <div x-show="pagination.total_pages > 1" class="mt-6 flex items-center justify-center gap-2">
@@ -276,6 +281,24 @@ $initialState = [
         return this.compactMoney(min) + '–' + this.compactMoney(max);
       },
 
+      get activeFilterChips() {
+        const chips = [];
+        if (this.filters.jenis) chips.push({key:'jenis',label:'Kos '+this.filters.jenis});
+        if (this.filters.kapasitas) chips.push({key:'kapasitas',label:'Min. '+this.filters.kapasitas+' orang'});
+        if (this.filters.jarak_max) chips.push({key:'jarak_max',label:'Radius '+this.filters.jarak_max+' km'});
+        if (this.filters.harga_min || this.filters.harga_max) chips.push({key:'harga',label:this.priceRangeLabel});
+        for (const id of this.filters.fasilitas) {
+          const facility=this.fasilitasList.find(item=>String(item.id_fasilitas)===String(id));
+          chips.push({key:'fasilitas:'+id,label:facility?.nama_fasilitas || 'Fasilitas '+id});
+        }
+        return chips;
+      },
+      removeFilter(key) {
+        if (key==='harga') {this.filters.harga_min='';this.filters.harga_max='';}
+        else if (key.startsWith('fasilitas:')) this.filters.fasilitas=this.filters.fasilitas.filter(id=>String(id)!==key.slice(9));
+        else if (['jenis','kapasitas','jarak_max'].includes(key)) this.filters[key]='';
+        this.search(1);
+      },
       get activeFilterCount() {
         let count = 0;
         if (this.filters.jarak_max) count++;

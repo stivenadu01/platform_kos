@@ -1,4 +1,4 @@
-<div x-data="accountProfilePage()" x-init="init()" class="owner-page">
+<div x-data="accountProfilePage()"  class="owner-page">
   <div class="owner-page-header">
     <div>
     <p class="owner-eyebrow">Akun</p>

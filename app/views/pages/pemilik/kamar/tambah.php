@@ -2,7 +2,7 @@
 
 <div
   x-data="kamarForm('<?= $mode ?>')"
-  x-init="init()"
+  
   class="owner-page mx-auto max-w-3xl">
 
   <!-- HEADER -->
@@ -238,7 +238,7 @@
     </div>
 
     <!-- ACTION -->
-    <div class="owner-form-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
+    <div class="owner-form-actions ui-page-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
       <a
         :href="returnUrl"
         class="btn-secondary">
@@ -304,6 +304,12 @@
             this.form.id_tipe_kamar = String(type.id_tipe_kamar);
             this.contextLocked = true;
             await this.loadTypeFacilities();
+          } else {
+            const propertyId = new URLSearchParams(window.location.search).get('id_kos');
+            if (propertyId && this.kosList.some(k => String(k.id_kos) === propertyId)) {
+              this.form.id_kos = propertyId;
+              await this.loadTipe(false);
+            }
           }
         } catch (error) {
           console.error('Gagal memuat kos:', error);
@@ -313,9 +319,9 @@
       },
 
       get returnUrl() {
-        const fallback = this.contextTypeId
-          ? '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
-          : '/pemilik/kamar';
+        const fallback = this.form.id_kos
+          ? '/pemilik/kos/detail?id_kos=' + encodeURIComponent(this.form.id_kos) + (this.form.id_tipe_kamar ? '&id_tipe_kamar=' + encodeURIComponent(this.form.id_tipe_kamar) : '')
+          : '/pemilik/kos';
         return BASE_URL + fallback;
       },
 
@@ -393,9 +399,9 @@
             });
           }
 
-          let target = this.contextTypeId
-            ? BASE_URL + '/pemilik/kamar/kelola?id_tipe_kamar=' + encodeURIComponent(this.contextTypeId)
-            : BASE_URL + '/pemilik/kamar';
+          let target = this.form.id_kos
+            ? BASE_URL + '/pemilik/kos/detail?id_kos=' + encodeURIComponent(this.form.id_kos) + '&id_tipe_kamar=' + encodeURIComponent(this.form.id_tipe_kamar)
+            : BASE_URL + '/pemilik/kos';
           if (localStorage.getItem('betakos_owner_onboarding_active_v4') === '1') {
             target += (target.includes('?') ? '&' : '?') + 'onboarding=1';
           }

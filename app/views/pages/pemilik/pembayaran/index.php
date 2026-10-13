@@ -1,6 +1,6 @@
 <div
   x-data="pembayaranPage()"
-  x-init="init()"
+
   class="owner-page">
 
   <div class="owner-page-header">
@@ -24,16 +24,17 @@
   </div>
 
   <div class="owner-segmented" role="tablist" aria-label="Periode tagihan">
-    <button type="button" role="tab" @click="setGroup('aktif')" :class="group === 'aktif' ? 'is-active' : ''"><span class="owner-segment-dot bg-rose-500"></span>Perlu ditagih</button>
-    <button type="button" role="tab" @click="setGroup('terjadwal')" :class="group === 'terjadwal' ? 'is-active' : ''"><span class="owner-segment-dot bg-blue-500"></span>Berjalan &amp; Mendatang</button>
+    <button type="button" role="tab" @click="setGroup('aktif')" :aria-selected="group==='aktif'" :class="group === 'aktif' ? 'is-active' : ''"><span class="owner-segment-dot bg-rose-500"></span>Perlu ditagih <span x-show="group==='aktif' && !loading" class="bk-tab-count" x-text="tagihan.length"></span></button>
+    <button type="button" role="tab" @click="setGroup('terjadwal')" :aria-selected="group==='terjadwal'" :class="group === 'terjadwal' ? 'is-active' : ''"><span class="owner-segment-dot bg-blue-500"></span>Berjalan &amp; Mendatang <span x-show="group==='terjadwal' && !loading" class="bk-tab-count" x-text="tagihan.length"></span></button>
   </div>
 
-  <div x-data="{ filterOpen: window.innerWidth >= 768 }" @resize.window="if (window.innerWidth >= 768) filterOpen = true" data-help="help-tagihan-filter" class="card border border-slate-200 shadow-sm">
-    <button type="button" @click="filterOpen = !filterOpen" class="owner-mobile-filter-summary md:hidden">
+  <div x-data="uiFilterPanel()" @resize.window="resize()" @keydown.escape.window="closeFilter()" data-help="help-tagihan-filter" class="card border border-slate-200 shadow-sm">
+    <button type="button" @click="toggleFilter()" :aria-expanded="filterOpen" class="owner-mobile-filter-summary md:hidden">
       <span class="inline-flex items-center gap-2"><?= masterIconSvg('filter', 'h-4 w-4') ?> Cari & Filter Tagihan</span>
-      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idKamar" class="owner-mobile-filter-count" x-text="[search,idKos,idKamar].filter(Boolean).length"></span><span x-text="filterOpen ? '−' : '+'"></span></span>
+      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idKamar" class="owner-mobile-filter-count" x-text="[search,idKos,idKamar].filter(Boolean).length"></span><?= masterIconSvg('chevron-down','h-4 w-4') ?></span>
     </button>
-    <div x-show="filterOpen" x-cloak class="mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid md:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+    <div x-show="filterOpen && mobile" x-cloak class="ui-filter-backdrop" @click="closeFilter()" aria-hidden="true"></div>
+    <div x-ref="panel" x-show="filterOpen" x-cloak :role="mobile ? 'dialog' : null" :aria-modal="mobile ? 'true' : null" aria-label="Filter data" class="ui-filter-panel"><div class="ui-filter-heading"><h2>Filter</h2><button type="button" @click="closeFilter()" class="owner-icon-button" aria-label="Tutup filter"><?= masterIconSvg('x','h-5 w-5') ?></button></div><div class="ui-filter-body mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid md:grid-cols-2 lg:grid-cols-4 lg:gap-4">
       <div class="form-group">
         <label class="label">Cari kamar atau penghuni</label>
         <input
@@ -64,6 +65,7 @@
         </select>
       </div>
 
+    </div><div class="ui-filter-footer"><button type="button" class="btn-primary" @click="closeFilter()">Lihat hasil</button></div>
     </div>
   </div>
 
@@ -97,7 +99,7 @@
                 <div class="owner-copy-full font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div>
                 <div class="owner-copy-full mt-1 font-medium text-slate-700" x-text="item.nama_penghuni || 'Belum ada penghuni'"></div>
                 <div class="owner-copy-full mt-1 text-xs text-slate-500" x-text="isScoped ? item.tipe_kamar : item.nama_kos + ' · ' + item.tipe_kamar"></div>
-                <div class="mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div>
+                <div class="mt-1 text-xs text-slate-400" x-text="item.nomor_tagihan"></div>
               </td>
               <td class="px-5 py-4">
                 <div x-text="formatDate(item.tanggal_mulai) + ' - ' + formatDate(item.tanggal_selesai)"></div>
@@ -130,12 +132,12 @@
       <template x-for="item in tagihan" :key="'m-' + item.id_tagihan">
         <article class="p-4">
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0 flex-1"><div class="owner-copy-full font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div><div class="owner-copy-full mt-1 font-medium text-slate-700" x-text="item.nama_penghuni || 'Belum ada penghuni'"></div><div class="owner-copy-full mt-1 text-xs text-slate-500" x-text="isScoped ? item.tipe_kamar : item.nama_kos + ' · ' + item.tipe_kamar"></div><div class="owner-copy-full mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div></div>
+            <div class="min-w-0 flex-1"><div class="owner-copy-full font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div><div class="owner-copy-full mt-1 font-medium text-slate-700" x-text="item.nama_penghuni || 'Belum ada penghuni'"></div><div class="owner-copy-full mt-1 text-xs text-slate-500" x-text="isScoped ? item.tipe_kamar : item.nama_kos + ' · ' + item.tipe_kamar"></div><div class="owner-copy-full mt-1 text-xs text-slate-400" x-text="item.nomor_tagihan"></div></div>
             <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="displayStatusClass(item)" x-text="displayStatusLabel(item)"></span>
           </div>
           <div class="mt-3 flex items-end justify-between gap-3 rounded-xl p-3" :class="item.perlu_tindakan ? 'bg-rose-50' : 'bg-blue-50'">
-            <div><div class="text-[11px] font-semibold uppercase tracking-wider" :class="item.perlu_tindakan ? 'text-rose-500' : 'text-blue-500'" x-text="item.perlu_tindakan ? 'Sisa yang harus dibayar' : 'Dapat dibayar lebih awal'"></div><div class="mt-1 text-xl font-bold tracking-tight" :class="item.perlu_tindakan ? 'text-rose-700' : 'text-blue-700'" x-text="format(item.sisa_tagihan)"></div></div>
-            <div class="text-right"><div class="text-[11px] text-slate-400">Jatuh tempo</div><div class="mt-1 text-xs font-semibold text-slate-700" x-text="formatDate(item.tanggal_jatuh_tempo)"></div></div>
+            <div><div class="text-xs font-semibold uppercase tracking-wider" :class="item.perlu_tindakan ? 'text-rose-500' : 'text-blue-500'" x-text="item.perlu_tindakan ? 'Sisa yang harus dibayar' : 'Dapat dibayar lebih awal'"></div><div class="mt-1 text-xl font-bold tracking-tight" :class="item.perlu_tindakan ? 'text-rose-700' : 'text-blue-700'" x-text="format(item.sisa_tagihan)"></div></div>
+            <div class="text-right"><div class="text-xs text-slate-400">Jatuh tempo</div><div class="mt-1 text-xs font-semibold text-slate-700" x-text="formatDate(item.tanggal_jatuh_tempo)"></div></div>
           </div>
           <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
             <div><div class="text-slate-400">Periode</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_mulai) + ' - ' + formatDate(item.tanggal_selesai)"></div></div>
@@ -175,7 +177,7 @@
       get isScoped() { return this.isTypeContext || this.isOccupantContext; },
       get backUrl() {
         if (this.isTypeContext) {
-          return BASE_URL + '/pemilik/kamar?id_kos=' + encodeURIComponent(this.idKos) + '&context=kos';
+          return BASE_URL + '/pemilik/kos/detail?id_kos=' + encodeURIComponent(this.idKos);
         }
         return BASE_URL + '/pemilik/penghuni';
       },

@@ -2,13 +2,15 @@
 
 /**
  * Return the application path regardless of whether BetaKos is installed at
- * the virtual-host root or below /platform_kos and/or /public.
+ * the virtual-host root or below /betakos and/or /public.
  */
 function normalized_request_path($requestUri = null)
 {
   $uri = parse_url($requestUri ?? ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH) ?: '/';
 
-  foreach (['/platform_kos/public', '/platform_kos', '/public'] as $prefix) {
+  $basePath = rtrim(parse_url(defined('BASE_URL') ? BASE_URL : '', PHP_URL_PATH) ?: '', '/');
+  $prefixes = $basePath ? [$basePath . '/public', $basePath] : ['/public'];
+  foreach ($prefixes as $prefix) {
     if ($uri === $prefix) return '/';
     if (str_starts_with($uri, $prefix . '/')) {
       $uri = substr($uri, strlen($prefix));

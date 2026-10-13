@@ -30,7 +30,7 @@
   x-show="$store.ui.confirmShow"
   x-transition
   @click.self="$store.ui.confirmNo()"
-  class="ui-confirm-layer modal-backdrop px-5">
+  role="dialog" aria-modal="true" aria-label="Konfirmasi tindakan" @keydown.escape.window="$store.ui.confirmNo()" class="ui-confirm-layer modal-backdrop px-5">
 
   <div class="modal-box">
 

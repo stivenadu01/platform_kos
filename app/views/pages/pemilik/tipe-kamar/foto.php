@@ -1,4 +1,4 @@
-<div x-data="tipeKamarFotoPage()" x-init="init()" class="owner-page mx-auto max-w-6xl">
+<div x-data="tipeKamarFotoPage()"  class="owner-page mx-auto max-w-6xl">
   <div class="owner-form-heading">
     <a :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
     <div class="mt-3">

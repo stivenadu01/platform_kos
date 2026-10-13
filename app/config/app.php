@@ -1,7 +1,7 @@
 <?php
 
 date_default_timezone_set("Asia/Makassar");
-define('APP_NAME', $_ENV['APP_NAME'] ?? 'My App');
+define('APP_NAME', $_ENV['APP_NAME'] ?? 'BetaKos');
 
 define('ROOT_PATH', __DIR__ . '/../../');
 define('UPLOADS_PATH', ROOT_PATH . '/public/uploads/');

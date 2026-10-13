@@ -37,9 +37,15 @@ class MidtransService
   {
     if (empty($response['actions']) || !is_array($response['actions'])) return '';
 
-    foreach ($response['actions'] as $action) {
-      if (($action['name'] ?? '') === 'generate-qr-code' && !empty($action['url'])) {
-        return (string)$action['url'];
+    // Current sandbox simulator expects the QR provided by the newer action.
+    // Retain legacy support for merchants still on the older QR format.
+    foreach (['generate-qr-code-v2', 'generate-qr-code'] as $name) {
+      foreach ($response['actions'] as $action) {
+        $url = (string)($action['url'] ?? '');
+        $hosts = $this->production ? ['api.midtrans.com','merchants-app.midtrans.com'] : ['api.sandbox.midtrans.com','merchants-app.sbx.midtrans.com'];
+        if (($action['name'] ?? '') === $name && parse_url($url, PHP_URL_SCHEME) === 'https' && in_array(parse_url($url, PHP_URL_HOST), $hosts, true)) {
+          return $url;
+        }
       }
     }
 
@@ -49,15 +55,40 @@ class MidtransService
   public function getStatus(string $orderId): array
   {
     if ($orderId === '') throw new InvalidArgumentException('Order ID tidak valid.');
-    return $this->request('GET', '/v2/' . rawurlencode($orderId) . '/status');
+    $response = $this->request('GET', '/v2/' . rawurlencode($orderId) . '/status');
+    $response['qr_code_url'] = $this->extractQrCodeUrl($response);
+    return $response;
   }
 
-  public function getQrisCodeUrl(string $transactionId): string
+  public function getQrisCodeUrl(string $transactionId, string $qrString = ''): string
   {
     $transactionId = trim($transactionId);
     if ($transactionId === '') throw new InvalidArgumentException('Transaction ID QRIS tidak valid.');
 
+    // Stored EMV QR payloads contain the GoPay reference in additional data
+    // (tag 62, GoPay subtag 50 or bill-reference subtag 05).
+    $fields = $this->parseQrFields($qrString);
+    $additional = $this->parseQrFields($fields['62'] ?? '');
+    $reference = $additional['50'] ?? $additional['05'] ?? '';
+    if (preg_match('/^A[0-9]{14}[a-zA-Z0-9]+ID$/D', $reference)) {
+      $host = $this->production ? 'https://merchants-app.midtrans.com' : 'https://merchants-app.sbx.midtrans.com';
+      return $host . '/v4/qris/gopay/' . rawurlencode($reference) . '/qr-code';
+    }
+
     return $this->baseUrl . '/v2/qris/' . rawurlencode($transactionId) . '/qr-code';
+  }
+
+  private function parseQrFields(string $value): array
+  {
+    $fields = []; $offset = 0; $size = strlen($value);
+    while ($offset + 4 <= $size) {
+      $tag = substr($value, $offset, 2); $length = substr($value, $offset + 2, 2);
+      if (!ctype_digit($tag . $length)) return [];
+      $length = (int)$length; $offset += 4;
+      if ($offset + $length > $size) return [];
+      $fields[$tag] = substr($value, $offset, $length); $offset += $length;
+    }
+    return $offset === $size ? $fields : [];
   }
 
   public function verifyNotificationSignature(array $notification): bool

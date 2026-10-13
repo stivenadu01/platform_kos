@@ -42,6 +42,7 @@ document.addEventListener('alpine:init', () => {
         const res = await API.post('/auth/logout');
 
         if (res.success) {
+          Alpine.store('notifications')?.stop();
           this.user = null;
 
           window.location.href =

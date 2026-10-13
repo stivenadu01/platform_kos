@@ -1,4 +1,4 @@
-<div x-data="pemilikLanggananCheckout()" x-init="init()" class="owner-page max-w-4xl">
+<div x-data="pemilikLanggananCheckout()"  class="owner-page max-w-4xl">
   <div class="owner-form-heading"><a :href="window.BASE_URL + '/pemilik/langganan'" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a><p class="owner-eyebrow mt-3">Konfirmasi</p><h2 class="owner-title">Checkout BetaKos Pro</h2><p class="owner-subtitle">Periksa pesanan, lalu pilih metode pembayaran.</p></div>
   <div x-show="loading" class="card h-48 animate-pulse"></div>
   <div x-show="!loading&&pendingPayment" x-cloak class="rounded-2xl border border-amber-200 bg-amber-50 p-4"><h3 class="font-bold text-amber-900">Pembayaran masih diproses</h3><p class="mt-1 text-sm text-amber-700">Selesaikan atau tunggu pemeriksaan order sebelumnya.</p><a :href="window.BASE_URL + '/pemilik/langganan/pembayaran'" class="btn-subscription mt-4">Lihat pembayaran</a></div>

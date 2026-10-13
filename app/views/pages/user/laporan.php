@@ -61,7 +61,7 @@ $reasonLabels = [
                 <div class="min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <h2 class="truncate text-base font-bold text-slate-900"><?= htmlspecialchars($item['nama_kos'] ?? 'Kos tidak ditemukan') ?></h2>
-                    <span class="rounded-full border px-2.5 py-1 text-[11px] font-semibold <?= $meta['class'] ?>">
+                    <span class="rounded-full border px-2.5 py-1 text-xs font-semibold <?= $meta['class'] ?>">
                       <?= htmlspecialchars($meta['label']) ?>
                     </span>
                   </div>

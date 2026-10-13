@@ -1,5 +1,16 @@
 <?php
 
+function requireLoginResponse(string $message): void
+{
+  $path = normalized_request_path();
+  if ($path !== '/api' && !str_starts_with($path, '/api/')) {
+    header('Location: ' . BASE_URL . '/login', true, 302);
+    exit;
+  }
+  response(['success'=>false,'message'=>$message],401);
+  exit;
+}
+
 function run_middleware($middlewares = [])
 {
   // Jalankan validasi CSRF satu kali sebelum middleware lain. Endpoint yang
@@ -18,11 +29,7 @@ function run_middleware($middlewares = [])
       header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
       header('Pragma: no-cache');
       if (!isset($_SESSION['user']['id_user'])) {
-        response([
-          'success' => false,
-          'message' => 'Akses ditolak, silakan login terlebih dahulu'
-        ], 401);
-        exit;
+        requireLoginResponse('Akses ditolak, silakan login terlebih dahulu');
       }
 
       // Session user bukan sumber kebenaran untuk status/role.
@@ -46,11 +53,7 @@ function run_middleware($middlewares = [])
           ]);
         }
         session_destroy();
-        response([
-          'success' => false,
-          'message' => 'Sesi berakhir atau akun tidak lagi dapat digunakan. Silakan login kembali.'
-        ], 401);
-        exit;
+        requireLoginResponse('Sesi berakhir atau akun tidak lagi dapat digunakan. Silakan login kembali.');
       }
 
       unset($freshUser['password']);

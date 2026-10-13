@@ -1,4 +1,4 @@
-<div x-data="adminLaporanPage()" x-init="init()" class="admin-page">
+<div x-data="adminLaporanPage()"  class="admin-page">
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Laporan Kos</h1>
@@ -45,7 +45,7 @@
     <div x-show="!loading && result.items.length" class="!block md:!hidden divide-y divide-slate-200">
       <template x-for="item in result.items" :key="'m-' + item.id_laporan">
         <article class="p-4 space-y-3">
-          <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama_kos"></div><div class="text-xs text-slate-400 mt-1" x-text="'ID Kos #' + item.id_kos"></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span></div>
+          <div class="flex items-start justify-between gap-3"><div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="item.nama_kos"></div><div class="text-xs text-slate-400 mt-1" x-text="'ID Kos #' + item.id_kos"></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-medium" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span></div>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Pelapor</div><div class="mt-1 font-semibold text-slate-800 truncate" x-text="item.nama_pelapor"></div><div class="text-slate-500 truncate" x-text="item.email_pelapor"></div></div>
             <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Alasan</div><div class="mt-1 font-semibold text-slate-700" x-text="reasonLabel(item.alasan)"></div></div>
@@ -97,14 +97,14 @@
     </div>
   </div>
 
-  <div x-show="detailOpen" x-cloak class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="detailOpen" x-cloak class="ui-dialog fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeDetail()"></div>
-    <div class="relative bg-white w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
-      <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
+    <div class="ui-sheet-panel ui-sheet-wide relative">
+      <div class="ui-sheet-header flex items-center justify-between gap-3">
         <div><h2 class="font-bold text-slate-900">Periksa Laporan</h2><p class="text-xs text-slate-500 mt-1" x-text="detail?.nama_kos || ''"></p></div>
         <button @click="closeDetail()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
-      <div class="p-5 sm:p-6 space-y-5" x-show="detail">
+      <div class="ui-sheet-body space-y-5" x-show="detail">
         <div class="grid sm:grid-cols-2 gap-4">
           <div class="rounded-xl bg-slate-50 p-4"><div class="text-xs text-slate-400">Pelapor</div><div class="mt-1 font-semibold text-slate-900" x-text="detail?.nama_pelapor"></div><div class="text-xs text-slate-500" x-text="detail?.email_pelapor"></div></div>
           <div class="rounded-xl bg-slate-50 p-4"><div class="text-xs text-slate-400">Alasan</div><div class="mt-1 font-semibold text-slate-900" x-text="reasonLabel(detail?.alasan)"></div></div>

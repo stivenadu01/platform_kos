@@ -2,9 +2,14 @@
 
 class GoogleAuthService
 {
+  private $verificationHttpHandler;
+
+  public function __construct(?callable $verificationHttpHandler = null)
+  {
+    $this->verificationHttpHandler = $verificationHttpHandler;
+  }
   private const AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
   private const TOKEN_URL = 'https://oauth2.googleapis.com/token';
-  private const TOKENINFO_URL = 'https://oauth2.googleapis.com/tokeninfo';
 
   public function getRedirectUri(): string
   {
@@ -74,29 +79,14 @@ class GoogleAuthService
 
   public function verifyIdToken(string $idToken): array
   {
-    $url = self::TOKENINFO_URL . '?' . http_build_query(['id_token' => $idToken]);
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_CONNECTTIMEOUT => 10,
-      CURLOPT_TIMEOUT => 20,
-      CURLOPT_SSL_VERIFYPEER => true,
-      CURLOPT_SSL_VERIFYHOST => 2
-    ]);
-    $raw = curl_exec($ch);
-    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlError = curl_error($ch);
-    curl_close($ch);
-
-    if ($raw === false || $curlError !== '' || $httpCode !== 200) {
+    try {
+      $handler = $this->verificationHttpHandler ?? Google\Auth\HttpHandler\HttpHandlerFactory::build(new GuzzleHttp\Client(['connect_timeout' => 10, 'timeout' => 20]));
+      $verifier = new Google\Auth\AccessToken($handler);
+      $payload = $verifier->verify($idToken, ['audience' => GOOGLE_CLIENT_ID]);
+    } catch (Throwable $e) {
       throw new Exception('Token Google tidak dapat diverifikasi.', 401);
     }
-
-    $payload = json_decode($raw, true);
-    if (!is_array($payload)) {
-      throw new Exception('Respons identitas Google tidak valid.', 401);
-    }
-
+    if (!is_array($payload)) throw new Exception('Identitas Google tidak valid.', 401);
     $issuer = (string) ($payload['iss'] ?? '');
     $audience = (string) ($payload['aud'] ?? '');
     $sub = trim((string) ($payload['sub'] ?? ''));
@@ -118,6 +108,8 @@ class GoogleAuthService
     }
 
     return [
+      'nonce' => (string)($payload['nonce'] ?? ''),
+      'authoritative_email' => str_ends_with($email, '@gmail.com') || !empty($payload['hd']),
       'sub' => $sub,
       'email' => $email,
       'nama' => trim((string) ($payload['name'] ?? '')),

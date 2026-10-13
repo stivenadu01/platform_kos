@@ -33,29 +33,27 @@ $__mobileTitle = match (true) {
         class="h-9 w-9 object-contain">
       <div class="leading-tight">
         <div class="font-bold text-slate-900">BetaKos</div>
-        <div class="hidden text-[11px] font-medium text-slate-500 sm:block">Kupang</div>
+        <div class="hidden text-xs font-medium text-slate-500 sm:block">Kupang</div>
       </div>
     </a>
 
     <nav class="ml-auto hidden items-center gap-1 md:flex">
-      <a href="<?= BASE_URL ?>/" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-        Beranda
-      </a>
-      <a href="<?= BASE_URL ?>/cari-kos" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-        Cari Kos
+<a href="<?= BASE_URL ?>/cari-kos" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
+        Jelajahi
       </a>
       <template x-if="$store.auth.user?.role === 'pelanggan'">
         <a href="<?= BASE_URL ?>/user/favorit" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
           Favorit
-        </a>
+        <?php echo navigationBadge('favorites','kos favorit', true); ?></a>
       </template>
       <template x-if="$store.auth.user?.role === 'pelanggan'">
         <a href="<?= BASE_URL ?>/user/kos-saya" class="rounded-lg px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
           Kos Saya
-        </a>
+        <?php echo navigationBadge('overdue','tagihan lewat jatuh tempo'); ?></a>
       </template>
     </nav>
 
+    <div class="bk-public-notification"><?php include ROOT_PATH . '/app/views/partials/notification-button.php'; ?></div>
     <?php if ($__isKosDetailPage): ?>
       <div class="ml-auto flex shrink-0 items-center gap-1.5">
         <?php if (isset($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pelanggan'): ?>
@@ -92,7 +90,7 @@ $__mobileTitle = match (true) {
       <template x-if="$store.auth.isLoggedIn">
         <div class="flex items-center gap-2">
           <template x-if="$store.auth.user?.role === 'pelanggan'">
-            <a href="<?= BASE_URL ?>/user/profil" class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Profil</a>
+            <a href="<?= BASE_URL ?>/user/akun" class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Akun</a>
           </template>
           <template x-if="$store.auth.user?.role === 'pemilik'">
             <a href="<?= BASE_URL ?>/pemilik" class="rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
@@ -128,12 +126,12 @@ $__mobileTitle = match (true) {
         Beranda
       </a>
       <a @click="open = false" href="<?= BASE_URL ?>/cari-kos" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
-        Cari Kos
+        Jelajahi
       </a>
       <template x-if="$store.auth.isLoggedIn">
         <a @click="open = false" href="<?= BASE_URL ?>/user/favorit" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">
           Favorit
-        </a>
+        <?php echo navigationBadge('favorites','kos favorit', true); ?></a>
       </template>
       <template x-if="$store.auth.user?.role === 'pelanggan'">
         <a @click="open = false" href="<?= BASE_URL ?>/user/profil" class="block rounded-xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50">

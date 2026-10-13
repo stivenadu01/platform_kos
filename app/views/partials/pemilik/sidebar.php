@@ -52,180 +52,29 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
   </div>
 
 
-  <!-- NAVIGATION -->
-  <nav class="owner-desktop-sidebar-nav min-h-0 flex-1 overflow-y-auto p-4 pb-6 space-y-1">
-
-    <!-- DASHBOARD -->
-    <a
-      :href="window.BASE_URL + '/pemilik'"
-      class="
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-slate-700
-        hover:bg-slate-100
-        hover:text-primary
-      ">
-
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('home', 'h-5 w-5') ?></span>
-
-      <span class="sidebar-label">
-        Dashboard
-      </span>
-
-    </a>
-
-
-    <!-- PROFIL -->
-    <a
-      :href="window.BASE_URL + '/pemilik/profil'"
-
-      class="
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-slate-700
-        hover:bg-slate-100
-        hover:text-primary
-      ">
-
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-round', 'h-5 w-5') ?></span>
-
-      <span class="sidebar-label">
-        Profil Saya
-      </span>
-
-    </a>
-
-
-    <!-- SECTION KOS -->
-    <div class="sidebar-section-label pt-5 pb-2 px-4">
-
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Manajemen Kos</span>
-
-    </div>
-
-
-    <!-- KOS -->
-    <a
-      :href="window.BASE_URL + '/pemilik/kos'"
-      data-owner-nav="property"
-      class="
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-slate-700
-        hover:bg-slate-100
-        hover:text-primary
-      ">
-
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('building-2', 'h-5 w-5') ?></span>
-
-      <span class="sidebar-label">
-        Properti
-      </span>
-
-    </a>
-
-
-    <!-- PENGHUNI -->
-    <a
-      :href="window.BASE_URL + '/pemilik/penghuni'"
-      class="
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-slate-700
-        hover:bg-slate-100
-        hover:text-primary
-      ">
-
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
-
-      <span class="sidebar-label">
-        Penghuni
-      </span>
-      <?php if (!$__pemilikIsPro): ?>
-        <span class="sidebar-label ml-auto text-[10px] font-bold text-primary">PRO</span>
-      <?php endif; ?>
-
-    </a>
-
-
-    <!-- PEMBAYARAN -->
-    <a
-      :href="window.BASE_URL + '/pemilik/pembayaran'"
-      class="
-        flex items-center gap-3
-        px-4 py-3
-        rounded-xl
-        text-sm font-medium
-        text-slate-700
-        hover:bg-slate-100
-        hover:text-primary
-      ">
-
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('wallet', 'h-5 w-5') ?></span>
-
-      <span class="sidebar-label">
-        Keuangan
-      </span>
-      <?php if (!$__pemilikIsPro): ?>
-        <span class="sidebar-label ml-auto text-[10px] font-bold text-primary">PRO</span>
-      <?php endif; ?>
-
-    </a>
-
-
-    <!-- SECTION LAYANAN -->
-    <div class="sidebar-section-label pt-5 pb-2 px-4">
-      <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Layanan</span>
-    </div>
-
-
-    <!-- CLAIM RIWAYAT -->
-    <a
-      :href="window.BASE_URL + '/pemilik/claim'"
-      class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span>
-      <span class="sidebar-label">Klaim Riwayat</span>
-    </a>
-
-
-    <!-- LANGGANAN -->
-    <a
-      :href="window.BASE_URL + '/pemilik/langganan'"
-      class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('star', 'h-5 w-5') ?></span>
-      <span class="sidebar-label">Langganan</span>
-    </a>
-
-    <a
-      :href="window.BASE_URL + '/pemilik/riwayat'"
-      class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 hover:text-primary">
-      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600"><?= masterIconSvg('history', 'h-5 w-5') ?></span>
-      <span class="sidebar-label">Riwayat</span>
-    </a>
-
-
-
-    <!-- KELUAR (MOBILE) -->
-    <div class="sticky bottom-0 mt-2 border-t border-slate-200 bg-white pt-3 lg:hidden">
-      <button
-        type="button"
-        @click="$store.auth.logout()"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50">
-        <?= masterIconSvg('log-out', 'h-5 w-5') ?>
-        <span class="sidebar-label">Keluar</span>
-      </button>
-    </div>
-
+  <?php
+  $ownerPath=normalized_request_path();
+  if(str_starts_with($ownerPath,'/pemilik/profil')) $ownerPath='/pemilik/akun';
+  $ownerGroups=[
+    'Utama'=>[['/pemilik','Ringkasan','home',null]],
+    'Kelola kos'=>[['/pemilik/kos','Kos saya','building-2','properties'],['/pemilik/penghuni','Penghuni','users-round','claims'],['/pemilik/pembayaran','Keuangan sewa','wallet','overdue']],
+    'Aktivitas'=>[['/pemilik/claim','Klaim penghuni','user-check','claims'],['/pemilik/riwayat','Riwayat','history',null]],
+    'Akun'=>[['/pemilik/langganan','BetaKos Pro','star','subscription'],['/pemilik/akun','Profil & pengaturan','user-round',null]]
+  ];
+  ?>
+  <nav class="owner-desktop-sidebar-nav bk-workspace-nav" aria-label="Navigasi pemilik">
+   <div class="bk-nav-scroll">
+    <?php foreach($ownerGroups as $group=>$items): ?>
+     <p class="sidebar-section-label bk-nav-group"><?= htmlspecialchars($group) ?></p>
+     <?php foreach($items as [$path,$label,$icon,$badge]): $active=$ownerPath===$path || ($path!=='/pemilik' && str_starts_with($ownerPath,$path.'/')); if($path==='/pemilik/kos' && (str_starts_with($ownerPath,'/pemilik/kamar') || str_starts_with($ownerPath,'/pemilik/tipe-kamar'))) $active=true; ?>
+      <a href="<?= BASE_URL.$path ?>" title="<?= htmlspecialchars($label) ?>" <?= $path==='/pemilik/kos'?'data-owner-nav="property"':'' ?> class="bk-workspace-link <?= $active?'owner-nav-active':'' ?>" <?= $active?'aria-current="page"':'' ?>>
+       <span class="bk-nav-icon"><?= masterIconSvg($icon,'h-5 w-5') ?></span><span class="sidebar-label"><?= htmlspecialchars($label) ?></span><?= $badge?navigationBadge($badge,$badge==='overdue'?'tagihan lewat jatuh tempo':'aktivitas menunggu'):'' ?>
+       <?php if(!$__pemilikIsPro && in_array($path,['/pemilik/penghuni','/pemilik/pembayaran'],true)): ?><span class="sidebar-label bk-pro-label">PRO</span><?php endif; ?>
+      </a>
+     <?php endforeach; ?>
+    <?php endforeach; ?>
+   </div>
   </nav>
-
   <nav class="owner-mobile-more-menu" aria-label="Menu lainnya">
     <div class="owner-mobile-more-intro mb-4">
       <p class="text-xs font-bold uppercase tracking-wider text-primary">Menu lainnya</p>
@@ -240,7 +89,7 @@ if (!empty($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'pemilik'
         <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
       </a>
       <a :href="window.BASE_URL + '/pemilik/claim'" class="owner-mobile-more-link">
-        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span>
+        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('user-check', 'h-5 w-5') ?></span>
         <span>Klaim Riwayat</span>
         <?= masterIconSvg('chevron-right', 'ml-auto h-4 w-4 text-slate-400') ?>
       </a>

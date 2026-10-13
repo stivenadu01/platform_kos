@@ -8,7 +8,7 @@
       <a href="<?= BASE_URL ?>/pemilik" @click.prevent="utils.goBack($el.href)" class="owner-back-link mb-3"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <p class="owner-eyebrow">Properti</p>
       <h2 class="owner-title">
-        Properti
+        Kos saya
       </h2>
 
       <p class="owner-subtitle">
@@ -52,6 +52,13 @@
     </div>
 
   <?php else: ?>
+    <section class="owner-panel !p-3"><label for="my-kos-search" class="sr-only">Cari kos Anda</label><input id="my-kos-search" class="input" type="search" x-model="search" placeholder="Cari nama atau alamat kos…"></section>
+    <div class="owner-segmented" aria-label="Status kos">
+      <?php foreach([''=>'Semua','aktif'=>'Aktif','menunggu_verifikasi'=>'Menunggu verifikasi','draft'=>'Draf','ditolak'=>'Perlu diperbaiki'] as $statusKey=>$statusLabel): $statusCount=$statusKey===''?count($kos):count(array_filter($kos,fn($item)=>$item['status']===$statusKey)); ?>
+      <button type="button" @click="status='<?= $statusKey ?>'" :class="status==='<?= $statusKey ?>'?'is-active':''" :aria-pressed="status==='<?= $statusKey ?>'"><span><?= $statusLabel ?></span><span class="bk-tab-count"><?= $statusCount ?></span></button>
+      <?php endforeach; ?>
+    </div>
+    <div x-show="!visibleCount" x-cloak class="owner-empty"><h3 class="font-bold">Tidak ada kos yang sesuai</h3><p class="mt-2 text-sm">Coba nama lain atau lihat semua status.</p><button type="button" class="btn-secondary mt-3" @click="search='';status=''">Reset pencarian</button></div>
 
     <div data-help="help-kos-list" class="owner-card-grid">
 
@@ -63,12 +70,14 @@
           $occupancy = $totalUnit > 0 ? min(100, (int)round(($occupiedUnit / $totalUnit) * 100)) : 0;
         ?>
 
-        <article class="owner-panel owner-panel-hover !p-0">
-          <div class="relative overflow-hidden bg-slate-900 p-4 sm:p-5">
+        <article x-show="matches(<?= htmlspecialchars(json_encode_safe(['name'=>$item['nama_kos'].' '.$item['alamat'],'status'=>$item['status']]),ENT_QUOTES,'UTF-8') ?>)" class="owner-panel owner-panel-hover !p-0">
+          <div class="property-cover">
+            <?= masterIconSvg('building-2', 'h-12 w-12') ?>
             <?php if (!empty($item['foto'])): ?>
               <img src="<?= BASE_URL . '/uploads' . htmlspecialchars($item['foto'], ENT_QUOTES, 'UTF-8') ?>" alt="Foto <?= htmlspecialchars($item['nama_kos'], ENT_QUOTES, 'UTF-8') ?>" class="absolute inset-0 h-full w-full object-cover" loading="lazy" onerror="this.style.display='none'">
             <?php endif; ?>
-            <div class="owner-photo-overlay absolute inset-0"></div>
+          </div>
+          <div class="property-content">
             <div class="relative flex items-start gap-3.5">
               <div class="owner-card-ring flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18"></path><path d="M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"></path><path d="M9 7h1"></path><path d="M14 7h1"></path><path d="M9 11h1"></path><path d="M14 11h1"></path><path d="M9 15h1"></path><path d="M14 15h1"></path></svg>
@@ -78,16 +87,17 @@
                 <h3 class="owner-copy-full mt-1 text-lg font-bold text-white"><?= htmlspecialchars($item['nama_kos']) ?></h3>
                 <p class="owner-card-muted owner-copy-full mt-1 text-xs"><?= htmlspecialchars($item['alamat']) ?></p>
               </div>
-              <span class="owner-card-ring shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['status']))) ?></span>
+              <div class="ui-actions" x-data="uiActionMenu()" @betakos:close-menus.window="closeMenu(false)" @resize.window="closeMenu()"><button type="button" x-ref="menuTrigger" class="ui-more-trigger !text-slate-600" aria-label="Tindakan lainnya" aria-haspopup="dialog" :aria-expanded="menuOpen" @click="menuOpen ? closeMenu() : showMenu()"><?= masterIconSvg('ellipsis','h-5 w-5') ?></button><template x-teleport="body"><div x-show="menuOpen" x-cloak class="ui-menu-layer" @keydown.escape.stop.prevent="closeMenu()"><div class="ui-menu-backdrop" @click="closeMenu()"></div><div x-ref="menuPanel" role="dialog" aria-modal="true" aria-label="Tindakan properti" class="ui-action-menu" :style="menuPosition" @click="if ($event.target.closest('a,button')) closeMenu(false)"><a href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>"><?= masterIconSvg('image','h-4 w-4') ?> Kelola foto</a><?php if ($item['status'] === 'menunggu_verifikasi'): ?><span class="cursor-not-allowed opacity-50"><?= masterIconSvg('pencil','h-4 w-4') ?> Edit terkunci</span><?php else: ?><a href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>"><?= masterIconSvg('pencil','h-4 w-4') ?> Edit informasi</a><?php endif; ?><button type="button" @click="hapus(<?= $item['id_kos'] ?>)" class="owner-photo-action-danger"><?= masterIconSvg('trash-2','h-4 w-4') ?> Hapus properti</button></div></div></template></div>
             </div>
 
             <div class="owner-photo-stat relative mt-4 rounded-xl p-3">
+              <span class="mb-2 inline-flex rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-semibold text-primary"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['status']))) ?></span>
               <div class="flex items-center justify-between gap-3 text-xs">
                 <span class="owner-photo-stat-label">Keterisian kamar</span>
                 <strong class="text-white"><?= $occupiedUnit ?> dari <?= $totalUnit ?> terisi</strong>
               </div>
               <div class="mt-2 h-1.5 overflow-hidden rounded-full bg-white/15"><div class="h-full rounded-full bg-emerald-400" style="width:<?= $occupancy ?>%"></div></div>
-              <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px]">
+              <div class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                 <span class="owner-stat-available font-semibold"><?= (int)$item['kamar_tersedia'] ?> tersedia</span>
                 <span class="owner-photo-stat-label"><?= (int)$item['kamar_tidak_tersedia'] ?> perlu diperiksa</span>
                 <span class="ml-auto font-semibold text-white"><?= $occupancy ?>%</span>
@@ -105,25 +115,14 @@
                 <div class="owner-photo-waiting rounded-xl px-3 py-2.5 text-center text-xs font-semibold">Menunggu Verifikasi Admin</div>
               <?php endif; ?>
 
-              <?php if ($item['status'] === 'aktif'): ?>
-                <a href="<?= BASE_URL ?>/pemilik/kamar?id_kos=<?= (int)$item['id_kos'] ?>&context=kos" class="owner-photo-action owner-photo-action-primary">
+              <?php if (!empty($item['id_kos'])): ?>
+                <a href="<?= BASE_URL ?>/pemilik/kos/detail?id_kos=<?= (int)$item['id_kos'] ?>" class="owner-photo-action owner-photo-action-primary">
                   <?= masterIconSvg('bed', 'h-4 w-4') ?>
-                  <span>Kelola Kamar</span>
+                  <span>Buka properti</span>
                   <span class="ml-auto"><?= masterIconSvg('chevron-right', 'h-4 w-4') ?></span>
                 </a>
               <?php endif; ?>
 
-              <div data-help="help-kos-action" class="grid grid-cols-3 gap-2 pt-0.5">
-                <a href="<?= BASE_URL ?>/pemilik/kos/foto?id=<?= $item['id_kos'] ?>" class="owner-photo-action owner-photo-action-neutral">
-                  <?= masterIconSvg('image', 'h-3.5 w-3.5') ?> Foto
-                </a>
-                <?php if ($item['status'] === 'menunggu_verifikasi'): ?>
-                  <span class="owner-photo-action owner-photo-action-neutral cursor-not-allowed opacity-50" title="Kos tidak dapat diedit selama menunggu verifikasi admin"><?= masterIconSvg('pencil', 'h-3.5 w-3.5') ?> Edit</span>
-                <?php else: ?>
-                  <a href="<?= BASE_URL ?>/pemilik/kos/edit?id=<?= $item['id_kos'] ?>" class="owner-photo-action owner-photo-action-neutral"><?= masterIconSvg('pencil', 'h-3.5 w-3.5') ?> Edit</a>
-                <?php endif; ?>
-                <button type="button" @click="hapus(<?= $item['id_kos'] ?>)" class="owner-photo-action owner-photo-action-danger"><?= masterIconSvg('trash-2', 'h-3.5 w-3.5') ?> Hapus</button>
-              </div>
             </div>
           </div>
 
@@ -153,6 +152,10 @@
 <script>
   function kosPage() {
     return {
+      search:'',status:'',
+      properties:<?= json_encode_safe(array_map(fn($item)=>['name'=>$item['nama_kos'].' '.$item['alamat'],'status'=>$item['status']],$kos ?? []),JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>,
+      matches(item){return (!this.status || item.status===this.status) && item.name.toLowerCase().includes(this.search.trim().toLowerCase());},
+      get visibleCount(){return this.properties.filter(item=>this.matches(item)).length;},
       async ajukan(id) {
         const ok = await Alpine.store('ui').confirm('Ajukan kos ini untuk diperiksa Admin?');
         if (!ok) return;

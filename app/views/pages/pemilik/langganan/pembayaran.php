@@ -1,4 +1,4 @@
-<div x-data="pemilikLanggananPembayaran()" x-init="init()" class="owner-page">
+<div x-data="pemilikLanggananPembayaran()"  class="owner-page">
   <div class="owner-form-heading">
     <a :href="window.BASE_URL + '/pemilik/langganan'" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
     <p class="owner-eyebrow mt-3">BetaKos Pro</p>
@@ -41,7 +41,7 @@
               <div class="flex items-start justify-between gap-4">
                 <div>
                   <h4 class="font-bold text-slate-900">Pembayaran QRIS</h4>
-                  <p class="mt-1 text-sm text-slate-600" x-text="selected.status === 'diverifikasi' ? 'Pembayaran berhasil diterima.' : (selected.status === 'dibatalkan' ? 'QRIS sudah tidak berlaku.' : 'Scan QRIS dengan aplikasi pembayaran yang mendukung QRIS.')"></p>
+                  <p class="mt-1 text-sm text-slate-600" x-text="selected.status === 'diverifikasi' ? 'Pembayaran berhasil diterima.' : (selected.status === 'dibatalkan' ? 'QRIS sudah tidak berlaku.' : (sandbox ? 'Mode uji: gunakan simulator Midtrans untuk menyelesaikan pembayaran.' : 'Scan QRIS dengan aplikasi pembayaran yang mendukung QRIS.'))"></p>
                 </div>
                 <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="statusClass(selected.status)" x-text="statusLabel(selected.status)"></span>
               </div>
@@ -49,6 +49,17 @@
                 <img :src="selected.qr_code_url" alt="QRIS pembayaran" class="w-64 h-64 rounded-xl border border-slate-200 bg-white p-3 object-contain">
               </div>
               <p x-show="selected.provider_order_id" class="mt-3 text-xs text-slate-500 text-center" x-text="'Order: ' + selected.provider_order_id"></p>
+              <div x-show="sandbox && selected.qr_code_url && selected.status === 'menunggu'" class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p class="text-sm font-semibold text-amber-900">Uji QRIS Sandbox</p>
+                <p class="mt-2 text-xs leading-5 text-amber-800">Salin URL gambar QR, buka simulator, lalu tempel pada kolom QR Code Image Url. Setelah simulasi selesai, cek status pembayaran di sini.</p>
+                <label class="mt-3 block text-xs font-semibold text-amber-900" for="sandbox-qr-url">URL gambar QR</label>
+                <input id="sandbox-qr-url" type="text" readonly :value="selected.qr_code_url" class="input mt-1 w-full" @focus="$el.select()">
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button type="button" class="btn-secondary" @click="copyQrUrl()">Salin URL QR</button>
+                  <a href="https://simulator.sandbox.midtrans.com/v2/qris/index" target="_blank" rel="noopener noreferrer" class="btn-secondary">Buka simulator</a>
+                  <button type="button" class="btn-primary" :disabled="checkingStatus" @click="checkStatus()" x-text="checkingStatus ? 'Memeriksa…' : 'Cek status pembayaran'"></button>
+                </div>
+              </div>
             </div>
           </template>
 
@@ -166,6 +177,21 @@ function pemilikLanggananPembayaran() {
     selected: null,
     paymentMethods: [],
     polling: null,
+    sandbox: <?= json_encode(!filter_var($_ENV['MIDTRANS_IS_PRODUCTION'] ?? false, FILTER_VALIDATE_BOOLEAN)) ?>,
+    checkingStatus: false,
+
+    async copyQrUrl() {
+      try { await navigator.clipboard.writeText(this.selected.qr_code_url); Alpine.store('ui').toast('URL QR berhasil disalin.', 'success'); }
+      catch { document.getElementById('sandbox-qr-url')?.select(); Alpine.store('ui').toast('Pilih URL lalu salin secara manual.', 'warning'); }
+    },
+    async checkStatus() {
+      if (!this.selected || this.checkingStatus) return;
+      this.checkingStatus = true;
+      try {
+        const res = await API.get('/pemilik/langganan/pembayaran/' + encodeURIComponent(this.selected.id_pembayaran_langganan) + '/midtrans-status', false);
+        this.selected = res.data;
+      } finally { this.checkingStatus = false; }
+    },
 
     get paymentMethod() {
       if (this.selected?.provider_pembayaran || this.selected?.nomor_tujuan_pembayaran || this.selected?.nama_penerima_pembayaran) {

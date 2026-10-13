@@ -33,7 +33,7 @@ function csrf_validate_request()
     response([
       'success' => false,
       'message' => 'Permintaan tidak valid atau token keamanan telah kedaluwarsa. Silakan muat ulang halaman.'
-    ], 419);
+    ], 403);
     exit;
   }
 }

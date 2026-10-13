@@ -62,7 +62,7 @@ class ApiLokasiController
         CURLOPT_CONNECTTIMEOUT => 4,
         CURLOPT_HTTPHEADER => [
           'Accept: application/json',
-          'User-Agent: PlatformKosKupang/1.0 (location search)'
+          'User-Agent: BetaKos/1.0 (location search)'
         ]
       ]);
 

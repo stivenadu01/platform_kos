@@ -16,7 +16,7 @@ $pickerConfig = [
 <div
   x-data="BetaKosLocationPicker(<?= htmlspecialchars(json_encode_safe($pickerConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), ENT_QUOTES, 'UTF-8') ?>)"
   class="relative"
-  x-init="init()"
+  
   @keydown.escape.window="closePicker()"
   @click.outside="closePicker()">
   <form x-show="!open" @submit.prevent="submitQuery()" class="relative flex items-center gap-3">

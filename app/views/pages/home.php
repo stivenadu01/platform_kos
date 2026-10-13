@@ -1,16 +1,16 @@
 <section class="relative overflow-hidden bg-white">
-  <div class="mx-auto max-w-7xl px-4 pb-10 pt-7 sm:px-6 sm:pb-14 sm:pt-16 lg:px-8 lg:pt-20">
+  <div class="mx-auto max-w-7xl px-4 pb-5 pt-5 sm:px-6 sm:pb-10 sm:pt-10 lg:px-8">
     <div class="grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
       <div>
         <span class="inline-flex rounded-full bg-primary-soft px-3 py-1 text-xs font-semibold text-primary">
           BetaKos Kupang
         </span>
 
-        <h1 class="mt-4 max-w-3xl font-[Poppins] text-3xl font-bold tracking-tight text-slate-900 sm:mt-5 sm:text-5xl lg:text-6xl">
-          Cari kos sesuai lokasi, kebutuhan, dan budgetmu.
+        <h1 class="mt-3 max-w-3xl font-sans text-2xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          Kos yang pas, dekat tujuanmu.
         </h1>
 
-        <p class="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-5 sm:text-lg sm:leading-7">
+        <p class="mt-3 hidden max-w-2xl text-sm leading-6 text-slate-600 sm:block">
           Masukkan nama tempat, jalan, kawasan, atau lokasi tujuan untuk menemukan kos di area yang kamu inginkan.
         </p>
 
@@ -19,6 +19,12 @@
           <?php include ROOT_PATH . '/app/views/partials/user/location-picker.php'; ?>
         </div>
 
+        <nav class="market-shortcuts" aria-label="Pilihan jenis kos">
+          <a href="<?= BASE_URL ?>/cari-kos">Semua kos</a>
+          <a href="<?= BASE_URL ?>/cari-kos?jenis=putra">Putra</a>
+          <a href="<?= BASE_URL ?>/cari-kos?jenis=putri">Putri</a>
+          <a href="<?= BASE_URL ?>/cari-kos?jenis=campur">Campur</a>
+        </nav>
         <div class="mt-5 hidden flex-wrap items-center gap-x-6 gap-y-3 text-sm text-slate-500 sm:flex">
           <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Cari berdasarkan lokasi</span>
           <span class="flex items-center gap-2"><span class="text-success"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span> Sesuaikan budget</span>
@@ -33,7 +39,7 @@
               <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-soft text-primary"><?= masterIconSvg('map-pin', 'h-6 w-6') ?></div>
               <div>
                 <p class="text-xs font-semibold uppercase tracking-wider text-primary">Contoh pencarian lokasi</p>
-                <p class="mt-1 font-[Poppins] text-xl font-bold text-slate-900">Kos di sekitar lokasi pilihan</p>
+                <p class="mt-1 font-sans text-xl font-bold text-slate-900">Kos di sekitar lokasi pilihan</p>
               </div>
             </div>
 
@@ -69,7 +75,7 @@
   <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
     <div class="text-center">
       <p class="text-sm font-semibold text-primary">Mulai dari sini</p>
-      <h2 class="mt-1 font-[Poppins] text-2xl font-bold text-slate-900 sm:text-3xl">Temukan kos yang sesuai tanpa ribet</h2>
+      <h2 class="mt-1 font-sans text-2xl font-bold text-slate-900 sm:text-3xl">Temukan kos yang sesuai tanpa ribet</h2>
       <p class="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-500">
         Tentukan lokasi, kebutuhan, dan budget. BetaKos membantu kamu menemukan pilihan yang paling sesuai.
       </p>
@@ -79,21 +85,21 @@
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
         <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('search', 'h-5 w-5') ?></div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 1</p>
-        <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Cari lokasi tujuan</h3>
+        <h3 class="mt-1 font-sans text-lg font-bold text-slate-900">Cari lokasi tujuan</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Ketik nama tempat, jalan, kawasan, atau lokasi yang ingin kamu jadikan patokan.</p>
       </a>
 
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
         <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('settings', 'h-5 w-5') ?></div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 2</p>
-        <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Pilih yang kamu butuhkan</h3>
+        <h3 class="mt-1 font-sans text-lg font-bold text-slate-900">Pilih yang kamu butuhkan</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Atur jenis kos, kapasitas, fasilitas, jarak, dan kisaran harga.</p>
       </a>
 
       <a href="<?= BASE_URL ?>/cari-kos" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
         <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('check-circle-2', 'h-5 w-5') ?></div>
         <p class="mt-5 text-xs font-semibold uppercase tracking-wider text-primary">Langkah 3</p>
-        <h3 class="mt-1 font-[Poppins] text-lg font-bold text-slate-900">Bandingkan pilihan</h3>
+        <h3 class="mt-1 font-sans text-lg font-bold text-slate-900">Bandingkan pilihan</h3>
         <p class="mt-2 text-sm leading-6 text-slate-500">Lihat foto, harga, lokasi, fasilitas, dan ketersediaan sebelum memilih.</p>
       </a>
     </div>
@@ -105,14 +111,14 @@
     <div class="flex items-end justify-between gap-4">
       <div>
         <p class="text-sm font-semibold text-primary">Kos pilihan</p>
-        <h2 class="mt-1 font-[Poppins] text-2xl font-bold text-slate-900 sm:text-3xl">Kos tersedia di Kupang</h2>
+        <h2 class="mt-1 font-sans text-2xl font-bold text-slate-900 sm:text-3xl">Kos tersedia di Kupang</h2>
         <p class="mt-2 text-sm text-slate-500">Lihat kos yang sedang tersedia atau mulai pencarian untuk menemukan lebih banyak pilihan.</p>
       </div>
       <a href="<?= BASE_URL ?>/cari-kos" class="hidden text-sm font-semibold text-primary hover:text-primary-dark sm:block">Lihat semua →</a>
     </div>
 
     <?php if (!empty($kosUnggulan)): ?>
-      <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-5 market-grid">
         <?php foreach ($kosUnggulan as $kos): ?>
           <?php $foto = !empty($kos['foto']) ? BASE_URL . '/uploads' . $kos['foto'] : ''; ?>
           <article class="public-card public-card-hover">
@@ -127,14 +133,14 @@
               <div class="p-5">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <h3 class="truncate font-[Poppins] text-lg font-bold text-slate-900"><?= htmlspecialchars($kos['nama_kos']) ?></h3>
+                    <h3 class="truncate font-sans text-lg font-bold text-slate-900"><?= htmlspecialchars($kos['nama_kos']) ?></h3>
                     <p class="mt-1 truncate text-xs text-slate-500"><?= htmlspecialchars($kos['alamat']) ?></p>
                   </div>
-                  <span class="shrink-0 rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-semibold capitalize text-primary"><?= htmlspecialchars($kos['jenis']) ?></span>
+                  <span class="shrink-0 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold capitalize text-primary"><?= htmlspecialchars($kos['jenis']) ?></span>
                 </div>
                 <div class="mt-5 flex items-end justify-between gap-4">
                   <div>
-                    <p class="text-[11px] text-slate-400">Mulai dari</p>
+                    <p class="text-xs text-slate-400">Mulai dari</p>
                     <p class="mt-0.5 text-base font-bold text-slate-900">
                       <?= $kos['harga_mulai'] !== null ? 'Rp ' . number_format((float) $kos['harga_mulai'], 0, ',', '.') : 'Hubungi pemilik' ?>
                     </p>
@@ -162,7 +168,7 @@
       <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
         <div>
           <p class="text-sm font-semibold text-blue-100">Belum tahu harus pilih yang mana?</p>
-          <h2 class="mt-2 font-[Poppins] text-2xl font-bold text-white sm:text-3xl">Cari kos dari lokasi yang kamu inginkan.</h2>
+          <h2 class="mt-2 font-sans text-2xl font-bold text-white sm:text-3xl">Cari kos dari lokasi yang kamu inginkan.</h2>
           <p class="mt-3 max-w-2xl text-sm leading-6 text-blue-100">
             Cari kos di sekitar lokasi yang kamu pilih, lalu sesuaikan dengan kebutuhan dan budgetmu.
           </p>

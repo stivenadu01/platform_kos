@@ -1,6 +1,6 @@
 <div
   x-data="penghuniFormPage()"
-  x-init="init()"
+  
   class="owner-page mx-auto max-w-5xl">
 
   <div class="owner-form-heading">
@@ -27,7 +27,7 @@
   <div x-show="mode === 'tambah' && (isTypeContext || isRoomContext)" x-cloak class="owner-context-panel">
     <div class="owner-context-header">
       <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('info', 'h-5 w-5') ?></span>
-      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-violet-600">Tujuan penambahan penghuni</p><h3 class="owner-copy-full mt-1 font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) + (isRoomContext ? ' · Kamar ' + contextInfo.nomor_kamar : '') : 'Memuat kos dan kamar...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? (isRoomContext ? 'Penghuni akan ditempatkan otomatis pada kamar ini.' : 'Pilih unit pada tipe ini · Maksimal ' + contextInfo.kapasitas + ' orang per kamar') : ''"></p></div>
+      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-primary">Tujuan penambahan penghuni</p><h3 class="owner-copy-full mt-1 font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) + (isRoomContext ? ' · Kamar ' + contextInfo.nomor_kamar : '') : 'Memuat kos dan kamar...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? (isRoomContext ? 'Penghuni akan ditempatkan otomatis pada kamar ini.' : 'Pilih unit pada tipe ini · Maksimal ' + contextInfo.kapasitas + ' orang per kamar') : ''"></p></div>
     </div>
   </div>
 
@@ -62,7 +62,7 @@
         </p>
       </div>
 
-      <div class="owner-form-actions flex justify-end border-t border-slate-200 pt-5">
+      <div class="owner-form-actions ui-page-actions flex justify-end border-t border-slate-200 pt-5">
         <button
           type="button"
           @click="nextStep()"
@@ -175,10 +175,10 @@
         </p>
       </div>
 
-      <div x-show="mode === 'tambah' && isRoomContext && selectedKamar" x-cloak class="md:col-span-2 rounded-xl border border-violet-200 bg-violet-50 p-4 text-sm text-violet-900">
-        <p class="text-xs font-semibold uppercase tracking-wider text-violet-500">Kamar terpilih otomatis</p>
+      <div x-show="mode === 'tambah' && isRoomContext && selectedKamar" x-cloak class="md:col-span-2 rounded-xl border border-primary/20 bg-primary-soft p-4 text-sm text-slate-900">
+        <p class="text-xs font-semibold uppercase tracking-wider text-primary">Kamar terpilih otomatis</p>
         <p class="mt-1 font-bold" x-text="'Kamar ' + selectedKamar?.nomor_kamar"></p>
-        <p class="mt-1 text-xs text-violet-700" x-text="(selectedKamar?.jumlah_penghuni || 0) + ' dari ' + (selectedKamar?.kapasitas || 0) + ' kapasitas terisi'"></p>
+        <p class="mt-1 text-xs text-primary" x-text="(selectedKamar?.jumlah_penghuni || 0) + ' dari ' + (selectedKamar?.kapasitas || 0) + ' kapasitas terisi'"></p>
       </div>
 
       <div x-show="mode === 'tambah'" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -215,7 +215,7 @@
     <div
       x-show="mode === 'edit' || step === 2"
       x-cloak
-      class="owner-form-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
+      class="owner-form-actions ui-page-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
 
       <button x-show="mode === 'tambah'" type="button" @click="backToNik()" class="btn-secondary">← Ubah NIK</button>
 
@@ -268,7 +268,7 @@
       },
 
       get backUrl() {
-        if (this.isRoomContext) return BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + encodeURIComponent(this.idKamar);
+        if (this.isRoomContext) return BASE_URL + '/pemilik/kamar/detail?id_kamar=' + encodeURIComponent(this.idKamar);
         if (!this.isTypeContext) return BASE_URL + '/pemilik/penghuni';
         const params = new URLSearchParams({ id_kos: this.idKos, id_tipe_kamar: this.idTipeKamar, context: 'tipe' });
         return BASE_URL + '/pemilik/penghuni?' + params.toString();

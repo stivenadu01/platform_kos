@@ -1,5 +1,5 @@
 <?php
-require_once '../app/config/bootstrap.php';
+require_once __DIR__ . '/../app/config/bootstrap.php';
 
 require_once ROOT_PATH . '/app/core/autoload.php';
 require_once ROOT_PATH . '/app/core/router.php';

@@ -1,4 +1,4 @@
-<div x-data="claimPage()" x-init="init()" class="owner-page">
+<div x-data="claimPage()"  class="owner-page">
   <div class="owner-page-header">
     <div>
       <p class="owner-eyebrow">Verifikasi Riwayat</p>
@@ -8,9 +8,10 @@
     <button type="button" @click="load()" class="owner-icon-button" title="Perbarui daftar" aria-label="Perbarui daftar"><?= masterIconSvg('refresh-cw', 'h-4 w-4') ?></button>
   </div>
 
+  <nav class="bk-context-nav" aria-label="Pengelolaan penghuni"><a href="<?= BASE_URL ?>/pemilik/penghuni">Penghuni aktif</a><a href="<?= BASE_URL ?>/pemilik/claim" aria-current="page">Klaim riwayat <?= navigationBadge('claims','klaim menunggu') ?></a></nav>
   <div class="owner-segmented w-fit max-w-full" role="tablist" aria-label="Status klaim">
     <template x-for="tab in tabs" :key="tab.value">
-      <button type="button" role="tab" @click="changeStatus(tab.value)" :class="status === tab.value ? 'is-active' : ''" x-text="tab.label"></button>
+      <button type="button" role="tab" @click="changeStatus(tab.value)" :aria-selected="status===tab.value" :class="status === tab.value ? 'is-active' : ''"><span x-text="tab.label"></span><span x-show="tab.value==='menunggu'" class="bk-tab-count" x-text="$store.navigation.counts.claims || 0"></span></button>
     </template>
   </div>
 
@@ -74,7 +75,7 @@
     </div>
   </div>
 
-  <div x-show="detailOpen" x-cloak class="fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-5">
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="detailOpen" x-cloak class="ui-dialog fixed inset-0 z-[80] flex items-end justify-center p-0 sm:items-center sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeDetail()"></div>
     <div class="relative max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-2xl sm:max-w-2xl sm:rounded-2xl">
       <div class="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">

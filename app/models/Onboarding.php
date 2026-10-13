@@ -57,7 +57,7 @@ function getPemilikOnboardingStatus($id_pemilik)
 
   $kosAction = $kosId <= 0
     ? ['/pemilik/kos/tambah', 'Tambah Kos']
-    : (!$kosComplete ? ['/pemilik/kos/foto?id=' . $kosId, 'Tambah Foto Kos'] : ['/pemilik/kos?id=' . $kosId, 'Lihat Kos']);
+    : (!$kosComplete ? ['/pemilik/kos/foto?id=' . $kosId, 'Tambah Foto Kos'] : ['/pemilik/kos/detail?id_kos=' . $kosId, 'Lihat Kos']);
 
   if ($typeId <= 0) {
     $typeAction = ['/pemilik/tipe-kamar/tambah?id_kos=' . $kosId, 'Buat Tipe Kamar'];
@@ -70,7 +70,7 @@ function getPemilikOnboardingStatus($id_pemilik)
   }
 
   $roomAction = $typeId > 0
-    ? ['/pemilik/kamar/kelola?id_tipe_kamar=' . $typeId, 'Tambah Unit Kamar']
+    ? ['/pemilik/kamar/tambah?id_tipe_kamar=' . $typeId, 'Tambah Unit Kamar']
     : ['/pemilik/kamar?id_kos=' . $kosId . '&context=kos', 'Buka Tipe Kamar'];
 
   $steps = [
@@ -94,6 +94,6 @@ function getPemilikOnboardingStatus($id_pemilik)
     'complete'=>$next === null,
     'steps'=>$steps,
     'next'=>$next,
-    'focus'=>['id_kos'=>$kosId ?: null,'nama_kos'=>$focusKos['nama_kos'] ?? null,'id_tipe_kamar'=>$typeId ?: null],
+    'focus'=>['id_kos'=>$kosId ?: null,'nama_kos'=>$focusKos['nama_kos'] ?? null,'id_tipe_kamar'=>$typeId ?: null,'status'=>$focusKos['status'] ?? null],
   ];
 }

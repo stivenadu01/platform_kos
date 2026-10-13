@@ -2,7 +2,7 @@
 -- Baseline: BetaKos_Icon_Master_Deduplicated_Final
 -- Tujuan: sinkronisasi master fasilitas/aturan dengan katalog icon canonical.
 -- Catatan: tidak menghapus custom master yang tidak termasuk canonical.
-USE `platform_kos`;
+USE `betakos`;
 SET NAMES utf8mb4;
 START TRANSACTION;
 

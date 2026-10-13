@@ -193,6 +193,61 @@ class ApiAuthController
     }
   }
 
+  public function googleCredential()
+  {
+    try {
+      rateLimit('google_credential_' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 60);
+      if (!empty($_SESSION['user'])) throw new Exception('Anda sudah masuk. Muat ulang halaman.',409);
+      $data = input();
+      $credential = $data['credential'] ?? '';
+      if (!is_string($credential) || strlen($credential) > 16384 || substr_count($credential,'.') !== 2) throw new Exception('Identitas Google tidak valid.',422);
+      $google = $this->googleIdentityService()->verifyIdToken($credential);
+      require_once ROOT_PATH . '/app/helpers/google_identity_helper.php';
+      $nonce = $google['nonce'] ?? '';
+      if (!consumeGoogleIdentityNonce($nonce)) throw new Exception('Sesi Google kedaluwarsa. Muat ulang halaman dan coba lagi.',401);
+
+      $user = findUserByGoogleSub($google['sub']);
+      if (!$user) {
+        $user = findUserByEmail($google['email']);
+        if ($user) {
+          $linkedSub = trim((string)($user['google_sub'] ?? ''));
+          if ($linkedSub !== '' && !hash_equals($linkedSub,$google['sub'])) throw new Exception('Email ini terhubung ke akun Google lain.',409);
+          if (($user['status'] ?? '') !== 'aktif') throw new Exception('Akun tidak dapat digunakan. Silakan hubungi administrator.',403);
+          if ($linkedSub === '') {
+            if (!$google['authoritative_email']) throw new Exception('Masuk dengan kata sandi untuk akun email ini.',409);
+            if (!linkGoogleSubToUser((int)$user['id_user'],$google['sub'])) {
+              $fresh = findUser((int)$user['id_user']);
+              if (!$fresh || !hash_equals((string)($fresh['google_sub'] ?? ''),$google['sub'])) throw new Exception('Akun Google gagal dihubungkan.',409);
+            }
+            $user = findUser((int)$user['id_user']);
+          }
+        }
+      }
+      if (!$user) {
+        $role = $data['role'] ?? '';
+        $_SESSION['google_pending_registration'] = [
+          'sub'=>$google['sub'],'email'=>$google['email'],'nama'=>$google['nama'] ?: $google['email'],
+          'picture'=>$google['picture'],'role'=>in_array($role,['pelanggan','pemilik'],true) ? $role : ''
+        ];
+        session_regenerate_id(true);
+        return response(['success'=>true,'data'=>['redirect_url'=>BASE_URL.'/register?google=1']]);
+      }
+      if (($user['status'] ?? '') !== 'aktif') throw new Exception('Akun tidak dapat digunakan. Silakan hubungi administrator.',403);
+      if (empty($user['email_verified_at'])) markUserEmailVerified((int)$user['id_user']);
+      updateLastLoginAt((int)$user['id_user']);
+      $user = findUser((int)$user['id_user']);
+      unset($user['password']);
+      session_regenerate_id(true); unset($_SESSION['csrf_token'],$_SESSION['google_identity_nonces'],$_SESSION['google_pending_registration']);
+      $_SESSION['user']=$user;
+      $_SESSION['user']['auth_session_version']=(int)($user['auth_session_version'] ?? 1);
+      $path = $user['role']==='admin' ? '/admin' : ($user['role']==='pemilik' ? '/pemilik' : '/');
+      return response(['success'=>true,'data'=>['redirect_url'=>BASE_URL.$path]]);
+    } catch (Throwable $e) {
+      $code = (int)$e->getCode();
+      return response(['success'=>false,'message'=>$code >= 400 && $code < 500 ? $e->getMessage() : 'Login Google belum dapat diselesaikan. Silakan coba lagi.'], $code >= 400 && $code < 500 ? $code : 500);
+    }
+  }
+
   public function googleCallback()
   {
     try {
@@ -321,6 +376,11 @@ class ApiAuthController
       header('Location: ' . rtrim(BASE_URL, '/') . '/login', true, 302);
       exit;
     }
+  }
+
+  protected function googleIdentityService(): GoogleAuthService
+  {
+    return new GoogleAuthService();
   }
 
   public function googleComplete()

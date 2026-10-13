@@ -1,4 +1,4 @@
-<div x-data="adminAturanPage()" x-init="init()" class="admin-page">
+<div x-data="adminAturanPage()"  class="admin-page">
   <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Data Master · Aturan Kos</p>
@@ -28,7 +28,7 @@
           <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary" x-html="iconSvg(item.icon)"></span>
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <h4 class="font-semibold text-slate-900" x-text="item.nama_aturan"></h4><span class="rounded-full px-2.5 py-1 text-[11px] font-medium" :class="item.status==='aktif'?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'" x-text="item.status==='aktif'?'Aktif':'Nonaktif'"></span>
+              <h4 class="font-semibold text-slate-900" x-text="item.nama_aturan"></h4><span class="rounded-full px-2.5 py-1 text-xs font-medium" :class="item.status==='aktif'?'bg-emerald-100 text-emerald-700':'bg-slate-100 text-slate-500'" x-text="item.status==='aktif'?'Aktif':'Nonaktif'"></span>
             </div>
             <p class="mt-1 text-xs text-slate-500" x-text="iconLabels[item.icon] || item.icon"></p>
           </div>
@@ -37,16 +37,16 @@
       </template>
     </div>
   </section>
-  <div x-show="modalOpen" x-cloak class="fixed inset-0 z-90 flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="modalOpen" x-cloak class="ui-dialog fixed inset-0  flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="close()"></div>
-    <div class="relative bg-white w-full sm:max-w-xl max-h-[94vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl">
-      <div class="flex justify-between gap-3">
+    <div class="ui-sheet-panel relative">
+      <div class="ui-sheet-header flex justify-between gap-3">
         <div>
           <h3 class="font-bold" x-text="editing?'Edit Aturan Kos':'Tambah Aturan Kos'"></h3>
           <p class="mt-1 text-xs text-slate-500">Gunakan katalog icon resmi BetaKos agar tampilan konsisten di seluruh platform.</p>
         </div><button @click="close()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
-      <form class="mt-5 space-y-4" @submit.prevent="save()">
+      <form @submit.prevent="save()" class="ui-sheet-form"><div class="ui-sheet-body space-y-4">
         <div><label class="label">Nama aturan *</label><input class="input mt-1" x-model="form.nama_aturan" required maxlength="200"></div>
         <div><label class="label">Icon *</label>
           <div class="mt-2 grid grid-cols-5 sm:grid-cols-7 gap-2 max-h-60 overflow-y-auto rounded-xl border border-slate-200 p-2">
@@ -61,7 +61,7 @@
               <option value="nonaktif">Nonaktif</option>
             </select></div>
         </div>
-        <div class="flex justify-end gap-2 pt-2"><button type="button" class="btn-secondary" @click="close()">Batal</button><button class="btn-primary" :disabled="saving" x-text="saving?'Menyimpan...':'Simpan'"></button></div>
+        </div><div class="ui-sheet-footer"><button type="button" class="btn-secondary" @click="close()">Batal</button><button class="btn-primary" :disabled="saving" x-text="saving?'Menyimpan...':'Simpan'"></button></div>
       </form>
     </div>
   </div>

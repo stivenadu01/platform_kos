@@ -2,15 +2,18 @@
 
 class UserController
 {
+  public function akun()
+  {
+    $role = $_SESSION['user']['role'] ?? '';
+    if (in_array($role, ['pemilik', 'admin'], true)) {
+      header('Location: ' . BASE_URL . ($role === 'pemilik' ? '/pemilik/akun' : '/admin'));
+      return;
+    }
+    view('account', ['title'=>'Akun','accountOwner'=>false]);
+  }
   public function home()
   {
-    model('Kos');
-
-    view('home', [
-      'title' => 'Temukan Kos di Kupang',
-      'kosUnggulan' => getKosUnggulanUntukHome(6),
-      'locationPresets' => getPublicLocationPresets()
-    ]);
+    $this->search();
   }
 
   public function search()

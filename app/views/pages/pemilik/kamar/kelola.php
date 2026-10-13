@@ -1,6 +1,6 @@
 <div
   x-data="kamarPage()"
-  x-init="init()"
+  
   class="owner-page">
 
   <!-- HEADER -->
@@ -8,8 +8,8 @@
     <div>
       <a :href="backUrl" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
       <p class="owner-eyebrow mt-3">Unit Kamar</p>
-      <h2 class="owner-title" x-text="tipe?.nama_tipe || 'Kelola Kamar'"></h2>
-      <p class="owner-subtitle" x-text="tipe ? tipe.nama_kos + ' · Ubah nomor dan status operasional unit.' : 'Kelola nomor unit dan status operasional kamar.'"></p>
+      <h2 class="owner-title">Unit Kamar</h2>
+      <p class="owner-subtitle">Pilih kamar untuk melihat penghuni, tagihan, dan statusnya.</p>
     </div>
 
     <div class="flex flex-wrap items-center gap-2">
@@ -95,7 +95,7 @@
                 <h3 class="mt-0.5 truncate text-lg font-bold text-slate-900" x-text="item.nomor_kamar"></h3>
               </div>
             </div>
-            <span class="shrink-0 rounded-full px-2 py-1 text-[11px] font-semibold" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
+            <span class="shrink-0 rounded-full px-2 py-1 text-xs font-semibold" :class="statusClass(item.status)" x-text="statusLabel(item.status)"></span>
           </div>
 
           <div class="space-y-3 p-3">
@@ -116,8 +116,8 @@
 
             <div class="space-y-2 border-t border-slate-100 pt-3">
               <div class="grid grid-cols-2 gap-2">
-                <a :href="BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + item.id_kamar" class="owner-action-secondary justify-center"><?= masterIconSvg('users-round', 'h-4 w-4') ?> Penghuni</a>
-                <a :href="BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + item.id_kamar + '&section=keuangan'" class="owner-action-secondary justify-center"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Tagihan</a>
+                <a :href="BASE_URL + '/pemilik/kamar/detail?id_kamar=' + item.id_kamar" class="owner-action-secondary justify-center"><?= masterIconSvg('users-round', 'h-4 w-4') ?> Penghuni</a>
+                <a :href="BASE_URL + '/pemilik/kamar/detail?id_kamar=' + item.id_kamar + '&section=keuangan'" class="owner-action-secondary justify-center"><?= masterIconSvg('wallet', 'h-4 w-4') ?> Tagihan</a>
               </div>
               <button type="button" @click="remove(item)" class="owner-action-danger w-full justify-center"><?= masterIconSvg('trash-2', 'h-4 w-4') ?> Hapus Kamar</button>
             </div>

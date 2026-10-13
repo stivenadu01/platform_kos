@@ -11,6 +11,9 @@ get('/reset-password', 'AuthController@resetPassword');
 
 // PEMILIK
 get('/pemilik', 'PemilikController@dashboard', ['auth', 'role:pemilik']);
+get('/pemilik/akun', 'PemilikController@akun', ['auth', 'role:pemilik']);
+get('/pemilik/kos/detail', 'PemilikController@detailProperti', ['auth', 'role:pemilik']);
+get('/pemilik/penghuni/detail', 'PemilikController@detailPenghuni', ['auth', 'role:pemilik', 'pro']);
 get('/pemilik/profil', 'PemilikController@profil', ['auth', 'role:pemilik']);
 get('/pemilik/kos', 'PemilikController@kos', ['auth', 'role:pemilik']);
 get('/pemilik/kos/tambah', 'PemilikController@tambahKos', ['auth', 'role:pemilik']);
@@ -37,8 +40,9 @@ get('/pemilik/penghuni/edit', 'PemilikController@editPenghuni', ['auth', 'role:p
 
 // Kelola kamar
 get('/pemilik/kamar', 'PemilikController@kamar', ['auth', 'role:pemilik']);
+get('/pemilik/kamar/detail', 'PemilikController@operasionalKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/kelola', 'PemilikController@kelolaKamar', ['auth', 'role:pemilik']);
-get('/pemilik/kamar/operasional', 'PemilikController@operasionalKamar', ['auth', 'role:pemilik', 'pro']);
+get('/pemilik/kamar/operasional', 'PemilikController@redirectOperasionalKamarLegacy', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/tambah', 'PemilikController@tambahKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/edit', 'PemilikController@editKamar', ['auth', 'role:pemilik']);
 get('/pemilik/kamar/harga', 'PemilikController@hargaKamar', ['auth', 'role:pemilik']);
@@ -49,6 +53,7 @@ get('/pemilik/tipe-kamar/foto', 'PemilikController@fotoTipeKamar', ['auth', 'rol
 
 // ALUR PUBLIK & PELANGGAN
 get('/cari-kos', 'UserController@search');
+get('/user/akun', 'UserController@akun');
 get('/kos/{id}', 'UserController@detailKos');
 get('/user/favorit', 'UserController@favorit', ['auth', 'role:pelanggan']);
 get('/user/kos-saya', 'UserController@kosSaya', ['auth', 'role:pelanggan']);

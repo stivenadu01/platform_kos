@@ -1,6 +1,6 @@
 <div
   x-data="hargaKamarPage()"
-  x-init="init()"
+  
   class="owner-page mx-auto max-w-3xl">
 
   <div class="owner-form-heading">
@@ -113,7 +113,7 @@
       <span x-text="kapasitas + ' orang'"></span>.
     </p>
 
-    <div class="owner-form-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
+    <div class="owner-form-actions ui-page-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
       <a
         href="<?= BASE_URL ?>/pemilik/kamar"
         class="btn-secondary">

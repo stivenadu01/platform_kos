@@ -1,4 +1,4 @@
-<div data-swipe-page x-data="accountProfilePage()" x-init="init()" class="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+<div data-swipe-page x-data="accountProfilePage()"  class="mx-auto w-full max-w-6xl space-y-5 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
   <div>
     <p class="text-sm font-medium text-primary">Akun</p>
     <h1 class="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">Profil & Pengaturan Akun</h1>

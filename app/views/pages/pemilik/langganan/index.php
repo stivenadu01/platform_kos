@@ -1,4 +1,4 @@
-<div x-data="pemilikLanggananPage()" x-init="init()" class="owner-page max-w-5xl">
+<div x-data="pemilikLanggananPage()"  class="owner-page max-w-5xl">
   <div class="owner-page-header">
     <div><p class="owner-eyebrow">Paket Akun</p><h2 class="owner-title">BetaKos Pro</h2><p class="owner-subtitle">Pilih durasi yang sesuai. Semua paket membuka fitur Pro yang sama.</p></div>
     <a :href="window.BASE_URL + '/pemilik/langganan/riwayat'" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-emerald-700"><?= masterIconSvg('history', 'h-4 w-4') ?> Riwayat</a>

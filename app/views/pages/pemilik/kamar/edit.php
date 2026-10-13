@@ -1,6 +1,6 @@
 <div
   x-data="editKamarForm()"
-  x-init="init()"
+  
   class="owner-page mx-auto max-w-3xl">
 
   <!-- HEADER -->
@@ -108,7 +108,7 @@
 
 
     <!-- ACTION -->
-    <div class="owner-form-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
+    <div class="owner-form-actions ui-page-actions flex justify-end gap-3 border-t border-slate-200 pt-5">
 
       <a
         :href="returnUrl"

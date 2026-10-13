@@ -5,7 +5,7 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
 ?>
 <div
   x-data="tagihanDetailPage(<?= $idTagihan ?>)"
-  x-init="init()"
+  
   class="owner-page">
 
   <div class="owner-page-header">
@@ -65,8 +65,8 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
           <div class="divide-y divide-slate-100">
             <template x-for="item in detail.pembayaran" :key="item.id_pembayaran">
               <article class="flex flex-col gap-2 p-3.5 sm:flex-row sm:items-center sm:justify-between">
-                <div class="min-w-0"><p class="font-semibold text-slate-900" x-text="item.nama_penghuni || 'Penghuni'"></p><p class="mt-1 text-xs text-slate-500" x-text="formatDateTime(item.tanggal_bayar) + ' · ' + paymentMethodLabel(item.metode)"></p><p class="mt-1 text-[11px] text-slate-400" x-text="item.nomor_pembayaran"></p><p x-show="item.catatan" class="mt-1 text-xs text-slate-600" x-text="item.catatan"></p></div>
-                <div class="flex items-center justify-between gap-3 sm:flex-col sm:items-end"><span class="font-bold text-emerald-600" x-text="format(item.jumlah)"></span><span x-show="item.status" class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600" x-text="paymentStatusLabel(item.status)"></span></div>
+                <div class="min-w-0"><p class="font-semibold text-slate-900" x-text="item.nama_penghuni || 'Penghuni'"></p><p class="mt-1 text-xs text-slate-500" x-text="formatDateTime(item.tanggal_bayar) + ' · ' + paymentMethodLabel(item.metode)"></p><p class="mt-1 text-xs text-slate-400" x-text="item.nomor_pembayaran"></p><p x-show="item.catatan" class="mt-1 text-xs text-slate-600" x-text="item.catatan"></p></div>
+                <div class="flex items-center justify-between gap-3 sm:flex-col sm:items-end"><span class="font-bold text-emerald-600" x-text="format(item.jumlah)"></span><span x-show="item.status" class="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600" x-text="paymentStatusLabel(item.status)"></span></div>
               </article>
             </template>
           </div>
@@ -76,7 +76,7 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
       <section data-help="help-tagihan-detail-occupants" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <button type="button" @click="showOccupants = !showOccupants" class="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
           <div><h3 class="font-bold text-slate-900">Penghuni Terkait</h3><p class="mt-1 text-xs text-slate-500" x-text="detail.penghuni.length + ' penghuni terhubung dengan tagihan ini'"></p></div>
-          <span class="text-lg text-slate-400" x-text="showOccupants ? '−' : '+'"></span>
+          <span class="text-slate-400 transition-transform" :class="showOccupants ? 'rotate-180' : ''"><?= masterIconSvg('chevron-down','h-4 w-4') ?></span>
         </button>
         <div x-show="showOccupants" x-cloak class="border-t border-slate-100 p-4 sm:p-5">
           <div class="divide-y overflow-hidden rounded-xl border border-slate-200">
@@ -89,7 +89,7 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
       <section data-help="help-tagihan-adjustment" class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <button type="button" @click="showAdjustments = !showAdjustments" class="flex w-full items-center justify-between gap-3 p-4 text-left sm:p-5">
           <div><h3 class="font-bold text-slate-900">Biaya Tambahan atau Potongan</h3><p class="mt-1 text-xs text-slate-500" x-text="detail.penyesuaian.length ? detail.penyesuaian.length + ' perubahan tercatat' : 'Tidak ada biaya tambahan atau potongan'"></p></div>
-          <span class="text-lg text-slate-400" x-text="showAdjustments ? '−' : '+'"></span>
+          <span class="text-slate-400 transition-transform" :class="showAdjustments ? 'rotate-180' : ''"><?= masterIconSvg('chevron-down','h-4 w-4') ?></span>
         </button>
         <div x-show="showAdjustments" x-cloak class="space-y-4 border-t border-slate-100 p-4 sm:p-5">
           <div class="flex justify-end"><button type="button" x-show="canPay" @click="openAdjustmentModal()" class="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">+ Tambah atau Potong</button></div>
@@ -100,15 +100,15 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
         </div>
       </section>
 
-      <div x-show="showPaymentForm" x-cloak x-transition.opacity @keydown.escape.window="closePaymentModal()" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+      <div x-show="showPaymentForm" x-cloak x-transition.opacity @keydown.escape.window="closePaymentModal()" role="dialog" aria-modal="true" aria-label="Detail dan tindakan" class="ui-dialog fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
         <div class="absolute inset-0 bg-slate-900/50" @click="closePaymentModal()"></div>
-        <div x-show="showPaymentForm" x-transition class="owner-payment-modal-panel relative flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
-          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-5">
+        <div x-show="showPaymentForm" x-transition class="ui-sheet-panel relative">
+          <div class="ui-sheet-header flex items-start justify-between gap-4">
             <div><p class="text-xs font-semibold uppercase tracking-wider text-primary">Kamar <span x-text="detail.nomor_kamar"></span></p><h3 class="mt-1 text-lg font-bold text-slate-900">Catat Pembayaran</h3><p class="mt-1 text-xs text-slate-500">Masukkan uang yang benar-benar sudah diterima.</p></div>
             <button type="button" @click="closePaymentModal()" class="owner-icon-button" aria-label="Tutup modal"><?= masterIconSvg('x', 'h-4 w-4') ?></button>
           </div>
-          <form @submit.prevent="submitPayment" class="flex min-h-0 flex-1 flex-col">
-            <div class="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 sm:p-5">
+          <form @submit.prevent="submitPayment" class="ui-sheet-form">
+            <div class="ui-sheet-body space-y-4">
               <div class="rounded-xl bg-primary-soft p-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-600">Belum dibayar</span><strong class="text-primary" x-text="format(detail.sisa_tagihan)"></strong></div></div>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div class="form-group"><label class="label">Dibayar oleh</label><select x-model="payment.id_penghuni" class="select" required><option value="">Pilih penghuni</option><template x-for="item in detail.penghuni" :key="item.id_penghuni"><option :value="item.id_penghuni" x-text="item.nama"></option></template></select></div>
@@ -119,20 +119,20 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
               <div class="form-group"><label class="label">Catatan <span class="font-normal text-slate-400">(opsional)</span></label><textarea x-model="payment.catatan" rows="2" class="input resize-none" placeholder="Contoh: Transfer BCA"></textarea></div>
               <div class="rounded-xl bg-slate-50 p-3 text-sm"><div class="flex justify-between gap-3"><span class="text-slate-500">Sisa setelah pembayaran</span><strong class="text-slate-900" x-text="format(paymentRemaining)"></strong></div></div>
             </div>
-            <div class="shrink-0 flex flex-col-reverse gap-2 border-t border-slate-200 bg-white p-4 sm:flex-row sm:justify-end sm:px-5"><button type="button" @click="closePaymentModal()" class="btn-secondary justify-center">Batal</button><button type="submit" class="owner-payment-button" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Konfirmasi Pembayaran'"></button></div>
+            <div class="ui-sheet-footer"><button type="button" @click="closePaymentModal()" class="btn-secondary justify-center">Batal</button><button type="submit" class="owner-payment-button" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Konfirmasi Pembayaran'"></button></div>
           </form>
         </div>
       </div>
 
-      <div x-show="showAdjustmentForm" x-cloak x-transition.opacity @keydown.escape.window="closeAdjustmentModal()" class="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
+      <div x-show="showAdjustmentForm" x-cloak x-transition.opacity @keydown.escape.window="closeAdjustmentModal()" role="dialog" aria-modal="true" aria-label="Detail dan tindakan" class="ui-dialog fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4">
         <div class="absolute inset-0 bg-slate-900/50" @click="closeAdjustmentModal()"></div>
-        <div x-show="showAdjustmentForm" x-transition class="relative flex w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl" style="max-height: 92vh;">
-          <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-5">
+        <div x-show="showAdjustmentForm" x-transition class="ui-sheet-panel relative">
+          <div class="ui-sheet-header flex items-start justify-between gap-4">
             <div><p class="text-xs font-semibold uppercase tracking-wider text-primary">Kamar <span x-text="detail.nomor_kamar"></span></p><h3 class="mt-1 text-lg font-bold text-slate-900">Tambah Biaya atau Potongan</h3><p class="mt-1 text-xs text-slate-500">Gunakan hanya jika nilai tagihan perlu disesuaikan.</p></div>
             <button type="button" @click="closeAdjustmentModal()" class="owner-icon-button" aria-label="Tutup modal"><?= masterIconSvg('x', 'h-4 w-4') ?></button>
           </div>
-          <form @submit.prevent="submitAdjustment" class="flex min-h-0 flex-1 flex-col">
-            <div class="space-y-4 overflow-y-auto p-4 sm:p-5">
+          <form @submit.prevent="submitAdjustment" class="ui-sheet-form">
+            <div class="ui-sheet-body space-y-4">
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div class="form-group"><label class="label">Perubahan</label><select x-model="adjustment.jenis" class="select" required><option value="tambah">Tambah biaya</option><option value="kurang">Berikan potongan</option></select></div>
                 <div class="form-group"><label class="label">Jumlah</label><input type="number" min="1" step="1" x-model.number="adjustment.jumlah" class="input-number" required></div>
@@ -140,7 +140,7 @@ $backUrl = BASE_URL . ($isHistoryDetail ? '/pemilik/riwayat?tab=keuangan' : '/pe
                 <div class="form-group"><label class="label">Alasan</label><input type="text" x-model="adjustment.alasan" maxlength="255" class="input" placeholder="Contoh: Denda keterlambatan" required></div>
               </div>
             </div>
-            <div class="flex flex-col-reverse gap-2 border-t border-slate-200 bg-white p-4 sm:flex-row sm:justify-end sm:px-5"><button type="button" @click="closeAdjustmentModal()" class="btn-secondary justify-center">Batal</button><button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
+            <div class="ui-sheet-footer"><button type="button" @click="closeAdjustmentModal()" class="btn-secondary justify-center">Batal</button><button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Perubahan'"></button></div>
           </form>
         </div>
       </div>

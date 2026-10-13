@@ -1,6 +1,6 @@
 <div
   x-data="penghuniPage()"
-  x-init="init()"
+
   class="owner-page">
 
   <!-- HEADER -->
@@ -27,20 +27,25 @@
   <div x-show="isTypeContext" x-cloak class="owner-context-panel">
     <div class="owner-context-header">
       <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary"><?= masterIconSvg('users-round', 'h-5 w-5') ?></span>
-      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-violet-600">Penghuni pada tipe</p><h3 class="owner-copy-full mt-1 font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat konteks...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Kapasitas ' + contextInfo.kapasitas + ' orang per kamar' : ''"></p></div>
+      <div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-wider text-primary">Penghuni pada tipe</p><h3 class="owner-copy-full mt-1 font-bold text-slate-900" x-text="contextInfo ? contextInfo.nama_kos + ' · ' + (contextInfo.nama_tipe || contextInfo.tipe_kamar) : 'Memuat konteks...'"></h3><p class="mt-1 text-xs text-slate-500" x-text="contextInfo ? 'Kapasitas ' + contextInfo.kapasitas + ' orang per kamar' : ''"></p></div>
     </div>
   </div>
 
 
   <!-- FILTER -->
-  <div x-show="!isTypeContext" x-data="{ filterOpen: window.innerWidth >= 768 }" @resize.window="if (window.innerWidth >= 768) filterOpen = true" data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
+  <nav x-show="!isTypeContext" class="bk-context-nav" aria-label="Pengelolaan penghuni">
+    <a href="<?= BASE_URL ?>/pemilik/penghuni" aria-current="page">Penghuni aktif</a>
+    <a href="<?= BASE_URL ?>/pemilik/claim">Klaim riwayat <?= navigationBadge('claims','klaim menunggu') ?></a>
+  </nav>
+  <div x-show="!isTypeContext" x-data="uiFilterPanel()" @resize.window="resize()" @keydown.escape.window="closeFilter()" data-help="help-penghuni-filter" class="card border border-slate-200 shadow-sm">
 
-    <button type="button" @click="filterOpen = !filterOpen" class="owner-mobile-filter-summary md:hidden">
+    <button type="button" @click="toggleFilter()" :aria-expanded="filterOpen" class="owner-mobile-filter-summary md:hidden">
       <span class="inline-flex items-center gap-2"><?= masterIconSvg('filter', 'h-4 w-4') ?> Cari & Filter Penghuni</span>
-      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idTipeKamar || idKamar" class="owner-mobile-filter-count" x-text="[search,idKos,idTipeKamar,idKamar].filter(Boolean).length"></span><span x-text="filterOpen ? '−' : '+'"></span></span>
+      <span class="inline-flex items-center gap-2"><span x-show="search || idKos || idTipeKamar || idKamar" class="owner-mobile-filter-count" x-text="[search,idKos,idTipeKamar,idKamar].filter(Boolean).length"></span><?= masterIconSvg('chevron-down','h-4 w-4') ?></span>
     </button>
 
-    <div x-show="filterOpen" x-cloak class="mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid md:grid-cols-2 xl:grid-cols-4 xl:gap-4">
+    <div x-show="filterOpen && mobile" x-cloak class="ui-filter-backdrop" @click="closeFilter()" aria-hidden="true"></div>
+    <div x-ref="panel" x-show="filterOpen" x-cloak :role="mobile ? 'dialog' : null" :aria-modal="mobile ? 'true' : null" aria-label="Filter data" class="ui-filter-panel"><div class="ui-filter-heading"><h2>Filter</h2><button type="button" @click="closeFilter()" class="owner-icon-button" aria-label="Tutup filter"><?= masterIconSvg('x','h-5 w-5') ?></button></div><div class="ui-filter-body mt-3 grid grid-cols-1 gap-3 md:mt-0 md:grid md:grid-cols-2 xl:grid-cols-4 xl:gap-4">
 
       <!-- SEARCH -->
       <div class="form-group">
@@ -144,6 +149,7 @@
       </div>
 
 
+    </div><div class="ui-filter-footer"><button type="button" class="btn-primary" @click="closeFilter()">Lihat hasil</button></div>
     </div>
 
   </div>
@@ -239,9 +245,7 @@
               <!-- PENGHUNI -->
               <td class="px-5 py-4">
 
-                <div class="font-medium text-slate-900"
-                  x-text="item.nama">
-                </div>
+                <a :href="BASE_URL+'/pemilik/penghuni/detail?id_penghuni='+item.id_penghuni" class="font-medium text-slate-900 hover:text-primary" x-text="item.nama"></a>
 
                 <div
                   x-show="item.no_hp"
@@ -338,12 +342,12 @@
       <template x-for="item in penghuni" :key="'m-' + item.id_penghuni">
         <article class="p-4">
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0"><div class="owner-copy-full font-bold text-slate-900" x-text="item.nama"></div><div class="mt-1 text-xs text-slate-500" x-show="item.no_hp" x-text="item.no_hp"></div></div>
+            <div class="min-w-0"><a :href="BASE_URL+'/pemilik/penghuni/detail?id_penghuni='+item.id_penghuni" class="owner-copy-full font-bold text-slate-900 hover:text-primary" x-text="item.nama"></a><div class="mt-1 text-xs text-slate-500" x-show="item.no_hp" x-text="item.no_hp"></div></div>
             <span class="shrink-0 inline-flex rounded-full px-2.5 py-1 text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : item.status === 'keluar' ? 'Sudah Keluar' : item.status || '-' "></span>
           </div>
-          <div class="mt-3 flex items-center gap-3 rounded-xl bg-violet-50 p-3">
-            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-violet-600 shadow-sm"><?= masterIconSvg('bed', 'h-4 w-4') ?></span>
-            <div class="min-w-0"><div class="text-[11px] font-semibold uppercase tracking-wider text-violet-500" x-text="isTypeContext ? 'Unit kamar' : item.nama_kos"></div><div class="owner-copy-full mt-0.5 font-bold text-violet-950" x-text="'Kamar ' + item.nomor_kamar + (!isTypeContext && item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
+          <div class="mt-3 flex items-center gap-3 rounded-xl bg-primary-soft p-3">
+            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-primary shadow-sm"><?= masterIconSvg('bed', 'h-4 w-4') ?></span>
+            <div class="min-w-0"><div class="text-xs font-semibold uppercase tracking-wider text-primary" x-text="isTypeContext ? 'Unit kamar' : item.nama_kos"></div><div class="owner-copy-full mt-0.5 font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar + (!isTypeContext && item.tipe_kamar ? ' · ' + item.tipe_kamar : '')"></div></div>
           </div>
           <div class="mt-3 text-xs">
             <div><div class="text-slate-400">Tanggal masuk</div><div class="mt-1 text-slate-700" x-text="formatDate(item.tanggal_masuk)"></div></div>
@@ -362,11 +366,11 @@
 
 
   <!-- MODAL CATAT PENGHUNI KELUAR -->
-  <div
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan"
     x-show="showKeluarModal"
     x-cloak
     x-transition.opacity
-    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    class="ui-dialog fixed inset-0  flex items-center justify-center p-4"
     @keydown.escape.window="closeKeluarModal()">
 
     <!-- BACKDROP -->
@@ -530,7 +534,7 @@
       },
 
       get backUrl() {
-        return BASE_URL + '/pemilik/kamar?id_kos=' + encodeURIComponent(this.idKos) + '&context=kos';
+        return BASE_URL + '/pemilik/kos/detail?id_kos=' + encodeURIComponent(this.idKos);
       },
 
 
@@ -915,7 +919,7 @@
       },
 
       tagihanUrl(item) {
-        return BASE_URL + '/pemilik/kamar/operasional?id_kamar=' + encodeURIComponent(item.id_kamar) + '&section=keuangan';
+        return BASE_URL + '/pemilik/penghuni/detail?id_penghuni=' + encodeURIComponent(item.id_penghuni) + '#tagihan';
       },
 
       editUrl(item) {

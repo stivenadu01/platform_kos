@@ -71,6 +71,7 @@ const API = (() => {
       if (json.message) {
         Alpine.store('ui').toast(json.message, 'success');
       }
+      if (['POST','PUT','PATCH','DELETE'].includes(method)) window.dispatchEvent(new CustomEvent('betakos:data-changed'));
 
       return json;
 

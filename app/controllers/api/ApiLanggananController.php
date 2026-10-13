@@ -187,15 +187,17 @@ class ApiLanggananController
 
       // Pulihkan URL QR untuk order lama jika belum tersimpan. Midtrans memberikan
       // transaction_id saat charge berhasil, dan URL QRIS dapat dibentuk dari ID tersebut.
-      if (($gateway['transaction_status'] ?? '') === 'pending' && empty($row['qr_code_url'])) {
+      if (($gateway['transaction_status'] ?? '') === 'pending') {
         $transactionId = (string)($gateway['transaction_id'] ?? $row['provider_transaction_id'] ?? '');
         if ($transactionId !== '') {
+          $recoveredUrl = $midtrans->getQrisCodeUrl($transactionId, (string)($row['qr_string'] ?? ''));
+          $qrUrl = $gateway['qr_code_url'] ?: (str_contains($recoveredUrl, '/v4/qris/') ? $recoveredUrl : ($row['qr_code_url'] ?: $recoveredUrl));
           updatePembayaranMidtransCreated($id, [
             'order_id' => $gateway['order_id'] ?? $row['provider_order_id'],
             'transaction_id' => $transactionId,
             'transaction_status' => 'pending',
             'qr_string' => (string)($gateway['qr_string'] ?? ''),
-            'qr_code_url' => $midtrans->getQrisCodeUrl($transactionId),
+            'qr_code_url' => $qrUrl,
           ]);
         }
       }

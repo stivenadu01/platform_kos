@@ -2,6 +2,9 @@
 $photos = $kos['foto'] ?? [];
 $facilities = $kos['fasilitas'] ?? [];
 $roomTypes = $kos['tipe_kamar'] ?? [];
+$listingPrices=[];
+foreach($roomTypes as $type) foreach($type['harga'] ?? [] as $price) if((float)($price['harga_total'] ?? 0)>0) $listingPrices[]=(float)$price['harga_total'];
+$listingMinimum=$listingPrices ? min($listingPrices) : null;
 $mainPhoto = $photos[0]['nama_file'] ?? null;
 $phone = preg_replace('/\D+/', '', (string)($kos['no_hp_pemilik'] ?? ''));
 if ($phone !== '' && str_starts_with($phone, '0')) {
@@ -80,28 +83,6 @@ if (!empty($lastLoginAt)) {
 }
 ?>
 
-<style>
-  html {
-    scroll-behavior: smooth;
-  }
-
-  .detail-section {
-    scroll-margin-top: 7rem;
-  }
-
-  .about-collapsed {
-    max-height: 10.5rem;
-    overflow: hidden;
-    position: relative;
-  }
-
-  @media (min-width: 640px) {
-    .about-collapsed {
-      max-height: 12.25rem;
-    }
-  }
-</style>
-
 <div x-data="kosDetailPage()" @detail-kos:report.window="reportOpen = true" @detail-kos:favorite.window="toggleFavorite()" @detail-kos:share.window="share()" class="public-page">
 <div data-swipe-page
     x-show="showSectionTabs"
@@ -162,7 +143,7 @@ if (!empty($lastLoginAt)) {
               <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">Saat ini tidak tersedia</span>
             <?php endif; ?>
           </div>
-          <h1 class="mt-3 font-[Poppins] text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"><?= htmlspecialchars($kos['nama_kos']) ?></h1>
+          <h1 class="mt-3 font-sans text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl"><?= htmlspecialchars($kos['nama_kos']) ?></h1>
           <p class="mt-2 flex items-start gap-2 text-sm leading-6 text-slate-500"><span class="mt-1 text-primary"><?= masterIconSvg('map-pin', 'h-4 w-4') ?></span><span><?= nl2br(htmlspecialchars($kos['alamat'])) ?></span></p>
           <div class="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <span class="rounded-full bg-slate-100 px-3 py-1.5 font-medium"><?= htmlspecialchars($updatedLabel) ?></span>
@@ -173,78 +154,15 @@ if (!empty($lastLoginAt)) {
             <?php endif; ?>
           </div>
 
-          <section id="tentang-kos" class="detail-section mt-8">
-            <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Tentang kos</h2>
-            <div x-data="{ expanded: false }" class="mt-3">
-              <div class="text-sm leading-7 text-slate-600" :class="<?= $aboutIsLong ? "expanded ? '' : 'about-collapsed'" : "''" ?>">
-                <?= nl2br(htmlspecialchars($aboutText)) ?>
-              </div>
-              <?php if ($aboutIsLong): ?>
-                <button
-                  type="button"
-                  @click="expanded = !expanded"
-                  class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark">
-                  <span x-text="expanded ? 'Sembunyikan' : 'Lihat selengkapnya'"></span>
-                  <span aria-hidden="true" x-text="expanded ? '↑' : '↓'"></span>
-                </button>
-              <?php endif; ?>
-            </div>
-          </section>
-
-          <section id="fasilitas" class="detail-section mt-8">
-            <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Fasilitas</h2>
-            <?php if ($facilities): ?>
-              <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
-                <?php foreach ($facilities as $facility): ?>
-                  <?php
-                  $facilityIcon = trim((string)($facility['icon'] ?? ''));
-                  if (!in_array($facilityIcon, masterIconKeys(), true)) {
-                    $facilityIcon = 'info';
-                  }
-                  $facilityName = (string)($facility['nama_fasilitas'] ?? 'Fasilitas');
-                  ?>
-                  <div class="group flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:min-h-12 sm:px-3 sm:py-2">
-                    <span
-                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary sm:h-8 sm:w-8"
-                      title="<?= htmlspecialchars(masterIconLabel($facilityIcon), ENT_QUOTES, 'UTF-8') ?>"
-                      aria-hidden="true">
-                      <?= masterIconSvg($facilityIcon, 'h-3.5 w-3.5 sm:h-4 sm:w-4') ?>
-                    </span>
-                    <span class="min-w-0 text-xs font-semibold leading-4 text-slate-700 sm:text-sm sm:leading-5">
-                      <?= htmlspecialchars($facilityName) ?>
-                    </span>
-                  </div>
-                <?php endforeach; ?>
-              </div>
-            <?php else: ?>
-              <p class="mt-3 text-sm text-slate-500">Belum ada fasilitas yang dicantumkan.</p>
-            <?php endif; ?>
-          </section>
-
-          <section id="aturan" class="detail-section mt-7">
-            <div>
-              <h2 class="font-[Poppins] text-xl font-bold text-slate-900">Aturan / Ketentuan</h2>
-
-            </div>
-            <?php $aturanKos = is_array($kos['aturan'] ?? null) ? $kos['aturan'] : []; ?>
-            <?php if ($aturanKos): ?>
-              <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                <?php foreach ($aturanKos as $aturan): ?>
-                  <div class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 sm:min-h-12 sm:px-3 sm:py-2">
-                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary sm:h-8 sm:w-8" aria-hidden="true"><?= masterIconSvg($aturan['icon'] ?? 'ban', 'h-3.5 w-3.5 sm:h-4 sm:w-4') ?></span>
-                    <p class="min-w-0 text-xs font-semibold leading-4 text-slate-800 sm:text-sm sm:leading-5"><?= htmlspecialchars($aturan['nama_aturan']) ?></p>
-                  </div>
-                <?php endforeach; ?>
-              </div>
-            <?php else: ?>
-              <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">Pemilik belum mencantumkan aturan khusus untuk kos ini. Silakan tanyakan langsung kepada pemilik.</div>
-            <?php endif; ?>
-          </section>
-
+          <div class="bk-detail-summary">
+            <div><span class="text-xs text-slate-500">Harga mulai per bulan</span><p class="text-xl font-bold text-slate-900"><?= $listingMinimum!==null ? 'Rp '.number_format($listingMinimum,0,',','.') : 'Tanyakan kepada pemilik' ?></p><small class="text-slate-500">Lihat rincian harga menurut tipe dan jumlah penghuni.</small></div>
+            <a href="#tipe-harga" class="btn-secondary">Lihat pilihan kamar <?= masterIconSvg('arrow-down','h-4 w-4') ?></a>
+          </div>
+          <nav class="bk-detail-sections hidden lg:flex" aria-label="Informasi kos"><a href="#tipe-harga">Tipe & harga <span class="bk-tab-count"><?= count($roomTypes) ?></span></a><a href="#fasilitas">Fasilitas <span class="bk-tab-count"><?= count($facilities) ?></span></a><a href="#aturan">Aturan</a><a href="#lokasi">Lokasi</a></nav>
           <section id="tipe-harga" class="detail-section mt-8">
             <div class="flex items-end justify-between gap-3">
               <div>
-                <h2 class="font-[Poppins] text-xl font-bold text-slate-900 sm:text-2xl">Tipe & Harga Kamar</h2>
+                <h2 class="font-sans text-xl font-bold text-slate-900 sm:text-2xl">Tipe & Harga Kamar</h2>
                 <p class="mt-1 text-sm leading-6 text-slate-500">Pilih tipe kamar berdasarkan kapasitas, fasilitas, harga, dan ketersediaannya.</p>
               </div>
             </div>
@@ -342,6 +260,76 @@ if (!empty($lastLoginAt)) {
             <?php endif; ?>
           </section>
 
+          <section id="tentang-kos" class="detail-section mt-8">
+            <h2 class="font-sans text-xl font-bold text-slate-900">Tentang kos</h2>
+            <div x-data="{ expanded: false }" class="mt-3">
+              <div class="text-sm leading-7 text-slate-600" :class="<?= $aboutIsLong ? "expanded ? '' : 'about-collapsed'" : "''" ?>">
+                <?= nl2br(htmlspecialchars($aboutText)) ?>
+              </div>
+              <?php if ($aboutIsLong): ?>
+                <button
+                  type="button"
+                  @click="expanded = !expanded"
+                  class="mt-2 inline-flex items-center gap-1 text-sm font-bold text-primary hover:text-primary-dark">
+                  <span x-text="expanded ? 'Sembunyikan' : 'Lihat selengkapnya'"></span>
+                  <span aria-hidden="true" x-text="expanded ? '↑' : '↓'"></span>
+                </button>
+              <?php endif; ?>
+            </div>
+          </section>
+
+          <section id="fasilitas" class="detail-section mt-8">
+            <h2 class="font-sans text-xl font-bold text-slate-900">Fasilitas</h2>
+            <?php if ($facilities): ?>
+              <div class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                <?php foreach ($facilities as $facility): ?>
+                  <?php
+                  $facilityIcon = trim((string)($facility['icon'] ?? ''));
+                  if (!in_array($facilityIcon, masterIconKeys(), true)) {
+                    $facilityIcon = 'info';
+                  }
+                  $facilityName = (string)($facility['nama_fasilitas'] ?? 'Fasilitas');
+                  ?>
+                  <div class="group flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-md sm:min-h-12 sm:px-3 sm:py-2">
+                    <span
+                      class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary sm:h-8 sm:w-8"
+                      title="<?= htmlspecialchars(masterIconLabel($facilityIcon), ENT_QUOTES, 'UTF-8') ?>"
+                      aria-hidden="true">
+                      <?= masterIconSvg($facilityIcon, 'h-3.5 w-3.5 sm:h-4 sm:w-4') ?>
+                    </span>
+                    <span class="min-w-0 text-xs font-semibold leading-4 text-slate-700 sm:text-sm sm:leading-5">
+                      <?= htmlspecialchars($facilityName) ?>
+                    </span>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php else: ?>
+              <p class="mt-3 text-sm text-slate-500">Belum ada fasilitas yang dicantumkan.</p>
+            <?php endif; ?>
+          </section>
+
+          <section id="aturan" class="detail-section mt-7">
+            <div>
+              <h2 class="font-sans text-xl font-bold text-slate-900">Aturan / Ketentuan</h2>
+
+            </div>
+            <?php $aturanKos = is_array($kos['aturan'] ?? null) ? $kos['aturan'] : []; ?>
+            <?php if ($aturanKos): ?>
+              <div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                <?php foreach ($aturanKos as $aturan): ?>
+                  <div class="flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-2.5 sm:min-h-12 sm:px-3 sm:py-2">
+                    <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-primary-soft text-primary sm:h-8 sm:w-8" aria-hidden="true"><?= masterIconSvg($aturan['icon'] ?? 'ban', 'h-3.5 w-3.5 sm:h-4 sm:w-4') ?></span>
+                    <p class="min-w-0 text-xs font-semibold leading-4 text-slate-800 sm:text-sm sm:leading-5"><?= htmlspecialchars($aturan['nama_aturan']) ?></p>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php else: ?>
+              <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-sm text-slate-500">Pemilik belum mencantumkan aturan khusus untuk kos ini. Silakan tanyakan langsung kepada pemilik.</div>
+            <?php endif; ?>
+          </section>
+
+
+
           <?php
           $mapLat = (float)($kos['latitude'] ?? 0);
           $mapLng = (float)($kos['longitude'] ?? 0);
@@ -355,7 +343,7 @@ if (!empty($lastLoginAt)) {
               <div>
                 <div class="flex items-center gap-2">
                   <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600"><?= masterIconSvg('map-pin', 'h-5 w-5') ?></span>
-                  <div><h2 class="font-[Poppins] text-xl font-bold text-slate-900">Lokasi dan lingkungan sekitar</h2><p class="mt-0.5 text-xs text-slate-500">Menampilkan area sekitar dalam radius 3 km.</p></div>
+                  <div><h2 class="font-sans text-xl font-bold text-slate-900">Lokasi dan lingkungan sekitar</h2><p class="mt-0.5 text-xs text-slate-500">Menampilkan area sekitar dalam radius 3 km.</p></div>
                 </div>
               </div>
               <a target="_blank" rel="noopener noreferrer" href="<?= htmlspecialchars($googleMapsUrl) ?>" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-dark">
@@ -451,7 +439,7 @@ if (!empty($lastLoginAt)) {
                   <div class="flex items-center gap-2">
                     <p class="truncate text-sm font-semibold text-slate-800"><?= htmlspecialchars($pemilikNama) ?></p>
                     <?php if ($pemilikPro): ?>
-                      <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-700">Pemilik Pro</span>
+                      <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-xs font-bold tracking-wide text-amber-700">Pemilik Pro</span>
                     <?php endif; ?>
                   </div>
                   <div class="mt-1 flex items-center gap-2 text-xs text-slate-500">
@@ -467,7 +455,7 @@ if (!empty($lastLoginAt)) {
     </section>
   </main>
 
-  <div class="fixed inset-x-3 bottom-3 z-[1000] rounded-2xl border border-slate-200 bg-white/95 p-2.5 shadow-[0_-8px_30px_rgba(15,23,42,0.12)] backdrop-blur lg:hidden">
+  <div class="ui-detail-actions lg:hidden">
     <div class="mx-auto flex max-w-7xl items-center gap-2">
       <?php if ($waUrl): ?>
         <a href="<?= htmlspecialchars($waUrl) ?>" target="_blank" rel="noopener" class="flex min-h-12 flex-1 items-center justify-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white hover:bg-primary-dark">Hubungi Pemilik</a>
@@ -478,7 +466,7 @@ if (!empty($lastLoginAt)) {
   </div>
 
   <?php if ($isPelanggan): ?>
-    <div x-show="reportOpen" x-cloak @keydown.escape.window="reportOpen = false" class="public-modal-layer fixed inset-0 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-5">
+    <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="reportOpen" x-cloak @keydown.escape.window="reportOpen = false" class="ui-dialog public-modal-layer fixed inset-0 flex items-end justify-center bg-slate-900/50 p-0 sm:items-center sm:p-5">
       <div class="absolute inset-0" @click="reportOpen = false"></div>
       <div class="relative w-full max-w-lg rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl">
         <div class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
@@ -550,10 +538,14 @@ if (!empty($lastLoginAt)) {
       galleryPhotos: photos,
       galleryIndex: 0,
       showSectionTabs: false,
-      activeSection: 'tentang-kos',
+      activeSection: 'tipe-harga',
       sectionTabs: [{
           id: 'foto',
           label: 'Foto'
+        },
+        {
+          id: 'tipe-harga',
+          label: 'Tipe & harga'
         },
         {
           id: 'tentang-kos',
@@ -566,10 +558,6 @@ if (!empty($lastLoginAt)) {
         {
           id: 'aturan',
           label: 'Aturan'
-        },
-        {
-          id: 'tipe-harga',
-          label: 'Tipe & harga'
         },
         {
           id: 'lokasi',

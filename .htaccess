@@ -1,5 +1,8 @@
 RewriteEngine On
 
 # Redirect semua request ke folder public/
-RewriteCond %{REQUEST_URI} !^/public/
+Options -Indexes
+RewriteRule ^(?:app|vendor|node_modules|storage|cron|\.git)(?:/|$) - [F,L,NC]
+RewriteRule ^(?:\..*|composer\.(?:json|lock)|package(?:-lock)?\.json|.*\.(?:sql|md|txt)|client_secret.*\.json)$ - [F,L,NC]
+RewriteRule ^public(?:/|$) - [L]
 RewriteRule ^(.*)$ public/$1 [L]

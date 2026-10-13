@@ -1,4 +1,4 @@
-<div x-data="favoritePage()" x-init="init()" class="public-page">
+<div x-data="favoritePage()"  class="public-page">
   <section class="public-page-header">
     <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div class="flex flex-wrap items-end justify-between gap-3">
@@ -13,17 +13,17 @@
   </section>
 
   <main class="mx-auto max-w-7xl px-4 py-6 pb-10 sm:px-6 lg:px-8">
-    <div x-show="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div x-show="loading" class="market-grid">
       <template x-for="i in 6" :key="i"><div class="h-80 animate-pulse rounded-2xl bg-slate-200"></div></template>
     </div>
 
-    <div x-show="!loading && items.length" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div x-show="!loading && items.length" class="market-grid">
       <template x-for="item in items" :key="item.id_kos">
         <article class="public-card public-card-hover group">
           <a :href="'<?= BASE_URL ?>/kos/' + item.id_kos" class="group block">
             <div class="relative aspect-[4/3] overflow-hidden bg-slate-100">
-              <img :src="item.foto ? '<?= BASE_URL ?>/uploads' + item.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'" :alt="item.nama_kos" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" @error="$event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.jpg'">
-              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-4 pb-3 pt-12"><div class="flex items-end justify-between gap-2 text-white"><strong x-text="item.harga_mulai !== null ? formatRupiah(item.harga_mulai) + ' / bulan' : 'Harga belum tersedia'"></strong><span class="text-xs" x-text="item.kamar_tersedia + ' tersedia'"></span></div></div><span class="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold capitalize text-slate-700 shadow-sm" x-text="item.jenis"></span>
+              <img :src="item.foto ? '<?= BASE_URL ?>/uploads' + item.foto : '<?= BASE_URL ?>/assets/images/placeholder-kos.svg'" :alt="item.nama_kos" class="h-full w-full object-cover transition duration-300 group-hover:scale-105" @error="$event.target.onerror=null; $event.target.src='<?= BASE_URL ?>/assets/images/placeholder-kos.svg'">
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/75 to-transparent px-4 pb-3 pt-12"><div class="flex items-end justify-between gap-2 text-white"><strong x-text="item.harga_mulai !== null ? formatRupiah(item.harga_mulai) + ' / bulan' : 'Harga belum tersedia'"></strong><span class="text-xs" x-text="item.kamar_tersedia + ' tersedia'"></span></div></div><span class="absolute left-3 top-3 rounded-full bg-white/95 px-2.5 py-1 text-xs font-semibold capitalize text-slate-700 shadow-sm" x-text="item.jenis"></span>
             </div>
             <div class="p-4">
               <h2 class="font-semibold text-slate-900" x-text="item.nama_kos"></h2>

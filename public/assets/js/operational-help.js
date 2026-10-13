@@ -80,7 +80,7 @@
         ['help-tagihan-detail', 'Buka detail tagihan', 'Klik Detail untuk berpindah ke halaman khusus yang berisi informasi penghuni, penyesuaian, dan riwayat pembayaran.']
       ]
     },
-    '/pemilik/kamar/operasional': {
+    '/pemilik/kamar/detail': {
       title: 'Operasional Kamar',
       intro: 'Penghuni dan tagihan aktif untuk satu kamar dikelola dari halaman ini.',
       steps: [
@@ -153,188 +153,24 @@
       title: 'Foto Tipe Kamar', intro: 'Foto di sini khusus untuk kategori kamar tertentu, bukan foto keseluruhan properti.',
       steps: [['help-tipe-photo-list', 'Foto tipe kamar', 'Foto yang tampil di sini hanya milik tipe kamar yang sedang dikelola.'], ['help-tipe-photo-upload', 'Upload foto', 'Tambahkan foto kamar yang jelas agar pencari dapat memahami kondisi tipe tersebut.']]
     };
-    return { title: 'Bantuan BetaKos', intro: 'Panduan kontekstual untuk halaman ini belum tersedia.', steps: [] };
+    if(current === '/pemilik/kos/detail') return {title:'Kelola properti',intro:'Pilih nomor kamar untuk melihat penghuni dan tagihannya. Tipe, harga, dan foto ada di Pengaturan properti.',steps:[['help-property-units','Pilih unit kamar','Cari nomor atau pilih tipe dan status, lalu buka kamar yang ingin dikelola.']]};
+    if(current === '/pemilik/akun') return {title:'Akun pemilik',intro:'Profil, langganan, riwayat, dan persiapan kos tersedia di sini.',steps:[]};
+    if(current === '/pemilik/penghuni/detail') return {title:'Detail penghuni',intro:'Lihat identitas, masa tinggal, dan tagihan yang terhubung dengan penghuni ini.',steps:[]};
+    return { title: 'Bantuan BetaKos', intro: 'Pilih tindakan sesuai pekerjaan yang ingin Anda selesaikan.', steps: [] };
   }
 
   function operationalHelp() {
     return {
-      open: false,
-      guide: null,
-      current: 0,
-      target: null,
-      rect: null,
-      resizeHandler: null,
-      scrollHandler: null,
-      tooltipPosition: null,
-      advancing: false,
-
-      init() {
-        this.resizeHandler = () => this.refreshTarget();
-        this.scrollHandler = () => this.refreshTarget();
-        window.addEventListener('resize', this.resizeHandler);
-        window.addEventListener('scroll', this.scrollHandler, true);
-        window.addEventListener('betakos:operational-help', () => this.start());
-        this.guide = getGuide();
-      },
-
+      open:false, guide:null, current:0, trigger:null,
+      init() { window.addEventListener('betakos:operational-help', () => this.start()); },
       start() {
-        this.guide = getGuide();
-        this.current = 0;
-        this.open = true;
-        this.$nextTick(() => this.resolveTarget());
+        this.guide=getGuide(); this.current=0; this.trigger=document.activeElement; this.open=true;
+        this.$nextTick(() => this.$refs.tooltip.querySelector('button')?.focus());
       },
-
-      close() {
-        this.open = false;
-        this.target = null;
-        this.rect = null;
-        this.tooltipPosition = null;
-        this.advancing = false;
-      },
-
-      next() {
-        if (!this.guide) return;
-        const step = this.guide.steps?.[this.current];
-        if (!step) {
-          this.close();
-          return;
-        }
-
-        if (this.current >= this.guide.steps.length - 1) {
-          this.close();
-          return;
-        }
-        this.current += 1;
-        this.$nextTick(() => this.resolveTarget());
-      },
-
-      prev() {
-        if (this.current <= 0) return;
-        this.current -= 1;
-        this.$nextTick(() => this.resolveTarget());
-      },
-
-      resolveTarget() {
-        const step = this.guide?.steps?.[this.current];
-        this.target = null;
-        this.rect = null;
-        this.tooltipPosition = null;
-        if (!step) return;
-
-        const find = () => {
-          const el = document.querySelector('[data-help="' + step[0] + '"]');
-          if (!el || !this.isVisible(el)) return false;
-          this.target = el;
-          el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-          setTimeout(() => this.refreshTarget(), 180);
-          return true;
-        };
-
-        if (!find()) {
-          this.waitForElement('[data-help="' + step[0] + '"]', () => this.resolveTarget(), 2500);
-        }
-      },
-
-      isVisible(el) {
-        if (!el || !document.body.contains(el)) return false;
-        const style = window.getComputedStyle(el);
-        const r = el.getBoundingClientRect();
-        return style.display !== 'none' && style.visibility !== 'hidden' && r.width > 0 && r.height > 0;
-      },
-
-      waitForElement(selector, callback, timeout = 3000) {
-        const started = Date.now();
-        const check = () => {
-          const el = document.querySelector(selector);
-          if (this.isVisible(el)) {
-            callback(el);
-            return;
-          }
-          if (Date.now() - started >= timeout) {
-            this.advancing = false;
-            return;
-          }
-          setTimeout(check, 80);
-        };
-        check();
-      },
-
-      refreshTarget() {
-        if (!this.open || !this.target || !document.body.contains(this.target)) return;
-        const r = this.target.getBoundingClientRect();
-        this.rect = { top: r.top, left: r.left, width: r.width, height: r.height };
-        this.$nextTick(() => this.positionTooltip());
-      },
-
-      get highlightStyle() {
-        if (!this.rect) return '';
-        return `top:${this.rect.top - 7}px;left:${this.rect.left - 7}px;width:${Math.max(this.rect.width + 14, 24)}px;height:${Math.max(this.rect.height + 14, 24)}px;`;
-      },
-
-      positionTooltip() {
-        if (!this.open || !this.rect || !this.$refs.tooltip) return;
-
-        // Tooltip WAJIB berada di luar area target yang sedang dijelaskan.
-        // Jika ruang tidak cukup, tinggi tooltip dipangkas sesuai ruang yang
-        // benar-benar tersedia di atas/bawah target dan isi tooltip dapat di-scroll.
-        const gap = 14;
-        const margin = 12;
-        const viewportHeight = window.innerHeight;
-        const viewportWidth = window.innerWidth;
-        const width = Math.min(390, viewportWidth - margin * 2);
-        const targetTop = Math.max(margin, this.rect.top);
-        const targetBottom = Math.min(viewportHeight - margin, this.rect.top + this.rect.height);
-        const spaceBelow = Math.max(0, viewportHeight - margin - (this.rect.top + this.rect.height) - gap);
-        const spaceAbove = Math.max(0, this.rect.top - margin - gap);
-        const measuredHeight = this.$refs.tooltip.getBoundingClientRect().height || 0;
-
-        // Utamakan sisi yang mampu menampung tooltip paling banyak.
-        // Bila salah satu sisi cukup untuk tinggi penuh, gunakan sisi tersebut.
-        const placeBelow = spaceBelow >= measuredHeight || spaceBelow >= spaceAbove;
-        const availableHeight = Math.max(0, placeBelow ? spaceBelow : spaceAbove);
-
-        let top;
-        if (placeBelow) {
-          top = this.rect.top + this.rect.height + gap;
-        } else {
-          top = this.rect.top - gap - availableHeight;
-        }
-
-        // Jangan pernah menggeser tooltip ke dalam target hanya demi menjaga
-        // tooltip tetap berada di viewport. Jika ruang sedikit, tooltip dibuat
-        // lebih pendek dan scrollable.
-        top = Math.max(margin, Math.min(top, viewportHeight - margin - availableHeight));
-
-        // Koreksi kecil agar batas tooltip tetap terpisah dari target.
-        if (placeBelow) {
-          top = Math.max(top, this.rect.top + this.rect.height + gap);
-        } else {
-          top = Math.min(top, this.rect.top - gap - availableHeight);
-        }
-
-        const left = Math.max(
-          margin,
-          Math.min(this.rect.left, viewportWidth - width - margin)
-        );
-
-        this.tooltipPosition = {
-          left,
-          top,
-          width,
-          maxHeight: availableHeight,
-          placement: placeBelow ? 'below' : 'above',
-          targetTop,
-          targetBottom
-        };
-      },
-
-      get tooltipStyle() {
-        if (!this.tooltipPosition) return '';
-        const p = this.tooltipPosition;
-        return `left:${p.left}px;top:${p.top}px;width:${p.width}px;max-height:${Math.max(p.maxHeight, 80)}px;overflow-y:auto;`;
-      }
+      close() { this.open=false; this.trigger?.focus(); },
+      next() { if(this.current >= (this.guide?.steps?.length || 0)-1) this.close(); else this.current++; },
+      prev() { if(this.current>0) this.current--; }
     };
   }
-
-  window.pemilikOperationalHelp = operationalHelp;
+  window.pemilikOperationalHelp=operationalHelp;
 })();

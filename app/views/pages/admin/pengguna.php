@@ -1,4 +1,4 @@
-<div x-data="adminPenggunaPage()" x-init="init()" class="admin-page">
+<div x-data="adminPenggunaPage()"  class="admin-page">
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Manajemen Pengguna</h1>
@@ -80,7 +80,7 @@
               </template>
               <div class="min-w-0"><div class="font-semibold text-slate-900 truncate" x-text="user.nama"></div><div class="text-xs text-slate-500 truncate" x-text="user.email"></div><div class="text-xs text-slate-400" x-text="user.no_hp || 'No. HP belum diisi'"></div></div>
             </div>
-            <span class="shrink-0 px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium" x-text="roleLabel(user.role)"></span>
+            <span class="shrink-0 px-2 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-medium" x-text="roleLabel(user.role)"></span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-xs">
             <div class="rounded-xl bg-slate-50 p-3"><div class="text-slate-400">Verifikasi</div><div class="mt-1 font-semibold" x-text="user.email_verified_at ? 'Terverifikasi' : 'Belum diverifikasi'"></div></div>
@@ -134,7 +134,7 @@
                 <span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="user.email_verified_at ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" x-text="user.email_verified_at ? 'Terverifikasi' : 'Belum diverifikasi'"></span>
               </td>
               <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-medium" :class="statusClass(user.status)" x-text="statusLabel(user.status)"></span></td>
-              <td class="px-5 py-4 whitespace-nowrap"><div class="text-slate-700" x-text="user.last_login_at ? formatDateTime(user.last_login_at) : 'Belum pernah login'"></div><div class="text-[11px] text-slate-400" x-text="user.last_login_at ? 'Aktivitas terakhir' : 'Belum ada aktivitas login'"></div></td><td class="px-5 py-4 text-slate-500 whitespace-nowrap" x-text="formatDate(user.created_at)"></td>
+              <td class="px-5 py-4 whitespace-nowrap"><div class="text-slate-700" x-text="user.last_login_at ? formatDateTime(user.last_login_at) : 'Belum pernah login'"></div><div class="text-xs text-slate-400" x-text="user.last_login_at ? 'Aktivitas terakhir' : 'Belum ada aktivitas login'"></div></td><td class="px-5 py-4 text-slate-500 whitespace-nowrap" x-text="formatDate(user.created_at)"></td>
               <td class="px-5 py-4">
                 <div class="flex justify-end gap-2">
                   <button x-show="!user.email_verified_at" @click="verify(user)" class="btn-secondary text-xs text-emerald-700">Verifikasi</button>
@@ -162,14 +162,14 @@
     </div>
   </div>
 
-  <div x-show="createOpen" x-cloak class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="createOpen" x-cloak class="ui-dialog fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeCreate()"></div>
-    <div class="relative bg-white w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
-      <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
+    <div class="ui-sheet-panel relative">
+      <div class="ui-sheet-header flex items-center justify-between gap-3">
         <div><h2 class="font-bold text-slate-900">Tambah Pengguna</h2><p class="text-xs text-slate-500 mt-1">Akun yang dibuat Admin langsung terverifikasi.</p></div>
         <button @click="closeCreate()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
-      <form @submit.prevent="createUser" class="p-5 sm:p-6 space-y-4">
+      <form @submit.prevent="createUser" class="ui-sheet-form"><div class="ui-sheet-body space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div><label class="label">Nama Lengkap *</label><input x-model="form.nama" class="input mt-1 w-full" required></div>
           <div><label class="label">Email *</label><input x-model="form.email" type="email" class="input mt-1 w-full" required></div>
@@ -179,7 +179,7 @@
           <div><label class="label">Kata Sandi *</label><input x-model="form.password" type="password" minlength="8" class="input mt-1 w-full" required placeholder="Minimal 8 karakter"></div>
         </div>
         <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-4 text-sm text-emerald-800">✓ Pengguna yang ditambahkan melalui Admin langsung memiliki status <b>terverifikasi</b> dan <b>aktif</b>, sehingga tidak perlu klik link verifikasi email.</div>
-        <div class="flex flex-col sm:flex-row-reverse gap-2 pt-2"><button type="submit" class="btn-primary" :disabled="saving"><span x-text="saving ? 'Menyimpan...' : 'Tambah Pengguna'"></span></button><button type="button" @click="closeCreate()" class="btn-secondary">Batal</button></div>
+        </div><div class="ui-sheet-footer"><button type="submit" class="btn-primary" :disabled="saving"><span x-text="saving ? 'Menyimpan...' : 'Tambah Pengguna'"></span></button><button type="button" @click="closeCreate()" class="btn-secondary">Batal</button></div>
       </form>
     </div>
   </div>

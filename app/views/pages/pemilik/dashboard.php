@@ -1,6 +1,6 @@
 <div
   x-data="pemilikDashboard()"
-  x-init="init()"
+  
   class="owner-page"
 >
   <div class="owner-page-header">
@@ -62,13 +62,13 @@
         <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"><?= masterIconSvg('bed', 'h-5 w-5') ?></span>
       </div>
       <div class="mt-4 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-emerald-500 transition-all duration-500" :style="'width:' + occupancyPercent + '%'" role="progressbar" :aria-valuenow="occupancyPercent" aria-valuemin="0" aria-valuemax="100"></div></div>
-      <div class="mt-2 flex items-center justify-between text-xs"><span class="text-slate-500" x-text="occupancyPercent + '% terisi'"></span><a href="<?= BASE_URL ?>/pemilik/kamar" class="font-semibold text-primary">Lihat kamar →</a></div>
+      <div class="mt-2 flex items-center justify-between text-xs"><span class="text-slate-500" x-text="occupancyPercent + '% terisi'"></span><a href="<?= BASE_URL ?>/pemilik/kos" class="font-semibold text-primary">Buka properti →</a></div>
     </div>
     <div class="owner-overview-metrics">
       <a href="<?= BASE_URL ?>/pemilik/kos"><span class="text-blue-600"><?= masterIconSvg('building-2', 'h-4 w-4') ?></span><span><strong x-text="summary.total_kos"></strong><small>Properti</small></span></a>
       <a href="<?= BASE_URL ?>/pemilik/kos"><span class="text-emerald-600"><?= masterIconSvg('check-circle-2', 'h-4 w-4') ?></span><span><strong x-text="summary.kamar_tersedia"></strong><small>Kamar tersedia</small></span></a>
       <a href="<?= BASE_URL ?>/pemilik/kos"><span class="text-amber-600"><?= masterIconSvg('circle-x', 'h-4 w-4') ?></span><span><strong x-text="summary.kamar_tidak_tersedia"></strong><small>Perlu diperiksa</small></span></a>
-      <a href="<?= BASE_URL ?>/pemilik/penghuni"><span class="text-violet-600"><?= masterIconSvg('users-round', 'h-4 w-4') ?></span><span><strong x-text="summary.penghuni_aktif"></strong><small>Penghuni aktif</small></span></a>
+      <a href="<?= BASE_URL ?>/pemilik/penghuni"><span class="text-primary"><?= masterIconSvg('users-round', 'h-4 w-4') ?></span><span><strong x-text="summary.penghuni_aktif"></strong><small>Penghuni aktif</small></span></a>
     </div>
   </div>
 
@@ -119,7 +119,7 @@
           <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-700"><?= masterIconSvg('bed', 'h-4 w-4') ?></span><span class="text-sm font-medium">Tambah Kamar</span>
         </a>
         <a href="<?= BASE_URL ?>/pemilik/penghuni/tambah" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
-          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-700"><?= masterIconSvg('user-round', 'h-4 w-4') ?></span><span class="text-sm font-medium">Tambah Penghuni</span>
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-soft text-primary"><?= masterIconSvg('user-round', 'h-4 w-4') ?></span><span class="text-sm font-medium">Tambah Penghuni</span>
         </a>
         <a href="<?= BASE_URL ?>/pemilik/pembayaran" class="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
           <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700"><?= masterIconSvg('wallet', 'h-4 w-4') ?></span><span class="text-sm font-medium">Catat Pembayaran</span>
@@ -154,7 +154,7 @@
           </template>
           <template x-for="item in tagihan" :key="item.id_tagihan">
             <tr class="border-b border-slate-100 last:border-0">
-              <td class="py-4 pr-4"><div class="font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div><div class="mt-1 text-[11px] text-slate-400" x-text="item.nomor_tagihan"></div></td>
+              <td class="py-4 pr-4"><div class="font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></div><div class="mt-1 text-xs text-slate-400" x-text="item.nomor_tagihan"></div></td>
               <td class="py-4 pr-4" x-text="item.nama_kos"></td>
               <td class="py-4 pr-4" x-text="tanggal(item.tanggal_jatuh_tempo)"></td>
               <td class="py-4 pr-4 font-semibold" x-text="rupiah(item.sisa_tagihan)"></td>
@@ -174,11 +174,11 @@
               <p class="owner-copy-full font-bold text-slate-900" x-text="'Kamar ' + item.nomor_kamar"></p>
               <p class="owner-copy-full mt-1 text-xs text-slate-500" x-text="item.nama_kos"></p>
             </div>
-            <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold" :class="item.status === 'sebagian' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'" x-text="item.status === 'sebagian' ? 'Sebagian' : 'Belum lunas'"></span>
+            <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold" :class="item.status === 'sebagian' ? 'bg-amber-50 text-amber-700' : 'bg-rose-50 text-rose-700'" x-text="item.status === 'sebagian' ? 'Sebagian' : 'Belum lunas'"></span>
           </div>
           <div class="mt-3 flex items-end justify-between gap-3">
-            <div><p class="text-[11px] text-slate-400">Jatuh tempo</p><p class="mt-0.5 text-xs font-medium text-slate-700" x-text="tanggal(item.tanggal_jatuh_tempo)"></p></div>
-            <div class="text-right"><p class="text-[11px] text-slate-400">Sisa pembayaran</p><p class="mt-0.5 font-bold text-rose-600" x-text="rupiah(item.sisa_tagihan)"></p></div>
+            <div><p class="text-xs text-slate-400">Jatuh tempo</p><p class="mt-0.5 text-xs font-medium text-slate-700" x-text="tanggal(item.tanggal_jatuh_tempo)"></p></div>
+            <div class="text-right"><p class="text-xs text-slate-400">Sisa pembayaran</p><p class="mt-0.5 font-bold text-rose-600" x-text="rupiah(item.sisa_tagihan)"></p></div>
           </div>
         </a>
       </template>

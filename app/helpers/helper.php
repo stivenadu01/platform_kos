@@ -1,5 +1,17 @@
 <?php
 
+// Content-based versions keep HTML, CSS and JS consistent across PWA updates.
+function uiAsset($path)
+{
+  static $versions = [];
+  $path = ltrim($path, '/');
+  if (!isset($versions[$path])) {
+    $file = ROOT_PATH . '/public/' . $path;
+    $versions[$path] = is_file($file) ? substr(hash_file('sha256', $file), 0, 12) : '1';
+  }
+  return BASE_URL . '/' . $path . '?v=' . $versions[$path];
+}
+
 function model($name)
 {
   $name = ucfirst($name);
@@ -21,6 +33,7 @@ function view($page, $data = [], $layout = 'user')
 require_once __DIR__ . '/request_helper.php';
 require_once __DIR__ . '/response_helper.php';
 require_once __DIR__ . '/phone_helper.php';
+require_once __DIR__ . '/navigation_helper.php';
 
 
 /**
@@ -37,7 +50,7 @@ function json_encode_safe($value, $flags = 0)
 
 function publicPrimaryNavigationPaths()
 {
-  return ['/', '/cari-kos', '/user/favorit', '/user/kos-saya'];
+  return ['/', '/cari-kos', '/user/favorit', '/user/kos-saya', '/user/akun'];
 }
 
 function isPublicPrimaryNavigationPath($path)
@@ -47,7 +60,7 @@ function isPublicPrimaryNavigationPath($path)
 
 function ownerPrimaryNavigationPaths()
 {
-  return ['/pemilik', '/pemilik/kos', '/pemilik/penghuni', '/pemilik/pembayaran'];
+  return ['/pemilik', '/pemilik/kos', '/pemilik/penghuni', '/pemilik/pembayaran', '/pemilik/akun'];
 }
 
 function isOwnerPrimaryNavigationPath($path)
@@ -60,6 +73,7 @@ require_once __DIR__ . '/location_helper.php';
 function masterIconCatalog()
 {
   return [
+    'ellipsis' => ['label'=>'Pengaturan lanjutan','path'=>'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>'],
     // Fasilitas konektivitas & hiburan
     'wifi' => ['label' => 'WiFi', 'path' => '<path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.5 16.05a6 6 0 0 1 7 0"/><path d="M12 19.5h.01"/>'],
     'router' => ['label' => 'Router', 'path' => '<rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 13h.01M11 13h.01M15 13h.01M19 13h.01"/><path d="M12 9V5M9 5h6"/>'],

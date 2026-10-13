@@ -1,4 +1,4 @@
-<div x-data="adminLokasiPage()" x-init="init()" class="admin-page">
+<div x-data="adminLokasiPage()"  class="admin-page">
   <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
       <p class="text-sm font-semibold text-primary">Manajemen Referensi</p>
@@ -95,7 +95,7 @@
               <div class="font-semibold text-slate-900 truncate" x-text="item.nama"></div>
               <div class="mt-1 text-xs text-slate-500" x-text="categoryLabel(item.kategori)"></div>
             </div>
-            <span class="shrink-0 px-2 py-1 rounded-full text-[11px] font-medium" :class="item.status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : 'Nonaktif'"></span>
+            <span class="shrink-0 px-2 py-1 rounded-full text-xs font-medium" :class="item.status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'" x-text="item.status === 'aktif' ? 'Aktif' : 'Nonaktif'"></span>
           </div>
           <div class="mt-3 text-xs text-slate-500" x-text="item.alamat || 'Alamat belum diisi'"></div>
           <div class="mt-2 text-xs text-slate-500" x-text="Number(item.latitude).toFixed(7) + ', ' + Number(item.longitude).toFixed(7) + ' · urutan ' + item.urutan"></div>
@@ -108,17 +108,17 @@
     </div>
   </section>
 
-  <div x-show="modalOpen" x-cloak class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-5">
+  <div role="dialog" aria-modal="true" aria-label="Detail dan tindakan" x-show="modalOpen" x-cloak class="ui-dialog fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-0 sm:p-5">
     <div class="absolute inset-0 bg-slate-900/50" @click="closeModal()"></div>
-    <div class="relative bg-white w-full sm:max-w-2xl max-h-[94vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl shadow-2xl">
-      <div class="sticky top-0 bg-white border-b border-slate-200 px-5 py-4 flex items-center justify-between z-10">
+    <div class="ui-sheet-panel relative">
+      <div class="ui-sheet-header flex items-center justify-between gap-3">
         <div>
           <h2 class="font-bold text-slate-900" x-text="editing ? 'Edit Lokasi' : 'Tambah Lokasi'"></h2>
           <p class="text-xs text-slate-500 mt-1">Data ini langsung menjadi pilihan lokasi pada pencarian publik.</p>
         </div>
         <button type="button" @click="closeModal()" class="flex h-9 w-9 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Tutup"><?= masterIconSvg('x', 'h-5 w-5') ?></button>
       </div>
-      <form @submit.prevent="save()" class="p-5 sm:p-6 space-y-4">
+      <form @submit.prevent="save()" class="ui-sheet-form"><div class="ui-sheet-body space-y-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div class="sm:col-span-2"><label class="label">Nama lokasi *</label><input x-model="form.nama" class="input mt-1 w-full" maxlength="200" required placeholder="Contoh: Politeknik Negeri Kupang"></div>
           <div><label class="label">Kategori *</label><select x-model="form.kategori" class="select mt-1"><option value="kampus">Kampus</option><option value="area">Area</option><option value="rumah_sakit">Rumah sakit</option>
@@ -153,7 +153,7 @@
           </div>
           <div><label class="label">Status</label><select x-model="form.status" class="select mt-1"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
         </div>
-        <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+        </div><div class="ui-sheet-footer">
           <button type="button" @click="closeModal()" class="btn-secondary justify-center">Batal</button>
           <button type="submit" class="btn-primary justify-center" :disabled="saving" x-text="saving ? 'Menyimpan...' : 'Simpan Lokasi'"></button>
         </div>

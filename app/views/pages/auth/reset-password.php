@@ -23,7 +23,7 @@
 
       <div
         x-data="resetForm()"
-        x-init="init()">
+        >
 
         <!-- TOKEN INVALID -->
         <div

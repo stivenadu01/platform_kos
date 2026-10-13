@@ -38,7 +38,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: geolocation=(self), camera=(), microphone=()');
-header("Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://fonts.googleapis.com https://unpkg.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://api.sandbox.midtrans.com https://api.midtrans.com; connect-src 'self'; frame-src 'self' https://www.google.com https://maps.google.com;");
+header("Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; script-src 'self' https://accounts.google.com/gsi/client https://unpkg.com 'unsafe-inline' 'unsafe-eval'; style-src 'self' https://accounts.google.com/gsi/style https://fonts.googleapis.com https://unpkg.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://api.sandbox.midtrans.com https://api.midtrans.com https://merchants-app.sbx.midtrans.com https://merchants-app.midtrans.com; connect-src 'self' https://accounts.google.com/gsi/; frame-src 'self' https://accounts.google.com/gsi/ https://www.google.com https://maps.google.com;");
 if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) {
   header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 }

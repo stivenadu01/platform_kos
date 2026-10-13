@@ -25,7 +25,7 @@ $masterCards = [
           </span>
           <span class="text-slate-400 transition group-hover:translate-x-0.5">→</span>
         </div>
-        <h2 class="mt-4 font-[Poppins] text-lg font-bold text-slate-900"><?= htmlspecialchars($card['title']) ?></h2>
+        <h2 class="mt-4 font-sans text-lg font-bold text-slate-900"><?= htmlspecialchars($card['title']) ?></h2>
         <p class="mt-1 text-sm leading-6 text-slate-500"><?= htmlspecialchars($card['desc']) ?></p>
         <div class="mt-4 text-xs font-semibold text-primary">Kelola data →</div>
       </a>

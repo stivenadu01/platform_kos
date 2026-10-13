@@ -9,6 +9,7 @@
     <div class="lg:hidden font-bold text-slate-900">BetaKos</div>
   </div>
   <div class="flex items-center gap-3">
+    <?php include ROOT_PATH . '/app/views/partials/notification-button.php'; ?>
     <button
       type="button"
       data-pwa-install data-pwa-install-mobile

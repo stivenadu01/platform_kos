@@ -86,34 +86,11 @@ unset($_SESSION['google_auth_error']);
             </div>
 
             <template x-if="!googleMode">
-              <div>
-                <div class="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <p class="text-sm font-semibold text-heading">Daftar lebih cepat dengan Google</p>
-                  <p class="mt-1 text-xs text-muted">Pilihan akun tetap mengikuti role yang Anda pilih di langkah sebelumnya.</p>
-                  <a
-                    :href="BASE_URL + '/api/auth/google/start?mode=register&role=' + encodeURIComponent(role)"
-                    class="mt-3 w-full h-11 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 flex items-center justify-center gap-3 text-sm font-semibold text-slate-700 transition"
-                    :class="!role ? 'pointer-events-none opacity-50' : ''"
-                    aria-label="Daftar dengan Google">
-                    <svg viewBox="0 0 24 24" class="w-5 h-5" aria-hidden="true">
-                      <path fill="#4285F4" d="M21.35 12.23c0-.72-.06-1.42-.18-2.09H12v3.96h5.24a4.48 4.48 0 0 1-1.94 2.94v2.45h3.14c1.84-1.69 2.91-4.18 2.91-7.26Z" />
-                      <path fill="#34A853" d="M12 21.82c2.63 0 4.84-.87 6.46-2.36l-3.14-2.45c-.87.58-1.98.92-3.32.92-2.55 0-4.71-1.72-5.49-5.04H3.27v2.53A9.76 9.76 0 0 0 12 21.82Z" />
-                      <path fill="#FBBC05" d="M6.51 13.89A5.87 5.87 0 0 1 6.2 12c0-.66.11-1.3.31-1.89V7.58H3.27A9.82 9.82 0 0 0 2.18 12c0 1.59.38 3.09 1.09 4.42l3.24-2.53Z" />
-                      <path fill="#EA4335" d="M12 6.07c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.15 14.63 2.18 12 2.18a9.76 9.76 0 0 0-8.73 5.4l3.24 2.53C7.29 7.79 9.45 6.07 12 6.07Z" />
-                    </svg>
-                    <span>Daftar dengan Google</span>
-                  </a>
-                </div>
-
-                <div class="my-5 relative">
-                  <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                    <div class="w-full border-t border-slate-200"></div>
-                  </div>
-                  <div class="relative flex justify-center"><span class="bg-white px-3 text-xs text-muted">atau daftar dengan email</span></div>
-                </div>
+              <div data-google-option class="bk-google-option mt-5">
+                <div data-google-signin :data-google-role="role"></div>
+                <p data-google-status role="status" class="bk-google-status">Memuat pilihan Google…</p>
               </div>
             </template>
-
             <form @submit.prevent="submit" class="space-y-5">
               <template x-if="!googleMode">
                 <div>

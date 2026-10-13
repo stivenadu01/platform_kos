@@ -6,9 +6,10 @@
   let gesture = null;
 
   function findTabs(target) {
-    const scope = target.closest('.owner-page, [data-swipe-page]');
+    const scope = target.closest('.owner-segmented, [data-swipe-tabs], [data-swipe-panel]');
     if (!scope) return null;
-    const tabs = scope.querySelector('.owner-segmented, [data-swipe-tabs]');
+    const tabs = scope.matches('.owner-segmented, [data-swipe-tabs]') ? scope
+      : scope.closest('.owner-page, [data-swipe-page]')?.querySelector('.owner-segmented, [data-swipe-tabs]');
     return tabs && tabs.dataset.swipeDisabled !== 'true' ? tabs : null;
   }
 

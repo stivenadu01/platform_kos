@@ -1,4 +1,4 @@
-<div x-data="riwayatLanggananPage()" x-init="init()" class="owner-page max-w-5xl">
+<div x-data="riwayatLanggananPage()"  class="owner-page max-w-5xl">
   <div class="owner-form-heading">
     <a :href="window.BASE_URL + '/pemilik/langganan'" @click.prevent="utils.goBack($el.href)" class="owner-back-link"><?= masterIconSvg('arrow-left', 'h-4 w-4') ?> Kembali</a>
     <p class="owner-eyebrow mt-3">BetaKos Pro</p>
@@ -26,11 +26,11 @@
             <p class="truncate font-bold text-slate-900" x-text="item.nama_paket"></p>
             <p class="mt-1 text-xs text-slate-500" x-text="(item.jenis_pembayaran === 'renewal' ? 'Perpanjangan' : 'Aktivasi') + ' · ' + item.durasi_bulan + ' bulan'"></p>
           </div>
-          <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold" :class="statusClass(item.status_pembayaran)" x-text="statusLabel(item.status_pembayaran)"></span>
+          <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold" :class="statusClass(item.status_pembayaran)" x-text="statusLabel(item.status_pembayaran)"></span>
         </div>
         <div class="mt-4 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3">
-          <div><p class="text-[11px] text-slate-400">Total</p><p class="mt-1 text-sm font-extrabold text-slate-900" x-text="item.is_gratis ? 'Gratis' : rupiah(item.nominal)"></p></div>
-          <div><p class="text-[11px] text-slate-400">Tanggal</p><p class="mt-1 text-sm font-semibold text-slate-700" x-text="tanggal(item.tanggal_transaksi)"></p></div>
+          <div><p class="text-xs text-slate-400">Total</p><p class="mt-1 text-sm font-extrabold text-slate-900" x-text="item.is_gratis ? 'Gratis' : rupiah(item.nominal)"></p></div>
+          <div><p class="text-xs text-slate-400">Tanggal</p><p class="mt-1 text-sm font-semibold text-slate-700" x-text="tanggal(item.tanggal_transaksi)"></p></div>
         </div>
       </article>
     </template>

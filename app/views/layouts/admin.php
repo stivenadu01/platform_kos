@@ -5,21 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($title ?? 'Admin BetaKos') ?></title>
   <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/assets/icon/favicon.ico">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#c2410c">
   <link rel="manifest" href="<?= BASE_URL ?>/assets/icon/site.webmanifest">
   <link rel="apple-touch-icon" href="<?= BASE_URL ?>/assets/icon/apple-touch-icon.png">
-  <link rel="stylesheet" href="<?= BASE_URL ?>/assets/css/app.css">
+  <link rel="stylesheet" href="<?= uiAsset('assets/css/app.css') ?>">
+  <link rel="stylesheet" href="<?= uiAsset('assets/css/workspace-redesign.css') ?>">
   <script>
     window.BASE_URL = <?= json_encode_safe(BASE_URL) ?>;
     window.NOMOR_WA = <?= json_encode_safe($_ENV['NOMOR_WA'] ?? '') ?>;
     window.__USER__ = <?= json_encode_safe($_SESSION['user'] ?? null, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    window.__NAV_COUNTS__ = <?= json_encode_safe(initialNavigationCounts()) ?>;
     window.__CSRF_TOKEN__ = <?= json_encode_safe(csrf_token()) ?>;
   </script>
-  <script src="<?= BASE_URL ?>/assets/js/api.js"></script>
-  <script src="<?= BASE_URL ?>/assets/js/store.js"></script>
-  <script src="<?= BASE_URL ?>/assets/js/utils.js"></script>
-  <script src="<?= BASE_URL ?>/assets/js/app.js"></script>
-  <script defer src="https://unpkg.com/alpinejs"></script>
+  <script src="<?= uiAsset('assets/js/api.js') ?>"></script>
+  <script src="<?= uiAsset('assets/js/store.js') ?>"></script>
+  <script src="<?= uiAsset('assets/js/navigation.js') ?>"></script>
+  <script src="<?= uiAsset('assets/js/notifications.js') ?>"></script>
+  <script src="<?= uiAsset('assets/js/utils.js') ?>"></script>
+  <script src="<?= uiAsset('assets/js/app.js') ?>"></script>
+  <script src="<?= uiAsset('assets/js/ui-components.js') ?>"></script>
+  <script defer src="<?= uiAsset('assets/js/vendor/alpine-3.14.9.min.js') ?>"></script>
 </head>
 <body class="admin-ui bg-slate-50 text-slate-800">
   <script>
@@ -42,5 +47,6 @@
     </div>
     <?php include ROOT_PATH . '/app/views/partials/toast.php'; ?>
   </div>
+  <?php include ROOT_PATH . '/app/views/partials/notifications.php'; ?>
 </body>
 </html>

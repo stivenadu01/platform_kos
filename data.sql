@@ -15,11 +15,11 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
--- Dumping database structure for platform_kos
-CREATE DATABASE IF NOT EXISTS `platform_kos` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `platform_kos`;
+-- Dumping database structure for betakos
+CREATE DATABASE IF NOT EXISTS `betakos` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `betakos`;
 
--- Dumping structure for table platform_kos.aturan
+-- Dumping structure for table betakos.aturan
 CREATE TABLE IF NOT EXISTS `aturan` (
   `id_aturan` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nama_aturan` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `aturan` (
   KEY `idx_aturan_status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.aturan: ~18 rows (approximately)
+-- Dumping data for table betakos.aturan: ~18 rows (approximately)
 INSERT INTO `aturan` (`id_aturan`, `nama_aturan`, `kategori`, `icon`, `deskripsi`, `urutan`, `status`, `created_at`, `updated_at`) VALUES
 	(1, 'Tidak menerima pasangan', 'penghuni', 'heart-off', 'Kos tidak menerima pasangan sebagai penghuni.', 10, 'aktif', '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 	(2, 'Khusus putra', 'penghuni', 'user-male', 'Kos diperuntukkan khusus penghuni putra.', 20, 'aktif', '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
@@ -56,7 +56,7 @@ INSERT INTO `aturan` (`id_aturan`, `nama_aturan`, `kategori`, `icon`, `deskripsi
 	(17, 'Wajib mengikuti ketentuan kos', 'umum', 'clipboard-check', 'Penghuni wajib mengikuti seluruh ketentuan yang berlaku di kos.', 170, 'aktif', '2026-09-08 00:00:00', '2026-09-08 00:00:00'),
 	(18, 'Menjaga ketertiban lingkungan kos', 'umum', 'info', 'Penghuni wajib menjaga ketertiban dan kenyamanan lingkungan kos.', 180, 'aktif', '2026-09-08 00:00:00', '2026-09-08 00:00:00');
 
--- Dumping structure for table platform_kos.claim_riwayat
+-- Dumping structure for table betakos.claim_riwayat
 CREATE TABLE IF NOT EXISTS `claim_riwayat` (
   `id_claim` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_penghuni` bigint unsigned NOT NULL,
@@ -77,11 +77,11 @@ CREATE TABLE IF NOT EXISTS `claim_riwayat` (
   CONSTRAINT `fk_claim_user` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.claim_riwayat: ~1 rows (approximately)
+-- Dumping data for table betakos.claim_riwayat: ~1 rows (approximately)
 INSERT INTO `claim_riwayat` (`id_claim`, `id_penghuni`, `id_user`, `nik_diajukan`, `status`, `catatan_mahasiswa`, `catatan_pemilik`, `tanggal_pengajuan`, `tanggal_keputusan`, `created_at`, `updated_at`) VALUES
 	(1, 5, 9, '5318928183918371', 'disetujui', '', '', '2026-09-04 11:15:38', '2026-09-04 11:16:01', '2026-09-04 03:15:38', '2026-09-04 03:16:01');
 
--- Dumping structure for table platform_kos.fasilitas
+-- Dumping structure for table betakos.fasilitas
 CREATE TABLE IF NOT EXISTS `fasilitas` (
   `id_fasilitas` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nama_fasilitas` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `fasilitas` (
   UNIQUE KEY `nama_fasilitas` (`nama_fasilitas`)
 ) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.fasilitas: ~55 rows (approximately)
+-- Dumping data for table betakos.fasilitas: ~55 rows (approximately)
 INSERT INTO `fasilitas` (`id_fasilitas`, `nama_fasilitas`, `icon`, `status`, `kategori`, `created_at`) VALUES
 	(1, 'WiFi', 'wifi', 'aktif', 'kos', '2026-09-08 00:00:00'),
 	(2, 'Router / Internet', 'router', 'aktif', 'kos', '2026-09-08 00:00:00'),
@@ -151,7 +151,7 @@ INSERT INTO `fasilitas` (`id_fasilitas`, `nama_fasilitas`, `icon`, `status`, `ka
 	(54, 'Monitor', 'monitor', 'aktif', 'kamar', '2026-09-08 00:00:00'),
 	(55, 'Gorden', 'curtain', 'aktif', 'kamar', '2026-09-08 00:00:00');
 
--- Dumping structure for table platform_kos.favorit
+-- Dumping structure for table betakos.favorit
 CREATE TABLE IF NOT EXISTS `favorit` (
   `id_favorit` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_user` bigint unsigned NOT NULL,
@@ -164,9 +164,9 @@ CREATE TABLE IF NOT EXISTS `favorit` (
   CONSTRAINT `fk_favorit_user` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.favorit: ~0 rows (approximately)
+-- Dumping data for table betakos.favorit: ~0 rows (approximately)
 
--- Dumping structure for table platform_kos.harga_kamar
+-- Dumping structure for table betakos.harga_kamar
 CREATE TABLE IF NOT EXISTS `harga_kamar` (
   `id_harga` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_tipe_kamar` bigint unsigned NOT NULL,
@@ -182,14 +182,14 @@ CREATE TABLE IF NOT EXISTS `harga_kamar` (
   CONSTRAINT `chk_jumlah_orang_positif` CHECK ((`jumlah_orang` > 0))
 ) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.harga_kamar: ~3 rows (approximately)
+-- Dumping data for table betakos.harga_kamar: ~3 rows (approximately)
 INSERT INTO `harga_kamar` (`id_harga`, `id_tipe_kamar`, `jumlah_orang`, `harga_total`, `created_at`, `updated_at`) VALUES
 	(15, 14, 1, 700000.00, '2026-09-04 03:01:42', '2026-09-04 03:01:42'),
 	(16, 14, 2, 1000000.00, '2026-09-04 03:01:42', '2026-09-04 03:01:42'),
 	(18, 13, 1, 1000000.00, '2026-09-07 14:30:56', '2026-09-07 14:30:56'),
 	(19, 15, 1, 1200000.00, '2026-09-07 14:35:39', '2026-09-07 14:35:39');
 
--- Dumping structure for table platform_kos.kamar
+-- Dumping structure for table betakos.kamar
 CREATE TABLE IF NOT EXISTS `kamar` (
   `id_kamar` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_kos` bigint unsigned NOT NULL,
@@ -209,7 +209,7 @@ CREATE TABLE IF NOT EXISTS `kamar` (
   CONSTRAINT `fk_kamar_tipe` FOREIGN KEY (`id_tipe_kamar`) REFERENCES `tipe_kamar` (`id_tipe_kamar`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=87 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.kamar: ~15 rows (approximately)
+-- Dumping data for table betakos.kamar: ~15 rows (approximately)
 INSERT INTO `kamar` (`id_kamar`, `id_kos`, `id_tipe_kamar`, `nomor_kamar`, `status`, `deskripsi`, `created_at`, `updated_at`) VALUES
 	(67, 10, 13, '1', 'terisi', NULL, '2026-09-03 12:56:25', '2026-09-04 08:32:18'),
 	(68, 10, 13, '2', 'tersedia', NULL, '2026-09-03 14:19:15', '2026-09-03 18:36:52'),
@@ -232,7 +232,7 @@ INSERT INTO `kamar` (`id_kamar`, `id_kos`, `id_tipe_kamar`, `nomor_kamar`, `stat
 	(85, 10, 15, '104', 'tersedia', NULL, '2026-09-07 14:46:48', '2026-09-07 14:46:48'),
 	(86, 10, 15, '105', 'tersedia', NULL, '2026-09-07 14:46:48', '2026-09-07 14:46:48');
 
--- Dumping structure for table platform_kos.kos
+-- Dumping structure for table betakos.kos
 CREATE TABLE IF NOT EXISTS `kos` (
   `id_kos` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_pemilik` bigint unsigned NOT NULL,
@@ -254,12 +254,12 @@ CREATE TABLE IF NOT EXISTS `kos` (
   CONSTRAINT `fk_kos_pemilik` FOREIGN KEY (`id_pemilik`) REFERENCES `users` (`id_user`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.kos: ~2 rows (approximately)
+-- Dumping data for table betakos.kos: ~2 rows (approximately)
 INSERT INTO `kos` (`id_kos`, `id_pemilik`, `nama_kos`, `alamat`, `latitude`, `longitude`, `google_maps_url`, `jenis`, `deskripsi`, `status`, `created_at`, `updated_at`) VALUES
 	(10, 2, 'Kost Benhapuk', 'RMX8+66X, Lasiana, Kec. Klp. Lima, Kota Kupang, Nusa Tenggara Tim.', -10.15107220, 123.66602380, 'https://www.google.com/maps/place/Kost+Benhapuk/@-10.1512382,123.6638464,15.5z/data=!4m15!1m8!3m7!1s0x2c5683deb42a06c9:0x14b1a711349277f!2sKost+Benhapuk!8m2!3d-10.1510722!4d123.6660238!10e5!16s%2Fg%2F11kqrl3_f_!3m5!1s0x2c5683deb42a06c9:0x14b1a711349277f!8m2!3d-10.1510722!4d123.6660238!16s%2Fg%2F11kqrl3_f_?entry=ttu&g_ep=EgoyMDI2MDkwMi4wIKXMDSoASAFQAw%3D%3D', 'campur', 'Green Kost Oesapa/Kelapa Lima – Hunian Nyaman, Aman, dan Strategis Sedang mencari kost nyaman dengan harga terjangkau di Kupang? Green Kost Oesapa adalah pilihan yang tepat! Keunggulan Green Kost Oesapa Harga terjangkau – hanya Rp400.000/bulan Kamar kosong tersedia– siap huni! Kamar mandi luar – tersedia 4 unit, bersih & terawat Lokasi strategis – dekat dengan Universitas Nusa Cendana (UNDANA), minimarket, warung makan, dan pusat aktivitas lainnya Keamanan terjamin – kost sudah difasilitasi pagar, sehingga lebih aman dan nyaman Fasilitas parkir – tersedia area parkir untuk penghuni Dengan lingkungan yang nyaman dan akses mudah ke berbagai tempat penting, Green Kost Oesapa adalah pilihan ideal bagi mahasiswa maupun pekerja yang mencari hunian praktis dan aman di Kupang. Tertarik? Hubungi kami sekarang dan dapatkan kamar terbaik sebelum kehabisan! Kontak Pemilik', 'aktif', '2026-09-03 12:54:40', '2026-09-06 07:48:17'),
 	(11, 8, 'KOST BENEDICT 1', 'Jl. Ade Irma No.3-19, Klp. Lima, Kec. Klp. Lima, Kota Kupang, Nusa Tenggara Tim.', -10.15774180, 123.61579080, 'https://maps.app.goo.gl/3bFW2CQVtaJAHQus7', 'campur', '', 'aktif', '2026-09-04 03:00:11', '2026-09-06 07:57:18');
 
--- Dumping structure for table platform_kos.kos_aturan
+-- Dumping structure for table betakos.kos_aturan
 CREATE TABLE IF NOT EXISTS `kos_aturan` (
   `id_kos` bigint unsigned NOT NULL,
   `id_aturan` bigint unsigned NOT NULL,
@@ -269,14 +269,14 @@ CREATE TABLE IF NOT EXISTS `kos_aturan` (
   CONSTRAINT `fk_kos_aturan_kos` FOREIGN KEY (`id_kos`) REFERENCES `kos` (`id_kos`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.kos_aturan: ~0 rows (approximately)
+-- Dumping data for table betakos.kos_aturan: ~0 rows (approximately)
 INSERT INTO `kos_aturan` (`id_kos`, `id_aturan`) VALUES
 	(10, 1),
 	(10, 4),
 	(10, 5),
 	(10, 14);
 
--- Dumping structure for table platform_kos.kos_fasilitas
+-- Dumping structure for table betakos.kos_fasilitas
 CREATE TABLE IF NOT EXISTS `kos_fasilitas` (
   `id_kos` bigint unsigned NOT NULL,
   `id_fasilitas` bigint unsigned NOT NULL,
@@ -286,7 +286,7 @@ CREATE TABLE IF NOT EXISTS `kos_fasilitas` (
   CONSTRAINT `fk_kos_fasilitas_kos` FOREIGN KEY (`id_kos`) REFERENCES `kos` (`id_kos`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.kos_fasilitas: ~1 rows (approximately)
+-- Dumping data for table betakos.kos_fasilitas: ~1 rows (approximately)
 INSERT INTO `kos_fasilitas` (`id_kos`, `id_fasilitas`) VALUES
 	(10, 1),
 	(10, 3),
@@ -295,10 +295,9 @@ INSERT INTO `kos_fasilitas` (`id_kos`, `id_fasilitas`) VALUES
 	(10, 14),
 	(10, 43),
 	(11, 43),
-	(10, 7),
 	(10, 24);
 
--- Dumping structure for table platform_kos.kos_favorit
+-- Dumping structure for table betakos.kos_favorit
 CREATE TABLE IF NOT EXISTS `kos_favorit` (
   `id_favorit` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_user` bigint unsigned NOT NULL,
@@ -310,11 +309,11 @@ CREATE TABLE IF NOT EXISTS `kos_favorit` (
   KEY `idx_kos_favorit_kos` (`id_kos`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.kos_favorit: ~0 rows (approximately)
+-- Dumping data for table betakos.kos_favorit: ~0 rows (approximately)
 INSERT INTO `kos_favorit` (`id_favorit`, `id_user`, `id_kos`, `created_at`) VALUES
 	(3, 3, 10, '2026-09-07 15:23:05');
 
--- Dumping structure for table platform_kos.kos_foto
+-- Dumping structure for table betakos.kos_foto
 CREATE TABLE IF NOT EXISTS `kos_foto` (
   `id_foto` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_kos` bigint unsigned NOT NULL,
@@ -327,7 +326,7 @@ CREATE TABLE IF NOT EXISTS `kos_foto` (
   CONSTRAINT `fk_kos_foto_kos` FOREIGN KEY (`id_kos`) REFERENCES `kos` (`id_kos`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.kos_foto: ~4 rows (approximately)
+-- Dumping data for table betakos.kos_foto: ~4 rows (approximately)
 INSERT INTO `kos_foto` (`id_foto`, `id_kos`, `nama_file`, `urutan`, `is_thumbnail`, `created_at`) VALUES
 	(7, 10, '/kos/KOS_4e3ee90a746434184435cb6d0c03b9be.png', 1, 1, '2026-09-03 12:54:59'),
 	(8, 11, '/kos/KOS_32b4b8cf6f9a4dc6ce72652df0493de8.png', 1, 0, '2026-09-04 03:00:48'),
@@ -335,7 +334,7 @@ INSERT INTO `kos_foto` (`id_foto`, `id_kos`, `nama_file`, `urutan`, `is_thumbnai
 	(10, 11, '/kos/KOS_3bf025a9a0098586ac556f69554d0833.png', 3, 1, '2026-09-05 07:34:19'),
 	(11, 11, '/kos/KOS_cf7922195a23c73bec7775d282f3b6b4.png', 4, 0, '2026-09-05 07:34:46');
 
--- Dumping structure for table platform_kos.langganan
+-- Dumping structure for table betakos.langganan
 CREATE TABLE IF NOT EXISTS `langganan` (
   `id_langganan` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_pemilik` bigint unsigned NOT NULL,
@@ -354,11 +353,11 @@ CREATE TABLE IF NOT EXISTS `langganan` (
   CONSTRAINT `fk_langganan_pemilik` FOREIGN KEY (`id_pemilik`) REFERENCES `users` (`id_user`) ON DELETE RESTRICT ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.langganan: ~1 rows (approximately)
+-- Dumping data for table betakos.langganan: ~1 rows (approximately)
 INSERT INTO `langganan` (`id_langganan`, `id_pemilik`, `id_paket_langganan`, `tanggal_mulai`, `tanggal_berakhir`, `status`, `catatan`, `created_at`, `updated_at`) VALUES
 	(27, 2, 3, '2026-09-05', '2030-09-05', 'aktif', NULL, '2026-09-05 00:16:05', '2026-09-07 22:45:04');
 
--- Dumping structure for table platform_kos.laporan_kos
+-- Dumping structure for table betakos.laporan_kos
 CREATE TABLE IF NOT EXISTS `laporan_kos` (
   `id_laporan` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_user` bigint unsigned NOT NULL,
@@ -381,9 +380,9 @@ CREATE TABLE IF NOT EXISTS `laporan_kos` (
   CONSTRAINT `fk_laporan_kos_user` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.laporan_kos: ~0 rows (approximately)
+-- Dumping data for table betakos.laporan_kos: ~0 rows (approximately)
 
--- Dumping structure for table platform_kos.lokasi_referensi
+-- Dumping structure for table betakos.lokasi_referensi
 CREATE TABLE IF NOT EXISTS `lokasi_referensi` (
   `id_lokasi` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nama` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -402,7 +401,7 @@ CREATE TABLE IF NOT EXISTS `lokasi_referensi` (
   KEY `idx_lokasi_status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=68 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.lokasi_referensi: ~35 rows (approximately)
+-- Dumping data for table betakos.lokasi_referensi: ~35 rows (approximately)
 INSERT INTO `lokasi_referensi` (`id_lokasi`, `nama`, `kategori`, `icon`, `alamat`, `latitude`, `longitude`, `google_maps_url`, `urutan`, `status`, `created_at`, `updated_at`) VALUES
 	(33, 'Universitas Nusa Cendana', 'kampus', 'graduation-cap', 'Jalan Adisucipto Penfui, Manulai II, Alak, Kota Kupang', -10.15444800, 123.65883100, 'https://www.google.com/maps/search/?api=1&query=Universitas%20Nusa%20Cendana,%20Jalan%20Adisucipto%20Penfui,%20Manulai%20II,%20Alak,%20Kota%20Kupang', 10, 'aktif', '2026-09-06 09:13:50', '2026-09-07 15:00:18'),
 	(34, 'Politeknik Negeri Kupang', 'kampus', 'graduation-cap', 'Jalan Adisucipto Penfui, Manulai II, Alak, Kota Kupang', -10.15139440, 123.66762400, 'https://www.google.com/maps/search/?api=1&query=Politeknik%20Negeri%20Kupang,%20Jalan%20Adisucipto%20Penfui,%20Manulai%20II,%20Alak,%20Kota%20Kupang', 20, 'aktif', '2026-09-06 09:13:50', '2026-09-07 15:00:18'),
@@ -440,7 +439,7 @@ INSERT INTO `lokasi_referensi` (`id_lokasi`, `nama`, `kategori`, `icon`, `alamat
 	(66, 'Pasar Inpres Naikoten I', 'toko', 'shopping-basket', 'Jl. Jend. Soeharto, Naikoten I, Kota Raja, Kota Kupang, Nusa Tenggara Timur', -10.17872028, 123.60169073, 'https://www.google.com/maps/search/?api=1&query=Pasar%20Inpres%20Naikoten%20I,%20Jl.%20Jend.%20Soeharto,%20Naikoten%20I,%20Kota%20Raja,%20Kota%20Kupang,%20Nusa%20Tenggara%20Timur', 110, 'aktif', '2026-09-06 09:13:50', '2026-09-07 15:00:18'),
 	(67, 'RSUD S.K. Lerik', 'rumah_sakit', 'hospital', 'Kota Lama, Kota Kupang, Nusa Tenggara Timur', -10.15030000, 123.60898000, 'https://www.google.com/maps/search/?api=1&query=RSUD%20S.K.%20Lerik,%20Kota%20Lama,%20Kota%20Kupang,%20Nusa%20Tenggara%20Timur', 120, 'aktif', '2026-09-06 09:13:50', '2026-09-07 15:00:18');
 
--- Dumping structure for table platform_kos.metode_pembayaran_langganan
+-- Dumping structure for table betakos.metode_pembayaran_langganan
 CREATE TABLE IF NOT EXISTS `metode_pembayaran_langganan` (
   `id_metode_pembayaran` int unsigned NOT NULL AUTO_INCREMENT,
   `jenis` enum('transfer_bank','e_wallet') COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -456,12 +455,12 @@ CREATE TABLE IF NOT EXISTS `metode_pembayaran_langganan` (
   KEY `idx_mpl_jenis` (`jenis`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.metode_pembayaran_langganan: ~2 rows (approximately)
+-- Dumping data for table betakos.metode_pembayaran_langganan: ~2 rows (approximately)
 INSERT INTO `metode_pembayaran_langganan` (`id_metode_pembayaran`, `jenis`, `nama_provider`, `nomor_tujuan`, `nama_penerima`, `keterangan`, `is_aktif`, `created_at`, `updated_at`) VALUES
 	(1, 'e_wallet', 'DANA', '081338609228', 'Stiven Melkianus Adu', '', 1, '2026-09-04 00:22:01', '2026-09-04 00:22:01'),
 	(2, 'transfer_bank', 'BRI', '003901139474509', 'Stiven Melkianus Adu', '', 1, '2026-09-04 00:22:40', '2026-09-04 00:22:40');
 
--- Dumping structure for table platform_kos.paket_langganan
+-- Dumping structure for table betakos.paket_langganan
 CREATE TABLE IF NOT EXISTS `paket_langganan` (
   `id_paket_langganan` int unsigned NOT NULL AUTO_INCREMENT,
   `kode` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -478,13 +477,13 @@ CREATE TABLE IF NOT EXISTS `paket_langganan` (
   UNIQUE KEY `kode` (`kode`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.paket_langganan: ~3 rows (approximately)
+-- Dumping data for table betakos.paket_langganan: ~3 rows (approximately)
 INSERT INTO `paket_langganan` (`id_paket_langganan`, `kode`, `nama`, `harga_bulanan`, `harga_perpanjangan`, `durasi_bulan`, `deskripsi`, `fitur_json`, `status`, `created_at`, `updated_at`) VALUES
 	(1, 'pro', 'Pro Bulanan', 0.00, 15000.00, 1, 'Paket Pro 1 bulan gratis untuk pelanggan baru. Perpanjangan Rp15.000/bulan.', '["Kelola penghuni", "Tagihan penghuni", "Pencatatan pembayaran", "Riwayat penghuni", "Ringkasan keuangan"]', 'aktif', '2026-09-03 23:01:12', '2026-09-04 12:03:00'),
 	(2, 'pro_6_bulan', 'Pro 6 Bulan', 50000.00, 75000.00, 6, 'Paket Pro 6 bulan. Harga awal Rp50.000 (±Rp8.333/bulan), perpanjangan Rp75.000 (Rp12.500/bulan).', '["Kelola penghuni", "Tagihan penghuni", "Pencatatan pembayaran", "Riwayat penghuni", "Ringkasan keuangan"]', 'aktif', '2026-09-04 00:57:43', '2026-09-04 12:03:00'),
 	(3, 'pro_1_tahun', 'Pro 1 Tahun', 100000.00, 120000.00, 12, 'Paket Pro 1 tahun. Harga awal Rp100.000 (±Rp8.333/bulan), perpanjangan Rp120.000 (Rp10.000/bulan).', '["Kelola penghuni", "Tagihan penghuni", "Pencatatan pembayaran", "Riwayat penghuni", "Ringkasan keuangan"]', 'aktif', '2026-09-04 00:57:43', '2026-09-04 12:03:00');
 
--- Dumping structure for table platform_kos.password_reset_tokens
+-- Dumping structure for table betakos.password_reset_tokens
 CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
   `id_reset` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_user` bigint unsigned NOT NULL,
@@ -499,9 +498,9 @@ CREATE TABLE IF NOT EXISTS `password_reset_tokens` (
   CONSTRAINT `fk_password_reset_user` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.password_reset_tokens: ~0 rows (approximately)
+-- Dumping data for table betakos.password_reset_tokens: ~0 rows (approximately)
 
--- Dumping structure for table platform_kos.pembayaran
+-- Dumping structure for table betakos.pembayaran
 CREATE TABLE IF NOT EXISTS `pembayaran` (
   `id_pembayaran` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_tagihan` bigint unsigned NOT NULL,
@@ -526,13 +525,13 @@ CREATE TABLE IF NOT EXISTS `pembayaran` (
   CONSTRAINT `chk_pembayaran_jumlah` CHECK ((`jumlah` > 0))
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.pembayaran: ~2 rows (approximately)
+-- Dumping data for table betakos.pembayaran: ~2 rows (approximately)
 INSERT INTO `pembayaran` (`id_pembayaran`, `id_tagihan`, `id_penghuni`, `id_user`, `nomor_pembayaran`, `jumlah`, `tanggal_bayar`, `metode`, `status`, `catatan`, `created_at`) VALUES
 	(3, 7, 5, 8, 'BYR-20260904110848-563', 500000.00, '2026-09-04 11:08:00', 'tunai', 'berhasil', '', '2026-09-04 03:08:48'),
 	(4, 7, 5, 8, 'BYR-20260904110913-309', 200000.00, '2026-09-04 11:09:00', 'transfer', 'berhasil', '', '2026-09-04 03:09:13'),
 	(5, 7, 6, 8, 'BYR-20260904111206-704', 300000.00, '2026-09-04 11:11:00', 'tunai', 'berhasil', '', '2026-09-04 03:12:06');
 
--- Dumping structure for table platform_kos.pembayaran_langganan
+-- Dumping structure for table betakos.pembayaran_langganan
 CREATE TABLE IF NOT EXISTS `pembayaran_langganan` (
   `id_pembayaran_langganan` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nomor_order` varchar(60) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -578,7 +577,7 @@ CREATE TABLE IF NOT EXISTS `pembayaran_langganan` (
   CONSTRAINT `chk_pembayaran_langganan_nominal` CHECK ((`nominal` > 0))
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.pembayaran_langganan: ~4 rows (approximately)
+-- Dumping data for table betakos.pembayaran_langganan: ~4 rows (approximately)
 INSERT INTO `pembayaran_langganan` (`id_pembayaran_langganan`, `nomor_order`, `id_langganan`, `id_paket_langganan`, `id_pemilik`, `jenis_pembayaran`, `nominal`, `metode_pembayaran`, `id_metode_pembayaran`, `provider_pembayaran`, `provider_order_id`, `provider_transaction_id`, `provider_status`, `qr_string`, `qr_code_url`, `paid_at`, `nomor_tujuan_pembayaran`, `nama_penerima_pembayaran`, `tanggal_pembayaran`, `bukti_pembayaran`, `status`, `id_admin_verifikasi`, `tanggal_verifikasi`, `catatan_admin`, `created_at`, `updated_at`) VALUES
 	(28, 'SUB-20260905-036D4041', 27, 3, 2, 'baru', 100000.00, 'qris', NULL, 'midtrans', 'SUB-20260905-036D4041', '67dbc353-ce47-4bbd-b968-538c3505824a', 'settlement', '00020101021226620014COM.GO-JEK.WWW011993600914309465464520210G0946546450303UKE51440014ID.CO.QRIS.WWW0215AID1503851320960303UKE52043409530336054061000005802ID5909stivenadu6008JAYAPURA61059922462395028A120260904161606QKSDkogbiCID0703A016304DC74', 'https://api.sandbox.midtrans.com/v2/qris/67dbc353-ce47-4bbd-b968-538c3505824a/qr-code', '2026-09-05 00:17:13', NULL, NULL, '2026-09-05 00:16:05', NULL, 'diverifikasi', NULL, '2026-09-05 00:17:13', NULL, '2026-09-05 00:16:05', '2026-09-05 00:17:13'),
 	(29, 'SUB-20260905-FBB1985A', 27, 3, 2, 'renewal', 120000.00, 'transfer_bank', 2, 'BRI', NULL, NULL, NULL, NULL, NULL, NULL, '003901139474509', 'Stiven Melkianus Adu', '2026-09-05 14:31:14', '/pembayaran-langganan/PEMBAYARAN-LANGGANAN_3461c277e4a1c0f25dbc00a217a1e89b.png', 'diverifikasi', 1, '2026-09-05 14:32:46', '', '2026-09-05 14:31:14', '2026-09-05 14:32:46'),
@@ -586,7 +585,7 @@ INSERT INTO `pembayaran_langganan` (`id_pembayaran_langganan`, `nomor_order`, `i
 	(31, 'SUB-20260905-85DE50F7', 27, 3, 2, 'renewal', 120000.00, 'qris', NULL, 'midtrans', 'SUB-20260905-85DE50F7', '0ff696e4-f12e-4750-bd55-3a8932679cd1', 'expire', '00020101021226620014COM.GO-JEK.WWW011993600914309465464520210G0946546450303UKE51440014ID.CO.QRIS.WWW0215AID1503851320960303UKE52043409530336054061200005802ID5909stivenadu6008JAYAPURA61059922462395028A120260905070542PB8jokR7n4ID0703A0163047544', 'https://api.sandbox.midtrans.com/v2/qris/0ff696e4-f12e-4750-bd55-3a8932679cd1/qr-code', NULL, NULL, NULL, '2026-09-05 15:05:39', NULL, 'dibatalkan', NULL, NULL, NULL, '2026-09-05 15:05:39', '2026-09-07 22:44:02'),
 	(32, 'SUB-20260907-494440AB', 27, 3, 2, 'renewal', 120000.00, 'qris', NULL, 'midtrans', 'SUB-20260907-494440AB', '178c5c51-cd25-4006-95a3-6370305ac198', 'settlement', '00020101021226620014COM.GO-JEK.WWW011993600914309465464520210G0946546450303UKE51440014ID.CO.QRIS.WWW0215AID1503851320960303UKE52043409530336054061200005802ID5909stivenadu6008JAYAPURA61059922462395028A1202609071444357IjIyzLD6cID0703A016304782A', 'https://api.sandbox.midtrans.com/v2/qris/178c5c51-cd25-4006-95a3-6370305ac198/qr-code', '2026-09-07 22:45:04', NULL, NULL, '2026-09-07 22:44:34', NULL, 'diverifikasi', NULL, '2026-09-07 22:45:04', NULL, '2026-09-07 22:44:34', '2026-09-07 22:45:04');
 
--- Dumping structure for table platform_kos.penghuni
+-- Dumping structure for table betakos.penghuni
 CREATE TABLE IF NOT EXISTS `penghuni` (
   `id_penghuni` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_kamar` bigint unsigned NOT NULL,
@@ -607,13 +606,13 @@ CREATE TABLE IF NOT EXISTS `penghuni` (
   CONSTRAINT `fk_penghuni_user` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.penghuni: ~3 rows (approximately)
+-- Dumping data for table betakos.penghuni: ~3 rows (approximately)
 INSERT INTO `penghuni` (`id_penghuni`, `id_kamar`, `id_user`, `nama`, `no_hp`, `nik`, `tanggal_masuk`, `tanggal_keluar`, `status`, `created_at`, `updated_at`) VALUES
 	(5, 72, 9, 'Rian', '081338609230', '5318928183918371', '2026-09-04', NULL, 'aktif', '2026-09-04 03:07:11', '2026-09-04 03:16:01'),
 	(6, 72, NULL, 'kedua', '012739283821', '8728373289632763', '2026-09-10', NULL, 'aktif', '2026-09-04 03:10:20', '2026-09-04 03:10:20'),
 	(7, 67, 3, 'Deva Adu', '085184583812', '5371000000000005', '2026-09-04', NULL, 'aktif', '2026-09-04 08:32:18', '2026-09-04 08:32:18');
 
--- Dumping structure for table platform_kos.penyesuaian_tagihan
+-- Dumping structure for table betakos.penyesuaian_tagihan
 CREATE TABLE IF NOT EXISTS `penyesuaian_tagihan` (
   `id_penyesuaian` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_tagihan` bigint unsigned NOT NULL,
@@ -632,12 +631,12 @@ CREATE TABLE IF NOT EXISTS `penyesuaian_tagihan` (
   CONSTRAINT `chk_penyesuaian_jumlah` CHECK ((`jumlah` > 0))
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.penyesuaian_tagihan: ~2 rows (approximately)
+-- Dumping data for table betakos.penyesuaian_tagihan: ~2 rows (approximately)
 INSERT INTO `penyesuaian_tagihan` (`id_penyesuaian`, `id_tagihan`, `id_penghuni`, `jenis`, `jumlah`, `tanggal_efektif`, `alasan`, `created_at`) VALUES
 	(1, 7, 6, 'tambah', 250000.00, '2026-09-10', 'Penyesuaian harga karena penghuni ke-2 masuk.', '2026-09-04 03:10:20'),
 	(2, 7, NULL, 'tambah', 50000.00, '2026-09-04', 'tambah 50 supaya pas 300', '2026-09-04 03:11:43');
 
--- Dumping structure for table platform_kos.tagihan
+-- Dumping structure for table betakos.tagihan
 CREATE TABLE IF NOT EXISTS `tagihan` (
   `id_tagihan` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_kamar` bigint unsigned NOT NULL,
@@ -671,13 +670,13 @@ CREATE TABLE IF NOT EXISTS `tagihan` (
   CONSTRAINT `chk_tagihan_total_penyesuaian` CHECK ((`total_penyesuaian` >= -(`harga_dasar`)))
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.tagihan: ~2 rows (approximately)
+-- Dumping data for table betakos.tagihan: ~2 rows (approximately)
 INSERT INTO `tagihan` (`id_tagihan`, `id_kamar`, `nomor_tagihan`, `tanggal_terbit`, `tanggal_mulai`, `tanggal_selesai`, `tanggal_jatuh_tempo`, `jumlah_orang`, `harga_dasar`, `total_penyesuaian`, `total_tagihan`, `total_dibayar`, `status`, `created_at`, `updated_at`) VALUES
 	(7, 72, 'TAG-20260904110711-6560', '2026-09-04', '2026-09-04', '2026-10-03', '2026-10-04', 2, 700000.00, 300000.00, 1000000.00, 1000000.00, 'lunas', '2026-09-04 03:07:11', '2026-09-04 03:12:06'),
 	(8, 72, 'TAG-20260904110913-2314', '2026-09-04', '2026-10-04', '2026-11-03', '2026-11-04', 2, 1000000.00, 0.00, 1000000.00, 0.00, 'belum_lunas', '2026-09-04 03:09:13', '2026-09-04 03:10:20'),
 	(9, 67, 'TAG-20260904163218-6805', '2026-09-04', '2026-09-04', '2026-10-03', '2026-10-04', 1, 1000000.00, 0.00, 1000000.00, 0.00, 'belum_lunas', '2026-09-04 08:32:18', '2026-09-04 08:32:18');
 
--- Dumping structure for table platform_kos.tagihan_penghuni
+-- Dumping structure for table betakos.tagihan_penghuni
 CREATE TABLE IF NOT EXISTS `tagihan_penghuni` (
   `id_tagihan_penghuni` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_tagihan` bigint unsigned NOT NULL,
@@ -691,7 +690,7 @@ CREATE TABLE IF NOT EXISTS `tagihan_penghuni` (
   CONSTRAINT `fk_tagihan_penghuni_tagihan` FOREIGN KEY (`id_tagihan`) REFERENCES `tagihan` (`id_tagihan`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.tagihan_penghuni: ~4 rows (approximately)
+-- Dumping data for table betakos.tagihan_penghuni: ~4 rows (approximately)
 INSERT INTO `tagihan_penghuni` (`id_tagihan_penghuni`, `id_tagihan`, `id_penghuni`, `created_at`) VALUES
 	(5, 7, 5, '2026-09-04 03:07:11'),
 	(6, 8, 5, '2026-09-04 03:09:13'),
@@ -699,7 +698,7 @@ INSERT INTO `tagihan_penghuni` (`id_tagihan_penghuni`, `id_tagihan`, `id_penghun
 	(8, 8, 6, '2026-09-04 03:10:20'),
 	(9, 9, 7, '2026-09-04 08:32:18');
 
--- Dumping structure for table platform_kos.tipe_kamar
+-- Dumping structure for table betakos.tipe_kamar
 CREATE TABLE IF NOT EXISTS `tipe_kamar` (
   `id_tipe_kamar` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_kos` bigint unsigned NOT NULL,
@@ -715,13 +714,13 @@ CREATE TABLE IF NOT EXISTS `tipe_kamar` (
   CONSTRAINT `chk_tipe_kamar_kapasitas` CHECK ((`kapasitas` > 0))
 ) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.tipe_kamar: ~0 rows (approximately)
+-- Dumping data for table betakos.tipe_kamar: ~0 rows (approximately)
 INSERT INTO `tipe_kamar` (`id_tipe_kamar`, `id_kos`, `nama_tipe`, `kapasitas`, `deskripsi`, `created_at`, `updated_at`) VALUES
 	(13, 10, 'Standard', 1, '', '2026-09-03 12:55:48', '2026-09-03 12:55:48'),
 	(14, 11, 'Standard', 2, '', '2026-09-04 03:01:42', '2026-09-04 03:01:42'),
 	(15, 10, 'VIP', 1, '', '2026-09-06 10:01:20', '2026-09-06 10:01:20');
 
--- Dumping structure for table platform_kos.tipe_kamar_fasilitas
+-- Dumping structure for table betakos.tipe_kamar_fasilitas
 CREATE TABLE IF NOT EXISTS `tipe_kamar_fasilitas` (
   `id_tipe_kamar` bigint unsigned NOT NULL,
   `id_fasilitas` bigint unsigned NOT NULL,
@@ -731,7 +730,7 @@ CREATE TABLE IF NOT EXISTS `tipe_kamar_fasilitas` (
   CONSTRAINT `fk_tipe_kamar_fasilitas_tipe` FOREIGN KEY (`id_tipe_kamar`) REFERENCES `tipe_kamar` (`id_tipe_kamar`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.tipe_kamar_fasilitas: ~12 rows (approximately)
+-- Dumping data for table betakos.tipe_kamar_fasilitas: ~12 rows (approximately)
 INSERT INTO `tipe_kamar_fasilitas` (`id_tipe_kamar`, `id_fasilitas`) VALUES
 	(13, 30),
 	(15, 30),
@@ -755,7 +754,7 @@ INSERT INTO `tipe_kamar_fasilitas` (`id_tipe_kamar`, `id_fasilitas`) VALUES
 	(15, 37),
 	(15, 55);
 
--- Dumping structure for table platform_kos.tipe_kamar_foto
+-- Dumping structure for table betakos.tipe_kamar_foto
 CREATE TABLE IF NOT EXISTS `tipe_kamar_foto` (
   `id_foto` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_tipe_kamar` bigint unsigned NOT NULL,
@@ -768,7 +767,7 @@ CREATE TABLE IF NOT EXISTS `tipe_kamar_foto` (
   CONSTRAINT `fk_tipe_kamar_foto_tipe` FOREIGN KEY (`id_tipe_kamar`) REFERENCES `tipe_kamar` (`id_tipe_kamar`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.tipe_kamar_foto: ~0 rows (approximately)
+-- Dumping data for table betakos.tipe_kamar_foto: ~0 rows (approximately)
 INSERT INTO `tipe_kamar_foto` (`id_foto`, `id_tipe_kamar`, `nama_file`, `urutan`, `is_thumbnail`, `created_at`) VALUES
 	(7, 13, '/tipe-kamar/TIPE-KAMAR_a7a01991a0fa5375512d97bfe2f4db00.png', 1, 1, '2026-09-03 12:56:09'),
 	(8, 14, '/tipe-kamar/TIPE-KAMAR_65ea5c8474fab108ed2f671e54efcafd.png', 1, 1, '2026-09-04 03:02:20'),
@@ -776,7 +775,7 @@ INSERT INTO `tipe_kamar_foto` (`id_foto`, `id_tipe_kamar`, `nama_file`, `urutan`
 	(10, 15, '/tipe-kamar/TIPE-KAMAR_a7bc621d2c0d9ef3cd8eff2f04f370ef.png', 2, 0, '2026-09-07 14:34:02'),
 	(11, 15, '/tipe-kamar/TIPE-KAMAR_c93242da2b8fa8c52dd016363e65f95e.png', 3, 1, '2026-09-07 14:34:36');
 
--- Dumping structure for table platform_kos.users
+-- Dumping structure for table betakos.users
 CREATE TABLE IF NOT EXISTS `users` (
   `id_user` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nama` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -799,7 +798,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `uq_users_google_sub` (`google_sub`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.users: ~7 rows (approximately)
+-- Dumping data for table betakos.users: ~7 rows (approximately)
 INSERT INTO `users` (`id_user`, `nama`, `nik`, `email`, `google_sub`, `password`, `last_login_at`, `role`, `no_hp`, `foto`, `email_verified_at`, `status`, `auth_session_version`, `created_at`, `updated_at`) VALUES
 	(1, 'Stiven Melkianus Adu', '5371040105040001', 'stivenadu01@gmail.com', '110943803175322052448', '$2y$10$DVu3Pb3QAnHqEPYG4DAfv.ywYHykap18gQCFcHBabUy0blqPg9KM.', '2026-09-07 23:19:37', 'admin', '081338609228', NULL, '2026-08-27 17:01:32', 'aktif', 1, '2026-08-27 09:01:14', '2026-09-07 15:19:37'),
 	(2, 'Deny Pating', '5371090928390005', 'deny@gmail.com', NULL, '$2y$10$AQC1oLxWZ8eDrvX02NkapelNyZgAkt7fYF8KQdK855ikukBRqsHPS', '2026-09-07 23:09:07', 'pemilik', '081338609303', '/profil/PROFIL_fa76e9f340ad8bb9d80dd2912d740628.png', '2026-08-27 17:03:41', 'aktif', 2, '2026-08-27 09:03:06', '2026-09-07 15:09:07'),
@@ -809,7 +808,7 @@ INSERT INTO `users` (`id_user`, `nama`, `nik`, `email`, `google_sub`, `password`
 	(8, 'Stiven Melkianus Adu', '5371040105040004', 'stivenadu9@gmail.com', NULL, '$2y$10$N3AXLofdIM.3EVgfZKqXjOhTBeh/v.j4Uk9rCheX1wHgJDXuBAEKi', '2026-09-06 15:56:49', 'pemilik', '081338609228', NULL, '2026-09-04 10:58:41', 'aktif', 1, '2026-09-04 02:57:20', '2026-09-06 07:56:49'),
 	(9, 'Rian Waang', '5318928183918371', 'rian@gmail.com', NULL, '$2y$10$EJblfBBynmmN6vZf5OO7QuevEyFqIx6blK7yqGN9YERg8speoHjni', '2026-09-04 11:16:10', 'pelanggan', '081338609230', NULL, '2026-09-04 11:14:58', 'aktif', 1, '2026-09-04 03:14:08', '2026-09-04 03:16:10');
 
--- Dumping structure for table platform_kos.user_verification_tokens
+-- Dumping structure for table betakos.user_verification_tokens
 CREATE TABLE IF NOT EXISTS `user_verification_tokens` (
   `id_token` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_user` bigint unsigned NOT NULL,
@@ -824,12 +823,12 @@ CREATE TABLE IF NOT EXISTS `user_verification_tokens` (
   CONSTRAINT `fk_verification_token_user` FOREIGN KEY (`id_user`) REFERENCES `users` (`id_user`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.user_verification_tokens: ~3 rows (approximately)
+-- Dumping data for table betakos.user_verification_tokens: ~3 rows (approximately)
 INSERT INTO `user_verification_tokens` (`id_token`, `id_user`, `token_hash`, `expires_at`, `used_at`, `created_at`) VALUES
 	(2, 8, '2f50a31d205d1243287129fe6a2a3ee9f82815d36e88cdc7605107cbda15c886', '2026-09-05 10:57:20', '2026-09-04 10:58:41', '2026-09-04 02:57:20'),
 	(3, 9, '4cd72abc93af40964c5a9f0ff937103446fbf5eaa6a9acee9fd55e5f3798f63a', '2026-09-05 11:14:08', NULL, '2026-09-04 03:14:08');
 
--- Dumping structure for table platform_kos.verifikasi_kos
+-- Dumping structure for table betakos.verifikasi_kos
 CREATE TABLE IF NOT EXISTS `verifikasi_kos` (
   `id_verifikasi` bigint unsigned NOT NULL AUTO_INCREMENT,
   `id_kos` bigint unsigned NOT NULL,
@@ -848,7 +847,7 @@ CREATE TABLE IF NOT EXISTS `verifikasi_kos` (
   CONSTRAINT `fk_verifikasi_kos` FOREIGN KEY (`id_kos`) REFERENCES `kos` (`id_kos`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Dumping data for table platform_kos.verifikasi_kos: ~2 rows (approximately)
+-- Dumping data for table betakos.verifikasi_kos: ~2 rows (approximately)
 INSERT INTO `verifikasi_kos` (`id_verifikasi`, `id_kos`, `id_admin`, `status`, `catatan`, `tanggal_pengajuan`, `tanggal_verifikasi`, `created_at`) VALUES
 	(7, 10, 1, 'disetujui', '', '2026-09-03 20:56:33', '2026-09-03 20:57:15', '2026-09-03 12:56:33'),
 	(8, 11, 1, 'disetujui', '', '2026-09-04 11:02:52', '2026-09-04 11:03:16', '2026-09-04 03:02:52');

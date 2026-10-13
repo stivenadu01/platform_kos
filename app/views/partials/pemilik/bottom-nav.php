@@ -19,18 +19,17 @@ $__ownerMobileActive = static function (string $route) use ($__ownerMobilePath):
   </a>
   <a href="<?= BASE_URL ?>/pemilik/kos" class="owner-bottom-nav-item <?= ($__ownerMobileActive('/pemilik/kos') || $__ownerMobileActive('/pemilik/kamar') || $__ownerMobileActive('/pemilik/tipe-kamar')) ? 'is-active' : '' ?>">
     <?= masterIconSvg('building-2', 'h-5 w-5') ?>
-    <span>Properti</span>
-  </a>
+    <span>Kos saya</span>
+  <?php echo navigationBadge('properties','kos perlu dilengkapi'); ?></a>
   <a href="<?= BASE_URL ?>/pemilik/penghuni" class="owner-bottom-nav-item <?= $__ownerMobileActive('/pemilik/penghuni') ? 'is-active' : '' ?>" <?= $__ownerMobileActive('/pemilik/penghuni') ? 'aria-current="page"' : '' ?>>
     <?= masterIconSvg('users-round', 'h-5 w-5') ?>
     <span>Penghuni</span>
-  </a>
+  <?php echo navigationBadge('claims','klaim menunggu'); ?></a>
   <a href="<?= BASE_URL ?>/pemilik/pembayaran" class="owner-bottom-nav-item <?= $__ownerMobileActive('/pemilik/pembayaran') ? 'is-active' : '' ?>" <?= $__ownerMobileActive('/pemilik/pembayaran') ? 'aria-current="page"' : '' ?>>
     <?= masterIconSvg('wallet', 'h-5 w-5') ?>
     <span>Keuangan</span>
-  </a>
-  <button type="button" @click="sidebarOpen = true" class="owner-bottom-nav-item <?= ($__ownerMobileActive('/pemilik/riwayat') || $__ownerMobileActive('/pemilik/profil') || $__ownerMobileActive('/pemilik/claim') || $__ownerMobileActive('/pemilik/langganan')) ? 'is-active' : '' ?>" aria-label="Buka menu lainnya">
-    <?= masterIconSvg('menu', 'h-5 w-5') ?>
-    <span>Lainnya</span>
-  </button>
+  <?php echo navigationBadge('overdue','tagihan lewat jatuh tempo'); ?></a>
+  <a href="<?= BASE_URL ?>/pemilik/akun" class="owner-bottom-nav-item <?= $__ownerMobileActive('/pemilik/akun') ? 'is-active' : '' ?>">
+    <?= masterIconSvg('user-round', 'h-5 w-5') ?><span>Akun</span>
+  <?php echo navigationBadge('subscription','pembayaran Pro menunggu'); ?></a>
 </nav>

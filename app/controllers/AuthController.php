@@ -4,6 +4,7 @@ class AuthController
 {
   public function login()
   {
+    if ($this->redirectSignedIn()) return;
     view('auth/login', [
       'title' => 'Masuk'
     ]);
@@ -12,9 +13,24 @@ class AuthController
 
   public function register()
   {
+    if ($this->redirectSignedIn()) return;
     view('auth/register', [
       'title' => 'Daftar'
     ]);
+  }
+
+  private function redirectSignedIn(): bool
+  {
+    if (empty($_SESSION['user']['id_user'])) return false;
+    model('User');
+    $user = findUser((int)$_SESSION['user']['id_user']);
+    if (!$user || ($user['status'] ?? '') !== 'aktif' || (int)($user['auth_session_version'] ?? 1) !== (int)($_SESSION['user']['auth_session_version'] ?? 1)) {
+      unset($_SESSION['user']);
+      return false;
+    }
+    $path = $user['role'] === 'admin' ? '/admin' : ($user['role'] === 'pemilik' ? '/pemilik' : '/');
+    header('Location: ' . BASE_URL . $path, true, 302);
+    return true;
   }
 
 

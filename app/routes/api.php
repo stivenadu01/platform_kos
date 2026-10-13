@@ -1,4 +1,8 @@
 <?php
+get('/api/navigation/counts','ApiNavigationController@counts',['auth']);
+get('/api/notifikasi', 'ApiNotifikasiController@index', ['auth', 'role:admin,pemilik,pelanggan']);
+post('/api/notifikasi/baca', 'ApiNotifikasiController@read', ['auth', 'role:admin,pemilik,pelanggan']);
+post('/api/notifikasi/klaim', 'ApiNotifikasiController@claim', ['auth', 'role:admin,pemilik,pelanggan']);
 
 // Auth
 // Session user
@@ -9,6 +13,7 @@ post('/api/auth/register', 'ApiAuthController@register', ['csrf']);
 get('/api/auth/google/start', 'ApiAuthController@googleStart');
 get('/api/auth/google/callback', 'ApiAuthController@googleCallback');
 post('/api/auth/google/complete', 'ApiAuthController@googleComplete', ['csrf']);
+post('/api/auth/google/credential', 'ApiAuthController@googleCredential', ['csrf']);
 // Logout
 post('/api/auth/logout', 'ApiAuthController@logout', ['auth']);
 post('/api/auth/logout-all', 'ApiAuthController@logoutAllDevices', ['auth']);

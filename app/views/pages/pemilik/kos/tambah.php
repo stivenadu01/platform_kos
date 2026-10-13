@@ -282,7 +282,7 @@
     </div>
 
     <!-- ACTION -->
-    <div class="owner-form-actions flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between">
+    <div class="owner-form-actions ui-page-actions flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-between">
 
       <a
         x-show="step === 1"
